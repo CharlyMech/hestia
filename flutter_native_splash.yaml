@@ -1,0 +1,14 @@
+flutter_native_splash:
+  ios: true
+  android: false
+  web: false
+  color: "#007CCC" # fallback flat color
+  background_image: assets/images/splash_bg.png   # overrides color on iOS
+
+  image: assets/images/splash_logo.png
+  ios_content_mode: scaleAspectFill
+
+  # --- Dark mode (mirrors light) ---
+  color_dark: "#007CCC"
+  background_image_dark: assets/images/splash_bg.png
+  image_dark: assets/images/splash_logo.png
