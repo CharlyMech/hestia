@@ -1,6 +1,5 @@
+import 'package:home_expenses/core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
-
-import '../constants/app_constants.dart';
 
 extension DateTimeExt on DateTime {
   /// To UNIX seconds (what Supabase stores)
