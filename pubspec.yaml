@@ -36,6 +36,7 @@ dependencies:
   # --- UI ---
   forui: ^0.7.0
   cupertino_icons: ^1.0.8
+  iconoir_flutter: ^7.11.0
 
   # --- Charts ---
   fl_chart: ^0.70.2
@@ -52,7 +53,6 @@ dependencies:
   uuid: ^4.5.1
   connectivity_plus: ^6.1.1
   logger: ^2.5.0
-  iconoir_flutter: ^7.11.0
 
 dev_dependencies:
   flutter_test:
