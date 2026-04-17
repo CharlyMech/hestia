@@ -48,5 +48,6 @@ app.*.map.json
 .env.*
 .env.*.local
 !.env.example
+lib/core/config/env.dart
 /android/app/profile
 /android/app/release
