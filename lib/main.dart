@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:home_expenses/core/config/dependencies.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
@@ -17,6 +18,9 @@ Future<void> main() async {
 
   // Open local database
   final database = await openDatabase();
+
+  // Initialize dependency graph
+  await AppDependencies.initialize();
 
   logger.i('App initialized');
 
