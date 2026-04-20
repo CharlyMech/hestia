@@ -1,5 +1,3 @@
-/// General-purpose extensions.
-
 extension StringExt on String {
   /// Capitalize first letter
   String get capitalized {
