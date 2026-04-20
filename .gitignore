@@ -51,3 +51,4 @@ app.*.map.json
 lib/core/config/env.dart
 /android/app/profile
 /android/app/release
+ios/Podfile.lock
