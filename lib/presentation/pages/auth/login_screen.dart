@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
@@ -54,8 +55,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text(
                   'Hestia',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
+                  style: AppFonts.heading(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
                     color: textPrimary,
@@ -65,7 +65,7 @@ class LoginScreen extends StatelessWidget {
                 Text(
                   'Manage your household finances together',
                   style: TextStyle(
-                    fontFamily: 'Inter',
+                    
                     fontSize: 15,
                     color: textMuted,
                   ),
@@ -85,7 +85,7 @@ class LoginScreen extends StatelessWidget {
                           style: TextStyle(
                             color: errorColor,
                             fontSize: 14,
-                            fontFamily: 'Inter',
+                            
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -109,7 +109,7 @@ class LoginScreen extends StatelessWidget {
                     child: const Text(
                       'Continue (dev)',
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        
                         fontWeight: FontWeight.w600,
                         color: CupertinoColors.white,
                         fontSize: 16,
@@ -151,7 +151,7 @@ class LoginScreen extends StatelessWidget {
                 //                   Text(
                 //                     'Sign in with Apple',
                 //                     style: TextStyle(
-                //                       fontFamily: 'Inter',
+                //                       
                 //                       fontWeight: FontWeight.w600,
                 //                       color: CupertinoColors.black,
                 //                       fontSize: 16,
