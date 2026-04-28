@@ -2,23 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
-import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/common/animated_progress_bar.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' hide Text;
 
 class CustomSplashScreen extends StatelessWidget {
   const CustomSplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final primary = _c(theme.primaryColor);
-    final textMuted = _c(theme.onInactiveColor);
+    final bg = const Color(0xFF007CCC);
+    final surface = const Color(0xFFFFFFFF).withValues(alpha: 0.25);
+    final primary = const Color(0xFFD4ECFF);
+    final textMuted = const Color(0xFFEAF6FF);
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
@@ -45,18 +42,12 @@ class CustomSplashScreen extends StatelessWidget {
               spacing: 24,
               children: [
                 Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: Home(
-                      width: 40,
-                      height: 40,
-                      color: primary,
-                    ),
+                  width: 132,
+                  height: 120,
+                  decoration: const BoxDecoration(),
+                  child: Image.asset(
+                    'assets/images/splash_logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
                 BlocBuilder<AuthBloc, AuthState>(
@@ -97,5 +88,4 @@ class CustomSplashScreen extends StatelessWidget {
     );
   }
 
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
