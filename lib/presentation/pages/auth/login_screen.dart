@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
-// TODO: re-enable with Apple Sign In button
-// import 'package:hestia/presentation/blocs/auth/auth_events.dart';
+import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' hide Text;
 
@@ -95,6 +94,30 @@ class LoginScreen extends StatelessWidget {
                     return const SizedBox.shrink();
                   },
                 ),
+
+                // Dev bypass button — temporary while Apple Sign-In is gated
+                // behind a paid Apple Developer account.
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: CupertinoButton(
+                    color: primary,
+                    borderRadius: BorderRadius.circular(12),
+                    onPressed: () => context
+                        .read<AuthBloc>()
+                        .add(const AuthDevBypass()),
+                    child: const Text(
+                      'Continue (dev)',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
 
                 // TODO: re-enable once Apple Developer paid account is set up
                 // Apple Sign-In button hidden until Sign In with Apple capability

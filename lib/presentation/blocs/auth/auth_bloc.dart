@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/repositories/auth_repository.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
@@ -12,6 +13,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignInWithApple>(_onSignInWithApple);
     on<AuthSignOut>(_onSignOut);
     on<AuthBiometricCheck>(_onBiometricCheck);
+    on<AuthDevBypass>(_onDevBypass);
+  }
+
+  Future<void> _onDevBypass(
+      AuthDevBypass event, Emitter<AuthState> emit) async {
+    final now = DateTime.now();
+    emit(AuthAuthenticated(Profile(
+      id: 'dev-user',
+      email: 'dev@hestia.local',
+      displayName: 'Ana Ruiz',
+      createdAt: now,
+      lastUpdate: now,
+    )));
   }
 
   Future<void> _onCheckSession(

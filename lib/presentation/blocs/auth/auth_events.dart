@@ -21,3 +21,7 @@ class AuthSignOut extends AuthEvent {
 class AuthBiometricCheck extends AuthEvent {
   const AuthBiometricCheck();
 }
+
+class AuthDevBypass extends AuthEvent {
+  const AuthDevBypass();
+}
