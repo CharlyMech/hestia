@@ -6,7 +6,7 @@ flutter_native_splash:
   background_image: assets/images/splash_bg.png   # overrides color on iOS
 
   image: assets/images/splash_logo.png
-  ios_content_mode: scaleAspectFill
+  ios_content_mode: center
 
   # --- Dark mode (mirrors light) ---
   color_dark: "#007CCC"
