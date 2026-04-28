@@ -37,6 +37,7 @@ dependencies:
   forui: ^0.7.0
   cupertino_icons: ^1.0.8
   iconoir_flutter: ^7.11.0
+  google_fonts: ^6.2.1
 
   # --- Charts ---
   fl_chart: ^0.70.2
