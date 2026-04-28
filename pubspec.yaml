@@ -1,4 +1,4 @@
-name: home_expenses
+name: hestia
 description: Shared household finance manager.
 publish_to: 'none'
 version: 1.0.0+1

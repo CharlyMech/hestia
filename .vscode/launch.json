@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Home expenses - START",
+      "name": "Hestia - START",
       "request": "launch",
       "type": "dart"
     },
