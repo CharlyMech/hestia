@@ -66,6 +66,7 @@ class AuthService extends SupabaseService {
 
   /// Check if a valid session exists
   Future<bool> hasValidSession() async {
+    if (!isInitialized) return false;
     final session = currentSession;
     if (session == null) return false;
 

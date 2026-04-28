@@ -10,11 +10,22 @@ import 'app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
-  );
+  // Initialize Supabase only when env is configured. Placeholder values
+  // would cause initialize() to hang on DNS resolution and freeze the
+  // native splash forever.
+  if (!Env.supabaseUrl.contains('YOUR_PROJECT') &&
+      !Env.supabaseAnonKey.contains('YOUR_ANON_KEY')) {
+    try {
+      await Supabase.initialize(
+        url: Env.supabaseUrl,
+        anonKey: Env.supabaseAnonKey,
+      ).timeout(const Duration(seconds: 8));
+    } catch (e) {
+      logger.w('Supabase init failed or timed out: $e');
+    }
+  } else {
+    logger.w('Supabase env not configured — running without backend');
+  }
 
   // Open local database
   final database = await openDatabase();
