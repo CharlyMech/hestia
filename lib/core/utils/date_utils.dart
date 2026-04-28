@@ -1,4 +1,4 @@
-import 'package:home_expenses/core/constants/app_constants.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:intl/intl.dart';
 
 extension DateTimeExt on DateTime {

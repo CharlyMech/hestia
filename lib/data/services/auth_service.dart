@@ -1,10 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:home_expenses/core/constants/app_constants.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
-import 'package:home_expenses/core/error/exceptions.dart';
+import 'package:hestia/core/error/exceptions.dart';
 import 'supabase_service.dart';
 
 class AuthService extends SupabaseService {

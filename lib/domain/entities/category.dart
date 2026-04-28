@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:home_expenses/core/constants/enums.dart';
+import 'package:hestia/core/constants/enums.dart';
 
 class Category extends Equatable {
   final String id;

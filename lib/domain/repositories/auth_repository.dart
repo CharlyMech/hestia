@@ -1,5 +1,5 @@
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/domain/entities/profile.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/profile.dart';
 
 abstract class AuthRepository {
   /// Current user ID, null if not authenticated

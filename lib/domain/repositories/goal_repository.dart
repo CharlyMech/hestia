@@ -1,7 +1,7 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/domain/entities/financial_goal.dart';
-import 'package:home_expenses/domain/entities/goal_progress.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/financial_goal.dart';
+import 'package:hestia/domain/entities/goal_progress.dart';
 
 abstract class GoalRepository {
   Future<(List<FinancialGoal>, Failure?)> getGoals({

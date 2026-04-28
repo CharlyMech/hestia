@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/presentation/blocs/view_mode/view_mode_events.dart';
-import 'package:home_expenses/presentation/blocs/view_mode/view_mode_state.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/presentation/blocs/view_mode/view_mode_events.dart';
+import 'package:hestia/presentation/blocs/view_mode/view_mode_state.dart';
 
 class ViewModeBloc extends Bloc<ViewModeEvent, ViewModeState> {
   ViewModeBloc() : super(const ViewModeState(ViewMode.personal)) {

@@ -1,5 +1,5 @@
-import 'package:home_expenses/core/constants/supabase_tables.dart';
-import 'package:home_expenses/core/error/exceptions.dart';
+import 'package:hestia/core/constants/supabase_tables.dart';
+import 'package:hestia/core/error/exceptions.dart';
 
 import 'supabase_service.dart';
 

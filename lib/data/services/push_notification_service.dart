@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:home_expenses/core/error/error_handler.dart';
+import 'package:hestia/core/error/error_handler.dart';
 
 /// Handles Firebase Cloud Messaging setup and listeners.
 /// Token storage is delegated to NotificationService.

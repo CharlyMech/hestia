@@ -1,18 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:home_expenses/presentation/pages/auth/login_screen.dart';
-import 'package:home_expenses/presentation/pages/categories/categories_screen.dart';
-import 'package:home_expenses/presentation/pages/dashboard/dashboard_screen.dart';
-import 'package:home_expenses/presentation/pages/goals/add_edit_goals_screen.dart';
-import 'package:home_expenses/presentation/pages/goals/goal_detail_screen.dart';
-import 'package:home_expenses/presentation/pages/goals/goals_screen.dart';
-import 'package:home_expenses/presentation/pages/money_sources/add_edit_money_sources_screen.dart';
-import 'package:home_expenses/presentation/pages/money_sources/money_sources_screen.dart';
-import 'package:home_expenses/presentation/pages/notifications/notifications_screen.dart';
-import 'package:home_expenses/presentation/pages/settings/settings_screen.dart';
-import 'package:home_expenses/presentation/pages/splash/custom_splash_screen.dart';
-import 'package:home_expenses/presentation/pages/transactions/add_edit_transaction_screen.dart';
-import 'package:home_expenses/presentation/pages/transactions/transactions_screen.dart';
+import 'package:hestia/presentation/pages/auth/login_screen.dart';
+import 'package:hestia/presentation/pages/categories/categories_screen.dart';
+import 'package:hestia/presentation/pages/dashboard/dashboard_screen.dart';
+import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
+import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
+import 'package:hestia/presentation/pages/goals/goals_screen.dart';
+import 'package:hestia/presentation/pages/money_sources/add_edit_money_sources_screen.dart';
+import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
+import 'package:hestia/presentation/pages/notifications/notifications_screen.dart';
+import 'package:hestia/presentation/pages/settings/settings_screen.dart';
+import 'package:hestia/presentation/pages/splash/custom_splash_screen.dart';
+import 'package:hestia/presentation/pages/transactions/add_edit_transaction_screen.dart';
+import 'package:hestia/presentation/pages/transactions/transactions_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';

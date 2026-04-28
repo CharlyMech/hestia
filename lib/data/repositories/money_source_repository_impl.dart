@@ -1,10 +1,10 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/error/error_handler.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/data/mappers/money_source_mapper.dart';
-import 'package:home_expenses/data/services/money_source_service.dart';
-import 'package:home_expenses/domain/entities/money_source.dart';
-import 'package:home_expenses/domain/repositories/money_source_repository.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/error/error_handler.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/data/mappers/money_source_mapper.dart';
+import 'package:hestia/data/services/money_source_service.dart';
+import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/domain/repositories/money_source_repository.dart';
 
 class MoneySourceRepositoryImpl implements MoneySourceRepository {
   final MoneySourceService _service;

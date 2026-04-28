@@ -1,7 +1,7 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/dtos/money_source_dto.dart';
-import 'package:home_expenses/domain/entities/money_source.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/dtos/money_source_dto.dart';
+import 'package:hestia/domain/entities/money_source.dart';
 
 abstract final class MoneySourceMapper {
   static MoneySource toDomain(MoneySourceDto dto) {

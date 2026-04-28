@@ -1,7 +1,7 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/dtos/goal_dto.dart';
-import 'package:home_expenses/domain/entities/financial_goal.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/dtos/goal_dto.dart';
+import 'package:hestia/domain/entities/financial_goal.dart';
 
 abstract final class GoalMapper {
   static FinancialGoal toDomain(GoalDto dto) {

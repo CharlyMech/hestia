@@ -1,6 +1,6 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/domain/entities/money_source.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/money_source.dart';
 
 abstract class MoneySourceRepository {
   Future<(List<MoneySource>, Failure?)> getMoneySources({

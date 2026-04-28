@@ -1,6 +1,6 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/domain/entities/category.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/category.dart';
 
 abstract class CategoryRepository {
   Future<(List<Category>, Failure?)> getCategories({

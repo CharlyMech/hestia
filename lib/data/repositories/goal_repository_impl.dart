@@ -1,12 +1,12 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/error/error_handler.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/mappers/goal_mapper.dart';
-import 'package:home_expenses/data/services/goal_service.dart';
-import 'package:home_expenses/domain/entities/financial_goal.dart';
-import 'package:home_expenses/domain/entities/goal_progress.dart';
-import 'package:home_expenses/domain/repositories/goal_repository.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/error/error_handler.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/mappers/goal_mapper.dart';
+import 'package:hestia/data/services/goal_service.dart';
+import 'package:hestia/domain/entities/financial_goal.dart';
+import 'package:hestia/domain/entities/goal_progress.dart';
+import 'package:hestia/domain/repositories/goal_repository.dart';
 
 class GoalRepositoryImpl implements GoalRepository {
   final GoalService _service;

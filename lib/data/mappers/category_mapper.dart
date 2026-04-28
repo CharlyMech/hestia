@@ -1,7 +1,7 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/dtos/category_dto.dart';
-import 'package:home_expenses/domain/entities/category.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/dtos/category_dto.dart';
+import 'package:hestia/domain/entities/category.dart';
 
 abstract final class CategoryMapper {
   static Category toDomain(CategoryDto dto) {

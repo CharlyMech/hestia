@@ -1,11 +1,11 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/error/error_handler.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/dtos/notification_dto.dart';
-import 'package:home_expenses/data/services/notification_service.dart';
-import 'package:home_expenses/domain/entities/notification.dart';
-import 'package:home_expenses/domain/repositories/notification_repository.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/error/error_handler.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/dtos/notification_dto.dart';
+import 'package:hestia/data/services/notification_service.dart';
+import 'package:hestia/domain/entities/notification.dart';
+import 'package:hestia/domain/repositories/notification_repository.dart';
 
 class NotificationRepositoryImpl implements NotificationRepository {
   final NotificationService _service;

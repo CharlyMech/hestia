@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:home_expenses/core/constants/themes.dart';
+import 'package:hestia/core/constants/themes.dart';
 
 /// Convert MyTheme → Forui FThemeData
 extension MyThemeToForui on MyTheme {

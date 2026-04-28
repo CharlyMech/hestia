@@ -1,10 +1,10 @@
-import 'package:home_expenses/core/constants/supabase_tables.dart';
-import 'package:home_expenses/core/error/error_handler.dart';
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/services/supabase_service.dart';
-import 'package:home_expenses/domain/entities/household.dart';
-import 'package:home_expenses/domain/repositories/household_repository.dart';
+import 'package:hestia/core/constants/supabase_tables.dart';
+import 'package:hestia/core/error/error_handler.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/services/supabase_service.dart';
+import 'package:hestia/domain/entities/household.dart';
+import 'package:hestia/domain/repositories/household_repository.dart';
 
 class HouseholdRepositoryImpl implements HouseholdRepository {
   final SupabaseService _service;

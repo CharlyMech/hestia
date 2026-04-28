@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
-import 'package:home_expenses/core/constants/themes.dart';
-import 'package:home_expenses/core/utils/theme_utils.dart';
+import 'package:hestia/core/constants/themes.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
 
 /// Builds the Forui theme from a [MyTheme] instance.
 FThemeData buildForuiTheme(MyTheme theme, {required Brightness brightness}) {

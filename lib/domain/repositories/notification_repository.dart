@@ -1,5 +1,5 @@
-import 'package:home_expenses/core/error/failures.dart';
-import 'package:home_expenses/domain/entities/notification.dart';
+import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/notification.dart';
 
 abstract class NotificationRepository {
   Future<(List<AppNotification>, Failure?)> getNotifications({

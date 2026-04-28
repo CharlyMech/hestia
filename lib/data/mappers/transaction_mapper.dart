@@ -1,8 +1,8 @@
-import 'package:home_expenses/core/constants/enums.dart';
-import 'package:home_expenses/core/utils/date_utils.dart';
-import 'package:home_expenses/data/dtos/transaction_dto.dart';
-import 'package:home_expenses/domain/entities/transaction.dart';
-import 'package:home_expenses/domain/entities/transfer.dart';
+import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/dtos/transaction_dto.dart';
+import 'package:hestia/domain/entities/transaction.dart';
+import 'package:hestia/domain/entities/transfer.dart';
 
 abstract final class TransactionMapper {
   /// DTO → Domain Entity

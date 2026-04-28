@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:home_expenses/core/config/dependencies.dart';
+import 'package:hestia/core/config/dependencies.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
@@ -24,5 +24,5 @@ Future<void> main() async {
 
   logger.i('App initialized');
 
-  runApp(HomeExpensesApp(database: database));
+  runApp(HestiaApp(database: database));
 }
