@@ -2,35 +2,45 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/presentation/pages/auth/login_screen.dart';
 import 'package:hestia/presentation/pages/categories/categories_screen.dart';
-import 'package:hestia/presentation/pages/dashboard/dashboard_screen.dart';
 import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
-import 'package:hestia/presentation/pages/goals/goals_screen.dart';
+import 'package:hestia/presentation/pages/main_tab_shell.dart';
 import 'package:hestia/presentation/pages/money_sources/add_edit_money_sources_screen.dart';
 import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
 import 'package:hestia/presentation/pages/notifications/notifications_screen.dart';
-import 'package:hestia/presentation/pages/settings/settings_screen.dart';
 import 'package:hestia/presentation/pages/splash/custom_splash_screen.dart';
 import 'package:hestia/presentation/pages/transactions/add_edit_transaction_screen.dart';
-import 'package:hestia/presentation/pages/transactions/transactions_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
   static const login = '/login';
-  static const dashboard = '/dashboard';
-  static const transactions = '/transactions';
+
+  /// Persistent tab shell — Home / Activity / Goals / More live here.
+  /// Use `?tab=N` (0..3) to land on a specific tab.
+  static const main = '/main';
+
+  /// Tab indices for [main] deep-links.
+  static const tabHome = 0;
+  static const tabActivity = 1;
+  static const tabGoals = 2;
+  static const tabMore = 3;
+
+  // Convenience aliases — push goes to /main with tab query.
+  static const dashboard = '$main?tab=$tabHome';
+  static const transactions = '$main?tab=$tabActivity';
+  static const goals = '$main?tab=$tabGoals';
+  static const settings = '$main?tab=$tabMore';
+
   static const addTransaction = '/transactions/add';
   static const editTransaction = '/transactions/edit';
   static const categories = '/categories';
   static const moneySources = '/money-sources';
   static const addMoneySource = '/money-sources/add';
   static const editMoneySource = '/money-sources/edit';
-  static const goals = '/goals';
   static const addGoal = '/goals/add';
   static const editGoal = '/goals/edit';
   static const goalDetail = '/goals/detail';
   static const notifications = '/notifications';
-  static const settings = '/settings';
 }
 
 final appRouter = GoRouter(
@@ -49,16 +59,11 @@ final appRouter = GoRouter(
       ),
     ),
     GoRoute(
-      path: AppRoutes.dashboard,
-      pageBuilder: (context, state) => const CupertinoPage(
-        child: DashboardScreen(),
-      ),
-    ),
-    GoRoute(
-      path: AppRoutes.transactions,
-      pageBuilder: (context, state) => const CupertinoPage(
-        child: TransactionsScreen(),
-      ),
+      path: AppRoutes.main,
+      pageBuilder: (context, state) {
+        final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '0') ?? 0;
+        return CupertinoPage(child: MainTabShell(initialTab: tab));
+      },
     ),
     GoRoute(
       path: AppRoutes.addTransaction,
@@ -103,12 +108,6 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: AppRoutes.goals,
-      pageBuilder: (context, state) => const CupertinoPage(
-        child: GoalsScreen(),
-      ),
-    ),
-    GoRoute(
       path: AppRoutes.addGoal,
       pageBuilder: (context, state) => const CupertinoPage(
         child: AddEditGoalScreen(),
@@ -136,12 +135,6 @@ final appRouter = GoRouter(
       path: AppRoutes.notifications,
       pageBuilder: (context, state) => const CupertinoPage(
         child: NotificationsScreen(),
-      ),
-    ),
-    GoRoute(
-      path: AppRoutes.settings,
-      pageBuilder: (context, state) => const CupertinoPage(
-        child: SettingsScreen(),
       ),
     ),
   ],
