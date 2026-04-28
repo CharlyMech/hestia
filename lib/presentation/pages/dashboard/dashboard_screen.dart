@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/dashboard/category_donut.dart';
-import 'package:hestia/presentation/widgets/dashboard/floating_nav_bar.dart';
 import 'package:hestia/presentation/widgets/dashboard/progress_ring.dart';
 import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
 import 'package:hestia/presentation/widgets/dashboard/sparkline.dart';
@@ -85,96 +83,68 @@ class DashboardScreen extends StatelessWidget {
       ),
     ];
 
-    return CupertinoPageScaffold(
-      backgroundColor: bg,
-      child: Stack(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: ListView(
-              padding: const EdgeInsets.only(bottom: 120),
-              children: [
-                _Header(
-                  fg: fg,
-                  muted: muted,
-                  surface: surface,
-                  border: border,
-                  accent: accent,
-                ),
-                const SizedBox(height: 20),
-                _BalanceCard(
-                  surface: surface,
-                  border: border,
-                  fg: fg,
-                  muted: muted,
-                  income: income,
-                  expense: expense,
-                  accent: accent,
-                  incomeSoft: _c(theme.incomeSoft),
-                  expenseSoft: _c(theme.expenseSoft),
-                ),
-                const SizedBox(height: 24),
-                _SectionLabel(label: 'Spending · April', action: 'View all', muted: muted, accent: accent),
-                const SizedBox(height: 12),
-                _DonutCard(
-                  surface: surface,
-                  border: border,
-                  fg: fg,
-                  muted: muted,
-                  trackColor: border,
-                  segments: donutSegs,
-                  legend: legend,
-                ),
-                const SizedBox(height: 24),
-                _SectionLabel(label: 'Active goals', action: 'See all', muted: muted, accent: accent),
-                const SizedBox(height: 12),
-                _GoalsRow(goals: goals, surface: surface, border: border, fg: fg, muted: muted, trackColor: border),
-                const SizedBox(height: 24),
-                _SectionLabel(label: 'Recent', muted: muted, accent: accent),
-                const SizedBox(height: 8),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: surface,
-                    border: Border.all(color: border, width: 1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      for (var i = 0; i < txs.length; i++)
-                        TxRow(tx: txs[i], showDivider: i < txs.length - 1),
-                    ],
-                  ),
-                ),
-              ],
+    return ColoredBox(
+      color: bg,
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 110),
+          children: [
+            _Header(
+              fg: fg,
+              muted: muted,
+              surface: surface,
+              border: border,
+              accent: accent,
             ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: FloatingNavBar(
-                active: NavTab.home,
-                onPlus: () => context.push(AppRoutes.addTransaction),
-                onTab: (tab) {
-                  switch (tab) {
-                    case NavTab.activity:
-                      context.push(AppRoutes.transactions);
-                    case NavTab.goals:
-                      context.push(AppRoutes.goals);
-                    case NavTab.more:
-                      context.push(AppRoutes.settings);
-                    case NavTab.home:
-                      break;
-                  }
-                },
+            const SizedBox(height: 20),
+            _BalanceCard(
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              income: income,
+              expense: expense,
+              accent: accent,
+              incomeSoft: _c(theme.incomeSoft),
+              expenseSoft: _c(theme.expenseSoft),
+            ),
+            const SizedBox(height: 24),
+            _SectionLabel(label: 'Spending · April', action: 'View all', muted: muted, accent: accent),
+            const SizedBox(height: 12),
+            _DonutCard(
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              trackColor: border,
+              segments: donutSegs,
+              legend: legend,
+            ),
+            const SizedBox(height: 24),
+            _SectionLabel(label: 'Active goals', action: 'See all', muted: muted, accent: accent),
+            const SizedBox(height: 12),
+            _GoalsRow(goals: goals, surface: surface, border: border, fg: fg, muted: muted, trackColor: border),
+            const SizedBox(height: 24),
+            _SectionLabel(label: 'Recent', muted: muted, accent: accent),
+            const SizedBox(height: 8),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: surface,
+                border: Border.all(color: border, width: 1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < txs.length; i++)
+                    TxRow(tx: txs[i], showDivider: i < txs.length - 1),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -209,13 +179,12 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   'Good morning, Ana',
-                  style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: muted),
+                  style: TextStyle(fontSize: 13, color: muted),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Overview',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
+                  style: AppFonts.heading(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
                     color: fg,
@@ -267,8 +236,7 @@ class _Header extends StatelessWidget {
             child: const Text(
               'AR',
               style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 14,
+    fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: CupertinoColors.white,
               ),
@@ -323,8 +291,7 @@ class _BalanceCard extends StatelessWidget {
                 Text(
                   'TOTAL BALANCE · APRIL',
                   style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12,
+            fontSize: 12,
                     color: muted,
                     letterSpacing: 0.6,
                   ),
@@ -343,8 +310,7 @@ class _BalanceCard extends StatelessWidget {
                       TextSpan(
                         text: '8,427',
                         style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 34,
+                        fontSize: 34,
                           fontWeight: FontWeight.w700,
                           color: fg,
                           letterSpacing: -1.0,
@@ -354,8 +320,7 @@ class _BalanceCard extends StatelessWidget {
                       TextSpan(
                         text: '.60',
                         style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 22,
+                        fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: fg.withValues(alpha: 0.5),
                           letterSpacing: -0.6,
@@ -369,8 +334,7 @@ class _BalanceCard extends StatelessWidget {
                 Text(
                   '€',
                   style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 16,
+            fontSize: 16,
                     color: muted,
                     fontWeight: FontWeight.w500,
                   ),
@@ -385,8 +349,7 @@ class _BalanceCard extends StatelessWidget {
                 Text(
                   '+2.4%',
                   style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12,
+            fontSize: 12,
                     color: income,
                     fontWeight: FontWeight.w500,
                   ),
@@ -394,7 +357,7 @@ class _BalanceCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   'vs last month',
-                  style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: muted),
+                  style: TextStyle(fontSize: 12, color: muted),
                 ),
               ],
             ),
@@ -471,8 +434,7 @@ class _InOutTile extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 11,
+        fontSize: 11,
                   color: color,
                   fontWeight: FontWeight.w600,
                 ),
@@ -483,8 +445,7 @@ class _InOutTile extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 16,
+fontSize: 16,
               fontWeight: FontWeight.w600,
               color: fg,
               fontFeatures: const [FontFeature.tabularFigures()],
@@ -522,8 +483,7 @@ class _SectionLabel extends StatelessWidget {
             child: Text(
               label.toUpperCase(),
               style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12,
+    fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: muted,
                 letterSpacing: 1.0,
@@ -534,8 +494,7 @@ class _SectionLabel extends StatelessWidget {
             Text(
               action!,
               style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12,
+    fontSize: 12,
                 color: accent,
                 fontWeight: FontWeight.w500,
               ),
@@ -600,8 +559,7 @@ class _DonutCard extends StatelessWidget {
                     Text(
                       'SPENT',
                       style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 10,
+                    fontSize: 10,
                         color: muted,
                         letterSpacing: 0.6,
                       ),
@@ -609,8 +567,7 @@ class _DonutCard extends StatelessWidget {
                     Text(
                       '1,842€',
                       style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 15,
+                    fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: fg,
                         letterSpacing: -0.4,
@@ -658,13 +615,13 @@ class _LegendRow extends StatelessWidget {
         Expanded(
           child: Text(
             item.name,
-            style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: fg),
+            style: TextStyle(fontSize: 12, color: fg),
           ),
         ),
         Text(
           '${item.value}€',
           style: TextStyle(
-            fontFamily: 'Inter',
+            
             fontSize: 12,
             color: muted,
             fontWeight: FontWeight.w500,
@@ -730,8 +687,7 @@ class _GoalsRow extends StatelessWidget {
                   child: Text(
                     '${(g.value * 100).round()}%',
                     style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 11,
+                fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: fg,
                       fontFeatures: const [FontFeature.tabularFigures()],
@@ -742,8 +698,7 @@ class _GoalsRow extends StatelessWidget {
                 Text(
                   g.title,
                   style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 13,
+            fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: fg,
                   ),
@@ -752,8 +707,7 @@ class _GoalsRow extends StatelessWidget {
                 Text(
                   g.amount,
                   style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 11,
+            fontSize: 11,
                     color: muted,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),

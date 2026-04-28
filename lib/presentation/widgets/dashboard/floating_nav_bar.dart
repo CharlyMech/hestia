@@ -1,22 +1,33 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Home, Trophy, Settings, Plus;
 import 'package:iconoir_flutter/regular/list.dart' as list_icon;
 
+/// Backwards-compatible enum kept for external callers that haven't migrated.
 enum NavTab { home, activity, goals, more }
 
+/// Index-driven floating nav bar with animated active pill.
+///
+/// [activeIndex] drives both the pill position and the active item color.
+/// Pass a fractional [pageOffset] (0.0–3.0) from a [PageController] to make
+/// the pill track swipe gestures continuously.
 class FloatingNavBar extends StatelessWidget {
-  final NavTab active;
+  final int activeIndex;
+  final double? pageOffset;
+  final ValueChanged<int>? onTab;
   final VoidCallback? onPlus;
-  final ValueChanged<NavTab>? onTab;
 
   const FloatingNavBar({
     super.key,
-    this.active = NavTab.home,
-    this.onPlus,
+    required this.activeIndex,
+    this.pageOffset,
     this.onTab,
+    this.onPlus,
   });
+
+  static const _items = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -26,63 +37,7 @@ class FloatingNavBar extends StatelessWidget {
     final accent = _c(theme.primaryColor);
     final muted = _c(theme.onInactiveColor);
 
-    Widget colored(Widget child, NavTab t) =>
-        SizedBox(width: 22, height: 22, child: child);
-
-    final items = [
-      _NavItem(
-        tab: NavTab.home,
-        label: 'Home',
-        icon: colored(
-          Home(width: 22, height: 22, color: active == NavTab.home ? accent : muted),
-          NavTab.home,
-        ),
-        active: active == NavTab.home,
-        activeColor: accent,
-        mutedColor: muted,
-        onTap: () => onTab?.call(NavTab.home),
-      ),
-      _NavItem(
-        tab: NavTab.activity,
-        label: 'Activity',
-        icon: colored(
-          list_icon.List(
-            width: 22,
-            height: 22,
-            color: active == NavTab.activity ? accent : muted,
-          ),
-          NavTab.activity,
-        ),
-        active: active == NavTab.activity,
-        activeColor: accent,
-        mutedColor: muted,
-        onTap: () => onTab?.call(NavTab.activity),
-      ),
-      _NavItem(
-        tab: NavTab.goals,
-        label: 'Goals',
-        icon: colored(
-          Trophy(width: 22, height: 22, color: active == NavTab.goals ? accent : muted),
-          NavTab.goals,
-        ),
-        active: active == NavTab.goals,
-        activeColor: accent,
-        mutedColor: muted,
-        onTap: () => onTab?.call(NavTab.goals),
-      ),
-      _NavItem(
-        tab: NavTab.more,
-        label: 'More',
-        icon: colored(
-          Settings(width: 22, height: 22, color: active == NavTab.more ? accent : muted),
-          NavTab.more,
-        ),
-        active: active == NavTab.more,
-        activeColor: accent,
-        mutedColor: muted,
-        onTap: () => onTab?.call(NavTab.more),
-      ),
-    ];
+    final position = pageOffset ?? activeIndex.toDouble();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -96,9 +51,52 @@ class FloatingNavBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(color: border, width: 1),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: items,
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  final itemWidth = c.maxWidth / _items;
+                  // Pill is a thin accent bar above the active item.
+                  final pillWidth = itemWidth * 0.46;
+                  final pillLeft =
+                      position * itemWidth + (itemWidth - pillWidth) / 2;
+
+                  return Stack(
+                    children: [
+                      // Animated active-indicator pill (top edge of bar)
+                      AnimatedPositioned(
+                        duration: pageOffset != null
+                            ? Duration.zero
+                            : const Duration(milliseconds: 240),
+                        curve: Curves.easeOut,
+                        top: 0,
+                        left: pillLeft,
+                        width: pillWidth,
+                        height: 3,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: accent,
+                            borderRadius: const BorderRadius.vertical(
+                              bottom: Radius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          for (var i = 0; i < _items; i++)
+                            Expanded(
+                              child: _NavItem(
+                                index: i,
+                                active: activeIndex == i,
+                                accent: accent,
+                                muted: muted,
+                                onTap: () => onTab?.call(i),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -130,27 +128,35 @@ class FloatingNavBar extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  // ignore: unused_element_parameter
-  final NavTab tab;
-  final String label;
-  final Widget icon;
+  final int index;
   final bool active;
-  final Color activeColor;
-  final Color mutedColor;
+  final Color accent;
+  final Color muted;
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.tab,
-    required this.label,
-    required this.icon,
+    required this.index,
     required this.active,
-    required this.activeColor,
-    required this.mutedColor,
+    required this.accent,
+    required this.muted,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = active ? accent : muted;
+    final Widget icon = switch (index) {
+      0 => Home(width: 22, height: 22, color: color),
+      1 => list_icon.List(width: 22, height: 22, color: color),
+      2 => Trophy(width: 22, height: 22, color: color),
+      _ => Settings(width: 22, height: 22, color: color),
+    };
+    final label = switch (index) {
+      0 => 'Home',
+      1 => 'Activity',
+      2 => 'Goals',
+      _ => 'More',
+    };
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -159,15 +165,14 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            icon,
+            SizedBox(width: 22, height: 22, child: icon),
             const SizedBox(height: 3),
             Text(
               label,
-              style: TextStyle(
-                fontFamily: 'Inter',
+              style: AppFonts.body(
                 fontSize: 10,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                color: active ? activeColor : mutedColor,
+                color: color,
               ),
             ),
           ],
