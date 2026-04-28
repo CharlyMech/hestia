@@ -51,6 +51,13 @@ class MyTheme {
   final String outlineColor;
   final String shadow;
 
+  // Dashboard / design-system extras
+  final String surface2Color;
+  final String borderColor;
+  final String incomeSoft;
+  final String expenseSoft;
+  final List<String> categoryTints;
+
   final MyChartTheme chart;
 
   const MyTheme({
@@ -68,6 +75,11 @@ class MyTheme {
     required this.onInactiveColor,
     required this.outlineColor,
     required this.shadow,
+    required this.surface2Color,
+    required this.borderColor,
+    required this.incomeSoft,
+    required this.expenseSoft,
+    required this.categoryTints,
     required this.chart,
   });
 }
@@ -88,6 +100,18 @@ const Map<ThemeType, MyTheme> themes = {
     onInactiveColor: '#475569',
     outlineColor: '#CBD5E1',
     shadow: '#000000',
+    surface2Color: '#F1F5F9',
+    borderColor: '#E2E8F0',
+    incomeSoft: '#22C55E14',
+    expenseSoft: '#EF444414',
+    categoryTints: [
+      '#8B7AE6',
+      '#E6B87A',
+      '#7AAFE6',
+      '#7AD4C1',
+      '#E67AB8',
+      '#8DD47A',
+    ],
     chart: MyChartTheme(
       series: [
         '#00B4D8',
@@ -108,18 +132,30 @@ const Map<ThemeType, MyTheme> themes = {
   ThemeType.dark: MyTheme(
     primaryColor: '#0077B6',
     onPrimaryColor: '#FFFFFF',
-    backgroundColor: '#0B1220',
-    onBackgroundColor: '#E2E8F0',
-    surfaceColor: '#111827',
-    onSurfaceColor: '#E2E8F0',
-    colorGreen: '#22C55E',
-    colorRed: '#EF4444',
+    backgroundColor: '#0B0F14',
+    onBackgroundColor: '#E6EAF0',
+    surfaceColor: '#141A22',
+    onSurfaceColor: '#E6EAF0',
+    colorGreen: '#34D399',
+    colorRed: '#F87171',
     onRedColor: '#FFFFFF',
     colorOrange: '#F59E0B',
-    inactiveColor: '#334155',
-    onInactiveColor: '#CBD5F5',
-    outlineColor: '#1E293B',
+    inactiveColor: '#1F2733',
+    onInactiveColor: '#8A94A3',
+    outlineColor: '#1F2733',
     shadow: '#000000',
+    surface2Color: '#1A2230',
+    borderColor: '#1F2733',
+    incomeSoft: '#34D39914',
+    expenseSoft: '#F8717114',
+    categoryTints: [
+      '#8B7AE6',
+      '#E6B87A',
+      '#7AAFE6',
+      '#7AD4C1',
+      '#E67AB8',
+      '#8DD47A',
+    ],
     chart: MyChartTheme(
       series: [
         '#00B4D8',
