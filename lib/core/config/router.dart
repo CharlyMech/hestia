@@ -6,10 +6,20 @@ import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
 import 'package:hestia/presentation/pages/main_tab_shell.dart';
 import 'package:hestia/presentation/pages/money_sources/add_edit_money_sources_screen.dart';
+import 'package:hestia/presentation/pages/money_sources/money_source_detail_screen.dart';
 import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
+import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/presentation/pages/appointments/add_edit_appointment_screen.dart';
+import 'package:hestia/presentation/pages/appointments/appointment_detail_screen.dart';
+import 'package:hestia/presentation/pages/notifications/notification_detail_screen.dart';
 import 'package:hestia/presentation/pages/notifications/notifications_screen.dart';
+import 'package:hestia/presentation/pages/profile/profile_screen.dart';
+import 'package:hestia/presentation/pages/settings/settings_screen.dart';
 import 'package:hestia/presentation/pages/splash/custom_splash_screen.dart';
+import 'package:hestia/domain/entities/notification.dart';
+import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/pages/transactions/add_edit_transaction_screen.dart';
+import 'package:hestia/presentation/pages/transactions/transactions_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -21,26 +31,33 @@ abstract final class AppRoutes {
 
   /// Tab indices for [main] deep-links.
   static const tabHome = 0;
-  static const tabActivity = 1;
+  static const tabCalendar = 1;
   static const tabGoals = 2;
-  static const tabMore = 3;
+  static const tabAccounts = 3;
 
   // Convenience aliases — push goes to /main with tab query.
   static const dashboard = '$main?tab=$tabHome';
-  static const transactions = '$main?tab=$tabActivity';
+  static const calendar = '$main?tab=$tabCalendar';
   static const goals = '$main?tab=$tabGoals';
-  static const settings = '$main?tab=$tabMore';
+  static const accounts = '$main?tab=$tabAccounts';
 
-  static const addTransaction = '/transactions/add';
+  static const transactions = '/transactions';
   static const editTransaction = '/transactions/edit';
   static const categories = '/categories';
   static const moneySources = '/money-sources';
   static const addMoneySource = '/money-sources/add';
   static const editMoneySource = '/money-sources/edit';
+  static const moneySourceDetail = '/money-sources/detail';
   static const addGoal = '/goals/add';
   static const editGoal = '/goals/edit';
   static const goalDetail = '/goals/detail';
   static const notifications = '/notifications';
+  static const notificationDetail = '/notifications/detail';
+  static const profile = '/profile';
+  static const settings = '/settings';
+  static const addAppointment = '/appointments/add';
+  static const editAppointment = '/appointments/edit';
+  static const appointmentDetail = '/appointments/detail';
 }
 
 final appRouter = GoRouter(
@@ -66,17 +83,11 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: AppRoutes.addTransaction,
-      pageBuilder: (context, state) => const CupertinoPage(
-        child: AddEditTransactionScreen(),
-      ),
-    ),
-    GoRoute(
       path: AppRoutes.editTransaction,
       pageBuilder: (context, state) {
-        final transactionId = state.extra as String;
+        final transaction = state.extra as Transaction;
         return CupertinoPage(
-          child: AddEditTransactionScreen(transactionId: transactionId),
+          child: AddEditTransactionScreen(transaction: transaction),
         );
       },
     ),
@@ -104,6 +115,15 @@ final appRouter = GoRouter(
         final sourceId = state.extra as String;
         return CupertinoPage(
           child: AddEditMoneySourceScreen(sourceId: sourceId),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.moneySourceDetail,
+      pageBuilder: (context, state) {
+        final sourceId = state.extra as String;
+        return CupertinoPage(
+          child: MoneySourceDetailScreen(sourceId: sourceId),
         );
       },
     ),
@@ -136,6 +156,58 @@ final appRouter = GoRouter(
       pageBuilder: (context, state) => const CupertinoPage(
         child: NotificationsScreen(),
       ),
+    ),
+    GoRoute(
+      path: AppRoutes.notificationDetail,
+      pageBuilder: (context, state) {
+        final n = state.extra as AppNotification;
+        return CupertinoPage(child: NotificationDetailScreen(notification: n));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.transactions,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: TransactionsScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.profile,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: ProfileScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.settings,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: SettingsScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.addAppointment,
+      pageBuilder: (context, state) {
+        final defaultDate = state.extra as DateTime?;
+        return CupertinoPage(
+          child: AddEditAppointmentScreen(defaultDate: defaultDate),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.editAppointment,
+      pageBuilder: (context, state) {
+        final appointment = state.extra as Appointment;
+        return CupertinoPage(
+          child: AddEditAppointmentScreen(existing: appointment),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.appointmentDetail,
+      pageBuilder: (context, state) {
+        final appointment = state.extra as Appointment;
+        return CupertinoPage(
+          child: AppointmentDetailScreen(appointment: appointment),
+        );
+      },
     ),
   ],
 );

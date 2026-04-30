@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Bank, CreditCard, Cash, PiggyBank, Wallet, NavArrowLeft;
@@ -32,6 +35,12 @@ class _AddEditMoneySourceScreenState extends State<AddEditMoneySourceScreen> {
     final accent = _c(theme.primaryColor);
     final tints = theme.categoryTints.map(_c).toList();
     final expense = _c(theme.colorRed);
+    final preferredCurrency =
+        (context.watch<AuthBloc>().state is AuthAuthenticated)
+            ? (context.watch<AuthBloc>().state as AuthAuthenticated)
+                    .profile
+                    .preferredCurrency
+            : 'EUR';
 
     final swatches = <Color>[
       accent,
@@ -132,7 +141,7 @@ class _AddEditMoneySourceScreenState extends State<AddEditMoneySourceScreen> {
                           ),
                           const SizedBox(height: 1),
                           Text(
-                            'Checking · EUR',
+                            'Checking · $preferredCurrency',
                             style: AppFonts.body(fontSize: 12, color: muted),
                           ),
                         ],
@@ -208,8 +217,8 @@ class _AddEditMoneySourceScreenState extends State<AddEditMoneySourceScreen> {
                   const SizedBox(height: 12),
                   FormFieldTile(
                     label: 'Initial balance',
-                    value: '0.00 €',
-                    trailing: 'EUR',
+                    value: '0.00 $preferredCurrency',
+                    trailing: preferredCurrency,
                     surface: surface,
                     border: border,
                     fg: fg,
