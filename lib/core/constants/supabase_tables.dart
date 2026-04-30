@@ -13,4 +13,6 @@ abstract final class SupabaseTables {
   static const scheduledNotifications = 'scheduled_notifications';
   static const notificationSettings = 'notification_settings';
   static const deviceTokens = 'device_tokens';
+  static const appointments = 'appointments';
+  static const appointmentReminders = 'appointment_reminders';
 }
