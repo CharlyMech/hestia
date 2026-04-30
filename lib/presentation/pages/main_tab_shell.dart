@@ -1,12 +1,18 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/pages/calendar/calendar_screen.dart';
 import 'package:hestia/presentation/pages/dashboard/dashboard_screen.dart';
 import 'package:hestia/presentation/pages/goals/goals_screen.dart';
-import 'package:hestia/presentation/pages/settings/settings_screen.dart';
-import 'package:hestia/presentation/pages/transactions/transactions_screen.dart';
+import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
+import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/dashboard/floating_nav_bar.dart';
+import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
 
 /// Persistent tab shell that holds Dashboard / Activity / Goals / More.
 ///
@@ -57,6 +63,25 @@ class _MainTabShellState extends State<MainTabShell> {
     );
   }
 
+  Future<void> _openTransactionSheet(BuildContext context) async {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) return;
+
+    final (household, _) = await AppDependencies.instance.householdRepository
+        .getCurrentHousehold(authState.profile.id);
+    if (household == null || !context.mounted) return;
+
+    await showAppBottomSheet<void>(
+      context: context,
+      title: 'New transaction',
+      heightFactor: 0.92,
+      child: TransactionForm(
+        householdId: household.id,
+        userId: authState.profile.id,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
@@ -70,11 +95,13 @@ class _MainTabShellState extends State<MainTabShell> {
             controller: _controller,
             physics: const BouncingScrollPhysics(),
             onPageChanged: (i) => setState(() => _index = i),
-            children: const [
-              DashboardScreen(),
-              TransactionsScreen(),
-              GoalsScreen(),
-              SettingsScreen(),
+            children: [
+              DashboardScreen(
+                onOpenMoneySource: (id) => context.push(AppRoutes.moneySourceDetail, extra: id),
+              ),
+              const CalendarScreen(),
+              const GoalsScreen(),
+              const MoneySourcesScreen(),
             ],
           ),
           Positioned(
@@ -87,7 +114,7 @@ class _MainTabShellState extends State<MainTabShell> {
                 activeIndex: _index,
                 pageOffset: _offset,
                 onTab: _goTo,
-                onPlus: () => context.push(AppRoutes.addTransaction),
+                onPlus: () => _openTransactionSheet(context),
               ),
             ),
           ),

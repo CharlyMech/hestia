@@ -2,11 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Home, Trophy, Settings, Plus;
-import 'package:iconoir_flutter/regular/list.dart' as list_icon;
+    show Home, Trophy, Calendar, Wallet, Plus;
 
-/// Backwards-compatible enum kept for external callers that haven't migrated.
-enum NavTab { home, activity, goals, more }
+/// Tab indices for the floating nav bar.
+enum NavTab { home, calendar, goals, accounts }
 
 /// Index-driven floating nav bar with animated active pill.
 ///
@@ -147,15 +146,15 @@ class _NavItem extends StatelessWidget {
     final color = active ? accent : muted;
     final Widget icon = switch (index) {
       0 => Home(width: 22, height: 22, color: color),
-      1 => list_icon.List(width: 22, height: 22, color: color),
+      1 => Calendar(width: 22, height: 22, color: color),
       2 => Trophy(width: 22, height: 22, color: color),
-      _ => Settings(width: 22, height: 22, color: color),
+      _ => Wallet(width: 22, height: 22, color: color),
     };
     final label = switch (index) {
       0 => 'Home',
-      1 => 'Activity',
+      1 => 'Calendar',
       2 => 'Goals',
-      _ => 'More',
+      _ => 'Accounts',
     };
     return GestureDetector(
       onTap: onTap,
