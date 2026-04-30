@@ -2,9 +2,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Hestia - START",
+      "name": "Hestia - Mock",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define=FLAVOR=mock"]
     },
+    {
+      "name": "Hestia - Supabase",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define=FLAVOR=supabase"]
+    }
   ]
 }
