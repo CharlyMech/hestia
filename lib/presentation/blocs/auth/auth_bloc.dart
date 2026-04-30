@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/error/failures.dart';
-import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/repositories/auth_repository.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
@@ -11,6 +10,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this._authRepository) : super(const AuthInitial()) {
     on<AuthCheckSession>(_onCheckSession);
     on<AuthSignInWithApple>(_onSignInWithApple);
+    on<AuthSignInWithEmail>(_onSignInWithEmail);
     on<AuthSignOut>(_onSignOut);
     on<AuthBiometricCheck>(_onBiometricCheck);
     on<AuthDevBypass>(_onDevBypass);
@@ -18,14 +18,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onDevBypass(
       AuthDevBypass event, Emitter<AuthState> emit) async {
-    final now = DateTime.now();
-    emit(AuthAuthenticated(Profile(
-      id: 'dev-user',
-      email: 'dev@hestia.local',
-      displayName: 'Ana Ruiz',
-      createdAt: now,
-      lastUpdate: now,
-    )));
+    final (profile, failure) = await _authRepository.getCurrentProfile();
+    if (failure != null || profile == null) {
+      emit(AuthError(failure ?? const AuthFailure('Dev bypass failed')));
+      return;
+    }
+    emit(AuthAuthenticated(profile));
   }
 
   Future<void> _onCheckSession(
@@ -67,6 +65,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading(message: 'Signing in...'));
 
     final (profile, failure) = await _authRepository.signInWithApple();
+    if (failure != null || profile == null) {
+      emit(AuthError(failure ?? const AuthFailure('Sign-in failed')));
+      return;
+    }
+
+    emit(AuthAuthenticated(profile));
+  }
+
+  Future<void> _onSignInWithEmail(
+      AuthSignInWithEmail event, Emitter<AuthState> emit) async {
+    emit(const AuthLoading(message: 'Signing in...'));
+
+    final (profile, failure) = await _authRepository.signInWithEmail(
+      event.email,
+      event.password,
+    );
     if (failure != null || profile == null) {
       emit(AuthError(failure ?? const AuthFailure('Sign-in failed')));
       return;

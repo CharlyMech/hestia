@@ -30,6 +30,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<(Profile?, Failure?)> signInWithEmail(
+      String email, String password) async {
+    try {
+      final response = await _authService.signInWithEmail(email, password);
+      if (response.user == null) {
+        return (null, const AuthFailure('Sign-in returned no user'));
+      }
+      final profile = await _fetchOrCreateProfile(response.user!.id);
+      return (profile, null);
+    } catch (e) {
+      return (null, mapExceptionToFailure(e));
+    }
+  }
+
+  @override
   Future<Failure?> signOut() async {
     try {
       await _authService.signOut();
@@ -69,6 +84,51 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<(Profile?, Failure?)> createUser({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    try {
+      // Calls a Supabase Edge Function that uses the service role key
+      // server-side. The function checks `is_superuser` on the caller's
+      // profile before creating the user. App-side stub: no client-side
+      // service-role calls — that key must never live in the app.
+      final response = await _authService.client.functions.invoke(
+        'admin-create-user',
+        body: {
+          'email': email,
+          'password': password,
+          if (displayName != null) 'display_name': displayName,
+        },
+      );
+      if (response.status >= 400) {
+        return (
+          null,
+          AuthFailure(
+            (response.data is Map ? response.data['error'] : null)?.toString() ??
+                'Create user failed (${response.status})',
+          ),
+        );
+      }
+      final data = response.data as Map<String, dynamic>;
+      return (
+        Profile(
+          id: data['id'] as String,
+          email: data['email'] as String,
+          displayName: data['display_name'] as String?,
+          preferredCurrency: (data['preferred_currency'] as String?) ?? 'EUR',
+          createdAt: DateTime.now(),
+          lastUpdate: DateTime.now(),
+        ),
+        null,
+      );
+    } catch (e) {
+      return (null, mapExceptionToFailure(e));
+    }
+  }
+
   Future<Profile> _fetchOrCreateProfile(String userId) async {
     final response = await _authService
         .from(SupabaseTables.profiles)
@@ -90,6 +150,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Profile(
         id: userId,
         email: user.email ?? '',
+        preferredCurrency: 'EUR',
         createdAt: DateTime.now(),
         lastUpdate: DateTime.now(),
       );
@@ -100,6 +161,8 @@ class AuthRepositoryImpl implements AuthRepository {
       email: response['email'] as String,
       displayName: response['display_name'] as String?,
       avatarUrl: response['avatar_url'] as String?,
+      preferredCurrency: (response['preferred_currency'] as String?) ?? 'EUR',
+      isSuperuser: (response['is_superuser'] as bool?) ?? false,
       createdAt: (response['created_at'] as int).fromUnix,
       lastUpdate: (response['last_update'] as int).fromUnix,
     );

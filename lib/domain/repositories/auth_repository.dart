@@ -8,6 +8,9 @@ abstract class AuthRepository {
   /// Sign in with Apple
   Future<(Profile?, Failure?)> signInWithApple();
 
+  /// Sign in with email + password
+  Future<(Profile?, Failure?)> signInWithEmail(String email, String password);
+
   /// Sign out
   Future<Failure?> signOut();
 
@@ -19,4 +22,12 @@ abstract class AuthRepository {
 
   /// Authenticate with biometrics
   Future<(bool, Failure?)> authenticateWithBiometrics();
+
+  /// Superuser-only: create a new user account.
+  /// Backed by a server-side admin endpoint in supabase flavor.
+  Future<(Profile?, Failure?)> createUser({
+    required String email,
+    required String password,
+    String? displayName,
+  });
 }

@@ -5,6 +5,8 @@ class Profile extends Equatable {
   final String email;
   final String? displayName;
   final String? avatarUrl;
+  final String preferredCurrency;
+  final bool isSuperuser;
   final DateTime createdAt;
   final DateTime lastUpdate;
 
@@ -13,10 +15,13 @@ class Profile extends Equatable {
     required this.email,
     this.displayName,
     this.avatarUrl,
+    this.preferredCurrency = 'EUR',
+    this.isSuperuser = false,
     required this.createdAt,
     required this.lastUpdate,
   });
 
   @override
-  List<Object?> get props => [id, email, displayName, avatarUrl];
+  List<Object?> get props =>
+      [id, email, displayName, avatarUrl, preferredCurrency, isSuperuser];
 }

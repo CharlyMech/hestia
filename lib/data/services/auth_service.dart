@@ -53,6 +53,22 @@ class AuthService extends SupabaseService {
     }
   }
 
+  /// Sign in with email + password via Supabase
+  Future<AuthResponse> signInWithEmail(String email, String password) async {
+    try {
+      final response =
+          await auth.signInWithPassword(email: email, password: password);
+      if (response.session != null) {
+        await _persistSession(response.session!);
+      }
+      return response;
+    } on AuthApiException catch (e) {
+      throw AuthException(e.message, code: e.code);
+    } catch (e) {
+      throw AuthException('Sign-in failed: $e');
+    }
+  }
+
   /// Sign out and clear stored session
   Future<void> signOut() async {
     try {

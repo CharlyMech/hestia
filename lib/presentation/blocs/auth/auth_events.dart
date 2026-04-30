@@ -14,6 +14,14 @@ class AuthSignInWithApple extends AuthEvent {
   const AuthSignInWithApple();
 }
 
+class AuthSignInWithEmail extends AuthEvent {
+  final String email;
+  final String password;
+  const AuthSignInWithEmail(this.email, this.password);
+  @override
+  List<Object?> get props => [email, password];
+}
+
 class AuthSignOut extends AuthEvent {
   const AuthSignOut();
 }
