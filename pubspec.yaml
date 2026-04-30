@@ -27,6 +27,9 @@ dependencies:
   # --- Routing ---
   go_router: ^14.6.2
 
+  # --- Preferences ---
+  shared_preferences: ^2.3.0
+
   # --- Local DB ---
   drift: ^2.22.1
   sqlite3_flutter_libs: ^0.5.28
@@ -54,6 +57,16 @@ dependencies:
   uuid: ^4.5.1
   connectivity_plus: ^6.1.1
   logger: ^2.5.0
+  flutter_dotenv: ^5.2.1
+  url_launcher: ^6.3.1
+  rxdart: ^0.28.0
+
+  # --- Google Calendar sync (prod flavor) ---
+  googleapis: ^13.2.0
+  googleapis_auth: ^1.6.0
+  google_sign_in: ^6.2.2
+  http: ^1.2.2
+  extension_google_sign_in_as_googleapis_auth: ^2.0.12
 
 dev_dependencies:
   flutter_test:
@@ -74,17 +87,3 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/icons/
-    - assets/animations/
-
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Inter-Bold.ttf
-          weight: 700
