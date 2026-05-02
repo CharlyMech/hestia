@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -83,7 +84,7 @@ class NotificationDetailScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: surface,
                   border: Border.all(color: border, width: 1),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
                 ),
                 child: Text(
                   notification.body,
@@ -100,7 +101,7 @@ class NotificationDetailScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: surface,
                     border: Border.all(color: border, width: 1),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

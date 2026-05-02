@@ -21,3 +21,12 @@ abstract final class AppConstants {
   static const dateFormat = 'dd MMM yyyy';
   static const monthYearFormat = 'MMM yyyy';
 }
+
+/// Border-radius scale. Max 12 — keeps UI tight.
+abstract final class AppRadii {
+  static const double xs = 4;
+  static const double sm = 6;
+  static const double md = 8;
+  static const double lg = 10;
+  static const double xl = 12;
+}

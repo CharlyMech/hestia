@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
@@ -228,7 +229,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                     color: state.titleValid
                         ? accent
                         : accent.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
                   ),
                   child: Center(
                     child: state.submitting

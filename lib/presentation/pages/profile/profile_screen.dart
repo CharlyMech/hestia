@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
@@ -86,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: surface,
             border: Border.all(color: border, width: 1),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppRadii.xl),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -127,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: surface,
                   border: Border.all(color: border, width: 1),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
                 ),
                 child: Row(
                   children: [

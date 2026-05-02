@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart' hide Page;
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
@@ -109,7 +110,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           decoration: BoxDecoration(
             color: surface,
             border: Border.all(color: border, width: 1),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppRadii.xl),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(

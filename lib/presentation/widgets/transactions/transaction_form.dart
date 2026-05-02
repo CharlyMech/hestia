@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/config/dependencies.dart';
@@ -308,7 +309,7 @@ class _FormBody extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: surface,
                             border: Border.all(color: border, width: 1),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(AppRadii.xl),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +360,7 @@ class _FormBody extends StatelessWidget {
                         child: CupertinoButton(
                           color: surface,
                           padding: EdgeInsets.zero,
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(AppRadii.xl),
                           onPressed: state.status ==
                                   TransactionFormStatus.submitting
                               ? null
@@ -374,7 +375,7 @@ class _FormBody extends StatelessWidget {
                       height: 50,
                       child: CupertinoButton(
                         color: accent,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(AppRadii.xl),
                         padding: EdgeInsets.zero,
                         onPressed: state.status ==
                                 TransactionFormStatus.submitting
@@ -505,7 +506,7 @@ class _PickerTile extends StatelessWidget {
           color: surface,
           border: Border.all(
               color: error != null ? errorColor : border, width: 1),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadii.xl),
         ),
         child: Row(
           children: [
@@ -582,7 +583,7 @@ class _ToggleTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: surface,
         border: Border.all(color: border, width: 1),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadii.xl),
       ),
       child: Row(
         children: [

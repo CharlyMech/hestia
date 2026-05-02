@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -113,7 +114,7 @@ class _CreateUserFormState extends State<CreateUserForm> {
             height: 50,
             child: CupertinoButton(
               color: accent,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppRadii.xl),
               padding: EdgeInsets.zero,
               onPressed: _submitting ? null : _submit,
               child: _submitting

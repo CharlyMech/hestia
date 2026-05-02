@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -121,7 +122,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             decoration: BoxDecoration(
               color: surface,
               border: Border.all(color: border, width: 1),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppRadii.xl),
             ),
             child: Column(
               children: [
@@ -291,7 +292,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               decoration: BoxDecoration(
                 color: surface,
                 border: Border.all(color: border, width: 1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppRadii.xl),
               ),
               child: Row(
                 children: [

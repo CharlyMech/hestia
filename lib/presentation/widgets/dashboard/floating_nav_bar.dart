@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
@@ -47,7 +48,7 @@ class FloatingNavBar extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: surface,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(AppRadii.xl),
                 border: Border.all(color: border, width: 1),
               ),
               child: LayoutBuilder(
@@ -107,7 +108,7 @@ class FloatingNavBar extends StatelessWidget {
               height: 64,
               decoration: BoxDecoration(
                 color: accent,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(AppRadii.xl),
               ),
               child: Center(
                 child: Plus(

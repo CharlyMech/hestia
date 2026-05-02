@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -204,7 +205,7 @@ class GoalDetailScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: surface,
                       border: Border.all(color: border, width: 1),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadii.xl),
                     ),
                     child: Row(
                       children: [
@@ -264,7 +265,7 @@ class GoalDetailScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: surface,
                       border: Border.all(color: border, width: 1),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadii.xl),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Column(
@@ -311,7 +312,7 @@ class GoalDetailScreen extends StatelessWidget {
                   height: 50,
                   child: CupertinoButton(
                     color: accent,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
                     padding: EdgeInsets.zero,
                     onPressed: () {},
                     child: Row(
@@ -371,7 +372,7 @@ class _StatCell extends StatelessWidget {
         decoration: BoxDecoration(
           color: surface,
           border: Border.all(color: border, width: 1),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadii.xl),
         ),
         child: Column(
           children: [
