@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
@@ -14,7 +17,6 @@ import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
-import 'package:hestia/presentation/widgets/common/toggle_switch.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show
         Group,
@@ -41,44 +43,22 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _faceId = true;
 
-  void _pickStartDay(BuildContext context, UserPrefsState prefs, Color fg,
-      Color surface, Color border, Color accent, Color muted) {
-    final options = [
-      (DateTime.monday, 'Monday'),
-      (DateTime.saturday, 'Saturday'),
-      (DateTime.sunday, 'Sunday'),
+  Future<void> _pickStartDay(
+      BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
+    final options = <({int v, String label})>[
+      (v: DateTime.monday, label: 'Monday'),
+      (v: DateTime.saturday, label: 'Saturday'),
+      (v: DateTime.sunday, label: 'Sunday'),
     ];
-    showCupertinoModalPopup<void>(
+    final picked = await _showOptionSheet<int>(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text('Start of week',
-            style: AppFonts.body(fontSize: 13, color: muted)),
-        actions: options
-            .map((o) => CupertinoActionSheetAction(
-                  onPressed: () {
-                    context
-                        .read<UserPrefsBloc>()
-                        .add(UserPrefsSetStartDay(o.$1));
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    o.$2,
-                    style: AppFonts.body(
-                      fontSize: 16,
-                      fontWeight: prefs.startDay == o.$1
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: prefs.startDay == o.$1 ? accent : fg,
-                    ),
-                  ),
-                ))
-            .toList(),
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: Text('Cancel', style: AppFonts.body(fontSize: 16, color: fg)),
-        ),
-      ),
+      title: l10n.settings_startDay,
+      current: prefs.startDay,
+      options: options,
     );
+    if (picked != null && context.mounted) {
+      context.read<UserPrefsBloc>().add(UserPrefsSetStartDay(picked));
+    }
   }
 
   String _startDayLabel(int day) => switch (day) {
@@ -88,69 +68,105 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _ => 'Monday',
       };
 
-  void _pickLanguage(
-      BuildContext context, UserPrefsState prefs, Color fg, Color accent, Color muted) {
-    final options = [('en', 'English'), ('es', 'Español')];
-    showCupertinoModalPopup<void>(
+  Future<void> _pickLanguage(
+      BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
+    final options = <({String v, String label})>[
+      (v: 'en', label: l10n.settings_languageEn),
+      (v: 'es', label: l10n.settings_languageEs),
+    ];
+    final picked = await _showOptionSheet<String>(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text('Language', style: AppFonts.body(fontSize: 13, color: muted)),
-        actions: options
-            .map((o) => CupertinoActionSheetAction(
-                  onPressed: () {
-                    context.read<UserPrefsBloc>().add(UserPrefsSetLanguageCode(o.$1));
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    o.$2,
-                    style: AppFonts.body(
-                      fontSize: 16,
-                      fontWeight: prefs.languageCode == o.$1
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: prefs.languageCode == o.$1 ? accent : fg,
-                    ),
+      title: l10n.settings_language,
+      current: prefs.languageCode,
+      options: options,
+    );
+    if (picked != null && context.mounted) {
+      context.read<UserPrefsBloc>().add(UserPrefsSetLanguageCode(picked));
+    }
+  }
+
+  Future<void> _pickTheme(
+      BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
+    final options = <({ThemeType v, String label})>[
+      (v: ThemeType.system, label: l10n.settings_themeSystem),
+      (v: ThemeType.light, label: l10n.settings_themeLight),
+      (v: ThemeType.dark, label: l10n.settings_themeDark),
+    ];
+    final picked = await _showOptionSheet<ThemeType>(
+      context: context,
+      title: l10n.settings_theme,
+      current: prefs.themeType,
+      options: options,
+    );
+    if (picked != null && context.mounted) {
+      context.read<UserPrefsBloc>().add(UserPrefsSetThemeType(picked));
+    }
+  }
+
+  Future<T?> _showOptionSheet<T>({
+    required BuildContext context,
+    required String title,
+    required T current,
+    required List<({T v, String label})> options,
+  }) {
+    final theme = context.myTheme;
+    final fg = _c(theme.onBackgroundColor);
+    final accent = _c(theme.primaryColor);
+    final border = _c(theme.borderColor);
+    return showAppBottomSheet<T>(
+      context: context,
+      title: title,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < options.length; i++) ...[
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).pop(options[i].v),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          options[i].label,
+                          style: AppFonts.body(
+                            fontSize: 15,
+                            fontWeight: options[i].v == current
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: options[i].v == current ? accent : fg,
+                          ),
+                        ),
+                      ),
+                      if (options[i].v == current)
+                        Icon(CupertinoIcons.check_mark,
+                            size: 16, color: accent),
+                    ],
                   ),
-                ))
-            .toList(),
+                ),
+              ),
+              if (i < options.length - 1)
+                Container(height: 1, color: border),
+            ],
+          ],
+        ),
       ),
     );
   }
 
-  void _pickTheme(
-      BuildContext context, UserPrefsState prefs, Color fg, Color accent, Color muted) {
-    final options = [
-      (ThemeType.dark, 'Dark'),
-      (ThemeType.light, 'Light'),
-    ];
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text('Theme', style: AppFonts.body(fontSize: 13, color: muted)),
-        actions: options
-            .map((o) => CupertinoActionSheetAction(
-                  onPressed: () {
-                    context.read<UserPrefsBloc>().add(UserPrefsSetThemeType(o.$1));
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    o.$2,
-                    style: AppFonts.body(
-                      fontSize: 16,
-                      fontWeight: prefs.themeType == o.$1
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: prefs.themeType == o.$1 ? accent : fg,
-                    ),
-                  ),
-                ))
-            .toList(),
-      ),
-    );
-  }
+  String _themeLabel(ThemeType t, AppLocalizations l10n) => switch (t) {
+        ThemeType.light => l10n.settings_themeLight,
+        ThemeType.dark => l10n.settings_themeDark,
+        ThemeType.system => l10n.settings_themeSystem,
+      };
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final prefs = context.watch<UserPrefsBloc>().state;
     final theme = context.myTheme;
     final bg = _c(theme.backgroundColor);
@@ -195,9 +211,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _Tile.chevron(
           icon: HalfMoon(width: 16, height: 16, color: tints[2]),
           color: tints[2],
-          label: 'Appearance',
-          sub: prefs.themeType == ThemeType.light ? 'Light' : 'Dark',
-          onTap: () => _pickTheme(context, prefs, fg, accent, muted),
+          label: l10n.settings_appearance,
+          sub: _themeLabel(prefs.themeType, l10n),
+          onTap: () => _pickTheme(context, prefs, l10n),
         ),
         _Tile.swatch(
           icon: ColorPicker(width: 16, height: 16, color: tints[4]),
@@ -208,22 +224,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _Tile.chevron(
           icon: Globe(width: 16, height: 16, color: tints[3]),
           color: tints[3],
-          label: 'Language',
-          sub: prefs.languageCode == 'es' ? 'Español' : 'English',
-          onTap: () => _pickLanguage(context, prefs, fg, accent, muted),
+          label: l10n.settings_language,
+          sub: prefs.languageCode == 'es'
+              ? l10n.settings_languageEs
+              : l10n.settings_languageEn,
+          onTap: () => _pickLanguage(context, prefs, l10n),
         ),
         _Tile.chevron(
           icon: CalendarPlus(width: 16, height: 16, color: tints[0]),
           color: tints[0],
-          label: 'Start of week',
+          label: l10n.settings_startDay,
           sub: _startDayLabel(prefs.startDay),
-          onTap: () => _pickStartDay(
-              context, prefs, fg, surface, border, accent, muted),
+          onTap: () => _pickStartDay(context, prefs, l10n),
         ),
         _Tile.toggle(
           icon: Clock(width: 16, height: 16, color: tints[1]),
           color: tints[1],
-          label: '24-hour time',
+          label: l10n.settings_use24h,
           value: prefs.use24h,
           onChanged: (v) =>
               context.read<UserPrefsBloc>().add(UserPrefsSetUse24h(v)),
@@ -317,11 +334,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 if (t.kind == _TileKind.toggle)
-                  ToggleSwitch(
+                  FSwitch(
                     value: t.value!,
-                    onChanged: t.onChanged!,
-                    activeColor: accent,
-                    inactiveColor: border,
+                    onChange: t.onChanged!,
                   )
                 else if (t.kind == _TileKind.swatch)
                   Container(
@@ -352,7 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           decoration: BoxDecoration(
             color: surface,
             border: Border.all(color: border, width: 1),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppRadii.xl),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -370,7 +385,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
             child: Text(
-              'Settings',
+              l10n.settings_title,
               style: AppFonts.heading(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
@@ -388,7 +403,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               decoration: BoxDecoration(
                 color: surface,
                 border: Border.all(color: border, width: 1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppRadii.xl),
               ),
               child: Row(
                 children: [

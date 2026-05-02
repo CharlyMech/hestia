@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 
@@ -43,10 +44,16 @@ class HestiaApp extends StatelessWidget {
       ],
       child: BlocBuilder<UserPrefsBloc, UserPrefsState>(
         builder: (context, prefs) {
-          final brightness = prefs.themeType == ThemeType.light
-              ? Brightness.light
-              : Brightness.dark;
-          final myTheme = themes[prefs.themeType] ?? themes[ThemeType.dark]!;
+          final systemBrightness = MediaQuery.platformBrightnessOf(context);
+          final myTheme = resolveTheme(
+            prefs.themeType,
+            systemBrightness: systemBrightness,
+          );
+          final brightness = prefs.themeType == ThemeType.system
+              ? systemBrightness
+              : (prefs.themeType == ThemeType.light
+                  ? Brightness.light
+                  : Brightness.dark);
           return InheritedMyTheme(
             theme: myTheme,
             child: FTheme(
@@ -56,12 +63,27 @@ class HestiaApp extends StatelessWidget {
                 theme: buildCupertinoTheme(myTheme, brightness: brightness),
                 routerConfig: appRouter,
                 locale: Locale(prefs.languageCode),
-                supportedLocales: const [Locale('en'), Locale('es')],
-                localizationsDelegates: const [
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const <LocalizationsDelegate<Object>>[
+                  AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
+                localeResolutionCallback: (deviceLocale, supported) {
+                  // Honor explicit user pick when set; else fall back to
+                  // device locale if supported, else 'en'.
+                  if (prefs.languageCode.isNotEmpty &&
+                      supported.any((l) => l.languageCode == prefs.languageCode)) {
+                    return Locale(prefs.languageCode);
+                  }
+                  if (deviceLocale != null &&
+                      supported.any(
+                          (l) => l.languageCode == deviceLocale.languageCode)) {
+                    return Locale(deviceLocale.languageCode);
+                  }
+                  return const Locale('en');
+                },
                 debugShowCheckedModeBanner: false,
               ),
             ),
