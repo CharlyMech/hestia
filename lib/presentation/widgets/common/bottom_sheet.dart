@@ -1,16 +1,18 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 
 /// App-wide bottom sheet. Theme-aware, drag handle, keyboard-safe.
 ///
-/// `heightFactor` (0..1) caps the max height as a fraction of the screen.
-/// `expand` makes the sheet take the available space inside the cap.
+/// Default: hugs content (intrinsic height). When content exceeds
+/// `heightFactor * screen`, the body becomes scrollable.
+/// Set `expand=true` to force the sheet to fill the cap regardless.
 Future<T?> showAppBottomSheet<T>({
   required BuildContext context,
   required Widget child,
   String? title,
-  double heightFactor = 0.95,
+  double heightFactor = 0.9,
   bool expand = false,
 }) {
   final theme = context.myTheme;
@@ -66,7 +68,7 @@ class _SheetContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final maxHeight = media.size.height * 0.95;
+    final maxHeight = media.size.height * heightFactor;
     final keyboard = media.viewInsets.bottom;
 
     return AnimatedPadding(
@@ -79,7 +81,9 @@ class _SheetContainer extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(AppRadii.xl),
+              ),
               border: Border.all(color: border, width: 1),
             ),
             child: SafeArea(
@@ -125,7 +129,10 @@ class _SheetContainer extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  if (expand) Expanded(child: child) else Flexible(child: child),
+                  if (expand)
+                    Expanded(child: SingleChildScrollView(child: child))
+                  else
+                    Flexible(child: SingleChildScrollView(child: child)),
                 ],
               ),
             ),
@@ -146,28 +153,39 @@ class _DraggableSheetShell extends StatefulWidget {
 
 class _DraggableSheetShellState extends State<_DraggableSheetShell> {
   double _dy = 0;
+  double? _sheetHeight;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragUpdate: (d) {
-        if (d.primaryDelta == null || d.primaryDelta! <= 0) return;
-        setState(() => _dy += d.primaryDelta!);
+    return LayoutBuilder(
+      builder: (context, c) {
+        // Cache the sheet height to compute a percentage threshold.
+        _sheetHeight ??= c.maxHeight.isFinite ? c.maxHeight : null;
+        return GestureDetector(
+          onVerticalDragUpdate: (d) {
+            if (d.primaryDelta == null || d.primaryDelta! <= 0) return;
+            // Rubbery resistance: 60% of raw delta.
+            setState(() => _dy += d.primaryDelta! * 0.6);
+          },
+          onVerticalDragEnd: (d) {
+            final velocity = d.primaryVelocity ?? 0;
+            // Require ~30% of sheet height OR sustained velocity > 1200 px/s.
+            final h = _sheetHeight ?? MediaQuery.of(context).size.height * 0.5;
+            final threshold = h * 0.30;
+            if (_dy > threshold || velocity > 1200) {
+              Navigator.of(context).pop();
+              return;
+            }
+            setState(() => _dy = 0);
+          },
+          child: AnimatedSlide(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            offset: Offset(0, _dy / 800),
+            child: widget.child,
+          ),
+        );
       },
-      onVerticalDragEnd: (d) {
-        final velocity = d.primaryVelocity ?? 0;
-        if (_dy > 120 || velocity > 900) {
-          Navigator.of(context).pop();
-          return;
-        }
-        setState(() => _dy = 0);
-      },
-      child: AnimatedSlide(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        offset: Offset(0, _dy / 500),
-        child: widget.child,
-      ),
     );
   }
 }
