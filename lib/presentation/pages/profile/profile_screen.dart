@@ -14,7 +14,7 @@ import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, LogOut, Settings, Shield, UserPlus;
+    show Bell, LogOut, Settings, Shield, Trophy, UserPlus;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -211,6 +211,13 @@ class ProfileScreen extends StatelessWidget {
                 label: 'Notifications',
                 sub: 'Inbox and alerts',
                 onTap: () => context.push(AppRoutes.notifications),
+              ),
+              tile(
+                icon: Trophy(width: 16, height: 16, color: tints[3]),
+                color: tints[3],
+                label: 'Goals',
+                sub: 'Across all accounts',
+                onTap: () => context.push(AppRoutes.goals),
               ),
               tile(
                 icon: Shield(width: 16, height: 16, color: tints[5]),

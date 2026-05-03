@@ -4,6 +4,7 @@ import 'package:hestia/presentation/pages/auth/login_screen.dart';
 import 'package:hestia/presentation/pages/categories/categories_screen.dart';
 import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
+import 'package:hestia/presentation/pages/goals/goals_screen.dart';
 import 'package:hestia/presentation/pages/main_tab_shell.dart';
 import 'package:hestia/presentation/pages/money_sources/add_edit_money_sources_screen.dart';
 import 'package:hestia/presentation/pages/money_sources/money_source_detail_screen.dart';
@@ -25,21 +26,24 @@ abstract final class AppRoutes {
   static const splash = '/';
   static const login = '/login';
 
-  /// Persistent tab shell — Home / Activity / Goals / More live here.
+  /// Persistent tab shell — Dashboard / Calendar / Shopping / Accounts.
   /// Use `?tab=N` (0..3) to land on a specific tab.
   static const main = '/main';
 
   /// Tab indices for [main] deep-links.
   static const tabHome = 0;
   static const tabCalendar = 1;
-  static const tabGoals = 2;
+  static const tabShopping = 2;
   static const tabAccounts = 3;
 
   // Convenience aliases — push goes to /main with tab query.
   static const dashboard = '$main?tab=$tabHome';
   static const calendar = '$main?tab=$tabCalendar';
-  static const goals = '$main?tab=$tabGoals';
+  static const shopping = '$main?tab=$tabShopping';
   static const accounts = '$main?tab=$tabAccounts';
+
+  /// Goals is now a pushed route, not a tab.
+  static const goals = '/goals';
 
   static const transactions = '/transactions';
   static const editTransaction = '/transactions/edit';
@@ -128,10 +132,19 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: AppRoutes.addGoal,
+      path: AppRoutes.goals,
       pageBuilder: (context, state) => const CupertinoPage(
-        child: AddEditGoalScreen(),
+        child: GoalsScreen(),
       ),
+    ),
+    GoRoute(
+      path: AppRoutes.addGoal,
+      pageBuilder: (context, state) {
+        final sourceId = state.extra as String?;
+        return CupertinoPage(
+          child: AddEditGoalScreen(prefilledMoneySourceId: sourceId),
+        );
+      },
     ),
     GoRoute(
       path: AppRoutes.editGoal,

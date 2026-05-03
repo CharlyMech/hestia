@@ -8,8 +8,8 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/pages/calendar/calendar_screen.dart';
 import 'package:hestia/presentation/pages/dashboard/dashboard_screen.dart';
-import 'package:hestia/presentation/pages/goals/goals_screen.dart';
 import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
+import 'package:hestia/presentation/pages/shopping/shopping_screen.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/dashboard/floating_nav_bar.dart';
 import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
@@ -100,7 +100,7 @@ class _MainTabShellState extends State<MainTabShell> {
                 onOpenMoneySource: (id) => context.push(AppRoutes.moneySourceDetail, extra: id),
               ),
               const CalendarScreen(),
-              const GoalsScreen(),
+              const ShoppingScreen(),
               const MoneySourcesScreen(),
             ],
           ),

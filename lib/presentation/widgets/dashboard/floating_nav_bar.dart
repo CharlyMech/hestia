@@ -2,11 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Home, Trophy, Calendar, Wallet, Plus;
+    show ReportColumns, Calendar, CartAlt, Wallet, Plus;
 
 /// Tab indices for the floating nav bar.
-enum NavTab { home, calendar, goals, accounts }
+enum NavTab { home, calendar, shopping, accounts }
 
 /// Index-driven floating nav bar with animated active pill.
 ///
@@ -144,35 +145,40 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = active ? accent : muted;
     final Widget icon = switch (index) {
-      0 => Home(width: 22, height: 22, color: color),
+      0 => ReportColumns(width: 22, height: 22, color: color),
       1 => Calendar(width: 22, height: 22, color: color),
-      2 => Trophy(width: 22, height: 22, color: color),
+      2 => CartAlt(width: 22, height: 22, color: color),
       _ => Wallet(width: 22, height: 22, color: color),
     };
     final label = switch (index) {
-      0 => 'Home',
-      1 => 'Calendar',
-      2 => 'Goals',
-      _ => 'Accounts',
+      0 => l10n.nav_dashboard,
+      1 => l10n.nav_calendar,
+      2 => l10n.nav_shopping,
+      _ => l10n.nav_accounts,
     };
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
+          spacing: 3,
           children: [
             SizedBox(width: 22, height: 22, child: icon),
-            const SizedBox(height: 3),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppFonts.body(
                 fontSize: 10,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                 color: color,
+                height: 1.0,
               ),
             ),
           ],
