@@ -10,9 +10,11 @@ import 'package:hestia/domain/entities/money_source.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/core/config/router.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/dashboard/sparkline.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show NavArrowLeft;
+import 'package:hestia/presentation/widgets/money_sources/wallet_card.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart' show NavArrowLeft, Plus;
 
 class MoneySourceDetailScreen extends StatefulWidget {
   final String sourceId;
@@ -25,6 +27,7 @@ class MoneySourceDetailScreen extends StatefulWidget {
 class _MoneySourceDetailScreenState extends State<MoneySourceDetailScreen> {
   MoneySource? _source;
   List<Transaction> _transactions = const [];
+  bool _notFound = false;
 
   @override
   void initState() {
@@ -43,12 +46,16 @@ class _MoneySourceDetailScreenState extends State<MoneySourceDetailScreen> {
     final (sources, _) = await AppDependencies.instance.moneySourceRepository
         .getMoneySources(
       householdId: household.id,
-      viewMode: ViewMode.personal,
+      viewMode: ViewMode.household,
       userId: profile.id,
       activeOnly: false,
     );
     final source = sources.where((s) => s.id == widget.sourceId).firstOrNull;
-    if (source == null || !mounted) return;
+    if (!mounted) return;
+    if (source == null) {
+      setState(() => _notFound = true);
+      return;
+    }
 
     final (transactions, _) = await AppDependencies.instance.transactionRepository
         .getTransactions(
@@ -81,7 +88,14 @@ class _MoneySourceDetailScreenState extends State<MoneySourceDetailScreen> {
     return CupertinoPageScaffold(
       backgroundColor: bg,
       child: SafeArea(
-        child: source == null
+        child: _notFound
+            ? Center(
+                child: Text(
+                  'Account not found',
+                  style: AppFonts.body(fontSize: 13, color: muted),
+                ),
+              )
+            : source == null
             ? const Center(child: CupertinoActivityIndicator())
             : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
@@ -110,32 +124,69 @@ class _MoneySourceDetailScreenState extends State<MoneySourceDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  WalletCard(source: source),
+                  const SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: surface,
                       border: Border.all(color: border, width: 1),
                       borderRadius: BorderRadius.circular(AppRadii.xl),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${source.institution ?? 'No institution'} · ${source.accountType.name}',
+                    child: Sparkline(color: accent, height: 52),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Goals on this account',
+                            style: AppFonts.sectionLabel(color: muted)),
+                      ),
+                      GestureDetector(
+                        onTap: () => context.push(
+                          AppRoutes.addGoal,
+                          extra: source.id,
+                        ),
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          spacing: 4,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Plus(width: 14, height: 14, color: accent),
+                            Text(
+                              'Add goal',
+                              style: AppFonts.body(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: accent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => context.push(
+                      AppRoutes.addGoal,
+                      extra: source.id,
+                    ),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 18),
+                      decoration: BoxDecoration(
+                        color: surface,
+                        border: Border.all(color: border, width: 1),
+                        borderRadius: BorderRadius.circular(AppRadii.xl),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'No goals yet — tap to add one',
                           style: AppFonts.body(fontSize: 12, color: muted),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${source.currentBalance.toStringAsFixed(2)} ${source.currency}',
-                          style: AppFonts.numeric(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: fg,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Sparkline(color: accent, height: 52),
-                      ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 18),

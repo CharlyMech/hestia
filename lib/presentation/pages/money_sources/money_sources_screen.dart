@@ -1,358 +1,384 @@
 import 'package:flutter/cupertino.dart';
-import 'package:hestia/core/constants/app_constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/blocs/money_sources/money_sources_bloc.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
-import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bank, PiggyBank, CreditCard, Cash, Plus;
+import 'package:hestia/presentation/widgets/money_sources/wallet_card.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 
-class MoneySourcesScreen extends StatelessWidget {
+class MoneySourcesScreen extends StatefulWidget {
   const MoneySourcesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final expense = _c(theme.colorRed);
-    final tints = theme.categoryTints.map(_c).toList();
+  State<MoneySourcesScreen> createState() => _MoneySourcesScreenState();
+}
 
-    final shared = <_Source>[
-      _Source(
-        name: 'Santander Joint',
-        inst: 'Santander',
-        type: 'checking',
-        icon: Bank(width: 20, height: 20, color: expense),
-        color: expense,
-        balance: 4820.40,
-        members: [
-          (name: 'Ana', color: tints[0]),
-          (name: 'Luis', color: tints[2]),
-        ],
-      ),
-      _Source(
-        name: 'Household Savings',
-        inst: 'BBVA',
-        type: 'savings',
-        icon: PiggyBank(width: 20, height: 20, color: tints[3]),
-        color: tints[3],
-        balance: 12400.00,
-        members: [
-          (name: 'Ana', color: tints[0]),
-          (name: 'Luis', color: tints[2]),
-        ],
-      ),
-    ];
+class _MoneySourcesScreenState extends State<MoneySourcesScreen> {
+  String? _householdId;
+  bool _resolving = true;
 
-    final personal = <_Source>[
-      _Source(
-        name: 'Revolut',
-        inst: 'Revolut',
-        type: 'checking',
-        icon: CreditCard(width: 20, height: 20, color: accent),
-        color: accent,
-        balance: 1284.12,
-        members: const [],
-      ),
-      _Source(
-        name: 'Cash wallet',
-        inst: '',
-        type: 'cash',
-        icon: Cash(width: 20, height: 20, color: tints[5]),
-        color: tints[5],
-        balance: 85.00,
-        members: const [],
-      ),
-      _Source(
-        name: 'Visa Crédit',
-        inst: 'CaixaBank',
-        type: 'credit',
-        icon: CreditCard(width: 20, height: 20, color: tints[1]),
-        color: tints[1],
-        balance: -320.40,
-        members: const [],
-      ),
-    ];
-
-    final total =
-        [...shared, ...personal].fold<double>(0, (s, x) => s + x.balance);
-
-    Widget sharedCard(_Source s) => Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: surface,
-            border: Border.all(color: border, width: 1),
-            borderRadius: BorderRadius.circular(AppRadii.xl),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: 3,
-                  color: s.color.withValues(alpha: 0.6),
-                ),
-              ),
-              Row(
-                children: [
-                  CatTile(icon: s.icon, color: s.color, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                s.name,
-                                style: AppFonts.body(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: fg,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const ScopePill(kind: ScopeKind.shared),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${s.inst} · ${s.type}',
-                          style: AppFonts.body(fontSize: 12, color: muted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        _money(s.balance),
-                        style: AppFonts.numeric(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      AvatarStack(
-                        members: s.members,
-                        size: 18,
-                        ringColor: surface,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-
-    Widget personalCard(_Source s) => Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: surface,
-            border: Border.all(color: border, width: 1),
-            borderRadius: BorderRadius.circular(AppRadii.xl),
-          ),
-          child: Row(
-            children: [
-              CatTile(icon: s.icon, color: s.color, size: 40),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            s.name,
-                            style: AppFonts.body(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: fg,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const ScopePill(kind: ScopeKind.personal),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      s.inst.isEmpty
-                          ? 'No institution · ${s.type}'
-                          : '${s.inst} · ${s.type}',
-                      style: AppFonts.body(fontSize: 12, color: muted),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                _money(s.balance),
-                style: AppFonts.numeric(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: s.balance < 0 ? expense : fg,
-                ),
-              ),
-            ],
-          ),
-        );
-
-    return CupertinoPageScaffold(
-      backgroundColor: bg,
-      child: ScreenShell(
-        bg: bg,
-        bottomPadding: 24,
-        slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Sources',
-                        style: AppFonts.heading(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Total net worth',
-                        style: AppFonts.body(fontSize: 13, color: muted),
-                      ),
-                      const SizedBox(height: 2),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: total.toStringAsFixed(2).replaceAllMapped(
-                                  RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-                                  (m) => '${m[1]},'),
-                              style: AppFonts.numeric(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: fg,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '€',
-                              style: AppFonts.numeric(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w500,
-                                color: muted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => context.push(AppRoutes.addMoneySource),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Plus(
-                        width: 18,
-                        height: 18,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        SliverToBoxAdapter(
-          child: SectionLabel('Shared · household', color: muted),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 10)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: SliverList.separated(
-            itemCount: shared.length,
-            itemBuilder: (_, i) => sharedCard(shared[i]),
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        SliverToBoxAdapter(
-          child: SectionLabel('Personal · Ana', color: muted),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 10)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: SliverList.separated(
-            itemCount: personal.length,
-            itemBuilder: (_, i) => personalCard(personal[i]),
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-          ),
-        ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _resolveHousehold();
   }
 
-  String _money(double v) {
-    final neg = v < 0;
-    final abs = v.abs();
-    final whole = abs.toStringAsFixed(2);
-    final formatted = whole.replaceAllMapped(
-        RegExp(r'(\d)(?=(\d{3})+\.)'), (m) => '${m[1]},');
-    return '${neg ? '−' : ''}$formatted€';
+  Future<void> _resolveHousehold() async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) {
+      if (mounted) setState(() => _resolving = false);
+      return;
+    }
+    final (household, _) = await AppDependencies.instance.householdRepository
+        .getCurrentHousehold(auth.profile.id);
+    if (!mounted) return;
+    setState(() {
+      _householdId = household?.id;
+      _resolving = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) {
+      return const _SignedOut();
+    }
+    if (_resolving || _householdId == null) {
+      final theme = context.myTheme;
+      final bg = _c(theme.backgroundColor);
+      return CupertinoPageScaffold(
+        backgroundColor: bg,
+        child: const Center(child: CupertinoActivityIndicator()),
+      );
+    }
+    return BlocProvider(
+      create: (_) => MoneySourcesBloc(
+        AppDependencies.instance.moneySourceRepository,
+      )..add(MoneySourcesLoad(
+          householdId: _householdId!,
+          userId: auth.profile.id,
+        )),
+      child: const _Body(),
+    );
   }
 
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
-class _Source {
-  final String name;
-  final String inst;
-  final String type;
-  final Widget icon;
-  final Color color;
-  final double balance;
-  final List<({String name, Color color})> members;
+class _Body extends StatelessWidget {
+  const _Body();
 
-  const _Source({
-    required this.name,
-    required this.inst,
-    required this.type,
-    required this.icon,
-    required this.color,
-    required this.balance,
-    required this.members,
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.myTheme;
+    final bg = _c(theme.backgroundColor);
+    final fg = _c(theme.onBackgroundColor);
+    final muted = _c(theme.onInactiveColor);
+    final accent = _c(theme.primaryColor);
+    final border = _c(theme.borderColor);
+
+    return CupertinoPageScaffold(
+      backgroundColor: bg,
+      child: BlocBuilder<MoneySourcesBloc, MoneySourcesState>(
+        builder: (context, state) {
+          if (state is MoneySourcesLoading || state is MoneySourcesInitial) {
+            return ScreenShell(
+              bg: bg,
+              slivers: const [
+                SliverFillRemaining(
+                  child: Center(child: CupertinoActivityIndicator()),
+                ),
+              ],
+            );
+          }
+          if (state is MoneySourcesError) {
+            return ScreenShell(
+              bg: bg,
+              slivers: [
+                SliverFillRemaining(
+                  child: Center(
+                    child: Text(state.message,
+                        style: AppFonts.body(fontSize: 13, color: muted)),
+                  ),
+                ),
+              ],
+            );
+          }
+          final loaded = state as MoneySourcesLoaded;
+          return ScreenShell(
+            bg: bg,
+            onRefresh: () async {
+              final bloc = context.read<MoneySourcesBloc>();
+              bloc.add(const MoneySourcesRefresh());
+              await bloc.stream
+                  .firstWhere((s) => s is! MoneySourcesLoading);
+            },
+            slivers: [
+              SliverToBoxAdapter(
+                child: _Header(
+                  l10n: l10n,
+                  fg: fg,
+                  muted: muted,
+                  accent: accent,
+                  total: loaded.totalBalance,
+                  currency: loaded.sources.firstOrNull?.currency ?? 'EUR',
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              if (loaded.shared.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: SectionLabel(l10n.moneySources_shared, color: muted),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                _CardList(sources: loaded.shared, indexOffset: 0),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
+              if (loaded.personal.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child:
+                      SectionLabel(l10n.moneySources_personal, color: muted),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                _CardList(
+                  sources: loaded.personal,
+                  indexOffset: loaded.shared.length,
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              ],
+              SliverToBoxAdapter(
+                child: _AddCardPlaceholder(
+                  border: border,
+                  muted: muted,
+                  label: l10n.moneySources_addCard,
+                  onTap: () => context.push(AppRoutes.addMoneySource),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+}
+
+class _Header extends StatelessWidget {
+  final AppLocalizations l10n;
+  final Color fg;
+  final Color muted;
+  final Color accent;
+  final double total;
+  final String currency;
+
+  const _Header({
+    required this.l10n,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.total,
+    required this.currency,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Text(
+            l10n.moneySources_title,
+            style: AppFonts.heading(
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+              color: fg,
+            ),
+          ),
+          Text(
+            l10n.moneySources_totalNetWorth,
+            style: AppFonts.body(fontSize: 13, color: muted),
+          ),
+          Text(
+            '${total.toStringAsFixed(2)} $currency',
+            style: AppFonts.numeric(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: fg,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CardList extends StatelessWidget {
+  final List<MoneySource> sources;
+  final int indexOffset;
+
+  const _CardList({required this.sources, required this.indexOffset});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverList.separated(
+        itemCount: sources.length,
+        itemBuilder: (_, i) => WalletCard(
+          source: sources[i],
+          index: indexOffset + i,
+          onTap: () => context.push(
+            AppRoutes.moneySourceDetail,
+            extra: sources[i].id,
+          ),
+        ),
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+      ),
+    );
+  }
+}
+
+class _AddCardPlaceholder extends StatelessWidget {
+  final Color border;
+  final Color muted;
+  final String label;
+  final VoidCallback onTap;
+
+  const _AddCardPlaceholder({
+    required this.border,
+    required this.muted,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AspectRatio(
+          aspectRatio: 1.586,
+          child: DottedBorder(
+            color: border,
+            radius: AppRadii.xl,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  Plus(width: 22, height: 22, color: muted),
+                  Text(
+                    label,
+                    style: AppFonts.body(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: muted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Lightweight dashed-border container — avoids adding a dotted_border package.
+class DottedBorder extends StatelessWidget {
+  final Color color;
+  final double radius;
+  final Widget child;
+
+  const DottedBorder({
+    super.key,
+    required this.color,
+    required this.radius,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedRRectPainter(color: color, radius: radius),
+      child: child,
+    );
+  }
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+  _DashedRRectPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+    final dashed = _dash(path, dash: 6, gap: 4);
+    canvas.drawPath(dashed, paint);
+  }
+
+  Path _dash(Path source, {required double dash, required double gap}) {
+    final out = Path();
+    for (final metric in source.computeMetrics()) {
+      double dist = 0;
+      while (dist < metric.length) {
+        final next = dist + dash;
+        out.addPath(metric.extractPath(dist, next), Offset.zero);
+        dist = next + gap;
+      }
+    }
+    return out;
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter old) =>
+      old.color != color || old.radius != radius;
+}
+
+class _SignedOut extends StatelessWidget {
+  const _SignedOut();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.myTheme;
+    final bg =
+        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final muted =
+        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+    return CupertinoPageScaffold(
+      backgroundColor: bg,
+      child: Center(
+        child: Text(
+          'Sign in to view accounts',
+          style: AppFonts.body(fontSize: 14, color: muted),
+        ),
+      ),
+    );
+  }
 }
