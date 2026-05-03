@@ -97,7 +97,7 @@ class _SheetContainer extends StatelessWidget {
                       const SizedBox(width: 12),
                       CupertinoButton(
                         padding: EdgeInsets.zero,
-                        minSize: 28,
+                        minimumSize: const Size.square(28),
                         onPressed: () => Navigator.of(context).pop(),
                         child: Icon(CupertinoIcons.xmark, size: 16, color: fg),
                       ),

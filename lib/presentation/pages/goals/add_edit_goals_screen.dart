@@ -9,7 +9,12 @@ import 'package:iconoir_flutter/iconoir_flutter.dart' show Xmark, Sparks;
 
 class AddEditGoalScreen extends StatefulWidget {
   final String? goalId;
-  const AddEditGoalScreen({super.key, this.goalId});
+  final String? prefilledMoneySourceId;
+  const AddEditGoalScreen({
+    super.key,
+    this.goalId,
+    this.prefilledMoneySourceId,
+  });
 
   @override
   State<AddEditGoalScreen> createState() => _AddEditGoalScreenState();
