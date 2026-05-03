@@ -80,6 +80,13 @@ class CalendarAppointmentAdded extends CalendarEvent {
   const CalendarAppointmentAdded();
 }
 
+class CalendarRefresh extends CalendarEvent {
+  final int _nonce;
+  CalendarRefresh() : _nonce = DateTime.now().microsecondsSinceEpoch;
+  @override
+  List<Object?> get props => [_nonce];
+}
+
 class CalendarMarkAllDay extends CalendarEvent {
   final String appointmentId;
   const CalendarMarkAllDay(this.appointmentId);
@@ -205,6 +212,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     on<CalendarMonthChanged>(_onMonthChanged);
     on<CalendarAppointmentAdded>(_onAppointmentAdded);
     on<CalendarMarkAllDay>(_onMarkAllDay);
+    on<CalendarRefresh>(_onRefresh);
   }
 
   Future<void> _onLoad(CalendarLoad e, Emitter<CalendarState> emit) async {
@@ -279,6 +287,12 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
   Future<void> _onAppointmentAdded(
       CalendarAppointmentAdded e, Emitter<CalendarState> emit) async {
+    emit(state.copyWith(loading: true));
+    await _fetch(emit);
+  }
+
+  Future<void> _onRefresh(
+      CalendarRefresh e, Emitter<CalendarState> emit) async {
     emit(state.copyWith(loading: true));
     await _fetch(emit);
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
@@ -350,44 +351,68 @@ class _BodyState extends State<_Body> {
             final dayAppts = dayItems.whereType<AppointmentItem>().toList();
             final dayTxs = dayItems.whereType<TransactionItem>().toList();
 
-            return Column(
-              children: [
-                SafeArea(
-                  bottom: false,
-                  child: _FixedTopBar(
-                    state: state,
-                    lineController: _lineController,
-                    fg: fg,
-                    muted: muted,
-                    accent: accent,
-                    surface: surface,
-                    border: border,
-                    bg: bg,
-                    onAddTap: () => _openAddSheet(context, state.selectedDate),
-                    onMonthTap: () => _showMonthPicker(context, state),
-                    onTodayTap: () {
-                      final today = DateTime.now();
-                      final local = DateTime(today.year, today.month, today.day);
-                      context.read<CalendarBloc>().add(CalendarSelectDate(local));
-                      context
-                          .read<CalendarBloc>()
-                          .add(CalendarMonthChanged(DateTime(local.year, local.month)));
-                    },
-                    onToggleAppointments: () => context
-                        .read<CalendarBloc>()
-                        .add(const CalendarToggleEventos()),
-                    onToggleTransactions: () => context
-                        .read<CalendarBloc>()
-                        .add(const CalendarToggleMovimientos()),
-                  ),
+            return SafeArea(
+              bottom: false,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
                 ),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                    onRefresh: () {
+                      final bloc = context.read<CalendarBloc>();
+                      final completer = Completer<void>();
+                      late StreamSubscription<CalendarState> sub;
+                      sub = bloc.stream.listen((s) {
+                        if (!s.loading) {
+                          if (!completer.isCompleted) {
+                            completer.complete();
+                          }
+                          sub.cancel();
+                        }
+                      });
+                      bloc.add(CalendarRefresh());
+                      return completer.future;
+                    },
+                  ),
+                  SliverToBoxAdapter(
+                    child: _FixedTopBar(
+                      state: state,
+                      lineController: _lineController,
+                      fg: fg,
+                      muted: muted,
+                      accent: accent,
+                      surface: surface,
+                      border: border,
+                      bg: bg,
+                      onAddTap: () =>
+                          _openAddSheet(context, state.selectedDate),
+                      onMonthTap: () => _showMonthPicker(context, state),
+                      onTodayTap: () {
+                        final today = DateTime.now();
+                        final local =
+                            DateTime(today.year, today.month, today.day);
+                        context
+                            .read<CalendarBloc>()
+                            .add(CalendarSelectDate(local));
+                        context.read<CalendarBloc>().add(CalendarMonthChanged(
+                            DateTime(local.year, local.month)));
+                      },
+                      onToggleAppointments: () => context
+                          .read<CalendarBloc>()
+                          .add(const CalendarToggleEventos()),
+                      onToggleTransactions: () => context
+                          .read<CalendarBloc>()
+                          .add(const CalendarToggleMovimientos()),
+                    ),
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: true,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, animation) => FadeTransition(
                         opacity: animation,
                         child: SlideTransition(
                           position: Tween<Offset>(
@@ -396,23 +421,24 @@ class _BodyState extends State<_Body> {
                           ).animate(animation),
                           child: child,
                         ),
-                      );
-                    },
-                    child: DayView(
-                      key: ValueKey(state.selectedDate),
-                      date: state.selectedDate,
-                      appointments: dayAppts,
-                      transactions: dayTxs,
-                      showAppointments: state.showAppointments,
-                      showTransactions: state.showTransactions,
-                      allDayIds: state.allDayAppointmentIds,
-                      use24h: prefs.use24h,
-                      onTapSlot: (dt) => _openAddSheet(context, dt),
-                      onTapAppointment: (a) => _openAppointmentInfoSheet(context, a),
+                      ),
+                      child: DayView(
+                        key: ValueKey(state.selectedDate),
+                        date: state.selectedDate,
+                        appointments: dayAppts,
+                        transactions: dayTxs,
+                        showAppointments: state.showAppointments,
+                        showTransactions: state.showTransactions,
+                        allDayIds: state.allDayAppointmentIds,
+                        use24h: prefs.use24h,
+                        onTapSlot: (dt) => _openAddSheet(context, dt),
+                        onTapAppointment: (a) =>
+                            _openAppointmentInfoSheet(context, a),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -523,7 +549,7 @@ class _FixedTopBar extends StatelessWidget {
               ),
               const Spacer(),
               CupertinoButton(
-                minSize: 30,
+                minimumSize: const Size(44, 30),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 color: surface,
                 onPressed: onTodayTap,
@@ -700,6 +726,7 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+
 
 // ── Signed out ────────────────────────────────────────────────────────────────
 

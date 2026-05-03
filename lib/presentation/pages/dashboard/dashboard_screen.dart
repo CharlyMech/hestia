@@ -95,9 +95,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         bottom: false,
         child: _loading
             ? const Center(child: CupertinoActivityIndicator())
-            : ListView(
-          padding: const EdgeInsets.only(bottom: 110),
-          children: [
+            : CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
+            CupertinoSliverRefreshControl(onRefresh: _load),
+            SliverPadding(
+              padding: const EdgeInsets.only(bottom: 110),
+              sliver: SliverList.list(children: [
             _Header(
               fg: fg,
               muted: muted,
@@ -225,6 +231,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     TxRow(tx: _recentTx[i], showDivider: i < _recentTx.length - 1),
                 ],
               ),
+            ),
+              ]),
             ),
           ],
         ),

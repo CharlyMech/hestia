@@ -24,6 +24,7 @@ class DayView extends StatefulWidget {
   final ValueChanged<Appointment> onTapAppointment;
   final bool use24h;
   final double bottomPadding;
+  final Future<void> Function()? onRefresh;
 
   const DayView({
     super.key,
@@ -37,6 +38,7 @@ class DayView extends StatefulWidget {
     required this.onTapAppointment,
     this.use24h = true,
     this.bottomPadding = 110,
+    this.onRefresh,
   });
 
   @override
@@ -112,12 +114,18 @@ class _DayViewState extends State<DayView> {
           onTapAppointment: widget.onTapAppointment,
         ),
         Expanded(
-          child: SingleChildScrollView(
+          child: CustomScrollView(
             controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            child: SizedBox(
-              height: _totalGridHeight + widget.bottomPadding,
-              child: LayoutBuilder(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
+              if (widget.onRefresh != null)
+                CupertinoSliverRefreshControl(onRefresh: widget.onRefresh),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: _totalGridHeight + widget.bottomPadding,
+                  child: LayoutBuilder(
                 builder: (context, constraints) {
                   final laneWidth = constraints.maxWidth - _timeColWidth;
                   return Stack(
@@ -205,7 +213,9 @@ class _DayViewState extends State<DayView> {
                   );
                 },
               ),
-            ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
