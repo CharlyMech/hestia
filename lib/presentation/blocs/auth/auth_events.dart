@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:hestia/domain/entities/profile.dart';
 
 sealed class AuthEvent extends Equatable {
   const AuthEvent();
@@ -32,4 +33,11 @@ class AuthBiometricCheck extends AuthEvent {
 
 class AuthDevBypass extends AuthEvent {
   const AuthDevBypass();
+}
+
+class AuthUpdateProfile extends AuthEvent {
+  final Profile profile;
+  const AuthUpdateProfile(this.profile);
+  @override
+  List<Object?> get props => [profile];
 }

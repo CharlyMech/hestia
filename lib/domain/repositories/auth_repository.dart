@@ -30,4 +30,8 @@ abstract class AuthRepository {
     required String password,
     String? displayName,
   });
+
+  /// Persist profile-level edits (display name, calendar color, currency, ...)
+  /// for the currently signed-in user.
+  Future<(Profile?, Failure?)> updateProfile(Profile profile);
 }

@@ -5,16 +5,18 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/admin/create_user_form.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, LogOut, Settings, Shield, Trophy, UserPlus;
+    show Bell, LogOut, Settings, Shield, Shop, Trophy, UserPlus;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -101,20 +103,11 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
 
-    return CupertinoPageScaffold(
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: bg,
-        border: null,
-        middle: Text(
-          'Profile',
-          style: AppFonts.heading(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: fg,
-          ),
-        ),
-      ),
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Profile',
       child: ScreenShell(
         bg: bg,
         bottomPadding: 24,
@@ -220,6 +213,13 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => context.push(AppRoutes.goals),
               ),
               tile(
+                icon: Shop(width: 16, height: 16, color: tints[2]),
+                color: tints[2],
+                label: 'Sources',
+                sub: 'Merchants, services, employers',
+                onTap: () => context.push(AppRoutes.transactionSources),
+              ),
+              tile(
                 icon: Shield(width: 16, height: 16, color: tints[5]),
                 color: tints[5],
                 label: 'Privacy',
@@ -228,6 +228,25 @@ class ProfileScreen extends StatelessWidget {
               ),
             ]),
           ),
+          // Calendar color — used to tint this user's appointment blocks
+          // for everyone in the household.
+          if (profile != null) ...[
+            const SliverToBoxAdapter(child: SizedBox(height: 22)),
+            SliverToBoxAdapter(
+                child: SectionLabel('Calendar color', color: muted)),
+            const SliverToBoxAdapter(child: SizedBox(height: 10)),
+            SliverToBoxAdapter(
+              child: _CalendarColorPicker(
+                profile: profile,
+                surface: surface,
+                border: border,
+                muted: muted,
+                fg: fg,
+                tints: tints,
+                accent: accent,
+              ),
+            ),
+          ],
           if (isSuper) ...[
             const SliverToBoxAdapter(child: SizedBox(height: 22)),
             SliverToBoxAdapter(child: SectionLabel('Admin', color: muted)),
@@ -288,4 +307,81 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+}
+
+/// Card-shaped picker that lets the signed-in user choose the color used to
+/// tint their appointment blocks across the household calendar.
+class _CalendarColorPicker extends StatelessWidget {
+  final Profile profile;
+  final Color surface;
+  final Color border;
+  final Color muted;
+  final Color fg;
+  final Color accent;
+  final List<Color> tints;
+
+  const _CalendarColorPicker({
+    required this.profile,
+    required this.surface,
+    required this.border,
+    required this.muted,
+    required this.fg,
+    required this.accent,
+    required this.tints,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final swatches = <Color>[
+      accent,
+      ...tints,
+      const Color(0xFF22C55E),
+      const Color(0xFFEF4444),
+      const Color(0xFFF59E0B),
+    ];
+    final currentIdx = () {
+      if (profile.calendarColor == null) return 0;
+      final hex = profile.calendarColor!.toLowerCase();
+      for (var i = 0; i < swatches.length; i++) {
+        final candidate =
+            '#${swatches[i].toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+        if (candidate.toLowerCase() == hex) return i;
+      }
+      return 0;
+    }();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: surface,
+          border: Border.all(color: border, width: 1),
+          borderRadius: BorderRadius.circular(AppRadii.xl),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 10,
+          children: [
+            Text(
+              'Used to tint your appointments for everyone in the household.',
+              style: AppFonts.body(fontSize: 12, color: muted),
+            ),
+            ColorSwatchRow(
+              colors: swatches,
+              selected: currentIdx,
+              onSelected: (i) {
+                final hex =
+                    '#${swatches[i].toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+                context
+                    .read<AuthBloc>()
+                    .add(AuthUpdateProfile(profile.copyWith(calendarColor: hex)));
+              },
+              bg: surface,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

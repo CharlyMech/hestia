@@ -14,6 +14,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOut>(_onSignOut);
     on<AuthBiometricCheck>(_onBiometricCheck);
     on<AuthDevBypass>(_onDevBypass);
+    on<AuthUpdateProfile>(_onUpdateProfile);
+  }
+
+  Future<void> _onUpdateProfile(
+      AuthUpdateProfile event, Emitter<AuthState> emit) async {
+    final (updated, failure) =
+        await _authRepository.updateProfile(event.profile);
+    if (failure != null || updated == null) return;
+    if (state is AuthAuthenticated) emit(AuthAuthenticated(updated));
   }
 
   Future<void> _onDevBypass(

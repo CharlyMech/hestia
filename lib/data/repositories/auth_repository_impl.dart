@@ -162,9 +162,27 @@ class AuthRepositoryImpl implements AuthRepository {
       displayName: response['display_name'] as String?,
       avatarUrl: response['avatar_url'] as String?,
       preferredCurrency: (response['preferred_currency'] as String?) ?? 'EUR',
+      calendarColor: response['calendar_color'] as String?,
       isSuperuser: (response['is_superuser'] as bool?) ?? false,
       createdAt: (response['created_at'] as int).fromUnix,
       lastUpdate: (response['last_update'] as int).fromUnix,
     );
+  }
+
+  @override
+  Future<(Profile?, Failure?)> updateProfile(Profile profile) async {
+    try {
+      final now = DateTime.now().toUnix;
+      await _authService.from(SupabaseTables.profiles).update({
+        'display_name': profile.displayName,
+        'avatar_url': profile.avatarUrl,
+        'preferred_currency': profile.preferredCurrency,
+        'calendar_color': profile.calendarColor,
+        'last_update': now,
+      }).eq('id', profile.id);
+      return (profile.copyWith(lastUpdate: DateTime.now()), null);
+    } catch (e) {
+      return (null, mapExceptionToFailure(e));
+    }
   }
 }
