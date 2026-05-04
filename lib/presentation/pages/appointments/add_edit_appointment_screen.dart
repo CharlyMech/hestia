@@ -8,6 +8,7 @@ import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/presentation/blocs/appointment_form/appointment_form_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
 class AddEditAppointmentScreen extends StatelessWidget {
@@ -61,27 +62,25 @@ class _Form extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return CupertinoPageScaffold(
+        return CupertinoPushedRouteShell(
           backgroundColor: bg,
-          navigationBar: CupertinoNavigationBar(
-            backgroundColor: bg,
-            border: null,
-            middle: Text(
+          borderColor: border,
+          foregroundColor: fg,
+          titleText:
               state.isEdit ? 'Edit appointment' : 'New appointment',
-              style: AppFonts.heading(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: fg,
-              ),
-            ),
-            trailing: state.submitting
-                ? const CupertinoActivityIndicator()
-                : GestureDetector(
-                    onTap: state.titleValid
-                        ? () => context
-                            .read<AppointmentFormBloc>()
-                            .add(const FormSubmit())
-                        : null,
+          trailing: state.submitting
+              ? const Padding(
+                  padding: EdgeInsets.only(right: 12),
+                  child: CupertinoActivityIndicator(),
+                )
+              : GestureDetector(
+                  onTap: state.titleValid
+                      ? () => context
+                          .read<AppointmentFormBloc>()
+                          .add(const FormSubmit())
+                      : null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
                     child: Text(
                       'Save',
                       style: AppFonts.body(
@@ -91,11 +90,10 @@ class _Form extends StatelessWidget {
                       ),
                     ),
                   ),
-          ),
-          child: SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-              children: [
+                ),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+            children: [
                 _LabeledField(
                   label: 'Title',
                   muted: muted,
@@ -250,8 +248,7 @@ class _Form extends StatelessWidget {
                 ],
               ],
             ),
-          ),
-        );
+          );
       },
     );
   }

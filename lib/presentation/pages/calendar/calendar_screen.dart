@@ -17,7 +17,7 @@ import 'package:hestia/presentation/widgets/calendar/day_view.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, Calendar, Plus;
+    show Bell, Calendar, Plus, User;
 
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
@@ -57,6 +57,7 @@ class _Body extends StatefulWidget {
 
 class _BodyState extends State<_Body> {
   late final FCalendarController<DateTime?> _lineController;
+  Map<String, String> _ownerColors = const {};
 
   @override
   void initState() {
@@ -64,6 +65,25 @@ class _BodyState extends State<_Body> {
     final today = _utc(DateTime.now());
     _lineController = FCalendarController.date(initialSelection: today);
     _lineController.addListener(_onLineControllerChanged);
+    _loadOwnerColors();
+  }
+
+  Future<void> _loadOwnerColors() async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) return;
+    final deps = AppDependencies.instance;
+    final (household, _) =
+        await deps.householdRepository.getCurrentHousehold(auth.profile.id);
+    if (household == null) return;
+    final (profiles, _) =
+        await deps.householdRepository.getMemberProfiles(household.id);
+    if (!mounted) return;
+    setState(() {
+      _ownerColors = {
+        for (final p in profiles)
+          if (p.calendarColor != null) p.id: p.calendarColor!,
+      };
+    });
   }
 
   void _onLineControllerChanged() {
@@ -345,9 +365,11 @@ class _BodyState extends State<_Body> {
               p.showAppointments != n.showAppointments ||
               p.showTransactions != n.showTransactions ||
               p.visibleMonth != n.visibleMonth ||
-              p.allDayAppointmentIds != n.allDayAppointmentIds,
+              p.allDayAppointmentIds != n.allDayAppointmentIds ||
+              p.onlyMine != n.onlyMine,
           builder: (context, state) {
-            final dayItems = state.itemsForDay(state.selectedDate);
+            final dayItems =
+                state.itemsForDayFor(state.selectedDate, widget.userId);
             final dayAppts = dayItems.whereType<AppointmentItem>().toList();
             final dayTxs = dayItems.whereType<TransactionItem>().toList();
 
@@ -404,6 +426,9 @@ class _BodyState extends State<_Body> {
                       onToggleTransactions: () => context
                           .read<CalendarBloc>()
                           .add(const CalendarToggleMovimientos()),
+                      onToggleOnlyMine: () => context
+                          .read<CalendarBloc>()
+                          .add(const CalendarToggleOnlyMine()),
                     ),
                   ),
                   SliverFillRemaining(
@@ -431,6 +456,7 @@ class _BodyState extends State<_Body> {
                         showTransactions: state.showTransactions,
                         allDayIds: state.allDayAppointmentIds,
                         use24h: prefs.use24h,
+                        ownerColors: _ownerColors,
                         onTapSlot: (dt) => _openAddSheet(context, dt),
                         onTapAppointment: (a) =>
                             _openAppointmentInfoSheet(context, a),
@@ -465,6 +491,7 @@ class _FixedTopBar extends StatelessWidget {
   final VoidCallback onTodayTap;
   final VoidCallback onToggleAppointments;
   final VoidCallback onToggleTransactions;
+  final VoidCallback onToggleOnlyMine;
 
   const _FixedTopBar({
     required this.state,
@@ -480,6 +507,7 @@ class _FixedTopBar extends StatelessWidget {
     required this.onTodayTap,
     required this.onToggleAppointments,
     required this.onToggleTransactions,
+    required this.onToggleOnlyMine,
   });
 
   @override
@@ -525,26 +553,20 @@ class _FixedTopBar extends StatelessWidget {
               ),
             ],
           ),
-          // Month picker trigger
+          // Month picker trigger — FButton with calendar icon + label.
           Row(
             children: [
-              GestureDetector(
-                onTap: onMonthTap,
-                behavior: HitTestBehavior.opaque,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      _monthYear(state.visibleMonth),
-                      style: AppFonts.body(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: accent,
-                      ),
-                    ),
-                    ChevronIcon(color: accent),
-                  ],
+              FButton(
+                style: FButtonStyle.outline,
+                onPress: onMonthTap,
+                prefix: Calendar(width: 14, height: 14, color: accent),
+                label: Text(
+                  _monthYear(state.visibleMonth),
+                  style: AppFonts.body(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: accent,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -580,6 +602,7 @@ class _FixedTopBar extends StatelessWidget {
           _Filters(
             showAppointments: state.showAppointments,
             showTransactions: state.showTransactions,
+            onlyMine: state.onlyMine,
             accent: accent,
             surface: surface,
             border: border,
@@ -587,6 +610,7 @@ class _FixedTopBar extends StatelessWidget {
             muted: muted,
             onToggleAppointments: onToggleAppointments,
             onToggleTransactions: onToggleTransactions,
+            onToggleOnlyMine: onToggleOnlyMine,
           ),
         ],
       ),
@@ -607,6 +631,7 @@ class _FixedTopBar extends StatelessWidget {
 class _Filters extends StatelessWidget {
   final bool showAppointments;
   final bool showTransactions;
+  final bool onlyMine;
   final Color accent;
   final Color surface;
   final Color border;
@@ -614,10 +639,12 @@ class _Filters extends StatelessWidget {
   final Color muted;
   final VoidCallback onToggleAppointments;
   final VoidCallback onToggleTransactions;
+  final VoidCallback onToggleOnlyMine;
 
   const _Filters({
     required this.showAppointments,
     required this.showTransactions,
+    required this.onlyMine,
     required this.accent,
     required this.surface,
     required this.border,
@@ -625,6 +652,7 @@ class _Filters extends StatelessWidget {
     required this.muted,
     required this.onToggleAppointments,
     required this.onToggleTransactions,
+    required this.onToggleOnlyMine,
   });
 
   @override
@@ -662,6 +690,22 @@ class _Filters extends StatelessWidget {
             fg: fg,
             muted: muted,
             onTap: onToggleTransactions,
+          ),
+        ),
+        Expanded(
+          child: _FilterChip(
+            label: 'Only mine',
+            icon: User(
+                width: 14,
+                height: 14,
+                color: onlyMine ? accent : muted),
+            active: onlyMine,
+            accent: accent,
+            surface: surface,
+            border: border,
+            fg: fg,
+            muted: muted,
+            onTap: onToggleOnlyMine,
           ),
         ),
       ],

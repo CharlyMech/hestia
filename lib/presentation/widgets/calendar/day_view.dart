@@ -26,6 +26,10 @@ class DayView extends StatefulWidget {
   final double bottomPadding;
   final Future<void> Function()? onRefresh;
 
+  /// Map of `userId` → hex color used to tint appointment blocks by owner
+  /// instead of by category. Falls back to category tints when missing.
+  final Map<String, String> ownerColors;
+
   const DayView({
     super.key,
     required this.date,
@@ -39,6 +43,7 @@ class DayView extends StatefulWidget {
     this.use24h = true,
     this.bottomPadding = 110,
     this.onRefresh,
+    this.ownerColors = const {},
   });
 
   @override
@@ -188,8 +193,8 @@ class _DayViewState extends State<DayView> {
                                       child: DayEventBlock(
                                         event: e,
                                         hourHeight: _hourHeight,
-                                        color: categoryColor(
-                                            e.appointment.category, tints),
+                                        color: _ownerOrCategoryColor(
+                                            e.appointment, tints),
                                         onTap: () => widget
                                             .onTapAppointment(e.appointment),
                                         use24h: widget.use24h,
@@ -224,6 +229,12 @@ class _DayViewState extends State<DayView> {
 
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
+
+  Color _ownerOrCategoryColor(Appointment a, List<Color> tints) {
+    final ownerHex = widget.ownerColors[a.userId];
+    if (ownerHex != null) return _c(ownerHex);
+    return categoryColor(a.category, tints);
+  }
 
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

@@ -94,6 +94,10 @@ class CalendarMarkAllDay extends CalendarEvent {
   List<Object?> get props => [appointmentId];
 }
 
+class CalendarToggleOnlyMine extends CalendarEvent {
+  const CalendarToggleOnlyMine();
+}
+
 class CalendarState extends Equatable {
   final DateTime selectedDate;
   final DateTime visibleMonth;
@@ -101,6 +105,7 @@ class CalendarState extends Equatable {
   final List<Transaction> recurringTx;
   final bool showAppointments;
   final bool showTransactions;
+  final bool onlyMine;
   final bool loading;
   final String? error;
   final Set<String> allDayAppointmentIds;
@@ -112,23 +117,36 @@ class CalendarState extends Equatable {
     this.recurringTx = const [],
     this.showAppointments = true,
     this.showTransactions = true,
+    this.onlyMine = false,
     this.loading = false,
     this.error,
     this.allDayAppointmentIds = const {},
   });
 
   /// All items in the visible month, post-filter.
-  List<CalendarItem> get visibleItems {
+  List<CalendarItem> visibleItemsFor(String? userId) {
     final items = <CalendarItem>[];
+    final myId = userId;
     if (showAppointments) {
-      items.addAll(appointments.map(AppointmentItem.new));
+      var appts = appointments;
+      if (onlyMine && myId != null) {
+        appts = appts.where((a) => a.userId == myId).toList();
+      }
+      items.addAll(appts.map(AppointmentItem.new));
     }
     if (showTransactions) {
-      items.addAll(recurringTx.map(TransactionItem.new));
+      var txs = recurringTx;
+      if (onlyMine && myId != null) {
+        txs = txs.where((t) => t.userId == myId).toList();
+      }
+      items.addAll(txs.map(TransactionItem.new));
     }
     items.sort((a, b) => a.when.compareTo(b.when));
     return items;
   }
+
+  /// Backwards-compat shortcut (no filter).
+  List<CalendarItem> get visibleItems => visibleItemsFor(null);
 
   List<CalendarItem> itemsForDay(DateTime day) {
     return visibleItems
@@ -156,6 +174,7 @@ class CalendarState extends Equatable {
     List<Transaction>? recurringTx,
     bool? showAppointments,
     bool? showTransactions,
+    bool? onlyMine,
     bool? loading,
     String? error,
     bool clearError = false,
@@ -168,6 +187,7 @@ class CalendarState extends Equatable {
         recurringTx: recurringTx ?? this.recurringTx,
         showAppointments: showAppointments ?? this.showAppointments,
         showTransactions: showTransactions ?? this.showTransactions,
+        onlyMine: onlyMine ?? this.onlyMine,
         loading: loading ?? this.loading,
         error: clearError ? null : (error ?? this.error),
         allDayAppointmentIds: allDayAppointmentIds ?? this.allDayAppointmentIds,
@@ -181,10 +201,21 @@ class CalendarState extends Equatable {
         recurringTx,
         showAppointments,
         showTransactions,
+        onlyMine,
         loading,
         error,
         allDayAppointmentIds,
       ];
+
+  /// Filter helper for callers that already know the active user id.
+  List<CalendarItem> itemsForDayFor(DateTime day, String? userId) {
+    return visibleItemsFor(userId)
+        .where((it) =>
+            it.when.year == day.year &&
+            it.when.month == day.month &&
+            it.when.day == day.day)
+        .toList();
+  }
 }
 
 class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
@@ -212,6 +243,8 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     on<CalendarMonthChanged>(_onMonthChanged);
     on<CalendarAppointmentAdded>(_onAppointmentAdded);
     on<CalendarMarkAllDay>(_onMarkAllDay);
+    on<CalendarToggleOnlyMine>(
+        (e, emit) => emit(state.copyWith(onlyMine: !state.onlyMine)));
     on<CalendarRefresh>(_onRefresh);
   }
 

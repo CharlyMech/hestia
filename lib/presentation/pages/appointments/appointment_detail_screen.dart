@@ -5,6 +5,7 @@ import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Bell, Cut, Cutlery, Heart, MapPin, Sparks, Suitcase;
@@ -47,24 +48,18 @@ class AppointmentDetailScreen extends StatelessWidget {
         Sparks(width: 20, height: 20, color: CupertinoColors.white),
     };
 
-    return CupertinoPageScaffold(
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: bg,
-        border: null,
-        middle: Text(
-          'Appointment',
-          style: AppFonts.heading(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: fg,
-          ),
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Appointment',
+      trailing: GestureDetector(
+        onTap: () => context.push(
+          AppRoutes.editAppointment,
+          extra: appointment,
         ),
-        trailing: GestureDetector(
-          onTap: () => context.push(
-            AppRoutes.editAppointment,
-            extra: appointment,
-          ),
+        child: Padding(
+          padding: const EdgeInsets.only(right: 12),
           child: Text(
             'Edit',
             style: AppFonts.body(
@@ -75,10 +70,9 @@ class AppointmentDetailScreen extends StatelessWidget {
           ),
         ),
       ),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-          children: [
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        children: [
             Row(
               children: [
                 CatTile(icon: icon, color: color, size: 56),
@@ -231,7 +225,6 @@ class AppointmentDetailScreen extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 
