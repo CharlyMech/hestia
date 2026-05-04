@@ -17,7 +17,7 @@ import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart'
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:hestia/presentation/widgets/common/date_range_selector.dart';
 import 'package:hestia/presentation/widgets/dashboard/balance_trend_line.dart';
-import 'package:hestia/presentation/widgets/dashboard/monthly_bar.dart';
+import 'package:hestia/presentation/widgets/dashboard/range_cash_flow_bars.dart';
 import 'package:hestia/presentation/widgets/dashboard/notifications_popover.dart';
 import 'package:hestia/presentation/widgets/dashboard/spend_donut.dart';
 import 'package:hestia/presentation/widgets/dashboard/tx_row.dart';
@@ -316,24 +316,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _ChartCard(
                         surface: surface,
                         border: border,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 8,
-                          children: [
-                            Text(
-                              'Net per month',
-                              style: AppFonts.sectionLabel(color: muted),
-                            ),
-                            MonthlyBar(
-                              transactions: _allTransactions,
-                              income: income,
-                              expense: expense,
-                              axis: muted,
-                              grid: border,
-                              tooltipBg: fg,
-                              tooltipFg: bg,
-                            ),
-                          ],
+                        child: RangeCashFlowBars(
+                          transactions: _txInRange(),
+                          income: income,
+                          expense: expense,
+                          axis: muted,
+                          grid: border,
+                          fg: fg,
+                          periodLabel: dateRangePresetShortLabel(_range),
                         ),
                       ),
                       const SizedBox(height: 12),

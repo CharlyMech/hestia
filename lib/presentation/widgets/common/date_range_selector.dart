@@ -4,6 +4,24 @@ import 'package:hestia/core/utils/app_fonts.dart';
 
 enum DateRangePreset { d7, d30, d90, m6, y1, custom }
 
+/// Short label for charts / headings (matches [DateRangeSelector] chips).
+String dateRangePresetShortLabel(DateRangePreset p) {
+  switch (p) {
+    case DateRangePreset.d7:
+      return '7d';
+    case DateRangePreset.d30:
+      return '30d';
+    case DateRangePreset.d90:
+      return '90d';
+    case DateRangePreset.m6:
+      return '6m';
+    case DateRangePreset.y1:
+      return '1y';
+    case DateRangePreset.custom:
+      return 'custom';
+  }
+}
+
 class DateRange {
   final DateTime start;
   final DateTime end;
