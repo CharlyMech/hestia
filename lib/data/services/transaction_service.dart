@@ -12,7 +12,7 @@ class TransactionService extends SupabaseService {
     int? startDate,
     int? endDate,
     String? categoryId,
-    String? moneySourceId,
+    String? bankAccountId,
     String? type,
     int limit = 50,
     int offset = 0,
@@ -29,8 +29,8 @@ class TransactionService extends SupabaseService {
       if (startDate != null) query = query.gte('date', startDate);
       if (endDate != null) query = query.lte('date', endDate);
       if (categoryId != null) query = query.eq('category_id', categoryId);
-      if (moneySourceId != null) {
-        query = query.eq('money_source_id', moneySourceId);
+      if (bankAccountId != null) {
+        query = query.eq('money_source_id', bankAccountId);
       }
       if (type != null) query = query.eq('type', type);
 

@@ -5,7 +5,8 @@ class LocalTransactions extends Table {
   TextColumn get householdId => text()();
   TextColumn get userId => text()();
   TextColumn get categoryId => text()();
-  TextColumn get moneySourceId => text()();
+  TextColumn get bankAccountId => text()();
+  TextColumn get transactionSourceId => text().nullable()();
   RealColumn get amount => real()();
   TextColumn get type => text()(); // 'income' | 'expense'
   TextColumn get note => text().nullable()();

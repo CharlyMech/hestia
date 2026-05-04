@@ -4,6 +4,7 @@ import 'package:hestia/core/error/failures.dart';
 import 'package:hestia/core/utils/date_utils.dart';
 import 'package:hestia/data/services/supabase_service.dart';
 import 'package:hestia/domain/entities/household.dart';
+import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/repositories/household_repository.dart';
 
 class HouseholdRepositoryImpl implements HouseholdRepository {
@@ -68,6 +69,45 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
       return (members, null);
     } catch (e) {
       return (<HouseholdMember>[], mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<(List<Profile>, Failure?)> getMemberProfiles(
+      String householdId) async {
+    try {
+      // members → user ids
+      final memberRows = await _service
+          .from(SupabaseTables.householdMembers)
+          .select('user_id')
+          .eq('household_id', householdId);
+      final ids = (memberRows as List)
+          .map((r) => r['user_id'] as String)
+          .toList();
+      if (ids.isEmpty) return (<Profile>[], null);
+
+      final rows = await _service
+          .from(SupabaseTables.profiles)
+          .select()
+          .inFilter('id', ids);
+
+      final profiles = (rows as List).map((json) {
+        return Profile(
+          id: json['id'] as String,
+          email: json['email'] as String,
+          displayName: json['display_name'] as String?,
+          avatarUrl: json['avatar_url'] as String?,
+          preferredCurrency:
+              json['preferred_currency'] as String? ?? 'EUR',
+          calendarColor: json['calendar_color'] as String?,
+          isSuperuser: json['is_superuser'] as bool? ?? false,
+          createdAt: (json['created_at'] as int).fromUnix,
+          lastUpdate: (json['last_update'] as int).fromUnix,
+        );
+      }).toList();
+      return (profiles, null);
+    } catch (e) {
+      return (<Profile>[], mapExceptionToFailure(e));
     }
   }
 }

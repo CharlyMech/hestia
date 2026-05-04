@@ -11,7 +11,7 @@ abstract class TransactionRepository {
     DateTime? startDate,
     DateTime? endDate,
     String? categoryId,
-    String? moneySourceId,
+    String? bankAccountId,
     TransactionType? type,
     int limit = 50,
     int offset = 0,

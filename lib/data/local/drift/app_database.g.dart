@@ -31,11 +31,11 @@ class $LocalTransactionsTable extends LocalTransactions
   late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
       'category_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _moneySourceIdMeta =
-      const VerificationMeta('moneySourceId');
+  static const VerificationMeta _bankAccountIdMeta =
+      const VerificationMeta('bankAccountId');
   @override
-  late final GeneratedColumn<String> moneySourceId = GeneratedColumn<String>(
-      'money_source_id', aliasedName, false,
+  late final GeneratedColumn<String> bankAccountId = GeneratedColumn<String>(
+      'bank_account_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
@@ -111,7 +111,7 @@ class $LocalTransactionsTable extends LocalTransactions
         householdId,
         userId,
         categoryId,
-        moneySourceId,
+        bankAccountId,
         amount,
         type,
         note,
@@ -160,13 +160,13 @@ class $LocalTransactionsTable extends LocalTransactions
     } else if (isInserting) {
       context.missing(_categoryIdMeta);
     }
-    if (data.containsKey('money_source_id')) {
+    if (data.containsKey('bank_account_id')) {
       context.handle(
-          _moneySourceIdMeta,
-          moneySourceId.isAcceptableOrUnknown(
-              data['money_source_id']!, _moneySourceIdMeta));
+          _bankAccountIdMeta,
+          bankAccountId.isAcceptableOrUnknown(
+              data['bank_account_id']!, _bankAccountIdMeta));
     } else if (isInserting) {
-      context.missing(_moneySourceIdMeta);
+      context.missing(_bankAccountIdMeta);
     }
     if (data.containsKey('amount')) {
       context.handle(_amountMeta,
@@ -241,8 +241,8 @@ class $LocalTransactionsTable extends LocalTransactions
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
       categoryId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}category_id'])!,
-      moneySourceId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}money_source_id'])!,
+      bankAccountId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}bank_account_id'])!,
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
       type: attachedDatabase.typeMapping
@@ -278,7 +278,7 @@ class LocalTransaction extends DataClass
   final String householdId;
   final String userId;
   final String categoryId;
-  final String moneySourceId;
+  final String bankAccountId;
   final double amount;
   final String type;
   final String? note;
@@ -294,7 +294,7 @@ class LocalTransaction extends DataClass
       required this.householdId,
       required this.userId,
       required this.categoryId,
-      required this.moneySourceId,
+      required this.bankAccountId,
       required this.amount,
       required this.type,
       this.note,
@@ -312,7 +312,7 @@ class LocalTransaction extends DataClass
     map['household_id'] = Variable<String>(householdId);
     map['user_id'] = Variable<String>(userId);
     map['category_id'] = Variable<String>(categoryId);
-    map['money_source_id'] = Variable<String>(moneySourceId);
+    map['bank_account_id'] = Variable<String>(bankAccountId);
     map['amount'] = Variable<double>(amount);
     map['type'] = Variable<String>(type);
     if (!nullToAbsent || note != null) {
@@ -336,7 +336,7 @@ class LocalTransaction extends DataClass
       householdId: Value(householdId),
       userId: Value(userId),
       categoryId: Value(categoryId),
-      moneySourceId: Value(moneySourceId),
+      bankAccountId: Value(bankAccountId),
       amount: Value(amount),
       type: Value(type),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
@@ -360,7 +360,7 @@ class LocalTransaction extends DataClass
       householdId: serializer.fromJson<String>(json['householdId']),
       userId: serializer.fromJson<String>(json['userId']),
       categoryId: serializer.fromJson<String>(json['categoryId']),
-      moneySourceId: serializer.fromJson<String>(json['moneySourceId']),
+      bankAccountId: serializer.fromJson<String>(json['bankAccountId']),
       amount: serializer.fromJson<double>(json['amount']),
       type: serializer.fromJson<String>(json['type']),
       note: serializer.fromJson<String?>(json['note']),
@@ -381,7 +381,7 @@ class LocalTransaction extends DataClass
       'householdId': serializer.toJson<String>(householdId),
       'userId': serializer.toJson<String>(userId),
       'categoryId': serializer.toJson<String>(categoryId),
-      'moneySourceId': serializer.toJson<String>(moneySourceId),
+      'bankAccountId': serializer.toJson<String>(bankAccountId),
       'amount': serializer.toJson<double>(amount),
       'type': serializer.toJson<String>(type),
       'note': serializer.toJson<String?>(note),
@@ -400,7 +400,7 @@ class LocalTransaction extends DataClass
           String? householdId,
           String? userId,
           String? categoryId,
-          String? moneySourceId,
+          String? bankAccountId,
           double? amount,
           String? type,
           Value<String?> note = const Value.absent(),
@@ -416,7 +416,7 @@ class LocalTransaction extends DataClass
         householdId: householdId ?? this.householdId,
         userId: userId ?? this.userId,
         categoryId: categoryId ?? this.categoryId,
-        moneySourceId: moneySourceId ?? this.moneySourceId,
+        bankAccountId: bankAccountId ?? this.bankAccountId,
         amount: amount ?? this.amount,
         type: type ?? this.type,
         note: note.present ? note.value : this.note,
@@ -437,9 +437,9 @@ class LocalTransaction extends DataClass
       userId: data.userId.present ? data.userId.value : this.userId,
       categoryId:
           data.categoryId.present ? data.categoryId.value : this.categoryId,
-      moneySourceId: data.moneySourceId.present
-          ? data.moneySourceId.value
-          : this.moneySourceId,
+      bankAccountId: data.bankAccountId.present
+          ? data.bankAccountId.value
+          : this.bankAccountId,
       amount: data.amount.present ? data.amount.value : this.amount,
       type: data.type.present ? data.type.value : this.type,
       note: data.note.present ? data.note.value : this.note,
@@ -464,7 +464,7 @@ class LocalTransaction extends DataClass
           ..write('householdId: $householdId, ')
           ..write('userId: $userId, ')
           ..write('categoryId: $categoryId, ')
-          ..write('moneySourceId: $moneySourceId, ')
+          ..write('bankAccountId: $bankAccountId, ')
           ..write('amount: $amount, ')
           ..write('type: $type, ')
           ..write('note: $note, ')
@@ -485,7 +485,7 @@ class LocalTransaction extends DataClass
       householdId,
       userId,
       categoryId,
-      moneySourceId,
+      bankAccountId,
       amount,
       type,
       note,
@@ -504,7 +504,7 @@ class LocalTransaction extends DataClass
           other.householdId == this.householdId &&
           other.userId == this.userId &&
           other.categoryId == this.categoryId &&
-          other.moneySourceId == this.moneySourceId &&
+          other.bankAccountId == this.bankAccountId &&
           other.amount == this.amount &&
           other.type == this.type &&
           other.note == this.note &&
@@ -522,7 +522,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
   final Value<String> householdId;
   final Value<String> userId;
   final Value<String> categoryId;
-  final Value<String> moneySourceId;
+  final Value<String> bankAccountId;
   final Value<double> amount;
   final Value<String> type;
   final Value<String?> note;
@@ -539,7 +539,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     this.householdId = const Value.absent(),
     this.userId = const Value.absent(),
     this.categoryId = const Value.absent(),
-    this.moneySourceId = const Value.absent(),
+    this.bankAccountId = const Value.absent(),
     this.amount = const Value.absent(),
     this.type = const Value.absent(),
     this.note = const Value.absent(),
@@ -557,7 +557,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     required String householdId,
     required String userId,
     required String categoryId,
-    required String moneySourceId,
+    required String bankAccountId,
     required double amount,
     required String type,
     this.note = const Value.absent(),
@@ -573,7 +573,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
         householdId = Value(householdId),
         userId = Value(userId),
         categoryId = Value(categoryId),
-        moneySourceId = Value(moneySourceId),
+        bankAccountId = Value(bankAccountId),
         amount = Value(amount),
         type = Value(type),
         date = Value(date),
@@ -584,7 +584,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     Expression<String>? householdId,
     Expression<String>? userId,
     Expression<String>? categoryId,
-    Expression<String>? moneySourceId,
+    Expression<String>? bankAccountId,
     Expression<double>? amount,
     Expression<String>? type,
     Expression<String>? note,
@@ -602,7 +602,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       if (householdId != null) 'household_id': householdId,
       if (userId != null) 'user_id': userId,
       if (categoryId != null) 'category_id': categoryId,
-      if (moneySourceId != null) 'money_source_id': moneySourceId,
+      if (bankAccountId != null) 'bank_account_id': bankAccountId,
       if (amount != null) 'amount': amount,
       if (type != null) 'type': type,
       if (note != null) 'note': note,
@@ -622,7 +622,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       Value<String>? householdId,
       Value<String>? userId,
       Value<String>? categoryId,
-      Value<String>? moneySourceId,
+      Value<String>? bankAccountId,
       Value<double>? amount,
       Value<String>? type,
       Value<String?>? note,
@@ -639,7 +639,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       householdId: householdId ?? this.householdId,
       userId: userId ?? this.userId,
       categoryId: categoryId ?? this.categoryId,
-      moneySourceId: moneySourceId ?? this.moneySourceId,
+      bankAccountId: bankAccountId ?? this.bankAccountId,
       amount: amount ?? this.amount,
       type: type ?? this.type,
       note: note ?? this.note,
@@ -669,8 +669,8 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     if (categoryId.present) {
       map['category_id'] = Variable<String>(categoryId.value);
     }
-    if (moneySourceId.present) {
-      map['money_source_id'] = Variable<String>(moneySourceId.value);
+    if (bankAccountId.present) {
+      map['bank_account_id'] = Variable<String>(bankAccountId.value);
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
@@ -715,7 +715,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
           ..write('householdId: $householdId, ')
           ..write('userId: $userId, ')
           ..write('categoryId: $categoryId, ')
-          ..write('moneySourceId: $moneySourceId, ')
+          ..write('bankAccountId: $bankAccountId, ')
           ..write('amount: $amount, ')
           ..write('type: $type, ')
           ..write('note: $note, ')
@@ -1277,12 +1277,12 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
   }
 }
 
-class $LocalMoneySourcesTable extends LocalMoneySources
-    with TableInfo<$LocalMoneySourcesTable, LocalMoneySource> {
+class $LocalBankAccountsTable extends LocalBankAccounts
+    with TableInfo<$LocalBankAccountsTable, LocalBankAccount> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $LocalMoneySourcesTable(this.attachedDatabase, [this._alias]);
+  $LocalBankAccountsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -1428,9 +1428,9 @@ class $LocalMoneySourcesTable extends LocalMoneySources
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'local_money_sources';
+  static const String $name = 'local_bank_accounts';
   @override
-  VerificationContext validateIntegrity(Insertable<LocalMoneySource> instance,
+  VerificationContext validateIntegrity(Insertable<LocalBankAccount> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -1541,9 +1541,9 @@ class $LocalMoneySourcesTable extends LocalMoneySources
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  LocalMoneySource map(Map<String, dynamic> data, {String? tablePrefix}) {
+  LocalBankAccount map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return LocalMoneySource(
+    return LocalBankAccount(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       householdId: attachedDatabase.typeMapping
@@ -1584,13 +1584,13 @@ class $LocalMoneySourcesTable extends LocalMoneySources
   }
 
   @override
-  $LocalMoneySourcesTable createAlias(String alias) {
-    return $LocalMoneySourcesTable(attachedDatabase, alias);
+  $LocalBankAccountsTable createAlias(String alias) {
+    return $LocalBankAccountsTable(attachedDatabase, alias);
   }
 }
 
-class LocalMoneySource extends DataClass
-    implements Insertable<LocalMoneySource> {
+class LocalBankAccount extends DataClass
+    implements Insertable<LocalBankAccount> {
   final String id;
   final String householdId;
   final String ownerType;
@@ -1609,7 +1609,7 @@ class LocalMoneySource extends DataClass
   final int createdAt;
   final int lastUpdate;
   final bool isSynced;
-  const LocalMoneySource(
+  const LocalBankAccount(
       {required this.id,
       required this.householdId,
       required this.ownerType,
@@ -1660,8 +1660,8 @@ class LocalMoneySource extends DataClass
     return map;
   }
 
-  LocalMoneySourcesCompanion toCompanion(bool nullToAbsent) {
-    return LocalMoneySourcesCompanion(
+  LocalBankAccountsCompanion toCompanion(bool nullToAbsent) {
+    return LocalBankAccountsCompanion(
       id: Value(id),
       householdId: Value(householdId),
       ownerType: Value(ownerType),
@@ -1688,10 +1688,10 @@ class LocalMoneySource extends DataClass
     );
   }
 
-  factory LocalMoneySource.fromJson(Map<String, dynamic> json,
+  factory LocalBankAccount.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return LocalMoneySource(
+    return LocalBankAccount(
       id: serializer.fromJson<String>(json['id']),
       householdId: serializer.fromJson<String>(json['householdId']),
       ownerType: serializer.fromJson<String>(json['ownerType']),
@@ -1737,7 +1737,7 @@ class LocalMoneySource extends DataClass
     };
   }
 
-  LocalMoneySource copyWith(
+  LocalBankAccount copyWith(
           {String? id,
           String? householdId,
           String? ownerType,
@@ -1756,7 +1756,7 @@ class LocalMoneySource extends DataClass
           int? createdAt,
           int? lastUpdate,
           bool? isSynced}) =>
-      LocalMoneySource(
+      LocalBankAccount(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
         ownerType: ownerType ?? this.ownerType,
@@ -1776,8 +1776,8 @@ class LocalMoneySource extends DataClass
         lastUpdate: lastUpdate ?? this.lastUpdate,
         isSynced: isSynced ?? this.isSynced,
       );
-  LocalMoneySource copyWithCompanion(LocalMoneySourcesCompanion data) {
-    return LocalMoneySource(
+  LocalBankAccount copyWithCompanion(LocalBankAccountsCompanion data) {
+    return LocalBankAccount(
       id: data.id.present ? data.id.value : this.id,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
@@ -1809,7 +1809,7 @@ class LocalMoneySource extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('LocalMoneySource(')
+    return (StringBuffer('LocalBankAccount(')
           ..write('id: $id, ')
           ..write('householdId: $householdId, ')
           ..write('ownerType: $ownerType, ')
@@ -1855,7 +1855,7 @@ class LocalMoneySource extends DataClass
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is LocalMoneySource &&
+      (other is LocalBankAccount &&
           other.id == this.id &&
           other.householdId == this.householdId &&
           other.ownerType == this.ownerType &&
@@ -1876,7 +1876,7 @@ class LocalMoneySource extends DataClass
           other.isSynced == this.isSynced);
 }
 
-class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
+class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
   final Value<String> id;
   final Value<String> householdId;
   final Value<String> ownerType;
@@ -1896,7 +1896,7 @@ class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
   final Value<int> lastUpdate;
   final Value<bool> isSynced;
   final Value<int> rowid;
-  const LocalMoneySourcesCompanion({
+  const LocalBankAccountsCompanion({
     this.id = const Value.absent(),
     this.householdId = const Value.absent(),
     this.ownerType = const Value.absent(),
@@ -1917,7 +1917,7 @@ class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
     this.isSynced = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  LocalMoneySourcesCompanion.insert({
+  LocalBankAccountsCompanion.insert({
     required String id,
     required String householdId,
     required String ownerType,
@@ -1946,7 +1946,7 @@ class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
         currentBalance = Value(currentBalance),
         createdAt = Value(createdAt),
         lastUpdate = Value(lastUpdate);
-  static Insertable<LocalMoneySource> custom({
+  static Insertable<LocalBankAccount> custom({
     Expression<String>? id,
     Expression<String>? householdId,
     Expression<String>? ownerType,
@@ -1990,7 +1990,7 @@ class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
     });
   }
 
-  LocalMoneySourcesCompanion copyWith(
+  LocalBankAccountsCompanion copyWith(
       {Value<String>? id,
       Value<String>? householdId,
       Value<String>? ownerType,
@@ -2010,7 +2010,7 @@ class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
       Value<int>? lastUpdate,
       Value<bool>? isSynced,
       Value<int>? rowid}) {
-    return LocalMoneySourcesCompanion(
+    return LocalBankAccountsCompanion(
       id: id ?? this.id,
       householdId: householdId ?? this.householdId,
       ownerType: ownerType ?? this.ownerType,
@@ -2098,7 +2098,7 @@ class LocalMoneySourcesCompanion extends UpdateCompanion<LocalMoneySource> {
 
   @override
   String toString() {
-    return (StringBuffer('LocalMoneySourcesCompanion(')
+    return (StringBuffer('LocalBankAccountsCompanion(')
           ..write('id: $id, ')
           ..write('householdId: $householdId, ')
           ..write('ownerType: $ownerType, ')
@@ -2151,11 +2151,11 @@ class $LocalGoalsTable extends LocalGoals
   late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
       'owner_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _moneySourceIdMeta =
-      const VerificationMeta('moneySourceId');
+  static const VerificationMeta _bankAccountIdMeta =
+      const VerificationMeta('bankAccountId');
   @override
-  late final GeneratedColumn<String> moneySourceId = GeneratedColumn<String>(
-      'money_source_id', aliasedName, true,
+  late final GeneratedColumn<String> bankAccountId = GeneratedColumn<String>(
+      'bank_account_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -2256,7 +2256,7 @@ class $LocalGoalsTable extends LocalGoals
         householdId,
         scope,
         ownerId,
-        moneySourceId,
+        bankAccountId,
         name,
         goalType,
         targetAmount,
@@ -2305,11 +2305,11 @@ class $LocalGoalsTable extends LocalGoals
       context.handle(_ownerIdMeta,
           ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta));
     }
-    if (data.containsKey('money_source_id')) {
+    if (data.containsKey('bank_account_id')) {
       context.handle(
-          _moneySourceIdMeta,
-          moneySourceId.isAcceptableOrUnknown(
-              data['money_source_id']!, _moneySourceIdMeta));
+          _bankAccountIdMeta,
+          bankAccountId.isAcceptableOrUnknown(
+              data['bank_account_id']!, _bankAccountIdMeta));
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -2402,8 +2402,8 @@ class $LocalGoalsTable extends LocalGoals
           .read(DriftSqlType.string, data['${effectivePrefix}scope'])!,
       ownerId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}owner_id']),
-      moneySourceId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}money_source_id']),
+      bankAccountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}bank_account_id']),
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       goalType: attachedDatabase.typeMapping
@@ -2446,7 +2446,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
   final String householdId;
   final String scope;
   final String? ownerId;
-  final String? moneySourceId;
+  final String? bankAccountId;
   final String name;
   final String goalType;
   final double? targetAmount;
@@ -2466,7 +2466,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
       required this.householdId,
       required this.scope,
       this.ownerId,
-      this.moneySourceId,
+      this.bankAccountId,
       required this.name,
       required this.goalType,
       this.targetAmount,
@@ -2490,8 +2490,8 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
     if (!nullToAbsent || ownerId != null) {
       map['owner_id'] = Variable<String>(ownerId);
     }
-    if (!nullToAbsent || moneySourceId != null) {
-      map['money_source_id'] = Variable<String>(moneySourceId);
+    if (!nullToAbsent || bankAccountId != null) {
+      map['bank_account_id'] = Variable<String>(bankAccountId);
     }
     map['name'] = Variable<String>(name);
     map['goal_type'] = Variable<String>(goalType);
@@ -2528,9 +2528,9 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
       ownerId: ownerId == null && nullToAbsent
           ? const Value.absent()
           : Value(ownerId),
-      moneySourceId: moneySourceId == null && nullToAbsent
+      bankAccountId: bankAccountId == null && nullToAbsent
           ? const Value.absent()
-          : Value(moneySourceId),
+          : Value(bankAccountId),
       name: Value(name),
       goalType: Value(goalType),
       targetAmount: targetAmount == null && nullToAbsent
@@ -2563,7 +2563,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
       householdId: serializer.fromJson<String>(json['householdId']),
       scope: serializer.fromJson<String>(json['scope']),
       ownerId: serializer.fromJson<String?>(json['ownerId']),
-      moneySourceId: serializer.fromJson<String?>(json['moneySourceId']),
+      bankAccountId: serializer.fromJson<String?>(json['bankAccountId']),
       name: serializer.fromJson<String>(json['name']),
       goalType: serializer.fromJson<String>(json['goalType']),
       targetAmount: serializer.fromJson<double?>(json['targetAmount']),
@@ -2588,7 +2588,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
       'householdId': serializer.toJson<String>(householdId),
       'scope': serializer.toJson<String>(scope),
       'ownerId': serializer.toJson<String?>(ownerId),
-      'moneySourceId': serializer.toJson<String?>(moneySourceId),
+      'bankAccountId': serializer.toJson<String?>(bankAccountId),
       'name': serializer.toJson<String>(name),
       'goalType': serializer.toJson<String>(goalType),
       'targetAmount': serializer.toJson<double?>(targetAmount),
@@ -2611,7 +2611,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
           String? householdId,
           String? scope,
           Value<String?> ownerId = const Value.absent(),
-          Value<String?> moneySourceId = const Value.absent(),
+          Value<String?> bankAccountId = const Value.absent(),
           String? name,
           String? goalType,
           Value<double?> targetAmount = const Value.absent(),
@@ -2631,8 +2631,8 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
         householdId: householdId ?? this.householdId,
         scope: scope ?? this.scope,
         ownerId: ownerId.present ? ownerId.value : this.ownerId,
-        moneySourceId:
-            moneySourceId.present ? moneySourceId.value : this.moneySourceId,
+        bankAccountId:
+            bankAccountId.present ? bankAccountId.value : this.bankAccountId,
         name: name ?? this.name,
         goalType: goalType ?? this.goalType,
         targetAmount:
@@ -2657,9 +2657,9 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
           data.householdId.present ? data.householdId.value : this.householdId,
       scope: data.scope.present ? data.scope.value : this.scope,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
-      moneySourceId: data.moneySourceId.present
-          ? data.moneySourceId.value
-          : this.moneySourceId,
+      bankAccountId: data.bankAccountId.present
+          ? data.bankAccountId.value
+          : this.bankAccountId,
       name: data.name.present ? data.name.value : this.name,
       goalType: data.goalType.present ? data.goalType.value : this.goalType,
       targetAmount: data.targetAmount.present
@@ -2691,7 +2691,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
           ..write('householdId: $householdId, ')
           ..write('scope: $scope, ')
           ..write('ownerId: $ownerId, ')
-          ..write('moneySourceId: $moneySourceId, ')
+          ..write('bankAccountId: $bankAccountId, ')
           ..write('name: $name, ')
           ..write('goalType: $goalType, ')
           ..write('targetAmount: $targetAmount, ')
@@ -2716,7 +2716,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
       householdId,
       scope,
       ownerId,
-      moneySourceId,
+      bankAccountId,
       name,
       goalType,
       targetAmount,
@@ -2739,7 +2739,7 @@ class LocalGoal extends DataClass implements Insertable<LocalGoal> {
           other.householdId == this.householdId &&
           other.scope == this.scope &&
           other.ownerId == this.ownerId &&
-          other.moneySourceId == this.moneySourceId &&
+          other.bankAccountId == this.bankAccountId &&
           other.name == this.name &&
           other.goalType == this.goalType &&
           other.targetAmount == this.targetAmount &&
@@ -2761,7 +2761,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
   final Value<String> householdId;
   final Value<String> scope;
   final Value<String?> ownerId;
-  final Value<String?> moneySourceId;
+  final Value<String?> bankAccountId;
   final Value<String> name;
   final Value<String> goalType;
   final Value<double?> targetAmount;
@@ -2782,7 +2782,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
     this.householdId = const Value.absent(),
     this.scope = const Value.absent(),
     this.ownerId = const Value.absent(),
-    this.moneySourceId = const Value.absent(),
+    this.bankAccountId = const Value.absent(),
     this.name = const Value.absent(),
     this.goalType = const Value.absent(),
     this.targetAmount = const Value.absent(),
@@ -2804,7 +2804,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
     required String householdId,
     required String scope,
     this.ownerId = const Value.absent(),
-    this.moneySourceId = const Value.absent(),
+    this.bankAccountId = const Value.absent(),
     required String name,
     required String goalType,
     this.targetAmount = const Value.absent(),
@@ -2833,7 +2833,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
     Expression<String>? householdId,
     Expression<String>? scope,
     Expression<String>? ownerId,
-    Expression<String>? moneySourceId,
+    Expression<String>? bankAccountId,
     Expression<String>? name,
     Expression<String>? goalType,
     Expression<double>? targetAmount,
@@ -2855,7 +2855,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
       if (householdId != null) 'household_id': householdId,
       if (scope != null) 'scope': scope,
       if (ownerId != null) 'owner_id': ownerId,
-      if (moneySourceId != null) 'money_source_id': moneySourceId,
+      if (bankAccountId != null) 'bank_account_id': bankAccountId,
       if (name != null) 'name': name,
       if (goalType != null) 'goal_type': goalType,
       if (targetAmount != null) 'target_amount': targetAmount,
@@ -2879,7 +2879,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
       Value<String>? householdId,
       Value<String>? scope,
       Value<String?>? ownerId,
-      Value<String?>? moneySourceId,
+      Value<String?>? bankAccountId,
       Value<String>? name,
       Value<String>? goalType,
       Value<double?>? targetAmount,
@@ -2900,7 +2900,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
       householdId: householdId ?? this.householdId,
       scope: scope ?? this.scope,
       ownerId: ownerId ?? this.ownerId,
-      moneySourceId: moneySourceId ?? this.moneySourceId,
+      bankAccountId: bankAccountId ?? this.bankAccountId,
       name: name ?? this.name,
       goalType: goalType ?? this.goalType,
       targetAmount: targetAmount ?? this.targetAmount,
@@ -2934,8 +2934,8 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
     if (ownerId.present) {
       map['owner_id'] = Variable<String>(ownerId.value);
     }
-    if (moneySourceId.present) {
-      map['money_source_id'] = Variable<String>(moneySourceId.value);
+    if (bankAccountId.present) {
+      map['bank_account_id'] = Variable<String>(bankAccountId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -2992,7 +2992,7 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoal> {
           ..write('householdId: $householdId, ')
           ..write('scope: $scope, ')
           ..write('ownerId: $ownerId, ')
-          ..write('moneySourceId: $moneySourceId, ')
+          ..write('bankAccountId: $bankAccountId, ')
           ..write('name: $name, ')
           ..write('goalType: $goalType, ')
           ..write('targetAmount: $targetAmount, ')
@@ -3479,8 +3479,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalTransactionsTable(this);
   late final $LocalCategoriesTable localCategories =
       $LocalCategoriesTable(this);
-  late final $LocalMoneySourcesTable localMoneySources =
-      $LocalMoneySourcesTable(this);
+  late final $LocalBankAccountsTable localBankAccounts =
+      $LocalBankAccountsTable(this);
   late final $LocalGoalsTable localGoals = $LocalGoalsTable(this);
   late final $LocalNotificationsTable localNotifications =
       $LocalNotificationsTable(this);
@@ -3491,7 +3491,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         localTransactions,
         localCategories,
-        localMoneySources,
+        localBankAccounts,
         localGoals,
         localNotifications
       ];
@@ -3503,7 +3503,7 @@ typedef $$LocalTransactionsTableCreateCompanionBuilder
   required String householdId,
   required String userId,
   required String categoryId,
-  required String moneySourceId,
+  required String bankAccountId,
   required double amount,
   required String type,
   Value<String?> note,
@@ -3522,7 +3522,7 @@ typedef $$LocalTransactionsTableUpdateCompanionBuilder
   Value<String> householdId,
   Value<String> userId,
   Value<String> categoryId,
-  Value<String> moneySourceId,
+  Value<String> bankAccountId,
   Value<double> amount,
   Value<String> type,
   Value<String?> note,
@@ -3557,8 +3557,8 @@ class $$LocalTransactionsTableFilterComposer
   ColumnFilters<String> get categoryId => $composableBuilder(
       column: $table.categoryId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get moneySourceId => $composableBuilder(
-      column: $table.moneySourceId, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnFilters(column));
@@ -3612,8 +3612,8 @@ class $$LocalTransactionsTableOrderingComposer
   ColumnOrderings<String> get categoryId => $composableBuilder(
       column: $table.categoryId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get moneySourceId => $composableBuilder(
-      column: $table.moneySourceId,
+  ColumnOrderings<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<double> get amount => $composableBuilder(
@@ -3669,8 +3669,8 @@ class $$LocalTransactionsTableAnnotationComposer
   GeneratedColumn<String> get categoryId => $composableBuilder(
       column: $table.categoryId, builder: (column) => column);
 
-  GeneratedColumn<String> get moneySourceId => $composableBuilder(
-      column: $table.moneySourceId, builder: (column) => column);
+  GeneratedColumn<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId, builder: (column) => column);
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
@@ -3735,7 +3735,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             Value<String> householdId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<String> categoryId = const Value.absent(),
-            Value<String> moneySourceId = const Value.absent(),
+            Value<String> bankAccountId = const Value.absent(),
             Value<double> amount = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<String?> note = const Value.absent(),
@@ -3753,7 +3753,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             householdId: householdId,
             userId: userId,
             categoryId: categoryId,
-            moneySourceId: moneySourceId,
+            bankAccountId: bankAccountId,
             amount: amount,
             type: type,
             note: note,
@@ -3771,7 +3771,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             required String householdId,
             required String userId,
             required String categoryId,
-            required String moneySourceId,
+            required String bankAccountId,
             required double amount,
             required String type,
             Value<String?> note = const Value.absent(),
@@ -3789,7 +3789,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             householdId: householdId,
             userId: userId,
             categoryId: categoryId,
-            moneySourceId: moneySourceId,
+            bankAccountId: bankAccountId,
             amount: amount,
             type: type,
             note: note,
@@ -4088,8 +4088,8 @@ typedef $$LocalCategoriesTableProcessedTableManager = ProcessedTableManager<
     ),
     LocalCategory,
     PrefetchHooks Function()>;
-typedef $$LocalMoneySourcesTableCreateCompanionBuilder
-    = LocalMoneySourcesCompanion Function({
+typedef $$LocalBankAccountsTableCreateCompanionBuilder
+    = LocalBankAccountsCompanion Function({
   required String id,
   required String householdId,
   required String ownerType,
@@ -4110,8 +4110,8 @@ typedef $$LocalMoneySourcesTableCreateCompanionBuilder
   Value<bool> isSynced,
   Value<int> rowid,
 });
-typedef $$LocalMoneySourcesTableUpdateCompanionBuilder
-    = LocalMoneySourcesCompanion Function({
+typedef $$LocalBankAccountsTableUpdateCompanionBuilder
+    = LocalBankAccountsCompanion Function({
   Value<String> id,
   Value<String> householdId,
   Value<String> ownerType,
@@ -4133,9 +4133,9 @@ typedef $$LocalMoneySourcesTableUpdateCompanionBuilder
   Value<int> rowid,
 });
 
-class $$LocalMoneySourcesTableFilterComposer
-    extends Composer<_$AppDatabase, $LocalMoneySourcesTable> {
-  $$LocalMoneySourcesTableFilterComposer({
+class $$LocalBankAccountsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalBankAccountsTable> {
+  $$LocalBankAccountsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4199,9 +4199,9 @@ class $$LocalMoneySourcesTableFilterComposer
       column: $table.isSynced, builder: (column) => ColumnFilters(column));
 }
 
-class $$LocalMoneySourcesTableOrderingComposer
-    extends Composer<_$AppDatabase, $LocalMoneySourcesTable> {
-  $$LocalMoneySourcesTableOrderingComposer({
+class $$LocalBankAccountsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalBankAccountsTable> {
+  $$LocalBankAccountsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4265,9 +4265,9 @@ class $$LocalMoneySourcesTableOrderingComposer
       column: $table.isSynced, builder: (column) => ColumnOrderings(column));
 }
 
-class $$LocalMoneySourcesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $LocalMoneySourcesTable> {
-  $$LocalMoneySourcesTableAnnotationComposer({
+class $$LocalBankAccountsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalBankAccountsTable> {
+  $$LocalBankAccountsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4329,32 +4329,32 @@ class $$LocalMoneySourcesTableAnnotationComposer
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
 }
 
-class $$LocalMoneySourcesTableTableManager extends RootTableManager<
+class $$LocalBankAccountsTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $LocalMoneySourcesTable,
-    LocalMoneySource,
-    $$LocalMoneySourcesTableFilterComposer,
-    $$LocalMoneySourcesTableOrderingComposer,
-    $$LocalMoneySourcesTableAnnotationComposer,
-    $$LocalMoneySourcesTableCreateCompanionBuilder,
-    $$LocalMoneySourcesTableUpdateCompanionBuilder,
+    $LocalBankAccountsTable,
+    LocalBankAccount,
+    $$LocalBankAccountsTableFilterComposer,
+    $$LocalBankAccountsTableOrderingComposer,
+    $$LocalBankAccountsTableAnnotationComposer,
+    $$LocalBankAccountsTableCreateCompanionBuilder,
+    $$LocalBankAccountsTableUpdateCompanionBuilder,
     (
-      LocalMoneySource,
-      BaseReferences<_$AppDatabase, $LocalMoneySourcesTable, LocalMoneySource>
+      LocalBankAccount,
+      BaseReferences<_$AppDatabase, $LocalBankAccountsTable, LocalBankAccount>
     ),
-    LocalMoneySource,
+    LocalBankAccount,
     PrefetchHooks Function()> {
-  $$LocalMoneySourcesTableTableManager(
-      _$AppDatabase db, $LocalMoneySourcesTable table)
+  $$LocalBankAccountsTableTableManager(
+      _$AppDatabase db, $LocalBankAccountsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$LocalMoneySourcesTableFilterComposer($db: db, $table: table),
+              $$LocalBankAccountsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$LocalMoneySourcesTableOrderingComposer($db: db, $table: table),
+              $$LocalBankAccountsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$LocalMoneySourcesTableAnnotationComposer(
+              $$LocalBankAccountsTableAnnotationComposer(
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
@@ -4377,7 +4377,7 @@ class $$LocalMoneySourcesTableTableManager extends RootTableManager<
             Value<bool> isSynced = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              LocalMoneySourcesCompanion(
+              LocalBankAccountsCompanion(
             id: id,
             householdId: householdId,
             ownerType: ownerType,
@@ -4419,7 +4419,7 @@ class $$LocalMoneySourcesTableTableManager extends RootTableManager<
             Value<bool> isSynced = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              LocalMoneySourcesCompanion.insert(
+              LocalBankAccountsCompanion.insert(
             id: id,
             householdId: householdId,
             ownerType: ownerType,
@@ -4447,27 +4447,27 @@ class $$LocalMoneySourcesTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$LocalMoneySourcesTableProcessedTableManager = ProcessedTableManager<
+typedef $$LocalBankAccountsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $LocalMoneySourcesTable,
-    LocalMoneySource,
-    $$LocalMoneySourcesTableFilterComposer,
-    $$LocalMoneySourcesTableOrderingComposer,
-    $$LocalMoneySourcesTableAnnotationComposer,
-    $$LocalMoneySourcesTableCreateCompanionBuilder,
-    $$LocalMoneySourcesTableUpdateCompanionBuilder,
+    $LocalBankAccountsTable,
+    LocalBankAccount,
+    $$LocalBankAccountsTableFilterComposer,
+    $$LocalBankAccountsTableOrderingComposer,
+    $$LocalBankAccountsTableAnnotationComposer,
+    $$LocalBankAccountsTableCreateCompanionBuilder,
+    $$LocalBankAccountsTableUpdateCompanionBuilder,
     (
-      LocalMoneySource,
-      BaseReferences<_$AppDatabase, $LocalMoneySourcesTable, LocalMoneySource>
+      LocalBankAccount,
+      BaseReferences<_$AppDatabase, $LocalBankAccountsTable, LocalBankAccount>
     ),
-    LocalMoneySource,
+    LocalBankAccount,
     PrefetchHooks Function()>;
 typedef $$LocalGoalsTableCreateCompanionBuilder = LocalGoalsCompanion Function({
   required String id,
   required String householdId,
   required String scope,
   Value<String?> ownerId,
-  Value<String?> moneySourceId,
+  Value<String?> bankAccountId,
   required String name,
   required String goalType,
   Value<double?> targetAmount,
@@ -4489,7 +4489,7 @@ typedef $$LocalGoalsTableUpdateCompanionBuilder = LocalGoalsCompanion Function({
   Value<String> householdId,
   Value<String> scope,
   Value<String?> ownerId,
-  Value<String?> moneySourceId,
+  Value<String?> bankAccountId,
   Value<String> name,
   Value<String> goalType,
   Value<double?> targetAmount,
@@ -4528,8 +4528,8 @@ class $$LocalGoalsTableFilterComposer
   ColumnFilters<String> get ownerId => $composableBuilder(
       column: $table.ownerId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get moneySourceId => $composableBuilder(
-      column: $table.moneySourceId, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
@@ -4595,8 +4595,8 @@ class $$LocalGoalsTableOrderingComposer
   ColumnOrderings<String> get ownerId => $composableBuilder(
       column: $table.ownerId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get moneySourceId => $composableBuilder(
-      column: $table.moneySourceId,
+  ColumnOrderings<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get name => $composableBuilder(
@@ -4666,8 +4666,8 @@ class $$LocalGoalsTableAnnotationComposer
   GeneratedColumn<String> get ownerId =>
       $composableBuilder(column: $table.ownerId, builder: (column) => column);
 
-  GeneratedColumn<String> get moneySourceId => $composableBuilder(
-      column: $table.moneySourceId, builder: (column) => column);
+  GeneratedColumn<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -4739,7 +4739,7 @@ class $$LocalGoalsTableTableManager extends RootTableManager<
             Value<String> householdId = const Value.absent(),
             Value<String> scope = const Value.absent(),
             Value<String?> ownerId = const Value.absent(),
-            Value<String?> moneySourceId = const Value.absent(),
+            Value<String?> bankAccountId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> goalType = const Value.absent(),
             Value<double?> targetAmount = const Value.absent(),
@@ -4761,7 +4761,7 @@ class $$LocalGoalsTableTableManager extends RootTableManager<
             householdId: householdId,
             scope: scope,
             ownerId: ownerId,
-            moneySourceId: moneySourceId,
+            bankAccountId: bankAccountId,
             name: name,
             goalType: goalType,
             targetAmount: targetAmount,
@@ -4783,7 +4783,7 @@ class $$LocalGoalsTableTableManager extends RootTableManager<
             required String householdId,
             required String scope,
             Value<String?> ownerId = const Value.absent(),
-            Value<String?> moneySourceId = const Value.absent(),
+            Value<String?> bankAccountId = const Value.absent(),
             required String name,
             required String goalType,
             Value<double?> targetAmount = const Value.absent(),
@@ -4805,7 +4805,7 @@ class $$LocalGoalsTableTableManager extends RootTableManager<
             householdId: householdId,
             scope: scope,
             ownerId: ownerId,
-            moneySourceId: moneySourceId,
+            bankAccountId: bankAccountId,
             name: name,
             goalType: goalType,
             targetAmount: targetAmount,
@@ -5084,8 +5084,8 @@ class $AppDatabaseManager {
       $$LocalTransactionsTableTableManager(_db, _db.localTransactions);
   $$LocalCategoriesTableTableManager get localCategories =>
       $$LocalCategoriesTableTableManager(_db, _db.localCategories);
-  $$LocalMoneySourcesTableTableManager get localMoneySources =>
-      $$LocalMoneySourcesTableTableManager(_db, _db.localMoneySources);
+  $$LocalBankAccountsTableTableManager get localBankAccounts =>
+      $$LocalBankAccountsTableTableManager(_db, _db.localBankAccounts);
   $$LocalGoalsTableTableManager get localGoals =>
       $$LocalGoalsTableTableManager(_db, _db.localGoals);
   $$LocalNotificationsTableTableManager get localNotifications =>

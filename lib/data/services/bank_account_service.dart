@@ -3,16 +3,16 @@ import 'package:hestia/core/error/exceptions.dart';
 
 import 'supabase_service.dart';
 
-class MoneySourceService extends SupabaseService {
-  MoneySourceService({super.client});
+class BankAccountService extends SupabaseService {
+  BankAccountService({super.client});
 
-  Future<List<Map<String, dynamic>>> getMoneySources({
+  Future<List<Map<String, dynamic>>> getBankAccounts({
     required String householdId,
     String? userId,
     bool activeOnly = true,
   }) async {
     try {
-      var query = from(SupabaseTables.moneySources)
+      var query = from(SupabaseTables.bankAccounts)
           .select()
           .eq('household_id', householdId);
 
@@ -25,10 +25,10 @@ class MoneySourceService extends SupabaseService {
     }
   }
 
-  Future<Map<String, dynamic>> createMoneySource(
+  Future<Map<String, dynamic>> createBankAccount(
       Map<String, dynamic> data) async {
     try {
-      final response = await from(SupabaseTables.moneySources)
+      final response = await from(SupabaseTables.bankAccounts)
           .insert(data)
           .select()
           .single();
@@ -38,17 +38,17 @@ class MoneySourceService extends SupabaseService {
     }
   }
 
-  Future<void> updateMoneySource(String id, Map<String, dynamic> data) async {
+  Future<void> updateBankAccount(String id, Map<String, dynamic> data) async {
     try {
-      await from(SupabaseTables.moneySources).update(data).eq('id', id);
+      await from(SupabaseTables.bankAccounts).update(data).eq('id', id);
     } catch (e) {
       throw ServerException('Failed to update money source: $e');
     }
   }
 
-  Future<void> deleteMoneySource(String id) async {
+  Future<void> deleteBankAccount(String id) async {
     try {
-      await from(SupabaseTables.moneySources).delete().eq('id', id);
+      await from(SupabaseTables.bankAccounts).delete().eq('id', id);
     } catch (e) {
       throw ServerException('Failed to delete money source: $e');
     }

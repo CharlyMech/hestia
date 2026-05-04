@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-class LocalMoneySources extends Table {
+class LocalBankAccounts extends Table {
   TextColumn get id => text()();
   TextColumn get householdId => text()();
   TextColumn get ownerType => text()();

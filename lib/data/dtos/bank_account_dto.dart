@@ -1,4 +1,4 @@
-class MoneySourceDto {
+class BankAccountDto {
   final String id;
   final String householdId;
   final String ownerType;
@@ -17,7 +17,7 @@ class MoneySourceDto {
   final int createdAt;
   final int lastUpdate;
 
-  const MoneySourceDto({
+  const BankAccountDto({
     required this.id,
     required this.householdId,
     required this.ownerType,
@@ -37,8 +37,8 @@ class MoneySourceDto {
     required this.lastUpdate,
   });
 
-  factory MoneySourceDto.fromJson(Map<String, dynamic> json) {
-    return MoneySourceDto(
+  factory BankAccountDto.fromJson(Map<String, dynamic> json) {
+    return BankAccountDto(
       id: json['id'] as String,
       householdId: json['household_id'] as String,
       ownerType: json['owner_type'] as String,

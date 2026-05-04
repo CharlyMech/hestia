@@ -1,11 +1,11 @@
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/date_utils.dart';
-import 'package:hestia/data/dtos/money_source_dto.dart';
-import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/data/dtos/bank_account_dto.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
 
-abstract final class MoneySourceMapper {
-  static MoneySource toDomain(MoneySourceDto dto) {
-    return MoneySource(
+abstract final class BankAccountMapper {
+  static BankAccount toDomain(BankAccountDto dto) {
+    return BankAccount(
       id: dto.id,
       householdId: dto.householdId,
       ownerType: OwnerType.fromString(dto.ownerType),
@@ -26,8 +26,8 @@ abstract final class MoneySourceMapper {
     );
   }
 
-  static MoneySourceDto toDto(MoneySource entity) {
-    return MoneySourceDto(
+  static BankAccountDto toDto(BankAccount entity) {
+    return BankAccountDto(
       id: entity.id,
       householdId: entity.householdId,
       ownerType: entity.ownerType.value,
@@ -48,7 +48,7 @@ abstract final class MoneySourceMapper {
     );
   }
 
-  static MoneySource fromJson(Map<String, dynamic> json) {
-    return toDomain(MoneySourceDto.fromJson(json));
+  static BankAccount fromJson(Map<String, dynamic> json) {
+    return toDomain(BankAccountDto.fromJson(json));
   }
 }

@@ -3,7 +3,7 @@ class GoalDto {
   final String householdId;
   final String scope;
   final String? ownerId;
-  final String? moneySourceId;
+  final String? bankAccountId;
   final String name;
   final String goalType;
   final num? targetAmount;
@@ -23,7 +23,7 @@ class GoalDto {
     required this.householdId,
     required this.scope,
     this.ownerId,
-    this.moneySourceId,
+    this.bankAccountId,
     required this.name,
     required this.goalType,
     this.targetAmount,
@@ -45,7 +45,7 @@ class GoalDto {
       householdId: json['household_id'] as String,
       scope: json['scope'] as String,
       ownerId: json['owner_id'] as String?,
-      moneySourceId: json['money_source_id'] as String?,
+      bankAccountId: json['money_source_id'] as String?,
       name: json['name'] as String,
       goalType: json['goal_type'] as String,
       targetAmount: json['target_amount'] as num?,
@@ -66,7 +66,7 @@ class GoalDto {
         'household_id': householdId,
         'scope': scope,
         'owner_id': ownerId,
-        'money_source_id': moneySourceId,
+        'money_source_id': bankAccountId,
         'name': name,
         'goal_type': goalType,
         'target_amount': targetAmount,
@@ -83,7 +83,7 @@ class GoalDto {
         'name': name,
         'target_amount': targetAmount,
         'monthly_target': monthlyTarget,
-        'money_source_id': moneySourceId,
+        'money_source_id': bankAccountId,
         'end_date': endDate,
         'is_active': isActive,
         'color': color,

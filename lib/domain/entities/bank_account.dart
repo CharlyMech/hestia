@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:hestia/core/constants/enums.dart';
 
-class MoneySource extends Equatable {
+class BankAccount extends Equatable {
   final String id;
   final String householdId;
   final OwnerType ownerType;
@@ -20,7 +20,7 @@ class MoneySource extends Equatable {
   final DateTime createdAt;
   final DateTime lastUpdate;
 
-  const MoneySource({
+  const BankAccount({
     required this.id,
     required this.householdId,
     required this.ownerType,

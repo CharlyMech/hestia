@@ -5,7 +5,7 @@ class LocalGoals extends Table {
   TextColumn get householdId => text()();
   TextColumn get scope => text()();
   TextColumn get ownerId => text().nullable()();
-  TextColumn get moneySourceId => text().nullable()();
+  TextColumn get bankAccountId => text().nullable()();
   TextColumn get name => text()();
   TextColumn get goalType => text()();
   RealColumn get targetAmount => real().nullable()();
