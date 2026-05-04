@@ -1,17 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
 
-class MoneySourcePicker extends StatelessWidget {
-  final List<MoneySource> sources;
+/// Picks a [BankAccount] (wallet) for a transaction or transfer.
+class BankAccountPicker extends StatelessWidget {
+  final List<BankAccount> accounts;
   final String? selectedId;
   final String? excludeId;
-  final ValueChanged<MoneySource> onSelected;
+  final ValueChanged<BankAccount> onSelected;
 
-  const MoneySourcePicker({
+  const BankAccountPicker({
     super.key,
-    required this.sources,
+    required this.accounts,
     required this.onSelected,
     this.selectedId,
     this.excludeId,
@@ -25,13 +26,13 @@ class MoneySourcePicker extends StatelessWidget {
     final accent = _c(theme.primaryColor);
     final border = _c(theme.borderColor);
 
-    final visible = sources.where((s) => s.id != excludeId).toList();
+    final visible = accounts.where((s) => s.id != excludeId).toList();
 
     if (visible.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'No money sources available',
+          'No bank accounts available',
           style: AppFonts.body(fontSize: 14, color: muted),
         ),
       );
@@ -40,6 +41,7 @@ class MoneySourcePicker extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: visible.length,
       separatorBuilder: (_, __) => Container(height: 0.5, color: border),
       itemBuilder: (context, i) {

@@ -7,19 +7,22 @@ import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/category.dart';
-import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/domain/entities/transaction.dart';
+import 'package:hestia/domain/entities/transaction_source.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_bloc.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_event.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_state.dart';
+import 'package:hestia/presentation/blocs/transaction_sources/transaction_sources_bloc.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/toggle_switch.dart';
+import 'package:hestia/presentation/widgets/transaction_sources/transaction_source_form.dart';
+import 'package:hestia/presentation/widgets/transactions/pickers/bank_account_picker.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/category_picker.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/date_picker.dart';
-import 'package:hestia/presentation/widgets/transactions/pickers/money_source_picker.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Cart, CreditCard, Calendar, Refresh, EditPencil, Trash;
+    show Cart, CreditCard, Calendar, Refresh, EditPencil, Trash, Shop, Plus;
 import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
@@ -45,7 +48,8 @@ class _TransactionFormState extends State<TransactionForm> {
   late final TextEditingController _noteCtrl;
 
   List<Category> _categories = const [];
-  List<MoneySource> _sources = const [];
+  List<BankAccount> _bankAccounts = const [];
+  List<TransactionSource> _txSources = const [];
   bool _loadingLookups = true;
 
   @override
@@ -64,17 +68,30 @@ class _TransactionFormState extends State<TransactionForm> {
     final (cats, _) = await deps.categoryRepository.getCategories(
       householdId: widget.householdId,
     );
-    final (sources, _) = await deps.moneySourceRepository.getMoneySources(
+    final (accounts, _) = await deps.bankAccountRepository.getBankAccounts(
       householdId: widget.householdId,
-      viewMode: ViewMode.household,
+      viewMode: ViewMode.personal,
       userId: widget.userId,
+    );
+    final (txSrcs, _) = await deps.transactionSourceRepository.getAll(
+      householdId: widget.householdId,
     );
     if (!mounted) return;
     setState(() {
       _categories = cats;
-      _sources = sources;
+      _bankAccounts = accounts;
+      _txSources = txSrcs;
       _loadingLookups = false;
     });
+  }
+
+  Future<void> _reloadTransactionSources() async {
+    final (txSrcs, _) =
+        await AppDependencies.instance.transactionSourceRepository.getAll(
+      householdId: widget.householdId,
+    );
+    if (!mounted) return;
+    setState(() => _txSources = txSrcs);
   }
 
   @override
@@ -97,10 +114,14 @@ class _TransactionFormState extends State<TransactionForm> {
         amountCtrl: _amountCtrl,
         noteCtrl: _noteCtrl,
         categories: _categories,
-        sources: _sources,
+        bankAccounts: _bankAccounts,
+        txSources: _txSources,
         loadingLookups: _loadingLookups,
         isEditing: widget.initialTransaction != null,
         onClose: widget.onClose,
+        householdId: widget.householdId,
+        userId: widget.userId,
+        onReloadTransactionSources: _reloadTransactionSources,
       ),
     );
   }
@@ -110,19 +131,27 @@ class _FormBody extends StatelessWidget {
   final TextEditingController amountCtrl;
   final TextEditingController noteCtrl;
   final List<Category> categories;
-  final List<MoneySource> sources;
+  final List<BankAccount> bankAccounts;
+  final List<TransactionSource> txSources;
   final bool loadingLookups;
   final bool isEditing;
   final VoidCallback? onClose;
+  final String householdId;
+  final String userId;
+  final Future<void> Function() onReloadTransactionSources;
 
   const _FormBody({
     required this.amountCtrl,
     required this.noteCtrl,
     required this.categories,
-    required this.sources,
+    required this.bankAccounts,
+    required this.txSources,
     required this.loadingLookups,
     required this.isEditing,
     required this.onClose,
+    required this.householdId,
+    required this.userId,
+    required this.onReloadTransactionSources,
   });
 
   @override
@@ -154,13 +183,14 @@ class _FormBody extends StatelessWidget {
         final selectedCategory = categories
             .where((c) => c.id == state.categoryId)
             .firstOrNull;
-        final selectedSource =
-            sources.where((s) => s.id == state.moneySourceId).firstOrNull;
-        final selectedTo =
-            sources.where((s) => s.id == state.toMoneySourceId).firstOrNull;
+        final selectedAccount =
+            bankAccounts.where((s) => s.id == state.bankAccountId).firstOrNull;
+        final selectedTo = bankAccounts
+            .where((s) => s.id == state.toBankAccountId)
+            .firstOrNull;
         final dateLabel = _formatDate(state.date);
 
-        return Padding(
+        return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -206,149 +236,161 @@ class _FormBody extends StatelessWidget {
               if (state.errors['amount'] != null)
                 _ErrorLine(text: state.errors['amount']!, color: expense),
               const SizedBox(height: 12),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
+              if (loadingLookups)
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CupertinoActivityIndicator(),
+                )
+              else ...[
+                if (!isTransfer)
+                  _PickerTile(
+                    icon: Cart(width: 18, height: 18, color: tints[0]),
+                    iconColor: tints[0],
+                    label: 'Category',
+                    value: selectedCategory?.name ?? 'Select',
+                    sub: selectedCategory?.type.name,
+                    error: state.errors['category'],
+                    errorColor: expense,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    onTap: () => _openCategoryPicker(context, bloc, state),
+                  ),
+                if (!isTransfer) const SizedBox(height: 8),
+                _PickerTile(
+                  icon:
+                      CreditCard(width: 18, height: 18, color: tints[2]),
+                  iconColor: tints[2],
+                  label: isTransfer ? 'From account' : 'Bank account',
+                  value: selectedAccount?.name ?? 'Select',
+                  sub: selectedAccount == null
+                      ? null
+                      : 'Balance ${selectedAccount.currentBalance.toStringAsFixed(2)} ${selectedAccount.currency}',
+                  error: state.errors[isTransfer ? 'from' : 'bankAccount'],
+                  errorColor: expense,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  onTap: () => _openBankAccountPicker(context, bloc, state, false),
+                ),
+                if (isTransfer) ...[
+                  const SizedBox(height: 8),
+                  _PickerTile(
+                    icon: CreditCard(
+                        width: 18, height: 18, color: tints[3]),
+                    iconColor: tints[3],
+                    label: 'To account',
+                    value: selectedTo?.name ?? 'Select',
+                    sub: selectedTo == null
+                        ? null
+                        : 'Balance ${selectedTo.currentBalance.toStringAsFixed(2)} ${selectedTo.currency}',
+                    error: state.errors['to'],
+                    errorColor: expense,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    onTap: () =>
+                        _openBankAccountPicker(context, bloc, state, true),
+                  ),
+                ],
+                if (!isTransfer) ...[
+                  const SizedBox(height: 8),
+                  _PickerTile(
+                    icon: Shop(width: 18, height: 18, color: tints[5]),
+                    iconColor: tints[5],
+                    label: 'Source',
+                    value: txSources
+                            .where((s) => s.id == state.transactionSourceId)
+                            .firstOrNull
+                            ?.name ??
+                        'Optional',
+                    sub: state.transactionSourceId == null
+                        ? 'Merchant, employer, service'
+                        : null,
+                    errorColor: expense,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    onTap: () => _openTransactionSourcePicker(
+                      context,
+                      bloc,
+                      state,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                _PickerTile(
+                  icon: Calendar(width: 18, height: 18, color: tints[1]),
+                  iconColor: tints[1],
+                  label: 'Date',
+                  value: dateLabel,
+                  errorColor: expense,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  onTap: () => _openDatePicker(context, bloc, state),
+                ),
+                if (!isTransfer) ...[
+                  const SizedBox(height: 8),
+                  _ToggleTile(
+                    icon: Refresh(width: 18, height: 18, color: tints[4]),
+                    iconColor: tints[4],
+                    label: 'Repeat',
+                    value: state.isRecurring ? 'Recurring' : 'One-time',
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                    switchOn: state.isRecurring,
+                    onChanged: (v) =>
+                        bloc.add(TransactionFormRecurringToggled(v)),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  decoration: BoxDecoration(
+                    color: surface,
+                    border: Border.all(color: border, width: 1),
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (loadingLookups)
-                        const Padding(
-                          padding: EdgeInsets.all(20),
-                          child: CupertinoActivityIndicator(),
-                        )
-                      else ...[
-                        if (!isTransfer)
-                          _PickerTile(
-                            icon: Cart(width: 18, height: 18, color: tints[0]),
-                            iconColor: tints[0],
-                            label: 'Category',
-                            value: selectedCategory?.name ?? 'Select',
-                            sub: selectedCategory?.type.name,
-                            error: state.errors['category'],
-                            errorColor: expense,
-                            surface: surface,
-                            border: border,
-                            fg: fg,
-                            muted: muted,
-                            onTap: () => _openCategoryPicker(context, bloc, state),
-                          ),
-                        if (!isTransfer) const SizedBox(height: 8),
-                        _PickerTile(
-                          icon: CreditCard(
-                              width: 18, height: 18, color: tints[2]),
-                          iconColor: tints[2],
-                          label: isTransfer ? 'From' : 'Source',
-                          value: selectedSource?.name ?? 'Select',
-                          sub: selectedSource == null
-                              ? null
-                              : 'Balance ${selectedSource.currentBalance.toStringAsFixed(2)} ${selectedSource.currency}',
-                          error: state.errors[isTransfer ? 'from' : 'source'],
-                          errorColor: expense,
-                          surface: surface,
-                          border: border,
-                          fg: fg,
-                          muted: muted,
-                          onTap: () => _openSourcePicker(
-                              context, bloc, state, false),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: EditPencil(
+                            width: 16, height: 16, color: muted),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: CupertinoTextField(
+                          controller: noteCtrl,
+                          placeholder: 'Add a note…',
+                          maxLines: 3,
+                          minLines: 1,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          style: AppFonts.body(fontSize: 13, color: fg),
+                          placeholderStyle:
+                              AppFonts.body(fontSize: 13, color: muted),
+                          decoration: const BoxDecoration(),
+                          onChanged: (v) =>
+                              bloc.add(TransactionFormNoteChanged(v)),
                         ),
-                        if (isTransfer) ...[
-                          const SizedBox(height: 8),
-                          _PickerTile(
-                            icon: CreditCard(
-                                width: 18, height: 18, color: tints[3]),
-                            iconColor: tints[3],
-                            label: 'To',
-                            value: selectedTo?.name ?? 'Select',
-                            sub: selectedTo == null
-                                ? null
-                                : 'Balance ${selectedTo.currentBalance.toStringAsFixed(2)} ${selectedTo.currency}',
-                            error: state.errors['to'],
-                            errorColor: expense,
-                            surface: surface,
-                            border: border,
-                            fg: fg,
-                            muted: muted,
-                            onTap: () => _openSourcePicker(
-                                context, bloc, state, true),
-                          ),
-                        ],
-                        const SizedBox(height: 8),
-                        _PickerTile(
-                          icon: Calendar(
-                              width: 18, height: 18, color: tints[1]),
-                          iconColor: tints[1],
-                          label: 'Date',
-                          value: dateLabel,
-                          errorColor: expense,
-                          surface: surface,
-                          border: border,
-                          fg: fg,
-                          muted: muted,
-                          onTap: () => _openDatePicker(context, bloc, state),
-                        ),
-                        if (!isTransfer) ...[
-                          const SizedBox(height: 8),
-                          _ToggleTile(
-                            icon: Refresh(
-                                width: 18, height: 18, color: tints[4]),
-                            iconColor: tints[4],
-                            label: 'Repeat',
-                            value: state.isRecurring ? 'Recurring' : 'One-time',
-                            surface: surface,
-                            border: border,
-                            fg: fg,
-                            muted: muted,
-                            accent: accent,
-                            switchOn: state.isRecurring,
-                            onChanged: (v) => bloc
-                                .add(TransactionFormRecurringToggled(v)),
-                          ),
-                        ],
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                          decoration: BoxDecoration(
-                            color: surface,
-                            border: Border.all(color: border, width: 1),
-                            borderRadius: BorderRadius.circular(AppRadii.xl),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 12),
-                                child: EditPencil(
-                                    width: 16, height: 16, color: muted),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: CupertinoTextField(
-                                  controller: noteCtrl,
-                                  placeholder: 'Add a note…',
-                                  maxLines: 3,
-                                  minLines: 1,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12),
-                                  style:
-                                      AppFonts.body(fontSize: 13, color: fg),
-                                  placeholderStyle: AppFonts.body(
-                                      fontSize: 13, color: muted),
-                                  decoration: const BoxDecoration(),
-                                  onChanged: (v) =>
-                                      bloc.add(TransactionFormNoteChanged(v)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      if (state.failure != null)
-                        _ErrorLine(
-                            text: state.failure!.message, color: expense),
-                      const SizedBox(height: 12),
+                      ),
                     ],
                   ),
                 ),
-              ),
+              ],
+              if (state.failure != null)
+                _ErrorLine(text: state.failure!.message, color: expense),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   if (isEditing)
@@ -423,21 +465,47 @@ class _FormBody extends StatelessWidget {
     );
   }
 
-  void _openSourcePicker(BuildContext context, TransactionFormBloc bloc,
+  void _openBankAccountPicker(BuildContext context, TransactionFormBloc bloc,
       TransactionFormState state, bool isTo) {
+    final title = isTo
+        ? 'Select destination account'
+        : (state.kind == TransactionKind.transfer
+            ? 'Select from account'
+            : 'Select bank account');
     showAppBottomSheet<void>(
       context: context,
-      title: isTo ? 'Select destination' : 'Select source',
+      title: title,
       heightFactor: 0.6,
-      child: MoneySourcePicker(
-        sources: sources,
-        selectedId: isTo ? state.toMoneySourceId : state.moneySourceId,
-        excludeId: isTo ? state.moneySourceId : null,
+      child: BankAccountPicker(
+        accounts: bankAccounts,
+        selectedId: isTo ? state.toBankAccountId : state.bankAccountId,
+        excludeId: isTo ? state.bankAccountId : null,
         onSelected: (s) => bloc.add(
           isTo
-              ? TransactionFormToSourceChanged(s.id)
+              ? TransactionFormToBankAccountChanged(s.id)
               : TransactionFormSourceChanged(s.id),
         ),
+      ),
+    );
+  }
+
+  Future<void> _openTransactionSourcePicker(BuildContext context,
+      TransactionFormBloc bloc, TransactionFormState state) async {
+    await showAppBottomSheet<void>(
+      context: context,
+      title: 'Counterparty source',
+      heightFactor: 0.72,
+      expand: true,
+      child: _TransactionSourcePickerSheet(
+        sources: txSources,
+        selectedId: state.transactionSourceId,
+        householdId: householdId,
+        userId: userId,
+        onReload: onReloadTransactionSources,
+        onSelected: (id) {
+          bloc.add(TransactionFormTransactionSourceChanged(id));
+          Navigator.of(context).pop();
+        },
       ),
     );
   }
@@ -461,6 +529,150 @@ class _FormBody extends StatelessWidget {
       return 'Today';
     }
     return DateFormat('dd MMM yyyy').format(d);
+  }
+
+  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+}
+
+/// Bottom-sheet body: create/edit + shrink-wrapped list (no nested viewport).
+class _TransactionSourcePickerSheet extends StatelessWidget {
+  final List<TransactionSource> sources;
+  final String? selectedId;
+  final String householdId;
+  final String userId;
+  final Future<void> Function() onReload;
+  final ValueChanged<String?> onSelected;
+
+  const _TransactionSourcePickerSheet({
+    required this.sources,
+    required this.selectedId,
+    required this.householdId,
+    required this.userId,
+    required this.onReload,
+    required this.onSelected,
+  });
+
+  Future<void> _openEditor(
+    BuildContext context, {
+    TransactionSource? existing,
+  }) async {
+    await showAppBottomSheet<void>(
+      context: context,
+      expand: true,
+      title: existing == null ? 'New source' : 'Edit source',
+      heightFactor: 0.85,
+      child: BlocProvider(
+        create: (_) => TransactionSourcesBloc(
+          AppDependencies.instance.transactionSourceRepository,
+        )..add(TransactionSourcesLoad(householdId: householdId)),
+        child: TransactionSourceForm(
+          existing: existing,
+          householdId: householdId,
+          userId: userId,
+        ),
+      ),
+    );
+    await onReload();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.myTheme;
+    final fg = _c(theme.onBackgroundColor);
+    final muted = _c(theme.onInactiveColor);
+    final accent = _c(theme.primaryColor);
+    final border = _c(theme.borderColor);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+          child: CupertinoButton.filled(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            onPressed: () => _openEditor(context),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 8,
+              children: [
+                Plus(width: 18, height: 18, color: CupertinoColors.white),
+                Text(
+                  'Create new source',
+                  style: AppFonts.body(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          itemCount: sources.length + 1,
+          separatorBuilder: (_, __) => Container(height: 1, color: border),
+          itemBuilder: (_, i) {
+            if (i == 0) {
+              final selected = selectedId == null;
+              return CupertinoButton(
+                onPressed: () => onSelected(null),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'None',
+                      style: AppFonts.body(
+                        fontSize: 15,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w400,
+                        color: selected ? accent : muted,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            final s = sources[i - 1];
+            final selected = s.id == selectedId;
+            return CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              onPressed: () => onSelected(s.id),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      s.name,
+                      style: AppFonts.body(
+                        fontSize: 15,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w400,
+                        color: selected ? accent : fg,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    s.kind.name,
+                    style: AppFonts.body(fontSize: 11, color: muted),
+                  ),
+                  const SizedBox(width: 8),
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(36, 36),
+                    onPressed: () => _openEditor(context, existing: s),
+                    child: EditPencil(width: 16, height: 16, color: muted),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
