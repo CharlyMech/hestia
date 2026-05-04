@@ -25,8 +25,14 @@ class TxData {
 class TxRow extends StatelessWidget {
   final TxData tx;
   final bool showDivider;
+  final VoidCallback? onTap;
 
-  const TxRow({super.key, required this.tx, this.showDivider = true});
+  const TxRow({
+    super.key,
+    required this.tx,
+    this.showDivider = true,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +45,7 @@ class TxRow extends StatelessWidget {
     final prefix = isIncome ? '+' : '−';
     final abs = tx.amount.abs().toStringAsFixed(2);
 
-    return Container(
+    final body = Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         border: showDivider
@@ -107,6 +113,12 @@ class TxRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (onTap == null) return body;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: body,
     );
   }
 

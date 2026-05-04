@@ -1,19 +1,30 @@
 import 'package:flutter/cupertino.dart';
-import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
-import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
+import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
+import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
+import 'package:hestia/presentation/widgets/common/date_range_selector.dart';
+import 'package:hestia/presentation/widgets/dashboard/balance_trend_line.dart';
+import 'package:hestia/presentation/widgets/dashboard/monthly_bar.dart';
+import 'package:hestia/presentation/widgets/dashboard/notifications_popover.dart';
+import 'package:hestia/presentation/widgets/dashboard/spend_donut.dart';
 import 'package:hestia/presentation/widgets/dashboard/tx_row.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show Bell, Bank, CreditCard;
+import 'package:hestia/presentation/widgets/goals/goal_progress_card.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart'
+    show Bell, Bank, CreditCard;
+import 'package:skeletonizer/skeletonizer.dart';
 
 class DashboardScreen extends StatefulWidget {
   final ValueChanged<String>? onOpenMoneySource;
@@ -24,9 +35,13 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  List<MoneySource> _topSources = const [];
+  List<BankAccount> _accounts = const [];
+  List<Transaction> _allTransactions = const [];
   List<TxData> _recentTx = const [];
+  List<Transaction> _recentTransactions = const [];
+  List<FinancialGoal> _goals = const [];
   bool _loading = true;
+  DateRangePreset _range = DateRangePreset.d30;
 
   @override
   void initState() {
@@ -38,46 +53,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) return;
     final profile = authState.profile;
-    final (household, _) = await AppDependencies.instance.householdRepository
-        .getCurrentHousehold(profile.id);
+    final deps = AppDependencies.instance;
+    final (household, _) =
+        await deps.householdRepository.getCurrentHousehold(profile.id);
     if (household == null) return;
 
-    final (sources, _) = await AppDependencies.instance.moneySourceRepository
-        .getMoneySources(
+    final (accounts, _) = await deps.bankAccountRepository.getBankAccounts(
       householdId: household.id,
       viewMode: ViewMode.personal,
       userId: profile.id,
     );
-    final userSourceIds = sources.map((s) => s.id).toSet();
-
-    final (transactions, _) = await AppDependencies.instance.transactionRepository
-        .getTransactions(
+    final (transactions, _) = await deps.transactionRepository.getTransactions(
       householdId: household.id,
-      viewMode: ViewMode.household,
+      viewMode: ViewMode.personal,
       userId: profile.id,
-      limit: 24,
+      limit: 500,
     );
-
-    final byAccount = <String, double>{};
-    for (final tx in transactions) {
-      byAccount[tx.moneySourceId] = (byAccount[tx.moneySourceId] ?? 0) + tx.amount.abs();
+    final (goals, _) = await deps.goalRepository.getGoals(
+      householdId: household.id,
+      viewMode: ViewMode.personal,
+      userId: profile.id,
+    );
+    if (mounted) {
+      context
+          .read<NotificationsBloc>()
+          .add(NotificationsLoad(profile.id));
     }
 
-    final sorted = [...sources]..sort(
-        (a, b) => (byAccount[b.id] ?? b.currentBalance).compareTo(byAccount[a.id] ?? a.currentBalance));
-    final recent = transactions
-        .where((tx) => userSourceIds.contains(tx.moneySourceId))
-        .take(6)
-        .map((tx) => _toTxData(tx, sources))
-        .toList();
+    final recentTransactions = transactions.take(6).toList();
+    final recent =
+        recentTransactions.map((tx) => _toTxData(tx, accounts)).toList();
 
     if (!mounted) return;
     setState(() {
-      _topSources = sorted.take(5).toList();
+      _accounts = accounts;
+      _allTransactions = transactions;
       _recentTx = recent;
+      _recentTransactions = recentTransactions;
+      _goals = goals.where((g) => g.isActive).toList();
       _loading = false;
     });
   }
+
+  List<Transaction> _txInRange() {
+    final r = DateRange.fromPreset(_range);
+    return _allTransactions
+        .where((tx) => tx.date.isAfter(r.start) && tx.date.isBefore(r.end))
+        .toList();
+  }
+
+  int _trendDays() => switch (_range) {
+        DateRangePreset.d7 => 7,
+        DateRangePreset.d30 => 30,
+        DateRangePreset.d90 => 90,
+        DateRangePreset.m6 => 180,
+        DateRangePreset.y1 => 365,
+        DateRangePreset.custom => 30,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -88,160 +120,357 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     final accent = _c(theme.primaryColor);
+    final income = _c(theme.colorGreen);
+    final expense = _c(theme.colorRed);
+    final tints = theme.categoryTints.map(_c).toList();
+    final auth = context.watch<AuthBloc>().state;
+    final userId = auth is AuthAuthenticated ? auth.profile.id : '';
+    final initials = auth is AuthAuthenticated
+        ? _initials(auth.profile.displayName ?? auth.profile.email)
+        : '··';
 
     return ColoredBox(
       color: bg,
       child: SafeArea(
         bottom: false,
         child: _loading
-            ? const Center(child: CupertinoActivityIndicator())
-            : CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: [
-            CupertinoSliverRefreshControl(onRefresh: _load),
-            SliverPadding(
-              padding: const EdgeInsets.only(bottom: 110),
-              sliver: SliverList.list(children: [
-            _Header(
-              fg: fg,
-              muted: muted,
-              surface: surface,
-              border: border,
-              accent: accent,
-              onAvatarTap: () => context.push(AppRoutes.settings),
-              onBellTap: () => context.push(AppRoutes.notifications),
-            ),
-            const SizedBox(height: 20),
-            _SectionLabel(
-              label: 'Top bank accounts',
-              action: 'View all',
-              muted: muted,
-              accent: accent,
-              onTap: () => context.push(AppRoutes.moneySources),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 126,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: _topSources.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (context, i) {
-                  final s = _topSources[i];
-                  final isShared = s.ownerType == OwnerType.shared;
-                  return GestureDetector(
-                    onTap: () => (widget.onOpenMoneySource ??
-                            ((id) => context.push(AppRoutes.moneySourceDetail, extra: id)))
-                        .call(s.id),
-                    child: SizedBox(
-                      width: 280,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: surface,
-                          border: Border.all(color: border, width: 1),
-                          borderRadius: BorderRadius.circular(AppRadii.xl),
+            ? Skeletonizer(
+                enabled: true,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  padding:
+                      const EdgeInsets.fromLTRB(20, 8, 20, 110),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'User name goes here long',
+                            style: AppFonts.heading(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: fg,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: surface,
+                              borderRadius:
+                                  BorderRadius.circular(12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'BANK ACCOUNTS',
+                        style: AppFonts.body(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: muted,
+                          letterSpacing: 1,
                         ),
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        height: 172,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            width: 262,
+                            height: 148,
+                            decoration: BoxDecoration(
+                              color: surface,
+                              border: Border.all(color: border),
+                              borderRadius: BorderRadius.circular(
+                                  AppRadii.xl),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Text(
+                            'SPENDING',
+                            style: AppFonts.body(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: muted,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const Spacer(),
+                        ],
+                      ),
+                      const SizedBox(height: 220),
+                      const SizedBox(height: 220),
+                      Text(
+                        'RECENT ACTIVITY placeholder',
+                        style: AppFonts.body(
+                          fontSize: 12,
+                          color: muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  CupertinoSliverRefreshControl(onRefresh: _load),
+                  SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 110),
+                    sliver: SliverList.list(children: [
+                      _Header(
+                        fg: fg,
+                        muted: muted,
+                        surface: surface,
+                        border: border,
+                        accent: accent,
+                        initials: initials,
+                        userId: userId,
+                        unreadCount:
+                            (context.watch<NotificationsBloc>().state
+                                    is NotificationsLoaded)
+                                ? (context.watch<NotificationsBloc>().state
+                                        as NotificationsLoaded)
+                                    .unreadCount
+                                : 0,
+                      ),
+                      const SizedBox(height: 20),
+                      _SectionLabel(
+                        label: 'Bank accounts',
+                        muted: muted,
+                      ),
+                      const SizedBox(height: 12),
+                      // Real WalletCard carousel.
+                      SizedBox(
+                        height: 180,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: _accounts.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (_, i) {
+                            return SizedBox(
+                              width: 280,
+                              child: WalletCard(
+                                source: _accounts[i],
+                                index: i,
+                                onTap: () =>
+                                    (widget.onOpenMoneySource ??
+                                            ((id) => context.push(
+                                                AppRoutes.bankAccountDetail,
+                                                extra: id)))
+                                        .call(_accounts[i].id),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: DateRangeSelector(
+                          selected: _range,
+                          onChanged: (r) => setState(() => _range = r),
+                          surface: surface,
+                          border: border,
+                          fg: fg,
+                          muted: muted,
+                          activeColor: accent,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _SectionLabel(
+                        label: 'Spending',
+                        muted: muted,
+                        accent: accent,
+                      ),
+                      const SizedBox(height: 8),
+                      _ChartCard(
+                        surface: surface,
+                        border: border,
+                        child: SpendDonut(
+                          transactions: _txInRange(),
+                          fg: fg,
+                          muted: muted,
+                          border: border,
+                          palette: tints,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _ChartCard(
+                        surface: surface,
+                        border: border,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 8,
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: accent.withValues(alpha: 0.14),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: (s.accountType == AccountType.savings
-                                        ? Bank(width: 18, height: 18, color: accent)
-                                        : CreditCard(width: 18, height: 18, color: accent)),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    s.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppFonts.body(fontSize: 14, fontWeight: FontWeight.w600, color: fg),
-                                  ),
-                                ),
-                                ScopePill(kind: isShared ? ScopeKind.shared : ScopeKind.personal),
-                              ],
-                            ),
-                            const Spacer(),
                             Text(
-                              '${s.currentBalance.toStringAsFixed(2)} ${s.currency}',
-                              style: AppFonts.numeric(fontSize: 22, fontWeight: FontWeight.w700, color: fg),
+                              'Net per month',
+                              style: AppFonts.sectionLabel(color: muted),
                             ),
-                            Text(
-                              '${s.institution ?? 'No institution'} · ${s.accountType.name}',
-                              style: AppFonts.body(fontSize: 12, color: muted),
+                            MonthlyBar(
+                              transactions: _allTransactions,
+                              income: income,
+                              expense: expense,
+                              axis: muted,
+                              grid: border,
+                              tooltipBg: fg,
+                              tooltipFg: bg,
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(
-              label: 'Spending · April',
-              action: 'View all',
-              muted: muted,
-              accent: accent,
-              onTap: () => context.push(AppRoutes.transactions),
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(
-              label: 'Active goals',
-              action: 'See all',
-              muted: muted,
-              accent: accent,
-              onTap: () => context.push(AppRoutes.goals),
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(
-              label: 'Recent',
-              action: 'View all',
-              muted: muted,
-              accent: accent,
-              onTap: () => context.push(AppRoutes.transactions),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: surface,
-                border: Border.all(color: border, width: 1),
-                borderRadius: BorderRadius.circular(AppRadii.xl),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  for (var i = 0; i < _recentTx.length; i++)
-                    TxRow(tx: _recentTx[i], showDivider: i < _recentTx.length - 1),
+                      const SizedBox(height: 12),
+                      _ChartCard(
+                        surface: surface,
+                        border: border,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 8,
+                          children: [
+                            Text(
+                              'Balance trend · ${_trendDays()}d',
+                              style: AppFonts.sectionLabel(color: muted),
+                            ),
+                            BalanceTrendLine(
+                              transactions: _allTransactions,
+                              bankAccounts: _accounts,
+                              line: accent,
+                              grid: border,
+                              axis: muted,
+                              tooltipBg: fg,
+                              tooltipFg: bg,
+                              days: _trendDays(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _SectionLabel(
+                        label: 'Active goals',
+                        action: 'See all',
+                        muted: muted,
+                        accent: accent,
+                        onTap: () => context.push(AppRoutes.goals),
+                      ),
+                      const SizedBox(height: 8),
+                      if (_goals.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 18),
+                            decoration: BoxDecoration(
+                              color: surface,
+                              border: Border.all(color: border, width: 1),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadii.xl),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'No active goals — tap See all to create one',
+                                style: AppFonts.body(
+                                    fontSize: 12, color: muted),
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          height: 86,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20),
+                            itemCount: _goals.take(4).length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (_, i) {
+                              final g = _goals[i];
+                              final color = g.color != null
+                                  ? Color(int.parse(
+                                      g.color!.replaceFirst('#', '0xff')))
+                                  : accent;
+                              return SizedBox(
+                                width: 240,
+                                child: GoalProgressCard(
+                                  goal: g,
+                                  color: color,
+                                  surface: surface,
+                                  border: border,
+                                  fg: fg,
+                                  muted: muted,
+                                  onTap: () =>
+                                      context.push(AppRoutes.goals),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 24),
+                      _SectionLabel(
+                        label: 'Recent',
+                        muted: muted,
+                        accent: accent,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: surface,
+                          border: Border.all(color: border, width: 1),
+                          borderRadius:
+                              BorderRadius.circular(AppRadii.xl),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < _recentTx.length; i++)
+                              TxRow(
+                                tx: _recentTx[i],
+                                showDivider: i < _recentTx.length - 1,
+                                onTap: () => context.push(
+                                  AppRoutes.transactionDetail,
+                                  extra: _recentTransactions[i],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ]),
+                  ),
                 ],
               ),
-            ),
-              ]),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  TxData _toTxData(Transaction tx, List<MoneySource> sources) {
-    final source = sources.where((s) => s.id == tx.moneySourceId).firstOrNull;
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '··';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
+  }
+
+  TxData _toTxData(Transaction tx, List<BankAccount> sources) {
+    final source = sources.where((s) => s.id == tx.bankAccountId).firstOrNull;
     final isShared = source?.ownerType == OwnerType.shared;
     final icon = tx.type == TransactionType.income
         ? CreditCard(width: 18, height: 18, color: const Color(0xFF4CB782))
@@ -251,8 +480,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: const Color(0xFF8B7AE6),
       title: tx.note ?? tx.categoryName ?? 'Transaction',
       category: tx.categoryName ?? tx.type.name,
-      source: source?.name ?? tx.moneySourceName ?? 'Account',
-      amount: tx.type == TransactionType.expense ? -tx.amount.abs() : tx.amount.abs(),
+      source: source?.name ?? tx.bankAccountName ?? 'Account',
+      amount: tx.type == TransactionType.expense
+          ? -tx.amount.abs()
+          : tx.amount.abs(),
       shared: isShared,
     );
   }
@@ -266,8 +497,9 @@ class _Header extends StatelessWidget {
   final Color surface;
   final Color border;
   final Color accent;
-  final VoidCallback? onAvatarTap;
-  final VoidCallback? onBellTap;
+  final String initials;
+  final String userId;
+  final int unreadCount;
 
   const _Header({
     required this.fg,
@@ -275,8 +507,9 @@ class _Header extends StatelessWidget {
     required this.surface,
     required this.border,
     required this.accent,
-    this.onAvatarTap,
-    this.onBellTap,
+    required this.initials,
+    required this.userId,
+    required this.unreadCount,
   });
 
   @override
@@ -288,12 +521,12 @@ class _Header extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
               children: [
                 Text(
-                  'Good morning, Ana',
-                  style: TextStyle(fontSize: 13, color: muted),
+                  'Welcome back',
+                  style: AppFonts.body(fontSize: 13, color: muted),
                 ),
-                const SizedBox(height: 2),
                 Text(
                   'Overview',
                   style: AppFonts.heading(
@@ -306,43 +539,45 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: onBellTap,
-            behavior: HitTestBehavior.opaque,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: surface,
-                    border: Border.all(color: border, width: 1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
+          // Bell with FPopover preview of latest unread notifications.
+          FPopover.tappable(
+            followerBuilder: (_, __, ___) =>
+                NotificationsPopover(userId: userId),
+            target: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: surface,
+                border: Border.all(color: border, width: 1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Center(
                     child: Bell(width: 18, height: 18, color: fg),
                   ),
-                ),
-                Positioned(
-                  top: 6,
-                  right: 7,
-                  child: Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: surface, width: 2),
+                  if (unreadCount > 0)
+                    Positioned(
+                      top: 6,
+                      right: 7,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: accent,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: surface, width: 2),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 10),
           GestureDetector(
-            onTap: onAvatarTap,
+            onTap: () => context.push(AppRoutes.profile),
             behavior: HitTestBehavior.opaque,
             child: Container(
               width: 40,
@@ -352,11 +587,11 @@ class _Header extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'AR',
-                style: TextStyle(
+              child: Text(
+                initials,
+                style: AppFonts.body(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: CupertinoColors.white,
                 ),
               ),
@@ -372,19 +607,20 @@ class _SectionLabel extends StatelessWidget {
   final String label;
   final String? action;
   final Color muted;
-  final Color accent;
+  final Color? accent;
   final VoidCallback? onTap;
 
   const _SectionLabel({
     required this.label,
     this.action,
     required this.muted,
-    required this.accent,
+    this.accent,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final linkColor = accent ?? muted;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -394,8 +630,8 @@ class _SectionLabel extends StatelessWidget {
           Expanded(
             child: Text(
               label.toUpperCase(),
-              style: TextStyle(
-    fontSize: 12,
+              style: AppFonts.body(
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: muted,
                 letterSpacing: 1.0,
@@ -405,16 +641,45 @@ class _SectionLabel extends StatelessWidget {
           if (action != null)
             GestureDetector(
               onTap: onTap,
+              behavior: HitTestBehavior.opaque,
               child: Text(
                 action!,
-                style: TextStyle(
+                style: AppFonts.body(
                   fontSize: 12,
-                  color: accent,
+                  color: linkColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _ChartCard extends StatelessWidget {
+  final Widget child;
+  final Color surface;
+  final Color border;
+
+  const _ChartCard({
+    required this.child,
+    required this.surface,
+    required this.border,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: surface,
+          border: Border.all(color: border, width: 1),
+          borderRadius: BorderRadius.circular(AppRadii.xl),
+        ),
+        child: child,
       ),
     );
   }
