@@ -8,7 +8,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/pages/calendar/calendar_screen.dart';
 import 'package:hestia/presentation/pages/dashboard/dashboard_screen.dart';
-import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
+import 'package:hestia/presentation/pages/bank_accounts/bank_accounts_screen.dart';
 import 'package:hestia/presentation/pages/shopping/shopping_screen.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/dashboard/floating_nav_bar.dart';
@@ -75,6 +75,7 @@ class _MainTabShellState extends State<MainTabShell> {
       context: context,
       title: 'New transaction',
       heightFactor: 0.92,
+      expand: true,
       child: TransactionForm(
         householdId: household.id,
         userId: authState.profile.id,
@@ -97,11 +98,11 @@ class _MainTabShellState extends State<MainTabShell> {
             onPageChanged: (i) => setState(() => _index = i),
             children: [
               DashboardScreen(
-                onOpenMoneySource: (id) => context.push(AppRoutes.moneySourceDetail, extra: id),
+                onOpenMoneySource: (id) => context.push(AppRoutes.bankAccountDetail, extra: id),
               ),
               const CalendarScreen(),
               const ShoppingScreen(),
-              const MoneySourcesScreen(),
+              const BankAccountsScreen(embeddedInTabShell: true),
             ],
           ),
           Positioned(

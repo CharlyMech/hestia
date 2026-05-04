@@ -21,8 +21,8 @@ class ScreenShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: bg,
+    return CupertinoPageScaffold(
+      backgroundColor: bg,
       child: SafeArea(
         bottom: false,
         child: CustomScrollView(

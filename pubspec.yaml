@@ -39,6 +39,7 @@ dependencies:
   path: ^1.9.0
 
   # --- UI ---
+  skeletonizer: ^1.4.2
   forui: ^0.7.0
   cupertino_icons: ^1.0.8
   iconoir_flutter: ^7.11.0

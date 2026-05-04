@@ -14,6 +14,7 @@ import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/admin/create_user_form.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
@@ -31,7 +32,9 @@ import 'package:iconoir_flutter/iconoir_flutter.dart'
         LogOut,
         UserPlus,
         Clock,
-        CalendarPlus;
+        CalendarPlus,
+        Cart,
+        Shop;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -207,6 +210,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           sub: 'Send invite link',
         ),
       ]),
+      _Section('Data management', [
+        _Tile.chevron(
+          icon: Cart(width: 16, height: 16, color: tints[0]),
+          color: tints[0],
+          label: 'Categories',
+          sub: 'Expense & income',
+          onTap: () => context.push(AppRoutes.categories),
+        ),
+        _Tile.chevron(
+          icon: Shop(width: 16, height: 16, color: tints[2]),
+          color: tints[2],
+          label: 'Sources',
+          sub: 'Merchants, employers, services',
+          onTap: () => context.push(AppRoutes.transactionSources),
+        ),
+      ]),
       _Section('Preferences', [
         _Tile.chevron(
           icon: HalfMoon(width: 16, height: 16, color: tints[2]),
@@ -378,84 +397,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
 
-    return ScreenShell(
-      bg: bg,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-            child: Text(
-              l10n.settings_title,
-              style: AppFonts.heading(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                color: fg,
-              ),
-            ),
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: surface,
-                border: Border.all(color: border, width: 1),
-                borderRadius: BorderRadius.circular(AppRadii.xl),
-              ),
-              child: Row(
-                children: [
-                  MemberAvatar(name: name, color: tints[0], size: 52),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: AppFonts.body(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: fg,
+    return CupertinoPushedRouteShell(
+      backgroundColor: bg,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: l10n.settings_title,
+      child: ScreenShell(
+        bg: bg,
+        slivers: [
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: surface,
+                  border: Border.all(color: border, width: 1),
+                  borderRadius: BorderRadius.circular(AppRadii.xl),
+                ),
+                child: Row(
+                  children: [
+                    MemberAvatar(name: name, color: tints[0], size: 52),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: AppFonts.body(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: fg,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$email · Owner',
-                          style: AppFonts.body(fontSize: 12, color: muted),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            '$email · Owner',
+                            style:
+                                AppFonts.body(fontSize: 12, color: muted),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  ChevronIcon(color: muted),
-                ],
+                    ChevronIcon(color: muted),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        for (final s in sections) ...[
-          const SliverToBoxAdapter(child: SizedBox(height: 22)),
-          if (s.title.isNotEmpty)
-            SliverToBoxAdapter(child: SectionLabel(s.title, color: muted)),
-          if (s.title.isNotEmpty)
-            const SliverToBoxAdapter(child: SizedBox(height: 10)),
-          SliverToBoxAdapter(child: sectionCard(s)),
+          for (final s in sections) ...[
+            const SliverToBoxAdapter(child: SizedBox(height: 22)),
+            if (s.title.isNotEmpty)
+              SliverToBoxAdapter(child: SectionLabel(s.title, color: muted)),
+            if (s.title.isNotEmpty)
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
+            SliverToBoxAdapter(child: sectionCard(s)),
+          ],
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          SliverToBoxAdapter(
+            child: Center(
+              child: Text(
+                'Hestia · v1.0.0',
+                style: AppFonts.label(
+                  fontSize: 11,
+                  color: muted.withValues(alpha: 0.55),
+                ),
+              ),
+            ),
+          ),
         ],
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-        SliverToBoxAdapter(
-          child: Center(
-            child: Text(
-              'Hestia · v1.0.0',
-              style: AppFonts.label(
-                fontSize: 11,
-                color: muted.withValues(alpha: 0.55),
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

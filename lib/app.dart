@@ -6,6 +6,7 @@ import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
+import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
 
 import 'core/config/router.dart';
 import 'core/config/theme.dart';
@@ -38,9 +39,9 @@ class HestiaApp extends StatelessWidget {
           create: (_) => UserPrefsBloc(deps.userPreferencesService)
             ..add(const UserPrefsLoad()),
         ),
-        // Add other global blocs here as you build them:
-        // BlocProvider(create: (_) => AuthBloc(...)),
-        // BlocProvider(create: (_) => NotificationsBloc(...)),
+        BlocProvider(
+          create: (_) => NotificationsBloc(deps.notificationRepository),
+        ),
       ],
       child: BlocBuilder<UserPrefsBloc, UserPrefsState>(
         builder: (context, prefs) {

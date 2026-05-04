@@ -6,9 +6,10 @@ import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
 import 'package:hestia/presentation/pages/goals/goals_screen.dart';
 import 'package:hestia/presentation/pages/main_tab_shell.dart';
-import 'package:hestia/presentation/pages/money_sources/add_edit_money_sources_screen.dart';
-import 'package:hestia/presentation/pages/money_sources/money_source_detail_screen.dart';
-import 'package:hestia/presentation/pages/money_sources/money_sources_screen.dart';
+import 'package:hestia/presentation/pages/bank_accounts/add_edit_bank_account_screen.dart';
+import 'package:hestia/presentation/pages/bank_accounts/bank_account_detail_screen.dart';
+import 'package:hestia/presentation/pages/bank_accounts/bank_accounts_screen.dart';
+import 'package:hestia/presentation/pages/bank_accounts/recurring_transactions_screen.dart';
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/presentation/pages/appointments/add_edit_appointment_screen.dart';
 import 'package:hestia/presentation/pages/appointments/appointment_detail_screen.dart';
@@ -19,7 +20,12 @@ import 'package:hestia/presentation/pages/settings/settings_screen.dart';
 import 'package:hestia/presentation/pages/splash/custom_splash_screen.dart';
 import 'package:hestia/domain/entities/notification.dart';
 import 'package:hestia/domain/entities/transaction.dart';
+import 'package:hestia/presentation/pages/shopping/add_edit_shopping_list_screen.dart';
+import 'package:hestia/presentation/pages/shopping/shopping_list_detail_screen.dart';
+import 'package:hestia/domain/entities/shopping_list.dart';
+import 'package:hestia/presentation/pages/transaction_sources/transaction_sources_screen.dart';
 import 'package:hestia/presentation/pages/transactions/add_edit_transaction_screen.dart';
+import 'package:hestia/presentation/pages/transactions/transaction_detail_screen.dart';
 import 'package:hestia/presentation/pages/transactions/transactions_screen.dart';
 
 abstract final class AppRoutes {
@@ -47,11 +53,16 @@ abstract final class AppRoutes {
 
   static const transactions = '/transactions';
   static const editTransaction = '/transactions/edit';
+  static const transactionDetail = '/transactions/detail';
+  static const transactionSources = '/transaction-sources';
+  static const addShoppingList = '/shopping/list/add';
+  static const shoppingListDetail = '/shopping/list';
   static const categories = '/categories';
-  static const moneySources = '/money-sources';
-  static const addMoneySource = '/money-sources/add';
-  static const editMoneySource = '/money-sources/edit';
-  static const moneySourceDetail = '/money-sources/detail';
+  static const bankAccounts = '/bank-accounts';
+  static const addBankAccount = '/bank-accounts/add';
+  static const editBankAccount = '/bank-accounts/edit';
+  static const bankAccountDetail = '/bank-accounts/detail';
+  static const recurringTransactions = '/bank-accounts/recurring';
   static const addGoal = '/goals/add';
   static const editGoal = '/goals/edit';
   static const goalDetail = '/goals/detail';
@@ -96,38 +107,56 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: AppRoutes.transactionDetail,
+      pageBuilder: (context, state) {
+        final transaction = state.extra as Transaction;
+        return CupertinoPage(
+          child: TransactionDetailScreen(transaction: transaction),
+        );
+      },
+    ),
+    GoRoute(
       path: AppRoutes.categories,
       pageBuilder: (context, state) => const CupertinoPage(
         child: CategoriesScreen(),
       ),
     ),
     GoRoute(
-      path: AppRoutes.moneySources,
+      path: AppRoutes.bankAccounts,
       pageBuilder: (context, state) => const CupertinoPage(
-        child: MoneySourcesScreen(),
+        child: BankAccountsScreen(),
       ),
     ),
     GoRoute(
-      path: AppRoutes.addMoneySource,
+      path: AppRoutes.addBankAccount,
       pageBuilder: (context, state) => const CupertinoPage(
-        child: AddEditMoneySourceScreen(),
+        child: AddEditBankAccountScreen(),
       ),
     ),
     GoRoute(
-      path: AppRoutes.editMoneySource,
+      path: AppRoutes.editBankAccount,
       pageBuilder: (context, state) {
         final sourceId = state.extra as String;
         return CupertinoPage(
-          child: AddEditMoneySourceScreen(sourceId: sourceId),
+          child: AddEditBankAccountScreen(sourceId: sourceId),
         );
       },
     ),
     GoRoute(
-      path: AppRoutes.moneySourceDetail,
+      path: AppRoutes.bankAccountDetail,
       pageBuilder: (context, state) {
         final sourceId = state.extra as String;
         return CupertinoPage(
-          child: MoneySourceDetailScreen(sourceId: sourceId),
+          child: BankAccountDetailScreen(sourceId: sourceId),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.recurringTransactions,
+      pageBuilder: (context, state) {
+        final sourceId = state.extra as String;
+        return CupertinoPage(
+          child: RecurringTransactionsScreen(sourceId: sourceId),
         );
       },
     ),
@@ -142,7 +171,7 @@ final appRouter = GoRouter(
       pageBuilder: (context, state) {
         final sourceId = state.extra as String?;
         return CupertinoPage(
-          child: AddEditGoalScreen(prefilledMoneySourceId: sourceId),
+          child: AddEditGoalScreen(prefilledBankAccountId: sourceId),
         );
       },
     ),
@@ -182,6 +211,33 @@ final appRouter = GoRouter(
       pageBuilder: (context, state) => const CupertinoPage(
         child: TransactionsScreen(),
       ),
+    ),
+    GoRoute(
+      path: AppRoutes.transactionSources,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: TransactionSourcesScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.addShoppingList,
+      pageBuilder: (context, state) {
+        final args = state.extra as (String, String);
+        return CupertinoPage(
+          child: AddEditShoppingListScreen(
+            householdId: args.$1,
+            userId: args.$2,
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.shoppingListDetail,
+      pageBuilder: (context, state) {
+        final list = state.extra as ShoppingList;
+        return CupertinoPage(
+          child: ShoppingListDetailScreen(list: list),
+        );
+      },
     ),
     GoRoute(
       path: AppRoutes.profile,

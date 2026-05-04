@@ -6,7 +6,9 @@ abstract final class SupabaseTables {
   static const categories = 'categories';
   static const transactions = 'transactions';
   static const transfers = 'transfers';
-  static const moneySources = 'money_sources';
+  // TODO(rename): rename DB table to `bank_accounts` in a future migration.
+  static const bankAccounts = 'money_sources';
+  static const transactionSources = 'transaction_sources';
   static const financialGoals = 'financial_goals';
   static const goalContributions = 'goal_contributions';
   static const notifications = 'notifications';
