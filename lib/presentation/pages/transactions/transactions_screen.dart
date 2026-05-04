@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:hestia/presentation/widgets/dashboard/tx_row.dart';
@@ -206,58 +207,48 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       );
     }
 
-    return ScreenShell(
-      bg: bg,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Activity',
-                    style: AppFonts.heading(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      color: fg,
-                    ),
+    return CupertinoPushedRouteShell(
+      backgroundColor: bg,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Activity',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconBtn(
+            icon: Search(width: 18, height: 18, color: fg),
+            surface: surface,
+            border: border,
+          ),
+          const SizedBox(width: 8),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconBtn(
+                icon: FilterAlt(width: 18, height: 18, color: fg),
+                surface: surface,
+                border: border,
+              ),
+              Positioned(
+                top: 9,
+                right: 9,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    shape: BoxShape.circle,
                   ),
                 ),
-                IconBtn(
-                  icon: Search(width: 18, height: 18, color: fg),
-                  surface: surface,
-                  border: border,
-                ),
-                const SizedBox(width: 8),
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconBtn(
-                      icon: FilterAlt(width: 18, height: 18, color: fg),
-                      surface: surface,
-                      border: border,
-                    ),
-                    Positioned(
-                      top: 9,
-                      right: 9,
-                      child: Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: accent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        ],
+      ),
+      child: ScreenShell(
+        bg: bg,
+        slivers: [
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
         SliverToBoxAdapter(
           child: SingleChildScrollView(
@@ -313,6 +304,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               groupSection(groups[i], first: i == 0),
         ),
       ],
+      ),
     );
   }
 

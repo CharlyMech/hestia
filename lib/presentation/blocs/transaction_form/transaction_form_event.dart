@@ -46,17 +46,25 @@ class TransactionFormCategoryChanged extends TransactionFormEvent {
 }
 
 class TransactionFormSourceChanged extends TransactionFormEvent {
-  final String moneySourceId;
-  const TransactionFormSourceChanged(this.moneySourceId);
+  final String bankAccountId;
+  const TransactionFormSourceChanged(this.bankAccountId);
   @override
-  List<Object?> get props => [moneySourceId];
+  List<Object?> get props => [bankAccountId];
 }
 
-class TransactionFormToSourceChanged extends TransactionFormEvent {
-  final String moneySourceId;
-  const TransactionFormToSourceChanged(this.moneySourceId);
+class TransactionFormToBankAccountChanged extends TransactionFormEvent {
+  final String bankAccountId;
+  const TransactionFormToBankAccountChanged(this.bankAccountId);
   @override
-  List<Object?> get props => [moneySourceId];
+  List<Object?> get props => [bankAccountId];
+}
+
+class TransactionFormTransactionSourceChanged extends TransactionFormEvent {
+  /// Pass null to clear the selection.
+  final String? transactionSourceId;
+  const TransactionFormTransactionSourceChanged(this.transactionSourceId);
+  @override
+  List<Object?> get props => [transactionSourceId];
 }
 
 class TransactionFormDateChanged extends TransactionFormEvent {

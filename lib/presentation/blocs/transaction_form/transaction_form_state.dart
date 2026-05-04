@@ -10,8 +10,10 @@ class TransactionFormState extends Equatable {
   final TransactionKind kind;
   final String amount;
   final String? categoryId;
-  final String? moneySourceId;
-  final String? toMoneySourceId;
+  final String? bankAccountId;
+  /// Transfer destination bank account.
+  final String? toBankAccountId;
+  final String? transactionSourceId;
   final DateTime date;
   final bool isRecurring;
   final String note;
@@ -24,8 +26,9 @@ class TransactionFormState extends Equatable {
     this.kind = TransactionKind.expense,
     this.amount = '',
     this.categoryId,
-    this.moneySourceId,
-    this.toMoneySourceId,
+    this.bankAccountId,
+    this.toBankAccountId,
+    this.transactionSourceId,
     required this.date,
     this.isRecurring = false,
     this.note = '',
@@ -50,8 +53,9 @@ class TransactionFormState extends Equatable {
     TransactionKind? kind,
     String? amount,
     Object? categoryId = _unset,
-    Object? moneySourceId = _unset,
-    Object? toMoneySourceId = _unset,
+    Object? bankAccountId = _unset,
+    Object? toBankAccountId = _unset,
+    Object? transactionSourceId = _unset,
     DateTime? date,
     bool? isRecurring,
     String? note,
@@ -65,12 +69,15 @@ class TransactionFormState extends Equatable {
       amount: amount ?? this.amount,
       categoryId:
           categoryId == _unset ? this.categoryId : categoryId as String?,
-      moneySourceId: moneySourceId == _unset
-          ? this.moneySourceId
-          : moneySourceId as String?,
-      toMoneySourceId: toMoneySourceId == _unset
-          ? this.toMoneySourceId
-          : toMoneySourceId as String?,
+      bankAccountId: bankAccountId == _unset
+          ? this.bankAccountId
+          : bankAccountId as String?,
+      toBankAccountId: toBankAccountId == _unset
+          ? this.toBankAccountId
+          : toBankAccountId as String?,
+      transactionSourceId: transactionSourceId == _unset
+          ? this.transactionSourceId
+          : transactionSourceId as String?,
       date: date ?? this.date,
       isRecurring: isRecurring ?? this.isRecurring,
       note: note ?? this.note,
@@ -86,8 +93,9 @@ class TransactionFormState extends Equatable {
         kind,
         amount,
         categoryId,
-        moneySourceId,
-        toMoneySourceId,
+        bankAccountId,
+        toBankAccountId,
+        transactionSourceId,
         date,
         isRecurring,
         note,

@@ -31,9 +31,11 @@ class TransactionFormBloc
     on<TransactionFormCategoryChanged>(
         (e, emit) => emit(state.copyWith(categoryId: e.categoryId)));
     on<TransactionFormSourceChanged>(
-        (e, emit) => emit(state.copyWith(moneySourceId: e.moneySourceId)));
-    on<TransactionFormToSourceChanged>(
-        (e, emit) => emit(state.copyWith(toMoneySourceId: e.moneySourceId)));
+        (e, emit) => emit(state.copyWith(bankAccountId: e.bankAccountId)));
+    on<TransactionFormToBankAccountChanged>(
+        (e, emit) => emit(state.copyWith(toBankAccountId: e.bankAccountId)));
+    on<TransactionFormTransactionSourceChanged>((e, emit) =>
+        emit(state.copyWith(transactionSourceId: e.transactionSourceId)));
     on<TransactionFormDateChanged>(
         (e, emit) => emit(state.copyWith(date: e.date)));
     on<TransactionFormRecurringToggled>(
@@ -53,7 +55,8 @@ class TransactionFormBloc
           : TransactionKind.income,
       amount: t.amount.toStringAsFixed(2),
       categoryId: t.categoryId,
-      moneySourceId: t.moneySourceId,
+      bankAccountId: t.bankAccountId,
+      transactionSourceId: t.transactionSourceId,
       date: t.date,
       isRecurring: t.isRecurring,
       note: t.note ?? '',
@@ -73,15 +76,21 @@ class TransactionFormBloc
       errors['amount'] = 'Enter an amount greater than zero';
     }
     if (state.kind == TransactionKind.transfer) {
-      if (state.moneySourceId == null) errors['from'] = 'Pick a source';
-      if (state.toMoneySourceId == null) errors['to'] = 'Pick a destination';
-      if (state.moneySourceId != null &&
-          state.moneySourceId == state.toMoneySourceId) {
+      if (state.bankAccountId == null) {
+        errors['from'] = 'Pick a from account';
+      }
+      if (state.toBankAccountId == null) {
+        errors['to'] = 'Pick a destination account';
+      }
+      if (state.bankAccountId != null &&
+          state.bankAccountId == state.toBankAccountId) {
         errors['to'] = 'Destination must differ';
       }
     } else {
       if (state.categoryId == null) errors['category'] = 'Pick a category';
-      if (state.moneySourceId == null) errors['source'] = 'Pick a source';
+      if (state.bankAccountId == null) {
+        errors['bankAccount'] = 'Pick a bank account';
+      }
     }
     return errors;
   }
@@ -108,8 +117,8 @@ class TransactionFormBloc
         id: '',
         householdId: householdId,
         userId: userId,
-        fromSourceId: state.moneySourceId!,
-        toSourceId: state.toMoneySourceId!,
+        fromSourceId: state.bankAccountId!,
+        toSourceId: state.toBankAccountId!,
         amount: amount,
         note: state.note.isEmpty ? null : state.note,
         date: state.date,
@@ -138,7 +147,8 @@ class TransactionFormBloc
       householdId: householdId,
       userId: userId,
       categoryId: state.categoryId!,
-      moneySourceId: state.moneySourceId!,
+      bankAccountId: state.bankAccountId!,
+      transactionSourceId: state.transactionSourceId,
       amount: amount,
       type: type,
       note: state.note.isEmpty ? null : state.note,
