@@ -1,15 +1,23 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/presentation/widgets/common/animated_progress_bar.dart';
-import 'package:hestia/presentation/widgets/common/member_avatar.dart';
+import 'package:hestia/domain/entities/financial_goal.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/blocs/goals/goals_bloc.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:hestia/presentation/widgets/dashboard/progress_ring.dart';
-import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus, Calendar;
+import 'package:hestia/presentation/widgets/goals/goal_form_content.dart';
+import 'package:hestia/presentation/widgets/goals/goal_progress_card.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
+import 'package:skeletonizer/skeletonizer.dart';
 
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
@@ -19,7 +27,143 @@ class GoalsScreen extends StatefulWidget {
 }
 
 class _GoalsScreenState extends State<GoalsScreen> {
-  int _filter = 0; // 0=All 1=Shared 2=Personal
+  String? _householdId;
+  bool _resolving = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveHousehold();
+  }
+
+  Future<void> _resolveHousehold() async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) {
+      if (mounted) setState(() => _resolving = false);
+      return;
+    }
+    final (household, _) = await AppDependencies.instance.householdRepository
+        .getCurrentHousehold(auth.profile.id);
+    if (!mounted) return;
+    setState(() {
+      _householdId = household?.id;
+      _resolving = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthBloc>().state;
+
+    if (auth is! AuthAuthenticated || _resolving || _householdId == null) {
+      final theme = context.myTheme;
+      final bg = _c(theme.backgroundColor);
+      final border = _c(theme.borderColor);
+      final fg = _c(theme.onBackgroundColor);
+      final muted = _c(theme.onInactiveColor);
+      final surface = _c(theme.surfaceColor);
+
+      Widget body = auth is! AuthAuthenticated
+          ? Center(
+              child: Text(
+                'Sign in to view goals',
+                style: AppFonts.body(fontSize: 14, color: muted),
+              ),
+            )
+          : Skeletonizer(
+              enabled: true,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
+                  Text(
+                    '0 active goals',
+                    style: AppFonts.body(fontSize: 13, color: muted),
+                  ),
+                  const SizedBox(height: 200),
+                  Container(
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: surface,
+                      border: Border.all(color: border),
+                      borderRadius: BorderRadius.circular(AppRadii.xl),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+      return CupertinoPushedRouteShell(
+        backgroundColor: bg,
+        borderColor: border,
+        foregroundColor: fg,
+        titleText: 'Goals',
+        child: body,
+      );
+    }
+
+    return BlocProvider(
+      create: (_) => GoalsBloc(AppDependencies.instance.goalRepository)
+        ..add(GoalsLoad(
+          householdId: _householdId!,
+          userId: auth.profile.id,
+        )),
+      child: _Body(
+        householdId: _householdId!,
+        userId: auth.profile.id,
+      ),
+    );
+  }
+
+  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+}
+
+class _Body extends StatefulWidget {
+  final String householdId;
+  final String userId;
+  const _Body({required this.householdId, required this.userId});
+
+  @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  int _filter = 0; // 0=All 1=Household 2=Personal
+  List<BankAccount> _moneySources = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMoneySources();
+  }
+
+  Future<void> _loadMoneySources() async {
+    final (sources, _) = await AppDependencies.instance.bankAccountRepository
+        .getBankAccounts(
+      householdId: widget.householdId,
+      viewMode: ViewMode.household,
+      userId: widget.userId,
+    );
+    if (!mounted) return;
+    setState(() => _moneySources = sources);
+  }
+
+  Future<void> _openGoalSheet({FinancialGoal? existing, String? prefilled}) {
+    return showAppBottomSheet<void>(
+      context: context,
+      title: existing == null ? 'New goal' : 'Edit goal',
+      heightFactor: 0.92,
+      child: BlocProvider.value(
+        value: context.read<GoalsBloc>(),
+        child: GoalFormContent(
+          existing: existing,
+          householdId: widget.householdId,
+          userId: widget.userId,
+          prefilledBankAccountId: prefilled,
+          bankAccounts: _moneySources,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,389 +176,348 @@ class _GoalsScreenState extends State<GoalsScreen> {
     final muted = _c(theme.onInactiveColor);
     final accent = _c(theme.primaryColor);
     final tints = theme.categoryTints.map(_c).toList();
-    final income = _c(theme.colorGreen);
 
-    final goals = <_Goal>[
-      _Goal(
-        title: 'Summer trip · Sicily',
-        v: 0.62,
-        cur: 1860,
-        tgt: 3000,
-        color: accent,
-        scope: ScopeKind.shared,
-        deadline: 'Aug 2026',
-        members: [
-          (name: 'Ana', color: tints[0]),
-          (name: 'Luis', color: tints[2]),
-        ],
-      ),
-      _Goal(
-        title: 'Emergency fund',
-        v: 0.34,
-        cur: 3400,
-        tgt: 10000,
-        color: tints[0],
-        scope: ScopeKind.shared,
-        deadline: 'No deadline',
-        members: [
-          (name: 'Ana', color: tints[0]),
-          (name: 'Luis', color: tints[2]),
-        ],
-      ),
-      _Goal(
-        title: 'New laptop',
-        v: 0.78,
-        cur: 1560,
-        tgt: 2000,
-        color: income,
-        scope: ScopeKind.personal,
-        deadline: 'Jun 2026',
-        members: const [],
-      ),
-      _Goal(
-        title: 'Photography course',
-        v: 0.15,
-        cur: 90,
-        tgt: 600,
-        color: tints[1],
-        scope: ScopeKind.personal,
-        deadline: 'Sep 2026',
-        members: const [],
-      ),
-    ];
-
-    final filtered = switch (_filter) {
-      1 => goals.where((g) => g.scope == ScopeKind.shared).toList(),
-      2 => goals.where((g) => g.scope == ScopeKind.personal).toList(),
-      _ => goals,
-    };
-
-    Widget pill(String label, int idx) {
-      final active = _filter == idx;
-      return GestureDetector(
-        onTap: () => setState(() => _filter = idx),
+    return CupertinoPushedRouteShell(
+      backgroundColor: bg,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Goals',
+      trailing: GestureDetector(
+        onTap: () => _openGoalSheet(),
+        behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: active ? surface2 : const Color(0x00000000),
-            border: Border.all(
-              color: active ? muted.withValues(alpha: 0.4) : border,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(999),
+            color: accent,
+            borderRadius: BorderRadius.circular(AppRadii.lg),
           ),
-          child: Text(
-            label,
-            style: AppFonts.body(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: active ? fg : muted,
+          child: const Center(
+            child: Plus(
+              width: 18,
+              height: 18,
+              color: CupertinoColors.white,
             ),
           ),
         ),
-      );
-    }
-
-    Widget goalCard(_Goal g) => GestureDetector(
-          onTap: () => context.push(AppRoutes.goalDetail, extra: g.title),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: surface,
-              border: Border.all(color: border, width: 1),
-              borderRadius: BorderRadius.circular(AppRadii.xl),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    ProgressRing(
-                      value: g.v,
-                      size: 54,
-                      stroke: 5,
-                      color: g.color,
-                      trackColor: border,
+      ),
+      child: BlocBuilder<GoalsBloc, GoalsState>(
+        builder: (context, state) {
+          if (state is GoalsLoading || state is GoalsInitial) {
+            return Skeletonizer(
+              enabled: true,
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                       child: Text(
-                        '${(g.v * 100).round()}%',
-                        style: AppFonts.numeric(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
+                        '0 active goals',
+                        style: AppFonts.body(fontSize: 13, color: muted),
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  g.title,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppFonts.body(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: fg,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              ScopePill(kind: g.scope),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                '${_fmt(g.cur)}€',
-                                style: AppFonts.numeric(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: fg,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '/ ${_fmt(g.tgt)}€',
-                                style: AppFonts.body(
-                                  fontSize: 12,
-                                  color: muted,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Calendar(
-                                width: 11,
-                                height: 11,
-                                color: muted,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                g.deadline,
-                                style: AppFonts.body(
-                                  fontSize: 11,
-                                  color: muted,
-                                ),
-                              ),
-                              if (g.members.isNotEmpty) ...[
-                                const SizedBox(width: 8),
-                                AvatarStack(
-                                  members: g.members,
-                                  size: 14,
-                                  ringColor: surface,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                AnimatedProgressBar(
-                  value: g.v,
-                  trackColor: border,
-                  fillColor: g.color,
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 200)),
+                ],
+              ),
+            );
+          }
+          if (state is GoalsError) {
+            return ScreenShell(
+              bg: bg,
+              slivers: [
+                SliverFillRemaining(
+                  child: Center(
+                    child: Text(state.message,
+                        style: AppFonts.body(fontSize: 13, color: muted)),
+                  ),
                 ),
               ],
-            ),
-          ),
-        );
+            );
+          }
+          final loaded = state as GoalsLoaded;
+          final filtered = switch (_filter) {
+            1 => loaded.household,
+            2 => loaded.personal,
+            _ => loaded.goals,
+          };
 
-    return ScreenShell(
-      bg: bg,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          return ScreenShell(
+            bg: bg,
+            onRefresh: () async {
+              final bloc = context.read<GoalsBloc>();
+              bloc.add(GoalsRefresh());
+              await bloc.stream.firstWhere((s) => s is! GoalsLoading);
+            },
+            slivers: [
+              SliverToBoxAdapter(
+                child: _GoalsSubtitle(
+                  muted: muted,
+                  total: loaded.goals.length,
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _SummaryCard(
+                    progress: loaded.overallProgress,
+                    current: loaded.totalCurrent,
+                    target: loaded.totalTarget,
+                    currency: loaded.goals.firstOrNull?.currency ?? 'EUR',
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 18)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    spacing: 6,
                     children: [
-                      Text(
-                        'Goals',
-                        style: AppFonts.heading(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
+                      _Pill(
+                        label: 'All',
+                        active: _filter == 0,
+                        onTap: () => setState(() => _filter = 0),
+                        surface: surface2,
+                        border: border,
+                        muted: muted,
+                        fg: fg,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '4 active · saving 52% on track',
-                        style: AppFonts.body(fontSize: 13, color: muted),
+                      _Pill(
+                        label: 'Household',
+                        active: _filter == 1,
+                        onTap: () => setState(() => _filter = 1),
+                        surface: surface2,
+                        border: border,
+                        muted: muted,
+                        fg: fg,
+                      ),
+                      _Pill(
+                        label: 'Personal',
+                        active: _filter == 2,
+                        onTap: () => setState(() => _filter = 2),
+                        surface: surface2,
+                        border: border,
+                        muted: muted,
+                        fg: fg,
                       ),
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => context.push(AppRoutes.addGoal),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(12),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 14)),
+              if (filtered.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text(
+                      'No goals yet',
+                      style: AppFonts.body(fontSize: 13, color: muted),
                     ),
-                    child: Center(
-                      child: Plus(
-                        width: 18,
-                        height: 18,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding:
+                      const EdgeInsets.fromLTRB(20, 0, 20, 32),
+                  sliver: SliverList.separated(
+                    itemCount: filtered.length,
+                    itemBuilder: (_, i) {
+                      final g = filtered[i];
+                      return GoalProgressCard(
+                        goal: g,
+                        color: _goalColor(g, accent, tints),
+                        surface: surface,
+                        border: border,
+                        fg: fg,
+                        muted: muted,
+                        onTap: () => _openGoalSheet(existing: g),
+                      );
+                    },
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        // Summary card
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: surface,
-                border: Border.all(color: border, width: 1),
-                borderRadius: BorderRadius.circular(AppRadii.xl),
-              ),
-              child: Row(
-                children: [
-                  ProgressRing(
-                    value: 0.52,
-                    size: 68,
-                    stroke: 6,
-                    color: accent,
-                    trackColor: border,
-                    child: Text(
-                      '52%',
-                      style: AppFonts.numeric(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: fg,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Overall progress',
-                          style: AppFonts.body(fontSize: 12, color: muted),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '6,910€',
-                              style: AppFonts.numeric(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: fg,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '/ 15,600€',
-                              style: AppFonts.body(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: muted,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '+420€ contributed this month',
-                          style: AppFonts.body(fontSize: 11, color: muted),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
-
-        // Filter pills
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                pill('All', 0),
-                const SizedBox(width: 6),
-                pill('Shared', 1),
-                const SizedBox(width: 6),
-                pill('Personal', 2),
-              ],
-            ),
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 14)),
-
-        // Goal cards
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          sliver: SliverList.separated(
-            itemCount: filtered.length,
-            itemBuilder: (_, i) => goalCard(filtered[i]),
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-          ),
-        ),
-      ],
+            ],
+          );
+        },
+      ),
     );
   }
 
-  String _fmt(num n) => n.toString().replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  Color _goalColor(FinancialGoal g, Color accent, List<Color> tints) {
+    if (g.color != null) {
+      return Color(int.parse(g.color!.replaceFirst('#', '0xff')));
+    }
+    if (tints.isEmpty) return accent;
+    final idx = g.id.hashCode.abs() % tints.length;
+    return tints[idx];
+  }
 
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
-class _Goal {
-  final String title;
-  final double v;
-  final num cur;
-  final num tgt;
-  final Color color;
-  final ScopeKind scope;
-  final String deadline;
-  final List<({String name, Color color})> members;
+class _GoalsSubtitle extends StatelessWidget {
+  final Color muted;
+  final int total;
 
-  const _Goal({
-    required this.title,
-    required this.v,
-    required this.cur,
-    required this.tgt,
-    required this.color,
-    required this.scope,
-    required this.deadline,
-    required this.members,
+  const _GoalsSubtitle({
+    required this.muted,
+    required this.total,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+      child: Text(
+        '$total active',
+        style: AppFonts.body(fontSize: 13, color: muted),
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  final double progress;
+  final double current;
+  final double target;
+  final String currency;
+  final Color surface;
+  final Color border;
+  final Color fg;
+  final Color muted;
+  final Color accent;
+
+  const _SummaryCard({
+    required this.progress,
+    required this.current,
+    required this.target,
+    required this.currency,
+    required this.surface,
+    required this.border,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: surface,
+        border: Border.all(color: border, width: 1),
+        borderRadius: BorderRadius.circular(AppRadii.xl),
+      ),
+      child: Row(
+        spacing: 16,
+        children: [
+          ProgressRing(
+            value: progress,
+            size: 68,
+            stroke: 6,
+            color: accent,
+            trackColor: border,
+            child: Text(
+              '${(progress * 100).round()}%',
+              style: AppFonts.numeric(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: fg,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                Text(
+                  'Overall progress',
+                  style: AppFonts.body(fontSize: 12, color: muted),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      '${current.toStringAsFixed(0)}$currency',
+                      style: AppFonts.numeric(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                      ),
+                    ),
+                    Text(
+                      '/ ${target.toStringAsFixed(0)}$currency',
+                      style: AppFonts.body(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  final Color surface;
+  final Color border;
+  final Color muted;
+  final Color fg;
+
+  const _Pill({
+    required this.label,
+    required this.active,
+    required this.onTap,
+    required this.surface,
+    required this.border,
+    required this.muted,
+    required this.fg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? surface : const Color(0x00000000),
+          border: Border.all(
+            color: active ? muted.withValues(alpha: 0.4) : border,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: AppFonts.body(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: active ? fg : muted,
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/dashboard/progress_ring.dart';
 import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show NavArrowLeft, MoreVert, Sparks, PiggyBank, Plus;
+    show MoreVert, Sparks, PiggyBank, Plus;
 
 class GoalDetailScreen extends StatelessWidget {
   final String goalId;
@@ -34,53 +34,25 @@ class GoalDetailScreen extends StatelessWidget {
       _Contrib('Luis', tints[2], 'Mar 28', 250),
     ];
 
-    return CupertinoPageScaffold(
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Goal',
+      trailing: Padding(
+        padding: const EdgeInsets.only(right: 4),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(44, 36),
+          onPressed: () {},
+          child: MoreVert(width: 20, height: 20, color: fg),
+        ),
+      ),
       child: Stack(
         children: [
-          SafeArea(
-            bottom: false,
-            child: ListView(
+          ListView(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 140),
               children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      IconBtn(
-                        icon: NavArrowLeft(width: 16, height: 16, color: fg),
-                        surface: surface,
-                        border: border,
-                        onTap: () => context.pop(),
-                        size: 36,
-                        radius: 10,
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Goal',
-                            style: AppFonts.body(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: fg,
-                            ),
-                          ),
-                        ),
-                      ),
-                      IconBtn(
-                        icon: MoreVert(width: 16, height: 16, color: fg),
-                        surface: surface,
-                        border: border,
-                        size: 36,
-                        radius: 10,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
                 // Hero
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -285,7 +257,6 @@ class GoalDetailScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
 
           // Bottom CTA with gradient mask
           Positioned(

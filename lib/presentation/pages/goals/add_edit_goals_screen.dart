@@ -1,19 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/dashboard/progress_ring.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show Xmark, Sparks;
+import 'package:iconoir_flutter/iconoir_flutter.dart' show Sparks;
 
 class AddEditGoalScreen extends StatefulWidget {
   final String? goalId;
-  final String? prefilledMoneySourceId;
+  final String? prefilledBankAccountId;
   const AddEditGoalScreen({
     super.key,
     this.goalId,
-    this.prefilledMoneySourceId,
+    this.prefilledBankAccountId,
   });
 
   @override
@@ -49,52 +49,29 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
     ];
     final selectedColor = swatches[_color];
 
-    return CupertinoPageScaffold(
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  IconBtn(
-                    icon: Xmark(width: 16, height: 16, color: fg),
-                    surface: surface,
-                    border: border,
-                    onTap: () => context.pop(),
-                    size: 36,
-                    radius: 10,
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        widget.goalId != null ? 'Edit goal' : 'New goal',
-                        style: AppFonts.body(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: fg,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'Save',
-                    style: AppFonts.body(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: accent,
-                    ),
-                  ),
-                ],
-              ),
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: widget.goalId != null ? 'Edit goal' : 'New goal',
+      trailing: GestureDetector(
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Text(
+            'Save',
+            style: AppFonts.body(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: accent,
             ),
-
-            const SizedBox(height: 22),
-
-            // Preview card
+          ),
+        ),
+      ),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(0, 12, 0, 32),
+        children: [
+          // Preview card
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -244,8 +221,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
