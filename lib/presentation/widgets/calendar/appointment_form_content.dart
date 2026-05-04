@@ -58,9 +58,11 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
           widget.onSaved(state.id ?? '', _allDay);
         },
         builder: (context, state) {
-          return ListView(
+          return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
-            children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Title
               _LabeledField(
                 label: 'Title',
@@ -246,7 +248,8 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                 ),
               ),
             ],
-          );
+          ),
+        );
         },
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show MaterialLocalizations;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:hestia/domain/entities/appointment.dart';
@@ -16,6 +17,8 @@ import 'package:hestia/presentation/widgets/calendar/appointment_form_content.da
 import 'package:hestia/presentation/widgets/calendar/day_view.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Bell, Calendar, Plus, User;
 
@@ -107,73 +110,27 @@ class _BodyState extends State<_Body> {
       BuildContext context, CalendarState state) async {
     final theme = context.myTheme;
     final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final l10n = AppLocalizations.of(context);
     final startDay = context.read<UserPrefsBloc>().state.startDay;
-    DateTime selected = state.selectedDate;
 
-    final picked = await showCupertinoModalPopup<DateTime>(
+    final picked = await showAppBottomSheet<DateTime>(
       context: context,
-      builder: (ctx) {
-        final ctrl = FCalendarController.date(
-          initialSelection: _utc(state.selectedDate),
-        );
-        final calStyle = FCalendarStyle.inherit(
-          colorScheme: context.theme.colorScheme,
-          typography: context.theme.typography,
-          style: context.theme.style,
-        ).copyWith(
-          dayPickerStyle: FCalendarDayPickerStyle.inherit(
-            colorScheme: context.theme.colorScheme,
-            typography: context.theme.typography,
-          ).copyWith(startDayOfWeek: startDay),
-        );
-        return Container(
-          height: 420,
-          color: surface,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: Text('Cancel',
-                          style: AppFonts.body(fontSize: 15, color: fg)),
-                    ),
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(selected),
-                      child: Text('Done',
-                          style: AppFonts.body(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: accent)),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: FCalendar(
-                    controller: ctrl,
-                    style: calStyle,
-                    start: DateTime.utc(2020),
-                    end: DateTime.utc(2035),
-                    today: _utc(DateTime.now()),
-                    initialMonth: _utc(state.visibleMonth),
-                    onPress: (d) {
-                      selected = DateTime(d.year, d.month, d.day);
-                    },
-                    onMonthChange: (d) {
-                      selected = DateTime(d.year, d.month, d.day);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      title: l10n.nav_calendar,
+      heightFactor: 0.72,
+      expand: true,
+      child: _MonthPickerSheetBody(
+        calendarBloc: context.read<CalendarBloc>(),
+        userId: widget.userId,
+        initialSelected: state.selectedDate,
+        initialMonth: state.visibleMonth,
+        startDayOfWeek: startDay,
+        surface: surface,
+        fg: _c(theme.onBackgroundColor),
+        muted: _c(theme.onInactiveColor),
+        accent: _c(theme.primaryColor),
+        income: _c(theme.colorGreen),
+        border: _c(theme.borderColor),
+      ),
     );
 
     if (picked != null && context.mounted) {
@@ -368,6 +325,7 @@ class _BodyState extends State<_Body> {
               p.allDayAppointmentIds != n.allDayAppointmentIds ||
               p.onlyMine != n.onlyMine,
           builder: (context, state) {
+            final l10n = AppLocalizations.of(context);
             final dayItems =
                 state.itemsForDayFor(state.selectedDate, widget.userId);
             final dayAppts = dayItems.whereType<AppointmentItem>().toList();
@@ -407,6 +365,9 @@ class _BodyState extends State<_Body> {
                       surface: surface,
                       border: border,
                       bg: bg,
+                      screenTitle: l10n.calendar_title,
+                      fullCalendarLabel: l10n.nav_calendar,
+                      todayLabel: l10n.common_today,
                       onAddTap: () =>
                           _openAddSheet(context, state.selectedDate),
                       onMonthTap: () => _showMonthPicker(context, state),
@@ -475,6 +436,292 @@ class _BodyState extends State<_Body> {
   }
 }
 
+// ── Full month picker (bottom sheet) ──────────────────────────────────────────
+///
+/// Custom month grid (not [FCalendar]) so every cell uses [surface], tiles can
+/// scale to full width, and we can draw appointment / transaction markers.
+/// Tap a day applies immediately and closes the sheet (no Done button).
+/// See [ForUI calendar concepts](https://forui.dev/docs/data/calendar).
+
+class _MonthPickerSheetBody extends StatefulWidget {
+  /// Required because [showAppBottomSheet] uses the root navigator; the sheet
+  /// route is not under [BlocProvider<CalendarBloc>].
+  final CalendarBloc calendarBloc;
+  final String userId;
+  final DateTime initialSelected;
+  final DateTime initialMonth;
+  final int startDayOfWeek;
+  final Color surface;
+  final Color fg;
+  final Color muted;
+  final Color accent;
+  final Color income;
+  final Color border;
+
+  const _MonthPickerSheetBody({
+    required this.calendarBloc,
+    required this.userId,
+    required this.initialSelected,
+    required this.initialMonth,
+    required this.startDayOfWeek,
+    required this.surface,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.income,
+    required this.border,
+  });
+
+  @override
+  State<_MonthPickerSheetBody> createState() => _MonthPickerSheetBodyState();
+}
+
+class _MonthPickerSheetBodyState extends State<_MonthPickerSheetBody> {
+  late DateTime _viewMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewMonth =
+        DateTime(widget.initialMonth.year, widget.initialMonth.month);
+  }
+
+  static int _leadingBlanks(DateTime firstOfMonth, int startDay) {
+    final wd = firstOfMonth.weekday % 7;
+    final sd = startDay % 7;
+    return (wd - sd + 7) % 7;
+  }
+
+  static List<DateTime?> _cellsForMonth(DateTime month, int startDay) {
+    final first = DateTime(month.year, month.month, 1);
+    final lead = _leadingBlanks(first, startDay);
+    final dim = DateTime(month.year, month.month + 1, 0).day;
+    final out = <DateTime?>[];
+    for (var i = 0; i < lead; i++) {
+      out.add(null);
+    }
+    for (var d = 1; d <= dim; d++) {
+      out.add(DateTime(month.year, month.month, d));
+    }
+    while (out.length % 7 != 0) {
+      out.add(null);
+    }
+    return out;
+  }
+
+  static DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  void _shiftMonth(int delta) {
+    final n = DateTime(_viewMonth.year, _viewMonth.month + delta);
+    setState(() => _viewMonth = n);
+    widget.calendarBloc.add(CalendarMonthChanged(n));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final monthTitle =
+        DateFormat.yMMMM(locale).format(_viewMonth);
+    final loc = MaterialLocalizations.of(context);
+
+    return BlocBuilder<CalendarBloc, CalendarState>(
+      bloc: widget.calendarBloc,
+      builder: (context, state) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final maxW = constraints.maxWidth;
+            final cell = (maxW / DateTime.daysPerWeek).clamp(48.0, 68.0);
+            final cellH = cell * 1.12;
+            final cells = _cellsForMonth(_viewMonth, widget.startDayOfWeek);
+            final today = _dayOnly(DateTime.now());
+            final selected = _dayOnly(widget.initialSelected);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: Row(
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: state.loading ? null : () => _shiftMonth(-1),
+                        child: Icon(
+                          CupertinoIcons.chevron_back,
+                          size: 22,
+                          color: state.loading ? widget.muted : widget.fg,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          monthTitle,
+                          textAlign: TextAlign.center,
+                          style: AppFonts.body(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: widget.accent,
+                          ),
+                        ),
+                      ),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: state.loading ? null : () => _shiftMonth(1),
+                        child: Icon(
+                          CupertinoIcons.chevron_forward,
+                          size: 22,
+                          color: state.loading ? widget.muted : widget.fg,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: List.generate(7, (col) {
+                    final w = ((widget.startDayOfWeek - 1 + col) % 7) + 1;
+                    final idx = w % 7;
+                    return SizedBox(
+                      width: cell,
+                      child: Center(
+                        child: Text(
+                          loc.narrowWeekdays[idx],
+                          style: AppFonts.body(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: widget.muted,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 4),
+                if (state.loading)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Center(
+                      child: CupertinoActivityIndicator(color: widget.accent),
+                    ),
+                  ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisExtent: cellH,
+                  ),
+                  itemCount: cells.length,
+                  itemBuilder: (context, i) {
+                    final day = cells[i];
+                    if (day == null) {
+                      return SizedBox(width: cell, height: cellH);
+                    }
+                    final inMonth = day.month == _viewMonth.month;
+                    final items =
+                        state.itemsForDayFor(day, widget.userId);
+                    final hasAppt =
+                        items.any((e) => e is AppointmentItem);
+                    final hasTx =
+                        items.any((e) => e is TransactionItem);
+                    final isToday = _dayOnly(day) == today;
+                    final isSelected = _dayOnly(day) == selected;
+                    final dOnly = _dayOnly(day);
+                    final isPast = dOnly.isBefore(today);
+                    final isFuture = dOnly.isAfter(today);
+
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .pop(DateTime(day.year, day.month, day.day));
+                      },
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: widget.surface,
+                          border: Border.all(
+                            color: isToday
+                                ? widget.accent
+                                    .withValues(alpha: 0.55)
+                                : widget.border.withValues(alpha: 0.35),
+                            width: isToday ? 1.4 : 0.6,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${day.day}',
+                              style: AppFonts.body(
+                                fontSize: 17,
+                                fontWeight: isSelected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                color: !inMonth
+                                    ? widget.muted
+                                        .withValues(alpha: 0.45)
+                                    : isSelected
+                                        ? widget.accent
+                                        : widget.fg,
+                              ),
+                            ),
+                            SizedBox(height: cell * 0.08),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (hasAppt)
+                                  _EventDot(
+                                    color: widget.accent,
+                                    dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
+                                  ),
+                                if (hasAppt && hasTx)
+                                  const SizedBox(width: 4),
+                                if (hasTx)
+                                  _EventDot(
+                                    color: widget.income,
+                                    dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
+                                  ),
+                                if (!hasAppt && !hasTx)
+                                  SizedBox(height: cell * 0.12),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _EventDot extends StatelessWidget {
+  final Color color;
+  final double dim;
+
+  const _EventDot({required this.color, required this.dim});
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: dim.clamp(0.2, 1.0),
+      child: Container(
+        width: 6,
+        height: 6,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+}
+
 // ── Fixed top bar ─────────────────────────────────────────────────────────────
 
 class _FixedTopBar extends StatelessWidget {
@@ -486,6 +733,9 @@ class _FixedTopBar extends StatelessWidget {
   final Color surface;
   final Color border;
   final Color bg;
+  final String screenTitle;
+  final String fullCalendarLabel;
+  final String todayLabel;
   final VoidCallback onAddTap;
   final VoidCallback onMonthTap;
   final VoidCallback onTodayTap;
@@ -502,6 +752,9 @@ class _FixedTopBar extends StatelessWidget {
     required this.surface,
     required this.border,
     required this.bg,
+    required this.screenTitle,
+    required this.fullCalendarLabel,
+    required this.todayLabel,
     required this.onAddTap,
     required this.onMonthTap,
     required this.onTodayTap,
@@ -529,7 +782,7 @@ class _FixedTopBar extends StatelessWidget {
                   spacing: 2,
                   children: [
                     Text(
-                      'Calendar',
+                      screenTitle,
                       style: AppFonts.heading(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
@@ -559,9 +812,9 @@ class _FixedTopBar extends StatelessWidget {
               FButton(
                 style: FButtonStyle.outline,
                 onPress: onMonthTap,
-                prefix: Calendar(width: 14, height: 14, color: accent),
+                prefix: Icon(CupertinoIcons.calendar, size: 15, color: accent),
                 label: Text(
-                  _monthYear(state.visibleMonth),
+                  fullCalendarLabel,
                   style: AppFonts.body(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -575,7 +828,10 @@ class _FixedTopBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 color: surface,
                 onPressed: onTodayTap,
-                child: Text('Today', style: AppFonts.body(fontSize: 12, color: fg)),
+                child: Text(
+                  todayLabel,
+                  style: AppFonts.body(fontSize: 12, color: fg),
+                ),
               ),
             ],
           ),
@@ -756,12 +1012,17 @@ class _FilterChip extends StatelessWidget {
           spacing: 8,
           children: [
             icon,
-            Text(
-              label,
-              style: AppFonts.body(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: active ? accent : muted,
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: AppFonts.body(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: active ? accent : muted,
+                ),
               ),
             ),
           ],
