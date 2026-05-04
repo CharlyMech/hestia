@@ -6,7 +6,8 @@ class Transaction extends Equatable {
   final String householdId;
   final String userId;
   final String categoryId;
-  final String moneySourceId;
+  final String bankAccountId;
+  final String? transactionSourceId;
   final double amount;
   final TransactionType type;
   final String? note;
@@ -19,7 +20,8 @@ class Transaction extends Equatable {
   // Joined fields (populated by repository when needed)
   final String? categoryName;
   final String? categoryColor;
-  final String? moneySourceName;
+  final String? bankAccountName;
+  final String? transactionSourceName;
   final String? userName;
 
   const Transaction({
@@ -27,7 +29,8 @@ class Transaction extends Equatable {
     required this.householdId,
     required this.userId,
     required this.categoryId,
-    required this.moneySourceId,
+    required this.bankAccountId,
+    this.transactionSourceId,
     required this.amount,
     required this.type,
     this.note,
@@ -38,7 +41,8 @@ class Transaction extends Equatable {
     required this.lastUpdate,
     this.categoryName,
     this.categoryColor,
-    this.moneySourceName,
+    this.bankAccountName,
+    this.transactionSourceName,
     this.userName,
   });
 
@@ -47,5 +51,5 @@ class Transaction extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, amount, type, date, categoryId, moneySourceId];
+      [id, amount, type, date, categoryId, bankAccountId];
 }
