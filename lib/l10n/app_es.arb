@@ -42,12 +42,12 @@
   "dashboard_balanceTrend": "Evolución del saldo",
   "dashboard_monthlyNet": "Neto mensual",
 
-  "moneySources_title": "Cuentas",
-  "moneySources_totalNetWorth": "Patrimonio total",
-  "moneySources_addCard": "Añadir cuenta",
-  "moneySources_shared": "Compartida",
-  "moneySources_personal": "Personal",
-  "moneySources_noInstitution": "Sin entidad",
+  "bankAccounts_title": "Cuentas",
+  "bankAccounts_totalNetWorth": "Patrimonio total",
+  "bankAccounts_addCard": "Añadir cuenta",
+  "bankAccounts_shared": "Compartida",
+  "bankAccounts_personal": "Personal",
+  "bankAccounts_noInstitution": "Sin entidad",
 
   "goals_title": "Objetivos",
   "goals_addGoal": "Añadir objetivo",

@@ -320,41 +320,41 @@ abstract class AppLocalizations {
   /// **'Monthly net'**
   String get dashboard_monthlyNet;
 
-  /// No description provided for @moneySources_title.
+  /// No description provided for @bankAccounts_title.
   ///
   /// In en, this message translates to:
   /// **'Sources'**
-  String get moneySources_title;
+  String get bankAccounts_title;
 
-  /// No description provided for @moneySources_totalNetWorth.
+  /// No description provided for @bankAccounts_totalNetWorth.
   ///
   /// In en, this message translates to:
   /// **'Total net worth'**
-  String get moneySources_totalNetWorth;
+  String get bankAccounts_totalNetWorth;
 
-  /// No description provided for @moneySources_addCard.
+  /// No description provided for @bankAccounts_addCard.
   ///
   /// In en, this message translates to:
   /// **'Add card'**
-  String get moneySources_addCard;
+  String get bankAccounts_addCard;
 
-  /// No description provided for @moneySources_shared.
+  /// No description provided for @bankAccounts_shared.
   ///
   /// In en, this message translates to:
   /// **'Shared'**
-  String get moneySources_shared;
+  String get bankAccounts_shared;
 
-  /// No description provided for @moneySources_personal.
+  /// No description provided for @bankAccounts_personal.
   ///
   /// In en, this message translates to:
   /// **'Personal'**
-  String get moneySources_personal;
+  String get bankAccounts_personal;
 
-  /// No description provided for @moneySources_noInstitution.
+  /// No description provided for @bankAccounts_noInstitution.
   ///
   /// In en, this message translates to:
   /// **'No institution'**
-  String get moneySources_noInstitution;
+  String get bankAccounts_noInstitution;
 
   /// No description provided for @goals_title.
   ///

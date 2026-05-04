@@ -42,12 +42,12 @@
   "dashboard_balanceTrend": "Balance trend",
   "dashboard_monthlyNet": "Monthly net",
 
-  "moneySources_title": "Sources",
-  "moneySources_totalNetWorth": "Total net worth",
-  "moneySources_addCard": "Add card",
-  "moneySources_shared": "Shared",
-  "moneySources_personal": "Personal",
-  "moneySources_noInstitution": "No institution",
+  "bankAccounts_title": "Sources",
+  "bankAccounts_totalNetWorth": "Total net worth",
+  "bankAccounts_addCard": "Add card",
+  "bankAccounts_shared": "Shared",
+  "bankAccounts_personal": "Personal",
+  "bankAccounts_noInstitution": "No institution",
 
   "goals_title": "Goals",
   "goals_addGoal": "Add goal",

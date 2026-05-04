@@ -120,22 +120,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboard_monthlyNet => 'Neto mensual';
 
   @override
-  String get moneySources_title => 'Cuentas';
+  String get bankAccounts_title => 'Cuentas';
 
   @override
-  String get moneySources_totalNetWorth => 'Patrimonio total';
+  String get bankAccounts_totalNetWorth => 'Patrimonio total';
 
   @override
-  String get moneySources_addCard => 'Añadir cuenta';
+  String get bankAccounts_addCard => 'Añadir cuenta';
 
   @override
-  String get moneySources_shared => 'Compartida';
+  String get bankAccounts_shared => 'Compartida';
 
   @override
-  String get moneySources_personal => 'Personal';
+  String get bankAccounts_personal => 'Personal';
 
   @override
-  String get moneySources_noInstitution => 'Sin entidad';
+  String get bankAccounts_noInstitution => 'Sin entidad';
 
   @override
   String get goals_title => 'Objetivos';
