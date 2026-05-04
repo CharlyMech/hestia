@@ -108,4 +108,19 @@ class MockAuthRepository implements AuthRepository {
       return (false, mapExceptionToFailure(e));
     }
   }
+
+  @override
+  Future<(Profile?, Failure?)> updateProfile(Profile profile) async {
+    final store = MockStore.instance;
+    final i = store.profiles.indexWhere((p) => p.id == profile.id);
+    if (i < 0) {
+      return (null, const ServerFailure('Profile not found'));
+    }
+    final updated = profile.copyWith(lastUpdate: DateTime.now());
+    store.profiles[i] = updated;
+    if (store.currentProfile?.id == updated.id) {
+      store.currentProfile = updated;
+    }
+    return (updated, null);
+  }
 }

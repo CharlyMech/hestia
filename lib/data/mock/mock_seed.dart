@@ -4,10 +4,13 @@ import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/household.dart';
-import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/domain/entities/notification.dart';
 import 'package:hestia/domain/entities/profile.dart';
+import 'package:hestia/domain/entities/shopping_list.dart';
+import 'package:hestia/domain/entities/shopping_list_item.dart';
 import 'package:hestia/domain/entities/transaction.dart';
+import 'package:hestia/domain/entities/transaction_source.dart';
 import 'package:uuid/uuid.dart';
 
 abstract final class MockSeed {
@@ -34,6 +37,7 @@ abstract final class MockSeed {
       email: 'ana@hestia.local',
       displayName: 'Ana Ruiz',
       preferredCurrency: 'EUR',
+      calendarColor: '#8B7AE6',
       isSuperuser: true,
       createdAt: now,
       lastUpdate: now,
@@ -43,6 +47,7 @@ abstract final class MockSeed {
       email: 'luca@hestia.local',
       displayName: 'Luca Marín',
       preferredCurrency: 'USD',
+      calendarColor: '#7AAFE6',
       createdAt: now,
       lastUpdate: now,
     );
@@ -81,7 +86,7 @@ abstract final class MockSeed {
     final salary = _cat('Salary', TransactionType.income, now);
     store.categories.addAll([dining, groceries, transport, utilities, leisure, salary]);
 
-    final anaRevolut = MoneySource(
+    final anaRevolut = BankAccount(
       id: _uuid.v4(),
       householdId: householdId,
       ownerType: OwnerType.personal,
@@ -96,7 +101,7 @@ abstract final class MockSeed {
       createdAt: now,
       lastUpdate: now,
     );
-    final lucaBbva = MoneySource(
+    final lucaBbva = BankAccount(
       id: _uuid.v4(),
       householdId: householdId,
       ownerType: OwnerType.personal,
@@ -110,7 +115,7 @@ abstract final class MockSeed {
       createdAt: now,
       lastUpdate: now,
     );
-    final sharedSavings = MoneySource(
+    final sharedSavings = BankAccount(
       id: _uuid.v4(),
       householdId: householdId,
       ownerType: OwnerType.shared,
@@ -123,9 +128,9 @@ abstract final class MockSeed {
       createdAt: now,
       lastUpdate: now,
     );
-    store.moneySources.addAll([anaRevolut, lucaBbva, sharedSavings]);
+    store.bankAccounts.addAll([anaRevolut, lucaBbva, sharedSavings]);
 
-    final samples = <(double, Category, MoneySource, String, int, TransactionType, String)>[
+    final samples = <(double, Category, BankAccount, String, int, TransactionType, String)>[
       (24.50, dining, anaRevolut, anaId, 2, TransactionType.expense, 'Dinner at Ramen Bar'),
       (87.30, groceries, sharedSavings, anaId, 4, TransactionType.expense, 'Mercadona'),
       (12.00, transport, anaRevolut, anaId, 5, TransactionType.expense, 'Metro card'),
@@ -157,7 +162,7 @@ abstract final class MockSeed {
         householdId: householdId,
         userId: uid,
         categoryId: cat.id,
-        moneySourceId: ms.id,
+        bankAccountId: ms.id,
         amount: amt,
         type: type,
         note: note,
@@ -166,7 +171,69 @@ abstract final class MockSeed {
         lastUpdate: date,
         categoryName: cat.name,
         categoryColor: cat.color,
-        moneySourceName: ms.name,
+        bankAccountName: ms.name,
+        userName: store.profiles.firstWhere((p) => p.id == uid).displayName,
+      ));
+    }
+
+    // Transaction sources — counterparties (merchants, employers, services).
+    // Visible household-wide; reusable across transactions and shopping lists.
+    TransactionSource src(String name, TransactionSourceKind kind, String hex) {
+      final s = TransactionSource(
+        id: _uuid.v4(),
+        householdId: householdId,
+        name: name,
+        kind: kind,
+        color: hex,
+        createdBy: anaId,
+        createdAt: now,
+        lastUpdate: now,
+      );
+      store.transactionSources.add(s);
+      return s;
+    }
+
+    final netflix = src('Netflix', TransactionSourceKind.service, '#E50914');
+    final spotify = src('Spotify', TransactionSourceKind.service, '#1DB954');
+    final movistar = src('Movistar', TransactionSourceKind.service, '#0066CC');
+    final esloogan = src('Esloogan', TransactionSourceKind.employer, '#22C55E');
+    final mapfre = src('Mapfre', TransactionSourceKind.service, '#E11D48');
+    src('Mercadona', TransactionSourceKind.merchant, '#00A551');
+    src('Lidl', TransactionSourceKind.merchant, '#0050AA');
+    src('Stripe', TransactionSourceKind.platform, '#635BFF');
+    src('Vinted', TransactionSourceKind.platform, '#09B1BA');
+    src('Anthropic', TransactionSourceKind.platform, '#D97706');
+
+    // Recurring scheduled transactions — visible on per-account "Recurring"
+    // sub-screen. Mix of subscriptions, salaries, bills.
+    final recurringSamples = <(double, Category, BankAccount, String, int, TransactionType, String, String, TransactionSource)>[
+      (12.99, leisure, anaRevolut, anaId, 8, TransactionType.expense, 'Netflix', 'monthly', netflix),
+      (9.99, leisure, anaRevolut, anaId, 5, TransactionType.expense, 'Spotify Family', 'monthly', spotify),
+      (29.00, utilities, sharedSavings, anaId, 3, TransactionType.expense, 'Internet · Movistar', 'monthly', movistar),
+      (2400.00, salary, anaRevolut, anaId, 7, TransactionType.income, 'Salary · Esloogan', 'monthly', esloogan),
+      (199.00, utilities, sharedSavings, lucaId, 12, TransactionType.expense, 'Annual insurance', 'yearly', mapfre),
+    ];
+    for (final (amt, cat, ms, uid, daysAgo, type, note, freq, txSrc) in recurringSamples) {
+      final date = now.subtract(Duration(days: daysAgo));
+      store.transactions.add(Transaction(
+        id: _uuid.v4(),
+        householdId: householdId,
+        userId: uid,
+        categoryId: cat.id,
+        bankAccountId: ms.id,
+        transactionSourceId: txSrc.id,
+        amount: amt,
+        type: type,
+        note: note,
+        date: date,
+        isRecurring: true,
+        recurringRule: {'frequency': freq},
+        createdAt: date,
+        lastUpdate: date,
+        categoryName: cat.name,
+        categoryColor: cat.color,
+        bankAccountName: ms.name,
+        transactionSourceName: txSrc.name,
         userName: store.profiles.firstWhere((p) => p.id == uid).displayName,
       ));
     }
@@ -176,10 +243,12 @@ abstract final class MockSeed {
         id: _uuid.v4(),
         householdId: householdId,
         scope: GoalScope.household,
-        name: 'Summer trip',
+        bankAccountId: sharedSavings.id,
+        name: 'Summer trip · Sicily',
         goalType: GoalType.reachTarget,
         targetAmount: 3000,
         currentAmount: 1450,
+        color: '#8B7AE6',
         startDate: now.subtract(const Duration(days: 90)),
         endDate: now.add(const Duration(days: 120)),
         createdAt: now,
@@ -188,13 +257,61 @@ abstract final class MockSeed {
       FinancialGoal(
         id: _uuid.v4(),
         householdId: householdId,
+        scope: GoalScope.household,
+        bankAccountId: sharedSavings.id,
+        name: 'Emergency fund',
+        goalType: GoalType.reachTarget,
+        targetAmount: 10000,
+        currentAmount: 3400,
+        color: '#7AAFE6',
+        startDate: now.subtract(const Duration(days: 180)),
+        createdAt: now,
+        lastUpdate: now,
+      ),
+      FinancialGoal(
+        id: _uuid.v4(),
+        householdId: householdId,
         scope: GoalScope.personal,
         ownerId: anaId,
+        bankAccountId: anaRevolut.id,
         name: 'Monthly savings',
         goalType: GoalType.saveMonthly,
         monthlyTarget: 400,
         currentAmount: 280,
+        color: '#22C55E',
         startDate: now.subtract(const Duration(days: 30)),
+        createdAt: now,
+        lastUpdate: now,
+      ),
+      FinancialGoal(
+        id: _uuid.v4(),
+        householdId: householdId,
+        scope: GoalScope.personal,
+        ownerId: anaId,
+        bankAccountId: anaRevolut.id,
+        name: 'New laptop',
+        goalType: GoalType.reachTarget,
+        targetAmount: 2000,
+        currentAmount: 1560,
+        color: '#E6B87A',
+        startDate: now.subtract(const Duration(days: 60)),
+        endDate: now.add(const Duration(days: 60)),
+        createdAt: now,
+        lastUpdate: now,
+      ),
+      FinancialGoal(
+        id: _uuid.v4(),
+        householdId: householdId,
+        scope: GoalScope.personal,
+        ownerId: lucaId,
+        bankAccountId: lucaBbva.id,
+        name: 'Photography course',
+        goalType: GoalType.reachTarget,
+        targetAmount: 600,
+        currentAmount: 90,
+        color: '#E67AB8',
+        startDate: now.subtract(const Duration(days: 14)),
+        endDate: now.add(const Duration(days: 150)),
         createdAt: now,
         lastUpdate: now,
       ),
@@ -280,6 +397,69 @@ abstract final class MockSeed {
         createdAt: now.subtract(const Duration(days: 1)),
       ),
     ]);
+
+    // Shopping lists — one active (with checked + unchecked items) and one
+    // paid in history.
+    final activeListId = _uuid.v4();
+    store.shoppingLists.add(ShoppingList(
+      id: activeListId,
+      householdId: householdId,
+      ownerId: anaId,
+      scope: ShoppingListScope.shared,
+      name: 'Weekly groceries',
+      bankAccountId: sharedSavings.id,
+      createdAt: now.subtract(const Duration(days: 1)),
+      lastUpdate: now,
+    ));
+    final groceryItems = <(String, int, bool)>[
+      ('Milk', 2, false),
+      ('Bread', 1, false),
+      ('Eggs', 12, true),
+      ('Olive oil', 1, false),
+      ('Tomatoes', 6, true),
+      ('Coffee beans', 1, false),
+    ];
+    for (var i = 0; i < groceryItems.length; i++) {
+      final (name, qty, checked) = groceryItems[i];
+      store.shoppingListItems.add(ShoppingListItem(
+        id: _uuid.v4(),
+        listId: activeListId,
+        name: name,
+        qty: qty,
+        sortOrder: i,
+        isChecked: checked,
+        checkedAt: checked ? now.subtract(const Duration(hours: 2)) : null,
+        createdAt: now.subtract(const Duration(days: 1)),
+        lastUpdate: now,
+      ));
+    }
+
+    final paidListId = _uuid.v4();
+    store.shoppingLists.add(ShoppingList(
+      id: paidListId,
+      householdId: householdId,
+      ownerId: lucaId,
+      scope: ShoppingListScope.personal,
+      name: 'Hardware store',
+      status: ShoppingListStatus.paid,
+      bankAccountId: lucaBbva.id,
+      paidAt: now.subtract(const Duration(days: 6)),
+      createdAt: now.subtract(const Duration(days: 7)),
+      lastUpdate: now.subtract(const Duration(days: 6)),
+    ));
+    for (final pair in const [('Drill bits', 1), ('Wood glue', 2)]) {
+      store.shoppingListItems.add(ShoppingListItem(
+        id: _uuid.v4(),
+        listId: paidListId,
+        name: pair.$1,
+        qty: pair.$2,
+        sortOrder: 0,
+        isChecked: true,
+        checkedAt: now.subtract(const Duration(days: 6)),
+        createdAt: now.subtract(const Duration(days: 7)),
+        lastUpdate: now.subtract(const Duration(days: 6)),
+      ));
+    }
   }
 
   static Category _cat(String name, TransactionType type, DateTime now) {

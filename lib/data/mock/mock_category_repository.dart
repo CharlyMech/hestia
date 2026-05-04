@@ -1,5 +1,6 @@
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/data/mock/mock_latency.dart';
 import 'package:hestia/data/mock/mock_store.dart';
 import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/domain/repositories/category_repository.dart';
@@ -14,6 +15,7 @@ class MockCategoryRepository implements CategoryRepository {
     TransactionType? type,
     bool activeOnly = true,
   }) async {
+    await mockReadLatency();
     final list = MockStore.instance.categories
         .where((c) => c.householdId == householdId)
         .where((c) => !activeOnly || c.isActive)

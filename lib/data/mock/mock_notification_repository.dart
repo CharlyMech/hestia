@@ -28,6 +28,32 @@ class MockNotificationRepository implements NotificationRepository {
   }
 
   @override
+  Future<Failure?> markAsUnread(String notificationId) async {
+    final list = MockStore.instance.notifications;
+    final i = list.indexWhere((n) => n.id == notificationId);
+    if (i < 0) return const ServerFailure('Notification not found');
+    final n = list[i];
+    list[i] = AppNotification(
+      id: n.id,
+      userId: n.userId,
+      householdId: n.householdId,
+      title: n.title,
+      body: n.body,
+      type: n.type,
+      payload: n.payload,
+      isRead: false,
+      createdAt: n.createdAt,
+    );
+    return null;
+  }
+
+  @override
+  Future<Failure?> delete(String notificationId) async {
+    MockStore.instance.notifications.removeWhere((n) => n.id == notificationId);
+    return null;
+  }
+
+  @override
   Future<Failure?> markAllAsRead(String userId) async {
     final list = MockStore.instance.notifications;
     for (var i = 0; i < list.length; i++) {

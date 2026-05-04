@@ -1,5 +1,6 @@
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/data/mock/mock_latency.dart';
 import 'package:hestia/data/mock/mock_store.dart';
 import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/goal_progress.dart';
@@ -16,6 +17,7 @@ class MockGoalRepository implements GoalRepository {
     String? userId,
     bool activeOnly = true,
   }) async {
+    await mockReadLatency();
     final list = MockStore.instance.goals
         .where((g) => g.householdId == householdId)
         .where((g) => !activeOnly || g.isActive)
@@ -95,7 +97,7 @@ class MockGoalRepository implements GoalRepository {
         householdId: g.householdId,
         scope: g.scope,
         ownerId: g.ownerId,
-        moneySourceId: g.moneySourceId,
+        bankAccountId: g.bankAccountId,
         name: g.name,
         goalType: g.goalType,
         targetAmount: g.targetAmount,

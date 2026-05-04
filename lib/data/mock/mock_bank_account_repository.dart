@@ -1,21 +1,23 @@
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/data/mock/mock_latency.dart';
 import 'package:hestia/data/mock/mock_store.dart';
-import 'package:hestia/domain/entities/money_source.dart';
-import 'package:hestia/domain/repositories/money_source_repository.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/domain/repositories/bank_account_repository.dart';
 import 'package:uuid/uuid.dart';
 
-class MockMoneySourceRepository implements MoneySourceRepository {
+class MockBankAccountRepository implements BankAccountRepository {
   static const _uuid = Uuid();
 
   @override
-  Future<(List<MoneySource>, Failure?)> getMoneySources({
+  Future<(List<BankAccount>, Failure?)> getBankAccounts({
     required String householdId,
     required ViewMode viewMode,
     String? userId,
     bool activeOnly = true,
   }) async {
-    final list = MockStore.instance.moneySources
+    await mockReadLatency();
+    final list = MockStore.instance.bankAccounts
         .where((s) => s.householdId == householdId)
         .where((s) => !activeOnly || s.isActive)
         .where((s) {
@@ -28,15 +30,15 @@ class MockMoneySourceRepository implements MoneySourceRepository {
   }
 
   @override
-  Future<(MoneySource?, Failure?)> createMoneySource(MoneySource source) async {
+  Future<(BankAccount?, Failure?)> createBankAccount(BankAccount source) async {
     final created = _copy(source, id: _uuid.v4(), createdAt: DateTime.now(), lastUpdate: DateTime.now());
-    MockStore.instance.moneySources.add(created);
+    MockStore.instance.bankAccounts.add(created);
     return (created, null);
   }
 
   @override
-  Future<Failure?> updateMoneySource(MoneySource source) async {
-    final list = MockStore.instance.moneySources;
+  Future<Failure?> updateBankAccount(BankAccount source) async {
+    final list = MockStore.instance.bankAccounts;
     final i = list.indexWhere((s) => s.id == source.id);
     if (i < 0) return const ServerFailure('Money source not found');
     list[i] = _copy(source, lastUpdate: DateTime.now());
@@ -44,18 +46,18 @@ class MockMoneySourceRepository implements MoneySourceRepository {
   }
 
   @override
-  Future<Failure?> deleteMoneySource(String id) async {
-    MockStore.instance.moneySources.removeWhere((s) => s.id == id);
+  Future<Failure?> deleteBankAccount(String id) async {
+    MockStore.instance.bankAccounts.removeWhere((s) => s.id == id);
     return null;
   }
 
-  MoneySource _copy(
-    MoneySource s, {
+  BankAccount _copy(
+    BankAccount s, {
     String? id,
     DateTime? createdAt,
     DateTime? lastUpdate,
   }) =>
-      MoneySource(
+      BankAccount(
         id: id ?? s.id,
         householdId: s.householdId,
         ownerType: s.ownerType,
