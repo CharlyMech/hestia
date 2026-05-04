@@ -86,7 +86,8 @@ class _MainTabShellState extends State<MainTabShell> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final bg =
+        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
 
     return CupertinoPageScaffold(
       backgroundColor: bg,
@@ -98,7 +99,8 @@ class _MainTabShellState extends State<MainTabShell> {
             onPageChanged: (i) => setState(() => _index = i),
             children: [
               DashboardScreen(
-                onOpenMoneySource: (id) => context.push(AppRoutes.bankAccountDetail, extra: id),
+                onOpenMoneySource: (id) =>
+                    context.push(AppRoutes.bankAccountDetail, extra: id),
               ),
               const CalendarScreen(),
               const ShoppingScreen(),
@@ -110,7 +112,8 @@ class _MainTabShellState extends State<MainTabShell> {
             right: 0,
             bottom: 0,
             child: SafeArea(
-              top: false,
+              minimum: const EdgeInsets.only(bottom: 16),
+              bottom: false,
               child: FloatingNavBar(
                 activeIndex: _index,
                 pageOffset: _offset,

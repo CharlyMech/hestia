@@ -41,7 +41,7 @@ class FloatingNavBar extends StatelessWidget {
     final position = pageOffset ?? activeIndex.toDouble();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Row(
         children: [
           Expanded(
