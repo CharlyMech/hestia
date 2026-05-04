@@ -11,7 +11,9 @@ import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
+import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/shopping/shopping_list_form_content.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show CartAlt, Plus;
 
 /// Shopping index — Active and History segmentation. Tapping a list pushes
@@ -140,15 +142,21 @@ class _BodyState extends State<_Body> {
                           border: border,
                           onTap: () async {
                             final bloc = context.read<ShoppingListsBloc>();
-                            await context.push(
-                              AppRoutes.addShoppingList,
-                              extra: (
-                                widget.householdId,
-                                widget.userId,
+                            await showAppBottomSheet<void>(
+                              context: context,
+                              title: l10n.shopping_newList,
+                              heightFactor: 0.88,
+                              expand: true,
+                              child: ShoppingListFormContent(
+                                householdId: widget.householdId,
+                                userId: widget.userId,
+                                onSuccess: () {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  bloc.add(ShoppingListsRefresh());
+                                },
                               ),
                             );
-                            if (!mounted) return;
-                            bloc.add(ShoppingListsRefresh());
                           },
                           size: 36,
                           radius: AppRadii.lg,
