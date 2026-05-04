@@ -57,9 +57,29 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
+  Future<Failure?> markAsUnread(String notificationId) async {
+    try {
+      await _service.markAsUnread(notificationId);
+      return null;
+    } catch (e) {
+      return mapExceptionToFailure(e);
+    }
+  }
+
+  @override
   Future<Failure?> markAllAsRead(String userId) async {
     try {
       await _service.markAllAsRead(userId);
+      return null;
+    } catch (e) {
+      return mapExceptionToFailure(e);
+    }
+  }
+
+  @override
+  Future<Failure?> delete(String notificationId) async {
+    try {
+      await _service.delete(notificationId);
       return null;
     } catch (e) {
       return mapExceptionToFailure(e);

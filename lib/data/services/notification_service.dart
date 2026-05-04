@@ -34,6 +34,23 @@ class NotificationService extends SupabaseService {
     }
   }
 
+  Future<void> markAsUnread(String notificationId) async {
+    try {
+      await from(SupabaseTables.notifications)
+          .update({'is_read': false}).eq('id', notificationId);
+    } catch (e) {
+      throw ServerException('Failed to mark notification as unread: $e');
+    }
+  }
+
+  Future<void> delete(String notificationId) async {
+    try {
+      await from(SupabaseTables.notifications).delete().eq('id', notificationId);
+    } catch (e) {
+      throw ServerException('Failed to delete notification: $e');
+    }
+  }
+
   Future<void> markAllAsRead(String userId) async {
     try {
       await from(SupabaseTables.notifications)

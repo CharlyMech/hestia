@@ -10,7 +10,11 @@ abstract class NotificationRepository {
 
   Future<Failure?> markAsRead(String notificationId);
 
+  Future<Failure?> markAsUnread(String notificationId);
+
   Future<Failure?> markAllAsRead(String userId);
+
+  Future<Failure?> delete(String notificationId);
 
   Future<(int, Failure?)> getUnreadCount(String userId);
 

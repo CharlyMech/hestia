@@ -4,6 +4,7 @@ import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/notification.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/notifications/notification_icon.dart';
 
@@ -22,26 +23,17 @@ class NotificationDetailScreen extends StatelessWidget {
 
     final v = NotifVisual.of(context, notification.type);
 
-    return CupertinoPageScaffold(
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: bg,
-        border: null,
-        middle: Text(
-          'Notification',
-          style: AppFonts.heading(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: fg,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Notification',
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               Row(
                 children: [
                   CatTile(icon: v.icon, color: v.color, size: 44),
@@ -133,9 +125,8 @@ class NotificationDetailScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              ],
             ],
-          ),
+          ],
         ),
       ),
     );

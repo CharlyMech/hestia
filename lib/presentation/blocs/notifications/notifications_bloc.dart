@@ -30,6 +30,21 @@ class NotificationsMarkAllRead extends NotificationsEvent {
   List<Object?> get props => [userId];
 }
 
+class NotificationsToggleRead extends NotificationsEvent {
+  final String notificationId;
+  final bool currentlyRead;
+  const NotificationsToggleRead(this.notificationId, this.currentlyRead);
+  @override
+  List<Object?> get props => [notificationId, currentlyRead];
+}
+
+class NotificationsDelete extends NotificationsEvent {
+  final String notificationId;
+  const NotificationsDelete(this.notificationId);
+  @override
+  List<Object?> get props => [notificationId];
+}
+
 abstract class NotificationsState extends Equatable {
   const NotificationsState();
   @override
@@ -67,6 +82,24 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     on<NotificationsLoad>(_onLoad);
     on<NotificationsMarkRead>(_onMarkRead);
     on<NotificationsMarkAllRead>(_onMarkAllRead);
+    on<NotificationsToggleRead>(_onToggleRead);
+    on<NotificationsDelete>(_onDelete);
+  }
+
+  Future<void> _onToggleRead(
+      NotificationsToggleRead e, Emitter<NotificationsState> emit) async {
+    if (e.currentlyRead) {
+      await _repo.markAsUnread(e.notificationId);
+    } else {
+      await _repo.markAsRead(e.notificationId);
+    }
+    if (_userId != null) add(NotificationsLoad(_userId!));
+  }
+
+  Future<void> _onDelete(
+      NotificationsDelete e, Emitter<NotificationsState> emit) async {
+    await _repo.delete(e.notificationId);
+    if (_userId != null) add(NotificationsLoad(_userId!));
   }
 
   Future<void> _onLoad(
