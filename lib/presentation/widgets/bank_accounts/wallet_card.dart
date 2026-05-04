@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/domain/entities/money_source.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show ArrowDown, ArrowUp;
@@ -14,7 +14,7 @@ import 'package:iconoir_flutter/iconoir_flutter.dart'
 /// asset exists at `assets/banks/<institution>.png`, else a primary-color
 /// gradient placeholder. Animates a press scale and a staggered enter.
 class WalletCard extends StatefulWidget {
-  final MoneySource source;
+  final BankAccount source;
 
   /// Index in the parent list — drives the staggered enter delay.
   final int index;
@@ -94,13 +94,14 @@ class _WalletCardState extends State<WalletCard>
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final accent = _c(theme.primaryColor);
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     final surface = _c(theme.surfaceColor);
+    // Placeholder uses neutral grayscale to hint "no bank visual yet" — once
+    // a custom color is set or a bank PNG drops in, that wins.
     final cardColor = widget.source.color != null
         ? _c(widget.source.color!)
-        : accent;
+        : const Color(0xFF4A4F58);
 
     final card = AnimatedBuilder(
       animation: _enter,

@@ -1,44 +1,44 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/enums.dart';
-import 'package:hestia/domain/entities/money_source.dart';
-import 'package:hestia/domain/repositories/money_source_repository.dart';
+import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/domain/repositories/bank_account_repository.dart';
 
-abstract class MoneySourcesEvent extends Equatable {
-  const MoneySourcesEvent();
+abstract class BankAccountsEvent extends Equatable {
+  const BankAccountsEvent();
   @override
   List<Object?> get props => const [];
 }
 
-class MoneySourcesLoad extends MoneySourcesEvent {
+class BankAccountsLoad extends BankAccountsEvent {
   final String householdId;
   final String userId;
-  const MoneySourcesLoad({required this.householdId, required this.userId});
+  const BankAccountsLoad({required this.householdId, required this.userId});
   @override
   List<Object?> get props => [householdId, userId];
 }
 
-class MoneySourcesRefresh extends MoneySourcesEvent {
-  const MoneySourcesRefresh();
+class BankAccountsRefresh extends BankAccountsEvent {
+  const BankAccountsRefresh();
 }
 
-abstract class MoneySourcesState extends Equatable {
-  const MoneySourcesState();
+abstract class BankAccountsState extends Equatable {
+  const BankAccountsState();
   @override
   List<Object?> get props => const [];
 }
 
-class MoneySourcesInitial extends MoneySourcesState {
-  const MoneySourcesInitial();
+class BankAccountsInitial extends BankAccountsState {
+  const BankAccountsInitial();
 }
 
-class MoneySourcesLoading extends MoneySourcesState {
-  const MoneySourcesLoading();
+class BankAccountsLoading extends BankAccountsState {
+  const BankAccountsLoading();
 }
 
-class MoneySourcesLoaded extends MoneySourcesState {
-  final List<MoneySource> sources;
-  const MoneySourcesLoaded(this.sources);
+class BankAccountsLoaded extends BankAccountsState {
+  final List<BankAccount> sources;
+  const BankAccountsLoaded(this.sources);
   @override
   List<Object?> get props => [sources];
 
@@ -47,54 +47,54 @@ class MoneySourcesLoaded extends MoneySourcesState {
   double get totalBalance =>
       sources.fold(0, (sum, s) => sum + s.currentBalance);
 
-  List<MoneySource> get shared =>
+  List<BankAccount> get shared =>
       sources.where((s) => s.ownerType == OwnerType.shared).toList();
-  List<MoneySource> get personal =>
+  List<BankAccount> get personal =>
       sources.where((s) => s.ownerType == OwnerType.personal).toList();
 }
 
-class MoneySourcesError extends MoneySourcesState {
+class BankAccountsError extends BankAccountsState {
   final String message;
-  const MoneySourcesError(this.message);
+  const BankAccountsError(this.message);
   @override
   List<Object?> get props => [message];
 }
 
-class MoneySourcesBloc extends Bloc<MoneySourcesEvent, MoneySourcesState> {
-  final MoneySourceRepository _repo;
+class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
+  final BankAccountRepository _repo;
   String? _householdId;
   String? _userId;
 
-  MoneySourcesBloc(this._repo) : super(const MoneySourcesInitial()) {
-    on<MoneySourcesLoad>(_onLoad);
-    on<MoneySourcesRefresh>(_onRefresh);
+  BankAccountsBloc(this._repo) : super(const BankAccountsInitial()) {
+    on<BankAccountsLoad>(_onLoad);
+    on<BankAccountsRefresh>(_onRefresh);
   }
 
   Future<void> _onLoad(
-      MoneySourcesLoad e, Emitter<MoneySourcesState> emit) async {
+      BankAccountsLoad e, Emitter<BankAccountsState> emit) async {
     _householdId = e.householdId;
     _userId = e.userId;
-    emit(const MoneySourcesLoading());
+    emit(const BankAccountsLoading());
     await _fetch(emit);
   }
 
   Future<void> _onRefresh(
-      MoneySourcesRefresh e, Emitter<MoneySourcesState> emit) async {
+      BankAccountsRefresh e, Emitter<BankAccountsState> emit) async {
     if (_householdId == null || _userId == null) return;
-    emit(const MoneySourcesLoading());
+    emit(const BankAccountsLoading());
     await _fetch(emit);
   }
 
-  Future<void> _fetch(Emitter<MoneySourcesState> emit) async {
-    final (sources, failure) = await _repo.getMoneySources(
+  Future<void> _fetch(Emitter<BankAccountsState> emit) async {
+    final (sources, failure) = await _repo.getBankAccounts(
       householdId: _householdId!,
-      viewMode: ViewMode.household,
+      viewMode: ViewMode.personal,
       userId: _userId,
     );
     if (failure != null) {
-      emit(MoneySourcesError(failure.message));
+      emit(BankAccountsError(failure.message));
       return;
     }
-    emit(MoneySourcesLoaded(sources));
+    emit(BankAccountsLoaded(sources));
   }
 }

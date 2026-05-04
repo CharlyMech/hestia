@@ -1,25 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bank, CreditCard, Cash, PiggyBank, Wallet, NavArrowLeft;
+    show Bank, CreditCard, Cash, PiggyBank, Wallet;
 
-class AddEditMoneySourceScreen extends StatefulWidget {
+class AddEditBankAccountScreen extends StatefulWidget {
   final String? sourceId;
-  const AddEditMoneySourceScreen({super.key, this.sourceId});
+  const AddEditBankAccountScreen({super.key, this.sourceId});
 
   @override
-  State<AddEditMoneySourceScreen> createState() =>
+  State<AddEditBankAccountScreen> createState() =>
       _AddEditMoneySourceScreenState();
 }
 
-class _AddEditMoneySourceScreenState extends State<AddEditMoneySourceScreen> {
+class _AddEditMoneySourceScreenState extends State<AddEditBankAccountScreen> {
   int _typeIdx = 0;
   int _ownerIdx = 0;
   int _iconIdx = 1;
@@ -64,51 +64,33 @@ class _AddEditMoneySourceScreenState extends State<AddEditMoneySourceScreen> {
     final selectedColor = swatches[_colorIdx];
     final selectedIcon = iconCtors[_iconIdx](selectedColor);
 
-    return CupertinoPageScaffold(
+    final isEdit = widget.sourceId != null;
+
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-              child: Row(
-                children: [
-                  IconBtn(
-                    icon: NavArrowLeft(width: 16, height: 16, color: fg),
-                    surface: surface,
-                    border: border,
-                    onTap: () => context.pop(),
-                    size: 36,
-                    radius: 10,
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'New source',
-                        style: AppFonts.body(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: fg,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'Save',
-                    style: AppFonts.body(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: accent,
-                    ),
-                  ),
-                ],
-              ),
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: isEdit ? 'Edit account' : 'New account',
+      trailing: Padding(
+        padding: const EdgeInsets.only(right: 6),
+        child: GestureDetector(
+          onTap: () {},
+          child: Text(
+            'Save',
+            style: AppFonts.body(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: accent,
             ),
-
-            const SizedBox(height: 24),
-
+          ),
+        ),
+      ),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
+        children: [
             // Preview card
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -293,7 +275,6 @@ class _AddEditMoneySourceScreenState extends State<AddEditMoneySourceScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 
