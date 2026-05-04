@@ -510,6 +510,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: barTitle,

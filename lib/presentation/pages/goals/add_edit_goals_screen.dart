@@ -51,6 +51,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: widget.goalId != null ? 'Edit goal' : 'New goal',

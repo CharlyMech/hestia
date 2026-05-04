@@ -4,11 +4,12 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show NavArrowLeft;
 
 /// Fixed iOS-style top row for pushed stack routes: plain back chevron (no
-/// bordered button), bottom hairline, light shadow; body scrolls underneath.
+/// bordered button), bottom hairline on [navBackground]; body scrolls underneath.
 class CupertinoPushedRouteShell extends StatelessWidget {
   const CupertinoPushedRouteShell({
     super.key,
     required this.backgroundColor,
+    required this.navBackground,
     required this.borderColor,
     required this.foregroundColor,
     required this.child,
@@ -23,6 +24,8 @@ class CupertinoPushedRouteShell extends StatelessWidget {
         );
 
   final Color backgroundColor;
+  /// Top chrome row (uses surface; body uses [backgroundColor]).
+  final Color navBackground;
   final Color borderColor;
   final Color foregroundColor;
   final Widget child;
@@ -65,17 +68,10 @@ class CupertinoPushedRouteShell extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: backgroundColor,
+                color: navBackground,
                 border: Border(
                   bottom: BorderSide(color: borderColor, width: 1),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: foregroundColor.withValues(alpha: 0.07),
-                    offset: const Offset(0, 2),
-                    blurRadius: 6,
-                  ),
-                ],
               ),
               child: Padding(
                 padding: topPadding,

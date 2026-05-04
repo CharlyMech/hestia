@@ -155,6 +155,7 @@ class _BodyState extends State<_Body> {
 
         return CupertinoPushedRouteShell(
           backgroundColor: bg,
+          navBackground: surface,
           borderColor: border,
           foregroundColor: fg,
           titleText: list.name,

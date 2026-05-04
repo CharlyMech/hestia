@@ -399,6 +399,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: l10n.settings_title,

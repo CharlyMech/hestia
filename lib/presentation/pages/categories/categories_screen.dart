@@ -117,6 +117,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     if (_loading) {
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
+        navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: 'Categories',
@@ -149,6 +150,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     if (_error != null) {
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
+        navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: 'Categories',
@@ -169,6 +171,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Categories',

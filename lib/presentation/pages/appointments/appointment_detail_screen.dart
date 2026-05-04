@@ -50,6 +50,7 @@ class AppointmentDetailScreen extends StatelessWidget {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Appointment',

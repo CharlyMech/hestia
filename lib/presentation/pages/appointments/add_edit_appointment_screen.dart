@@ -64,6 +64,7 @@ class _Form extends StatelessWidget {
       builder: (context, state) {
         return CupertinoPushedRouteShell(
           backgroundColor: bg,
+          navBackground: surface,
           borderColor: border,
           foregroundColor: fg,
           titleText:

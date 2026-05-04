@@ -113,10 +113,18 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
       );
 
       if (widget.embeddedInTabShell) {
-        return ColoredBox(color: bg, child: loadingBody);
+        return ColoredBox(
+          color: bg,
+          child: SafeArea(
+            bottom: false,
+            child: loadingBody,
+          ),
+        );
       }
+      final surface = _c(theme.surfaceColor);
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
+        navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: l10n.bankAccounts_title,
@@ -137,23 +145,32 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
-class _Body extends StatelessWidget {
+class _Body extends StatefulWidget {
   final bool embeddedInTabShell;
 
   const _Body({required this.embeddedInTabShell});
 
+  @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  int _skeletonEpoch = 0;
+
   Widget _wrapPageChrome({
     required Color bg,
+    required Color surface,
     required Color border,
     required Color fg,
     required AppLocalizations l10n,
     required Widget child,
   }) {
-    if (embeddedInTabShell) {
+    if (widget.embeddedInTabShell) {
       return ColoredBox(color: bg, child: child);
     }
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: l10n.bankAccounts_title,
@@ -166,6 +183,7 @@ class _Body extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
     final bg = _c(theme.backgroundColor);
+    final surface = _c(theme.surfaceColor);
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     final accent = _c(theme.primaryColor);
@@ -173,54 +191,36 @@ class _Body extends StatelessWidget {
 
     return _wrapPageChrome(
       bg: bg,
+      surface: surface,
       border: border,
       fg: fg,
       l10n: l10n,
-      child: BlocBuilder<BankAccountsBloc, BankAccountsState>(
-        builder: (context, state) {
+      child: BlocListener<BankAccountsBloc, BankAccountsState>(
+        listenWhen: (p, n) =>
+            n is BankAccountsLoading && p is BankAccountsLoaded,
+        listener: (_, __) {
+          if (mounted) setState(() => _skeletonEpoch++);
+        },
+        child: BlocBuilder<BankAccountsBloc, BankAccountsState>(
+          builder: (context, state) {
           if (state is BankAccountsLoading || state is BankAccountsInitial) {
             return Skeletonizer(
+              key: ValueKey(_skeletonEpoch),
               enabled: true,
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
                 slivers: [
-                  if (embeddedInTabShell)
-                    SliverToBoxAdapter(
-                      child: _Header(
-                        l10n: l10n,
-                        fg: fg,
-                        muted: muted,
-                        accent: accent,
-                        total: 0,
-                        currency: 'EUR',
-                        showLargeTitle: true,
-                      ),
-                    )
-                  else
-                    const SliverToBoxAdapter(child: SizedBox(height: 8)),
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(20, embeddedInTabShell ? 8 : 0, 20, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.bankAccounts_totalNetWorth,
-                            style: AppFonts.body(fontSize: 13, color: muted),
-                          ),
-                          Text(
-                            '8888.88 EUR',
-                            style: AppFonts.numeric(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: fg,
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: _Header(
+                      l10n: l10n,
+                      fg: fg,
+                      muted: muted,
+                      accent: accent,
+                      total: 88888.88,
+                      currency: 'EUR',
+                      showLargeTitle: widget.embeddedInTabShell,
                     ),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -280,7 +280,7 @@ class _Body extends StatelessWidget {
                   accent: accent,
                   total: loaded.totalBalance,
                   currency: loaded.sources.firstOrNull?.currency ?? 'EUR',
-                  showLargeTitle: embeddedInTabShell,
+                  showLargeTitle: widget.embeddedInTabShell,
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -315,6 +315,7 @@ class _Body extends StatelessWidget {
             ],
           );
         },
+        ),
       ),
     );
   }

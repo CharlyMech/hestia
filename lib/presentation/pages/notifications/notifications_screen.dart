@@ -51,6 +51,7 @@ class _NotificationsBody extends StatelessWidget {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Inbox',
@@ -358,11 +359,14 @@ class _Empty extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final bg = Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final surface =
+        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
     final border = Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
     final fg = Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
     final muted = Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Inbox',

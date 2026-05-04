@@ -102,6 +102,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Transaction',

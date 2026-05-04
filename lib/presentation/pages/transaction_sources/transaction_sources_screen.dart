@@ -55,12 +55,14 @@ class _TransactionSourcesScreenState extends State<TransactionSourcesScreen> {
     final auth = context.watch<AuthBloc>().state;
     final theme = context.myTheme;
     final bg = _c(theme.backgroundColor);
+    final surface = _c(theme.surfaceColor);
     final border = _c(theme.borderColor);
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     if (auth is! AuthAuthenticated || _resolving || _householdId == null) {
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
+        navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: 'Transaction sources',
@@ -137,6 +139,7 @@ class _Body extends StatelessWidget {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Transaction sources',

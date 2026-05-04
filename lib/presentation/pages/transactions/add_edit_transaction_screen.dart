@@ -15,11 +15,13 @@ class AddEditTransactionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final bg = _c(theme.backgroundColor);
+    final surface = _c(theme.surfaceColor);
     final border = _c(theme.borderColor);
     final fg = _c(theme.onBackgroundColor);
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Edit transaction',

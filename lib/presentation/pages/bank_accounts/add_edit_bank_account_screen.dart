@@ -68,6 +68,7 @@ class _AddEditMoneySourceScreenState extends State<AddEditBankAccountScreen> {
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
+      navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
       titleText: isEdit ? 'Edit account' : 'New account',
