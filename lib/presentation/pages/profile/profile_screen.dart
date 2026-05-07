@@ -16,7 +16,7 @@ import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, LogOut, Settings, Shield, Shop, Trophy, UserPlus;
+    show Bell, EditPencil, LogOut, Settings, Shop, Trophy, UserPlus;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -193,6 +193,13 @@ class ProfileScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: card([
               tile(
+                icon: EditPencil(width: 16, height: 16, color: tints[4]),
+                color: tints[4],
+                label: 'Edit profile',
+                sub: 'Name, avatar, currency',
+                onTap: () {},
+              ),
+              tile(
                 icon: Settings(width: 16, height: 16, color: tints[2]),
                 color: tints[2],
                 label: 'Settings',
@@ -219,13 +226,6 @@ class ProfileScreen extends StatelessWidget {
                 label: 'Sources',
                 sub: 'Merchants, services, employers',
                 onTap: () => context.push(AppRoutes.transactionSources),
-              ),
-              tile(
-                icon: Shield(width: 16, height: 16, color: tints[5]),
-                color: tints[5],
-                label: 'Privacy',
-                sub: 'Data, biometrics',
-                onTap: () => context.push(AppRoutes.settings),
               ),
             ]),
           ),
