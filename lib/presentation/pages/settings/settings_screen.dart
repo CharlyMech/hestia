@@ -8,15 +8,10 @@ import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
-import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
-import 'package:hestia/presentation/blocs/auth/auth_events.dart';
-import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
-import 'package:hestia/presentation/widgets/admin/create_user_form.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show
@@ -24,13 +19,10 @@ import 'package:iconoir_flutter/iconoir_flutter.dart'
         Home,
         Mail,
         HalfMoon,
-        ColorPicker,
         Globe,
         Fingerprint,
         Bell,
         Shield,
-        LogOut,
-        UserPlus,
         Clock,
         CalendarPlus,
         Cart,
@@ -177,17 +169,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final border = _c(theme.borderColor);
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
     final tints = theme.categoryTints.map(_c).toList();
     final expense = _c(theme.colorRed);
     final income = _c(theme.colorGreen);
-
-    final profile = (context.watch<AuthBloc>().state is AuthAuthenticated)
-        ? (context.watch<AuthBloc>().state as AuthAuthenticated).profile
-        : null;
-
-    final name = profile?.displayName ?? 'Ana Ruiz';
-    final email = profile?.email ?? 'ana@ruiz.es';
 
     final sections = <_Section>[
       _Section('Household', [
@@ -233,12 +217,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           label: l10n.settings_appearance,
           sub: _themeLabel(prefs.themeType, l10n),
           onTap: () => _pickTheme(context, prefs, l10n),
-        ),
-        _Tile.swatch(
-          icon: ColorPicker(width: 16, height: 16, color: tints[4]),
-          color: tints[4],
-          label: 'Accent color',
-          swatchColor: accent,
         ),
         _Tile.chevron(
           icon: Globe(width: 16, height: 16, color: tints[3]),
@@ -286,35 +264,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           label: 'Privacy',
         ),
       ]),
-      _Section('', [
-        _Tile.danger(
-          icon: LogOut(width: 16, height: 16, color: expense),
-          color: expense,
-          label: 'Sign out',
-          onTap: () => context.read<AuthBloc>().add(const AuthSignOut()),
-        ),
-      ]),
     ];
-
-    if (profile?.isSuperuser == true) {
-      sections.insert(
-        sections.length - 1,
-        _Section('Admin', [
-          _Tile.chevron(
-            icon: UserPlus(width: 16, height: 16, color: accent),
-            color: accent,
-            label: 'Create user',
-            sub: 'Add a new household member',
-            onTap: () => showAppBottomSheet<void>(
-              context: context,
-              title: 'Create user',
-              heightFactor: 0.7,
-              child: const CreateUserForm(),
-            ),
-          ),
-        ]),
-      );
-    }
 
     Widget tileWidget(_Tile t, {required bool last}) => GestureDetector(
           onTap: t.onTap,
@@ -339,7 +289,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         style: AppFonts.body(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: t.danger ? expense : fg,
+                          color: fg,
                         ),
                       ),
                       if (t.sub != null) ...[
@@ -356,23 +306,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   FSwitch(
                     value: t.value!,
                     onChange: t.onChanged!,
-                  )
-                else if (t.kind == _TileKind.swatch)
-                  Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: t.swatchColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: surface, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: t.swatchColor!,
-                          spreadRadius: 1,
-                          blurRadius: 0,
-                        ),
-                      ],
-                    ),
                   )
                 else if (t.kind == _TileKind.chevron)
                   ChevronIcon(color: muted),
@@ -407,47 +340,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         bg: bg,
         slivers: [
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: surface,
-                  border: Border.all(color: border, width: 1),
-                  borderRadius: BorderRadius.circular(AppRadii.xl),
-                ),
-                child: Row(
-                  children: [
-                    MemberAvatar(name: name, color: tints[0], size: 52),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            style: AppFonts.body(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: fg,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '$email · Owner',
-                            style:
-                                AppFonts.body(fontSize: 12, color: muted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ChevronIcon(color: muted),
-                  ],
-                ),
-              ),
-            ),
-          ),
           for (final s in sections) ...[
             const SliverToBoxAdapter(child: SizedBox(height: 22)),
             if (s.title.isNotEmpty)
@@ -476,7 +368,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
-enum _TileKind { chevron, toggle, swatch, danger }
+enum _TileKind { chevron, toggle }
 
 class _Tile {
   final Widget icon;
@@ -486,9 +378,7 @@ class _Tile {
   final _TileKind kind;
   final bool? value;
   final ValueChanged<bool>? onChanged;
-  final Color? swatchColor;
   final VoidCallback? onTap;
-  final bool danger;
 
   const _Tile._({
     required this.icon,
@@ -498,9 +388,7 @@ class _Tile {
     required this.kind,
     this.value,
     this.onChanged,
-    this.swatchColor,
     this.onTap,
-    this.danger = false,
   });
 
   factory _Tile.chevron({
@@ -533,35 +421,6 @@ class _Tile {
         kind: _TileKind.toggle,
         value: value,
         onChanged: onChanged,
-      );
-
-  factory _Tile.swatch({
-    required Widget icon,
-    required Color color,
-    required String label,
-    required Color swatchColor,
-  }) =>
-      _Tile._(
-        icon: icon,
-        color: color,
-        label: label,
-        kind: _TileKind.swatch,
-        swatchColor: swatchColor,
-      );
-
-  factory _Tile.danger({
-    required Widget icon,
-    required Color color,
-    required String label,
-    VoidCallback? onTap,
-  }) =>
-      _Tile._(
-        icon: icon,
-        color: color,
-        label: label,
-        kind: _TileKind.danger,
-        danger: true,
-        onTap: onTap,
       );
 }
 
