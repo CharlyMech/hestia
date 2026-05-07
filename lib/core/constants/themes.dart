@@ -6,25 +6,8 @@ enum ThemeType { light, dark, system }
 class MyChartTheme {
   final List<String> series;
 
-  final String positive;
-  final String negative;
-  final String neutral;
-
-  final String grid;
-  final String axis;
-
-  final String tooltipBackground;
-  final String tooltipText;
-
   const MyChartTheme({
     required this.series,
-    required this.positive,
-    required this.negative,
-    required this.neutral,
-    required this.grid,
-    required this.axis,
-    required this.tooltipBackground,
-    required this.tooltipText,
   });
 }
 
@@ -34,29 +17,22 @@ class MyTheme {
   final String onPrimaryColor;
 
   final String backgroundColor;
-  final String onBackgroundColor;
-
   final String surfaceColor;
-  final String onSurfaceColor;
+  final String foregroundColor;
 
-  final String colorGreen;
-  final String colorRed;
-  final String onRedColor;
+  final String successColor;
+  final String warningColor;
+  final String errorColor;
+  final String onStatusColor;
+  final String destructiveColor;
+  final String neutralColor;
 
-  final String colorOrange;
-
-  final String inactiveColor;
-  final String onInactiveColor;
+  final String mutedColor;
 
   final String outlineColor;
   final String shadow;
 
-  // Dashboard / design-system extras
-  final String surface2Color;
-  final String borderColor;
-  final String incomeSoft;
-  final String expenseSoft;
-  final List<String> categoryTints;
+  final List<String> categoryChartColors;
 
   final MyChartTheme chart;
 
@@ -64,113 +40,94 @@ class MyTheme {
     required this.primaryColor,
     required this.onPrimaryColor,
     required this.backgroundColor,
-    required this.onBackgroundColor,
     required this.surfaceColor,
-    required this.onSurfaceColor,
-    required this.colorGreen,
-    required this.colorRed,
-    required this.onRedColor,
-    required this.colorOrange,
-    required this.inactiveColor,
-    required this.onInactiveColor,
+    required this.foregroundColor,
+    required this.successColor,
+    required this.warningColor,
+    required this.errorColor,
+    required this.onStatusColor,
+    required this.destructiveColor,
+    required this.neutralColor,
+    required this.mutedColor,
     required this.outlineColor,
     required this.shadow,
-    required this.surface2Color,
-    required this.borderColor,
-    required this.incomeSoft,
-    required this.expenseSoft,
-    required this.categoryTints,
+    required this.categoryChartColors,
     required this.chart,
   });
+
+  // Backward-compatibility aliases while callers migrate.
+  String get colorGreen => successColor;
+  String get colorRed => errorColor;
+  String get onRedColor => onStatusColor;
+  String get colorOrange => warningColor;
+  String get surface2Color => surfaceColor;
+  String get incomeSoft => successColor;
+  String get expenseSoft => errorColor;
+  String get borderColor => outlineColor;
+  String get inactiveColor => mutedColor;
+  String get onBackgroundColor => foregroundColor;
+  String get onSurfaceColor => foregroundColor;
+  String get onMutedColor => foregroundColor;
+  @Deprecated('Use onMutedColor instead.')
+  String get onInactiveColor => onMutedColor;
+  String get onDestructiveColor => foregroundColor;
+  List<String> get categoryTints => categoryChartColors;
 }
+
+const String _kStatusSuccess = '#22C55E';
+const String _kStatusWarning = '#F59E0B';
+const String _kStatusError = '#EF4444';
+const String _kStatusNeutral = '#94A3B8';
+const String _kOnStatusColor = '#FFFFFF';
+const List<String> _kCategoryChartColors = [
+  '#0077B6',
+  '#00B4D8',
+  '#8B7AE6',
+  '#7AD4C1',
+  '#E6B87A',
+  '#E67AB8',
+  '#8DD47A',
+];
 
 const Map<ThemeType, MyTheme> themes = {
   ThemeType.light: MyTheme(
     primaryColor: '#0077B6',
     onPrimaryColor: '#FFFFFF',
-    backgroundColor: '#F7FAFC',
-    onBackgroundColor: '#0F172A',
+    backgroundColor: '#F0F2F5',
     surfaceColor: '#FFFFFF',
-    onSurfaceColor: '#0F172A',
-    colorGreen: '#22C55E',
-    colorRed: '#EF4444',
-    onRedColor: '#FFFFFF',
-    colorOrange: '#F59E0B',
-    inactiveColor: '#E2E8F0',
-    onInactiveColor: '#475569',
-    outlineColor: '#CBD5E1',
+    foregroundColor: '#111111',
+    successColor: _kStatusSuccess,
+    warningColor: _kStatusWarning,
+    errorColor: _kStatusError,
+    onStatusColor: _kOnStatusColor,
+    destructiveColor: '#DC2626',
+    neutralColor: _kStatusNeutral,
+    mutedColor: '#64748B',
+    outlineColor: '#E2E8F0',
     shadow: '#000000',
-    surface2Color: '#F1F5F9',
-    borderColor: '#E2E8F0',
-    incomeSoft: '#22C55E14',
-    expenseSoft: '#EF444414',
-    categoryTints: [
-      '#8B7AE6',
-      '#E6B87A',
-      '#7AAFE6',
-      '#7AD4C1',
-      '#E67AB8',
-      '#8DD47A',
-    ],
+    categoryChartColors: _kCategoryChartColors,
     chart: MyChartTheme(
-      series: [
-        '#00B4D8',
-        '#22C55E',
-        '#F59E0B',
-        '#EF4444',
-        '#6366F1',
-      ],
-      positive: '#22C55E',
-      negative: '#EF4444',
-      neutral: '#94A3B8',
-      grid: '#E2E8F0',
-      axis: '#334155',
-      tooltipBackground: '#0F172A',
-      tooltipText: '#FFFFFF',
+      series: _kCategoryChartColors,
     ),
   ),
   ThemeType.dark: MyTheme(
     primaryColor: '#0077B6',
     onPrimaryColor: '#FFFFFF',
-    backgroundColor: '#0B0F14',
-    onBackgroundColor: '#E6EAF0',
-    surfaceColor: '#141A22',
-    onSurfaceColor: '#E6EAF0',
-    colorGreen: '#34D399',
-    colorRed: '#F87171',
-    onRedColor: '#FFFFFF',
-    colorOrange: '#F59E0B',
-    inactiveColor: '#1F2733',
-    onInactiveColor: '#8A94A3',
-    outlineColor: '#1F2733',
+    backgroundColor: '#0F1117',
+    surfaceColor: '#1C1F26',
+    foregroundColor: '#f1f1f1',
+    successColor: _kStatusSuccess,
+    warningColor: _kStatusWarning,
+    errorColor: _kStatusError,
+    onStatusColor: _kOnStatusColor,
+    destructiveColor: '#F87171',
+    neutralColor: _kStatusNeutral,
+    mutedColor: '#8A94A3',
+    outlineColor: '#252B36',
     shadow: '#000000',
-    surface2Color: '#1A2230',
-    borderColor: '#1F2733',
-    incomeSoft: '#34D39914',
-    expenseSoft: '#F8717114',
-    categoryTints: [
-      '#8B7AE6',
-      '#E6B87A',
-      '#7AAFE6',
-      '#7AD4C1',
-      '#E67AB8',
-      '#8DD47A',
-    ],
+    categoryChartColors: _kCategoryChartColors,
     chart: MyChartTheme(
-      series: [
-        '#00B4D8',
-        '#22C55E',
-        '#F59E0B',
-        '#EF4444',
-        '#818CF8',
-      ],
-      positive: '#22C55E',
-      negative: '#EF4444',
-      neutral: '#475569',
-      grid: '#1E293B',
-      axis: '#CBD5F5',
-      tooltipBackground: '#111827',
-      tooltipText: '#FFFFFF',
+      series: _kCategoryChartColors,
     ),
   ),
 };

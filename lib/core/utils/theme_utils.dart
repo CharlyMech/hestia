@@ -10,16 +10,16 @@ extension MyThemeToForui on MyTheme {
         brightness: brightness,
         primary: _c(primaryColor),
         primaryForeground: _c(onPrimaryColor),
-        secondary: _c(inactiveColor),
-        secondaryForeground: _c(onInactiveColor),
-        muted: _c(inactiveColor),
-        mutedForeground: _c(onInactiveColor),
+        secondary: _c(surfaceColor),
+        secondaryForeground: _c(foregroundColor),
+        muted: _c(mutedColor),
+        mutedForeground: _c(foregroundColor),
         background: _c(backgroundColor),
-        foreground: _c(onBackgroundColor),
-        destructive: _c(colorRed),
-        destructiveForeground: _c(onRedColor),
-        error: _c(colorRed),
-        errorForeground: _c(onRedColor),
+        foreground: _c(foregroundColor),
+        destructive: _c(destructiveColor),
+        destructiveForeground: _c(onDestructiveColor),
+        error: _c(errorColor),
+        errorForeground: _c(onStatusColor),
         border: _c(outlineColor),
       ),
     );
@@ -31,16 +31,6 @@ extension MyThemeToForui on MyTheme {
 /// Chart helpers
 extension MyChartThemeParser on MyChartTheme {
   List<Color> get seriesColors => series.map((c) => _c(c)).toList();
-
-  Color get positiveColor => _c(positive);
-  Color get negativeColor => _c(negative);
-  Color get neutralColor => _c(neutral);
-
-  Color get gridColor => _c(grid);
-  Color get axisColor => _c(axis);
-
-  Color get tooltipBg => _c(tooltipBackground);
-  Color get tooltipTextColor => _c(tooltipText);
 
   Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

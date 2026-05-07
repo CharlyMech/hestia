@@ -6,23 +6,23 @@ import 'package:hestia/core/utils/app_fonts.dart';
 
 /// Builds the Forui theme from a [MyTheme] instance.
 FThemeData buildForuiTheme(MyTheme theme, {required Brightness brightness}) {
-  final fg = _c(theme.onBackgroundColor);
-  final muted = _c(theme.onInactiveColor);
+  final fg = _c(theme.foregroundColor);
+  final muted = _c(theme.mutedColor);
 
   final colorScheme = FColorScheme(
     brightness: brightness,
     primary: _c(theme.primaryColor),
     primaryForeground: _c(theme.onPrimaryColor),
-    secondary: _c(theme.inactiveColor),
-    secondaryForeground: _c(theme.onInactiveColor),
-    muted: _c(theme.inactiveColor),
-    mutedForeground: _c(theme.onInactiveColor),
+    secondary: _c(theme.surfaceColor),
+    secondaryForeground: _c(theme.foregroundColor),
+    muted: _c(theme.mutedColor),
+    mutedForeground: _c(theme.foregroundColor),
     background: _c(theme.backgroundColor),
-    foreground: _c(theme.onBackgroundColor),
-    destructive: _c(theme.colorRed),
-    destructiveForeground: _c(theme.onRedColor),
-    error: _c(theme.colorRed),
-    errorForeground: _c(theme.onRedColor),
+    foreground: _c(theme.foregroundColor),
+    destructive: _c(theme.destructiveColor),
+    destructiveForeground: _c(theme.onDestructiveColor),
+    error: _c(theme.errorColor),
+    errorForeground: _c(theme.onStatusColor),
     border: _c(theme.outlineColor),
   );
 
@@ -54,7 +54,7 @@ CupertinoThemeData buildCupertinoTheme(
 }) {
   final bg = _c(theme.backgroundColor);
   final surface = _c(theme.surfaceColor);
-  final fg = _c(theme.onBackgroundColor);
+  final fg = _c(theme.foregroundColor);
   final primary = _c(theme.primaryColor);
 
   return CupertinoThemeData(
