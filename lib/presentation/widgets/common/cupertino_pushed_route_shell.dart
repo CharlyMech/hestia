@@ -60,7 +60,7 @@ class CupertinoPushedRouteShell extends StatelessWidget {
             : const SizedBox.shrink());
 
     return ColoredBox(
-      color: backgroundColor,
+      color: navBackground,
       child: SafeArea(
         bottom: false,
         child: Column(
@@ -93,7 +93,12 @@ class CupertinoPushedRouteShell extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(child: child),
+            Expanded(
+              child: ColoredBox(
+                color: backgroundColor,
+                child: child,
+              ),
+            ),
           ],
         ),
       ),
