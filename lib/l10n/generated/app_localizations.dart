@@ -188,6 +188,162 @@ abstract class AppLocalizations {
   /// **'Accounts'**
   String get nav_accounts;
 
+  /// No description provided for @nav_pets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get nav_pets;
+
+  /// No description provided for @nav_cars.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars'**
+  String get nav_cars;
+
+  /// No description provided for @settings_carsModule.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars tracking'**
+  String get settings_carsModule;
+
+  /// No description provided for @settings_carsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars'**
+  String get settings_carsTitle;
+
+  /// No description provided for @settings_carsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars and fill-ups'**
+  String get settings_carsSub;
+
+  /// No description provided for @settings_general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settings_general;
+
+  /// No description provided for @settings_modules.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules'**
+  String get settings_modules;
+
+  /// No description provided for @settings_dataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data management'**
+  String get settings_dataManagement;
+
+  /// No description provided for @settings_categoriesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get settings_categoriesTab;
+
+  /// No description provided for @settings_sourcesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get settings_sourcesTab;
+
+  /// No description provided for @settings_dateFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Date format'**
+  String get settings_dateFormat;
+
+  /// No description provided for @settings_dateFormatMdy.
+  ///
+  /// In en, this message translates to:
+  /// **'MM/DD/YYYY'**
+  String get settings_dateFormatMdy;
+
+  /// No description provided for @settings_dateFormatDmy.
+  ///
+  /// In en, this message translates to:
+  /// **'DD/MM/YYYY'**
+  String get settings_dateFormatDmy;
+
+  /// No description provided for @settings_dateFormatYmd.
+  ///
+  /// In en, this message translates to:
+  /// **'YYYY-MM-DD'**
+  String get settings_dateFormatYmd;
+
+  /// No description provided for @settings_allowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location'**
+  String get settings_allowLocation;
+
+  /// No description provided for @settings_allowNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications'**
+  String get settings_allowNotifications;
+
+  /// No description provided for @settings_faceIdUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Face ID unlock'**
+  String get settings_faceIdUnlock;
+
+  /// No description provided for @settings_viewCarsData.
+  ///
+  /// In en, this message translates to:
+  /// **'View cars data'**
+  String get settings_viewCarsData;
+
+  /// No description provided for @profile_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get profile_edit;
+
+  /// No description provided for @notifications_unread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notifications_unread;
+
+  /// No description provided for @notifications_read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get notifications_read;
+
+  /// No description provided for @notifications_showRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Show read'**
+  String get notifications_showRead;
+
+  /// No description provided for @notifications_hideRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide read'**
+  String get notifications_hideRead;
+
+  /// No description provided for @cars_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars'**
+  String get cars_title;
+
+  /// No description provided for @cars_analyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Car analytics'**
+  String get cars_analyticsTitle;
+
+  /// No description provided for @cars_fuelType.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel type'**
+  String get cars_fuelType;
+
   /// No description provided for @settings_title.
   ///
   /// In en, this message translates to:
@@ -428,11 +584,23 @@ abstract class AppLocalizations {
   /// **'Shopping'**
   String get shopping_title;
 
+  /// No description provided for @shopping_sessionsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get shopping_sessionsTab;
+
   /// No description provided for @shopping_active.
   ///
   /// In en, this message translates to:
   /// **'Active'**
   String get shopping_active;
+
+  /// No description provided for @shopping_templatesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get shopping_templatesTab;
 
   /// No description provided for @shopping_history.
   ///
@@ -511,6 +679,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New transaction'**
   String get transaction_new;
+
+  /// No description provided for @transactionLocation_mapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick location'**
+  String get transactionLocation_mapTitle;
+
+  /// No description provided for @transactionLocation_statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location insights'**
+  String get transactionLocation_statsTitle;
+
+  /// No description provided for @transactionLocation_statsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'geo-tagged pins'**
+  String get transactionLocation_statsCount;
+
+  /// No description provided for @transactionLocation_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions with a location yet.'**
+  String get transactionLocation_empty;
+
+  /// No description provided for @settings_locationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get settings_locationSection;
+
+  /// No description provided for @settings_locationStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Map & pins'**
+  String get settings_locationStats;
+
+  /// No description provided for @settings_locationStatsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent transactions saved with GPS'**
+  String get settings_locationStatsSub;
+
+  /// No description provided for @settings_locationPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission'**
+  String get settings_locationPermission;
+
+  /// No description provided for @settings_locationRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Request access'**
+  String get settings_locationRequest;
+
+  /// No description provided for @settings_locationOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open system settings'**
+  String get settings_locationOpenSettings;
+
+  /// No description provided for @settings_locationPermGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed while using the app'**
+  String get settings_locationPermGranted;
+
+  /// No description provided for @settings_locationPermDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Denied — tap Request access'**
+  String get settings_locationPermDenied;
+
+  /// No description provided for @settings_locationPermForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked — enable in system Settings'**
+  String get settings_locationPermForever;
+
+  /// No description provided for @settings_locationPermSvcOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are turned off'**
+  String get settings_locationPermSvcOff;
 }
 
 class _AppLocalizationsDelegate

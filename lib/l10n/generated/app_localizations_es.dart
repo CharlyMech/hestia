@@ -54,6 +54,84 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nav_accounts => 'Cuentas';
 
   @override
+  String get nav_pets => 'Mascotas';
+
+  @override
+  String get nav_cars => 'Coches';
+
+  @override
+  String get settings_carsModule => 'Seguimiento de coches';
+
+  @override
+  String get settings_carsTitle => 'Coches';
+
+  @override
+  String get settings_carsSub => 'Coches y repostajes';
+
+  @override
+  String get settings_general => 'General';
+
+  @override
+  String get settings_modules => 'Módulos';
+
+  @override
+  String get settings_dataManagement => 'Gestión de datos';
+
+  @override
+  String get settings_categoriesTab => 'Categorías';
+
+  @override
+  String get settings_sourcesTab => 'Fuentes';
+
+  @override
+  String get settings_dateFormat => 'Formato de fecha';
+
+  @override
+  String get settings_dateFormatMdy => 'MM/DD/AAAA';
+
+  @override
+  String get settings_dateFormatDmy => 'DD/MM/AAAA';
+
+  @override
+  String get settings_dateFormatYmd => 'AAAA-MM-DD';
+
+  @override
+  String get settings_allowLocation => 'Permitir ubicación';
+
+  @override
+  String get settings_allowNotifications => 'Permitir notificaciones';
+
+  @override
+  String get settings_faceIdUnlock => 'Desbloqueo con Face ID';
+
+  @override
+  String get settings_viewCarsData => 'Ver datos de coches';
+
+  @override
+  String get profile_edit => 'Editar';
+
+  @override
+  String get notifications_unread => 'No leídas';
+
+  @override
+  String get notifications_read => 'Leídas';
+
+  @override
+  String get notifications_showRead => 'Mostrar leídas';
+
+  @override
+  String get notifications_hideRead => 'Ocultar leídas';
+
+  @override
+  String get cars_title => 'Coches';
+
+  @override
+  String get cars_analyticsTitle => 'Análisis del coche';
+
+  @override
+  String get cars_fuelType => 'Tipo de combustible';
+
+  @override
   String get settings_title => 'Ajustes';
 
   @override
@@ -174,7 +252,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shopping_title => 'Compras';
 
   @override
+  String get shopping_sessionsTab => 'Sesiones';
+
+  @override
   String get shopping_active => 'Activa';
+
+  @override
+  String get shopping_templatesTab => 'Plantillas';
 
   @override
   String get shopping_history => 'Historial';
@@ -215,4 +299,50 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get transaction_new => 'Nueva transacción';
+
+  @override
+  String get transactionLocation_mapTitle => 'Elegir ubicación';
+
+  @override
+  String get transactionLocation_statsTitle => 'Resumen de ubicaciones';
+
+  @override
+  String get transactionLocation_statsCount => 'marcadores geolocalizados';
+
+  @override
+  String get transactionLocation_empty =>
+      'Aún no hay transacciones con ubicación.';
+
+  @override
+  String get settings_locationSection => 'Ubicación';
+
+  @override
+  String get settings_locationStats => 'Mapa y marcadores';
+
+  @override
+  String get settings_locationStatsSub =>
+      'Transacciones recientes guardadas con GPS';
+
+  @override
+  String get settings_locationPermission => 'Permiso';
+
+  @override
+  String get settings_locationRequest => 'Solicitar acceso';
+
+  @override
+  String get settings_locationOpenSettings => 'Abrir ajustes del sistema';
+
+  @override
+  String get settings_locationPermGranted => 'Permitido mientras usas la app';
+
+  @override
+  String get settings_locationPermDenied => 'Denegado — pulsa Solicitar acceso';
+
+  @override
+  String get settings_locationPermForever =>
+      'Bloqueado — actívalo en Ajustes del sistema';
+
+  @override
+  String get settings_locationPermSvcOff =>
+      'Los servicios de ubicación están desactivados';
 }

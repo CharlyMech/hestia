@@ -54,6 +54,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_accounts => 'Accounts';
 
   @override
+  String get nav_pets => 'Pets';
+
+  @override
+  String get nav_cars => 'Cars';
+
+  @override
+  String get settings_carsModule => 'Cars tracking';
+
+  @override
+  String get settings_carsTitle => 'Cars';
+
+  @override
+  String get settings_carsSub => 'Cars and fill-ups';
+
+  @override
+  String get settings_general => 'General';
+
+  @override
+  String get settings_modules => 'Modules';
+
+  @override
+  String get settings_dataManagement => 'Data management';
+
+  @override
+  String get settings_categoriesTab => 'Categories';
+
+  @override
+  String get settings_sourcesTab => 'Sources';
+
+  @override
+  String get settings_dateFormat => 'Date format';
+
+  @override
+  String get settings_dateFormatMdy => 'MM/DD/YYYY';
+
+  @override
+  String get settings_dateFormatDmy => 'DD/MM/YYYY';
+
+  @override
+  String get settings_dateFormatYmd => 'YYYY-MM-DD';
+
+  @override
+  String get settings_allowLocation => 'Allow location';
+
+  @override
+  String get settings_allowNotifications => 'Allow notifications';
+
+  @override
+  String get settings_faceIdUnlock => 'Face ID unlock';
+
+  @override
+  String get settings_viewCarsData => 'View cars data';
+
+  @override
+  String get profile_edit => 'Edit';
+
+  @override
+  String get notifications_unread => 'Unread';
+
+  @override
+  String get notifications_read => 'Read';
+
+  @override
+  String get notifications_showRead => 'Show read';
+
+  @override
+  String get notifications_hideRead => 'Hide read';
+
+  @override
+  String get cars_title => 'Cars';
+
+  @override
+  String get cars_analyticsTitle => 'Car analytics';
+
+  @override
+  String get cars_fuelType => 'Fuel type';
+
+  @override
   String get settings_title => 'Settings';
 
   @override
@@ -174,7 +252,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shopping_title => 'Shopping';
 
   @override
+  String get shopping_sessionsTab => 'Sessions';
+
+  @override
   String get shopping_active => 'Active';
+
+  @override
+  String get shopping_templatesTab => 'Templates';
 
   @override
   String get shopping_history => 'History';
@@ -215,4 +299,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_new => 'New transaction';
+
+  @override
+  String get transactionLocation_mapTitle => 'Pick location';
+
+  @override
+  String get transactionLocation_statsTitle => 'Location insights';
+
+  @override
+  String get transactionLocation_statsCount => 'geo-tagged pins';
+
+  @override
+  String get transactionLocation_empty =>
+      'No transactions with a location yet.';
+
+  @override
+  String get settings_locationSection => 'Location';
+
+  @override
+  String get settings_locationStats => 'Map & pins';
+
+  @override
+  String get settings_locationStatsSub => 'Recent transactions saved with GPS';
+
+  @override
+  String get settings_locationPermission => 'Permission';
+
+  @override
+  String get settings_locationRequest => 'Request access';
+
+  @override
+  String get settings_locationOpenSettings => 'Open system settings';
+
+  @override
+  String get settings_locationPermGranted => 'Allowed while using the app';
+
+  @override
+  String get settings_locationPermDenied => 'Denied — tap Request access';
+
+  @override
+  String get settings_locationPermForever =>
+      'Blocked — enable in system Settings';
+
+  @override
+  String get settings_locationPermSvcOff => 'Location services are turned off';
 }
