@@ -43,6 +43,34 @@ class UserPrefsSetLanguageCode extends UserPrefsEvent {
   List<Object?> get props => [languageCode];
 }
 
+class UserPrefsSetShowFuelModule extends UserPrefsEvent {
+  final bool showFuelModule;
+  const UserPrefsSetShowFuelModule(this.showFuelModule);
+  @override
+  List<Object?> get props => [showFuelModule];
+}
+
+class UserPrefsSetDateFormat extends UserPrefsEvent {
+  final String dateFormat;
+  const UserPrefsSetDateFormat(this.dateFormat);
+  @override
+  List<Object?> get props => [dateFormat];
+}
+
+class UserPrefsSetAllowNotifications extends UserPrefsEvent {
+  final bool allowNotifications;
+  const UserPrefsSetAllowNotifications(this.allowNotifications);
+  @override
+  List<Object?> get props => [allowNotifications];
+}
+
+class UserPrefsSetFaceIdUnlock extends UserPrefsEvent {
+  final bool faceIdUnlock;
+  const UserPrefsSetFaceIdUnlock(this.faceIdUnlock);
+  @override
+  List<Object?> get props => [faceIdUnlock];
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
 class UserPrefsState extends Equatable {
@@ -54,11 +82,21 @@ class UserPrefsState extends Equatable {
   final ThemeType themeType;
   final String languageCode;
 
+  /// Whether the Cars module is visible (tab + nav). Default: false.
+  final bool showFuelModule;
+  final String dateFormat;
+  final bool allowNotifications;
+  final bool faceIdUnlock;
+
   const UserPrefsState({
     this.startDay = DateTime.monday,
     this.use24h = true,
     this.themeType = ThemeType.dark,
     this.languageCode = 'en',
+    this.showFuelModule = false,
+    this.dateFormat = 'mdy',
+    this.allowNotifications = false,
+    this.faceIdUnlock = false,
   });
 
   UserPrefsState copyWith({
@@ -66,16 +104,33 @@ class UserPrefsState extends Equatable {
     bool? use24h,
     ThemeType? themeType,
     String? languageCode,
+    bool? showFuelModule,
+    String? dateFormat,
+    bool? allowNotifications,
+    bool? faceIdUnlock,
   }) =>
       UserPrefsState(
         startDay: startDay ?? this.startDay,
         use24h: use24h ?? this.use24h,
         themeType: themeType ?? this.themeType,
         languageCode: languageCode ?? this.languageCode,
+        showFuelModule: showFuelModule ?? this.showFuelModule,
+        dateFormat: dateFormat ?? this.dateFormat,
+        allowNotifications: allowNotifications ?? this.allowNotifications,
+        faceIdUnlock: faceIdUnlock ?? this.faceIdUnlock,
       );
 
   @override
-  List<Object?> get props => [startDay, use24h, themeType, languageCode];
+  List<Object?> get props => [
+        startDay,
+        use24h,
+        themeType,
+        languageCode,
+        showFuelModule,
+        dateFormat,
+        allowNotifications,
+        faceIdUnlock,
+      ];
 }
 
 // ── Bloc ──────────────────────────────────────────────────────────────────────
@@ -89,6 +144,10 @@ class UserPrefsBloc extends Bloc<UserPrefsEvent, UserPrefsState> {
     on<UserPrefsSetUse24h>(_onSetUse24h);
     on<UserPrefsSetThemeType>(_onSetThemeType);
     on<UserPrefsSetLanguageCode>(_onSetLanguageCode);
+    on<UserPrefsSetShowFuelModule>(_onSetShowFuelModule);
+    on<UserPrefsSetDateFormat>(_onSetDateFormat);
+    on<UserPrefsSetAllowNotifications>(_onSetAllowNotifications);
+    on<UserPrefsSetFaceIdUnlock>(_onSetFaceIdUnlock);
   }
 
   void _onLoad(UserPrefsLoad e, Emitter<UserPrefsState> emit) {
@@ -100,6 +159,10 @@ class UserPrefsBloc extends Bloc<UserPrefsEvent, UserPrefsState> {
         orElse: () => ThemeType.dark,
       ),
       languageCode: _service.languageCode,
+      showFuelModule: _service.showFuelModule,
+      dateFormat: _service.dateFormat,
+      allowNotifications: _service.allowNotifications,
+      faceIdUnlock: _service.faceIdUnlock,
     ));
   }
 
@@ -125,5 +188,29 @@ class UserPrefsBloc extends Bloc<UserPrefsEvent, UserPrefsState> {
       UserPrefsSetLanguageCode e, Emitter<UserPrefsState> emit) async {
     await _service.setLanguageCode(e.languageCode);
     emit(state.copyWith(languageCode: e.languageCode));
+  }
+
+  Future<void> _onSetShowFuelModule(
+      UserPrefsSetShowFuelModule e, Emitter<UserPrefsState> emit) async {
+    await _service.setShowFuelModule(e.showFuelModule);
+    emit(state.copyWith(showFuelModule: e.showFuelModule));
+  }
+
+  Future<void> _onSetDateFormat(
+      UserPrefsSetDateFormat e, Emitter<UserPrefsState> emit) async {
+    await _service.setDateFormat(e.dateFormat);
+    emit(state.copyWith(dateFormat: e.dateFormat));
+  }
+
+  Future<void> _onSetAllowNotifications(
+      UserPrefsSetAllowNotifications e, Emitter<UserPrefsState> emit) async {
+    await _service.setAllowNotifications(e.allowNotifications);
+    emit(state.copyWith(allowNotifications: e.allowNotifications));
+  }
+
+  Future<void> _onSetFaceIdUnlock(
+      UserPrefsSetFaceIdUnlock e, Emitter<UserPrefsState> emit) async {
+    await _service.setFaceIdUnlock(e.faceIdUnlock);
+    emit(state.copyWith(faceIdUnlock: e.faceIdUnlock));
   }
 }

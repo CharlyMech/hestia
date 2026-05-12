@@ -4,6 +4,10 @@ const _kStartDay = 'pref_start_day';
 const _kUse24h = 'pref_use24h';
 const _kThemeType = 'pref_theme_type';
 const _kLanguageCode = 'pref_language_code';
+const _kShowFuelModule = 'pref_show_fuel_module';
+const _kDateFormat = 'pref_date_format';
+const _kAllowNotifications = 'pref_allow_notifications';
+const _kFaceIdUnlock = 'pref_face_id_unlock';
 
 class UserPreferencesService {
   final SharedPreferences _prefs;
@@ -40,5 +44,33 @@ class UserPreferencesService {
 
   Future<void> setLanguageCode(String value) async {
     await _prefs.setString(_kLanguageCode, value);
+  }
+
+  /// Whether the Fuel module is visible (tab + nav). Default: false.
+  /// Pets module is always visible (no flag).
+  bool get showFuelModule => _prefs.getBool(_kShowFuelModule) ?? false;
+
+  Future<void> setShowFuelModule(bool value) async {
+    await _prefs.setBool(_kShowFuelModule, value);
+  }
+
+  /// Short date pattern: `mdy`, `dmy`, or `ymd`.
+  String get dateFormat => _prefs.getString(_kDateFormat) ?? 'mdy';
+
+  Future<void> setDateFormat(String value) async {
+    await _prefs.setString(_kDateFormat, value);
+  }
+
+  bool get allowNotifications =>
+      _prefs.getBool(_kAllowNotifications) ?? false;
+
+  Future<void> setAllowNotifications(bool value) async {
+    await _prefs.setBool(_kAllowNotifications, value);
+  }
+
+  bool get faceIdUnlock => _prefs.getBool(_kFaceIdUnlock) ?? false;
+
+  Future<void> setFaceIdUnlock(bool value) async {
+    await _prefs.setBool(_kFaceIdUnlock, value);
   }
 }
