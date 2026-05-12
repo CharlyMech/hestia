@@ -24,8 +24,8 @@ class NotifVisual {
         NotifVisual(Group(width: 18, height: 18, color: tints[0]), tints[0]),
       NotificationType.goal =>
         NotifVisual(Trophy(width: 18, height: 18, color: green), green),
-      NotificationType.alert => NotifVisual(
-          WarningTriangle(width: 18, height: 18, color: red), red),
+      NotificationType.alert =>
+        NotifVisual(WarningTriangle(width: 18, height: 18, color: red), red),
       NotificationType.system =>
         NotifVisual(Shield(width: 18, height: 18, color: tints[2]), tints[2]),
       NotificationType.reminder =>

@@ -89,7 +89,7 @@ class SegmentedControl extends StatelessWidget {
   final Color border;
   final Color fg;
   final Color muted;
-  final Color? activeColor; // null = surface2, non-null = solid color
+  final Color? activeColor; // null = subtle pill fill
   final Color? activeFg;
 
   const SegmentedControl({
@@ -107,42 +107,77 @@ class SegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (options.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final safeActive = active.clamp(0, options.length - 1);
+    final pillFill = activeColor ?? fg.withValues(alpha: 0.10);
+    const pad = 4.0;
+
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(pad),
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border, width: 0.5),
       ),
-      child: Row(
-        children: [
-          for (var i = 0; i < options.length; i++)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onChanged(i),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: i == active
-                        ? (activeColor ?? surface.withValues(alpha: 0.0))
-                        : const Color(0x00000000),
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  child: Text(
-                    options[i],
-                    textAlign: TextAlign.center,
-                    style: AppFonts.body(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: i == active
-                          ? (activeFg ?? fg)
-                          : muted,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final innerW = constraints.maxWidth;
+          final n = options.length;
+          final segW = innerW / n;
+          final pillW = segW - 4;
+          final pillLeft = 2 + safeActive * segW;
+
+          return SizedBox(
+            height: 36,
+            width: innerW,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  left: pillLeft,
+                  top: 0,
+                  bottom: 0,
+                  width: pillW,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: pillFill,
+                      borderRadius: BorderRadius.circular(9),
                     ),
                   ),
                 ),
-              ),
+                Row(
+                  children: [
+                    for (var i = 0; i < n; i++)
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => onChanged(i),
+                          child: Center(
+                            child: Text(
+                              options[i],
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppFonts.body(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    i == safeActive ? (activeFg ?? fg) : muted,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -184,7 +219,6 @@ class FormFieldTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           decoration: BoxDecoration(
             color: surface,
-            border: Border.all(color: border, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -241,7 +275,6 @@ class IconBtn extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           color: surface,
-          border: Border.all(color: border, width: 1),
           borderRadius: BorderRadius.circular(radius),
         ),
         child: Center(child: icon),

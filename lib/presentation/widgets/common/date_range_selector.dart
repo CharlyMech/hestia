@@ -80,7 +80,6 @@ class DateRangeSelector extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
       child: Row(

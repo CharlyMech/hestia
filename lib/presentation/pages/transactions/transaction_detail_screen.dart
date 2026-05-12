@@ -11,8 +11,7 @@ import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show EditPencil, Trash;
+import 'package:iconoir_flutter/iconoir_flutter.dart' show EditPencil, Trash;
 
 /// Read-only transaction detail. FButton at the bottom opens [TransactionForm]
 /// in a bottom sheet for edits; trash icon confirms delete via Cupertino dialog.
@@ -120,78 +119,77 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
-                  // Amount headline
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: surface,
-                      border: Border.all(color: border, width: 1),
-                      borderRadius: BorderRadius.circular(AppRadii.xl),
-                    ),
-                    child: Column(
-                      spacing: 6,
-                      children: [
-                        Text(
-                          isIncome ? 'Income' : 'Expense',
-                          style: AppFonts.body(fontSize: 12, color: muted),
-                        ),
-                        Text(
-                          '$sign${_tx.amount.abs().toStringAsFixed(2)}',
-                          style: AppFonts.numeric(
-                            fontSize: 38,
-                            fontWeight: FontWeight.w700,
-                            color: tintColor,
-                          ),
-                        ),
-                        Text(
-                          _tx.note ?? _tx.categoryName ?? 'Transaction',
-                          style: AppFonts.body(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: fg,
-                          ),
-                        ),
-                      ],
-                    ),
+          // Amount headline
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadii.xl),
+            ),
+            child: Column(
+              spacing: 6,
+              children: [
+                Text(
+                  isIncome ? 'Income' : 'Expense',
+                  style: AppFonts.body(fontSize: 12, color: muted),
+                ),
+                Text(
+                  '$sign${_tx.amount.abs().toStringAsFixed(2)}',
+                  style: AppFonts.numeric(
+                    fontSize: 38,
+                    fontWeight: FontWeight.w700,
+                    color: tintColor,
                   ),
-                  const SizedBox(height: 16),
+                ),
+                Text(
+                  _tx.note ?? _tx.categoryName ?? 'Transaction',
+                  style: AppFonts.body(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: fg,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
 
-                  // Field rows
-                  _DetailCard(
-                    surface: surface,
-                    border: border,
-                    rows: [
-                      _Row('Category', _tx.categoryName ?? '—'),
-                      _Row('Account', _tx.bankAccountName ?? '—'),
-                      if (_tx.transactionSourceName != null)
-                        _Row('Source', _tx.transactionSourceName!),
-                      _Row('Date', _fmtDate(_tx.date)),
-                      if (_tx.userName != null) _Row('By', _tx.userName!),
-                      if (_tx.isRecurring) const _Row('Recurring', 'Yes'),
-                      if (_tx.note != null && _tx.note!.isNotEmpty)
-                        _Row('Note', _tx.note!),
-                    ],
-                    fg: fg,
-                    muted: muted,
-                  ),
+          // Field rows
+          _DetailCard(
+            surface: surface,
+            border: border,
+            rows: [
+              _Row('Category', _tx.categoryName ?? '—'),
+              _Row('Account', _tx.bankAccountName ?? '—'),
+              if (_tx.transactionSourceName != null)
+                _Row('Source', _tx.transactionSourceName!),
+              _Row('Date', _fmtDate(_tx.date)),
+              if (_tx.userName != null) _Row('By', _tx.userName!),
+              if (_tx.isRecurring) const _Row('Recurring', 'Yes'),
+              if (_tx.note != null && _tx.note!.isNotEmpty)
+                _Row('Note', _tx.note!),
+            ],
+            fg: fg,
+            muted: muted,
+          ),
 
-                  const SizedBox(height: 24),
-                  FButton(
-                    onPress: _openEditSheet,
-                    prefix: EditPencil(
-                      width: 16,
-                      height: 16,
-                      color: CupertinoColors.white,
-                    ),
-                    label: const Text('Edit transaction'),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Updated ${_fmtDate(_tx.lastUpdate)}',
-                    textAlign: TextAlign.center,
-                    style: AppFonts.body(fontSize: 11, color: muted),
-                  ),
-                ],
+          const SizedBox(height: 24),
+          FButton(
+            onPress: _openEditSheet,
+            prefix: EditPencil(
+              width: 16,
+              height: 16,
+              color: CupertinoColors.white,
+            ),
+            label: const Text('Edit transaction'),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Updated ${_fmtDate(_tx.lastUpdate)}',
+            textAlign: TextAlign.center,
+            style: AppFonts.body(fontSize: 11, color: muted),
+          ),
+        ],
       ),
     );
   }
@@ -243,7 +241,6 @@ class _DetailCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.xl),
       ),
       clipBehavior: Clip.antiAlias,

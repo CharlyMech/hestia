@@ -29,7 +29,6 @@ class NotificationsPopover extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: surface,
-          border: Border.all(color: border, width: 1),
           borderRadius: BorderRadius.circular(AppRadii.xl),
           boxShadow: [
             BoxShadow(
@@ -60,7 +59,8 @@ class NotificationsPopover extends StatelessWidget {
                       .add(NotificationsMarkAllRead(userId)),
                 ),
                 Container(height: 1, color: border),
-                if (state is NotificationsLoading || state is NotificationsInitial)
+                if (state is NotificationsLoading ||
+                    state is NotificationsInitial)
                   const Padding(
                     padding: EdgeInsets.all(24),
                     child: CupertinoActivityIndicator(),

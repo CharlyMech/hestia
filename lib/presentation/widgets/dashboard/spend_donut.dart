@@ -71,7 +71,8 @@ class _SpendDonutState extends State<SpendDonut> {
                 pieTouchData: PieTouchData(
                   touchCallback: (event, response) {
                     setState(() {
-                      _touchedIndex = response?.touchedSection?.touchedSectionIndex;
+                      _touchedIndex =
+                          response?.touchedSection?.touchedSectionIndex;
                     });
                   },
                 ),
@@ -100,9 +101,7 @@ class _SpendDonutState extends State<SpendDonut> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (var i = 0;
-                    i < entries.length && i < 5;
-                    i++)
+                for (var i = 0; i < entries.length && i < 5; i++)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3),
                     child: Row(

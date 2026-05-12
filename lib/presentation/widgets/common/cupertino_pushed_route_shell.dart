@@ -24,6 +24,7 @@ class CupertinoPushedRouteShell extends StatelessWidget {
         );
 
   final Color backgroundColor;
+
   /// Top chrome row (uses surface; body uses [backgroundColor]).
   final Color navBackground;
   final Color borderColor;

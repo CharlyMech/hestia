@@ -18,8 +18,7 @@ class TransactionSourcesLoad extends TransactionSourcesEvent {
 
 class TransactionSourcesRefresh extends TransactionSourcesEvent {
   final int _nonce;
-  TransactionSourcesRefresh()
-      : _nonce = DateTime.now().microsecondsSinceEpoch;
+  TransactionSourcesRefresh() : _nonce = DateTime.now().microsecondsSinceEpoch;
   @override
   List<Object?> get props => [_nonce];
 }
@@ -78,7 +77,8 @@ class TransactionSourcesBloc
   final TransactionSourceRepository _repo;
   String? _householdId;
 
-  TransactionSourcesBloc(this._repo) : super(const TransactionSourcesInitial()) {
+  TransactionSourcesBloc(this._repo)
+      : super(const TransactionSourcesInitial()) {
     on<TransactionSourcesLoad>(_onLoad);
     on<TransactionSourcesRefresh>(_onRefresh);
     on<TransactionSourcesCreate>(_onCreate);
@@ -100,20 +100,20 @@ class TransactionSourcesBloc
     await _fetch(emit);
   }
 
-  Future<void> _onCreate(TransactionSourcesCreate e,
-      Emitter<TransactionSourcesState> emit) async {
+  Future<void> _onCreate(
+      TransactionSourcesCreate e, Emitter<TransactionSourcesState> emit) async {
     await _repo.create(e.source);
     await _fetch(emit);
   }
 
-  Future<void> _onUpdate(TransactionSourcesUpdate e,
-      Emitter<TransactionSourcesState> emit) async {
+  Future<void> _onUpdate(
+      TransactionSourcesUpdate e, Emitter<TransactionSourcesState> emit) async {
     await _repo.update(e.source);
     await _fetch(emit);
   }
 
-  Future<void> _onDelete(TransactionSourcesDelete e,
-      Emitter<TransactionSourcesState> emit) async {
+  Future<void> _onDelete(
+      TransactionSourcesDelete e, Emitter<TransactionSourcesState> emit) async {
     await _repo.delete(e.id);
     await _fetch(emit);
   }

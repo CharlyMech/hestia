@@ -45,8 +45,9 @@ class BalanceTrendLine extends StatelessWidget {
     double netInWindow = 0;
     for (final tx in transactions) {
       if (tx.date.isAfter(start) || _sameDay(tx.date, start)) {
-        netInWindow +=
-            tx.type == TransactionType.income ? tx.amount.abs() : -tx.amount.abs();
+        netInWindow += tx.type == TransactionType.income
+            ? tx.amount.abs()
+            : -tx.amount.abs();
       }
     }
     double running = currentTotal - netInWindow;
@@ -98,8 +99,7 @@ class BalanceTrendLine extends StatelessWidget {
     }
     final minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
     final maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
-    final pad =
-        ((maxY - minY).abs() * 0.12).clamp(1.0, double.infinity);
+    final pad = ((maxY - minY).abs() * 0.12).clamp(1.0, double.infinity);
 
     return SizedBox(
       height: 200,
@@ -112,7 +112,8 @@ class BalanceTrendLine extends StatelessWidget {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: ((maxY - minY).abs() / 4).clamp(1, double.infinity),
+            horizontalInterval:
+                ((maxY - minY).abs() / 4).clamp(1, double.infinity),
             getDrawingHorizontalLine: (_) =>
                 FlLine(color: grid, strokeWidth: 0.6),
           ),

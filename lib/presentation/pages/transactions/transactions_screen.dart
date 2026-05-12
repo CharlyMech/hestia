@@ -103,7 +103,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: active ? accent : surface,
-            border: active ? null : Border.all(color: border, width: 1),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
@@ -127,7 +126,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           decoration: BoxDecoration(
             color: active ? surface2 : const Color(0x00000000),
             border: Border.all(
-              color: active ? muted.withValues(alpha: 0.4) : border,
+              color: active
+                  ? muted.withValues(alpha: 0.4)
+                  : const Color(0x00000000),
               width: 1,
             ),
             borderRadius: BorderRadius.circular(999),
@@ -191,7 +192,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: surface,
-                border: Border.all(color: border, width: 1),
                 borderRadius: BorderRadius.circular(AppRadii.xl),
               ),
               clipBehavior: Clip.antiAlias,
@@ -250,61 +250,55 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         bg: bg,
         slivers: [
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
-
-        SliverToBoxAdapter(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                monthChip('April', 0),
-                const SizedBox(width: 8),
-                monthChip('March', 1),
-                const SizedBox(width: 8),
-                monthChip('Feb', 2),
-                const SizedBox(width: 8),
-                monthChip('Jan', 3),
-              ],
+          SliverToBoxAdapter(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  monthChip('April', 0),
+                  const SizedBox(width: 8),
+                  monthChip('March', 1),
+                  const SizedBox(width: 8),
+                  monthChip('Feb', 2),
+                  const SizedBox(width: 8),
+                  monthChip('Jan', 3),
+                ],
+              ),
             ),
           ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-        SliverToBoxAdapter(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                filterPill('All', 0),
-                const SizedBox(width: 6),
-                filterPill(
-                  'Shared',
-                  1,
-                  leading: Group(
-                    width: 12,
-                    height: 12,
-                    color: _filter == 1 ? fg : muted,
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          SliverToBoxAdapter(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  filterPill('All', 0),
+                  const SizedBox(width: 6),
+                  filterPill(
+                    'Shared',
+                    1,
+                    leading: Group(
+                      width: 12,
+                      height: 12,
+                      color: _filter == 1 ? fg : muted,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                filterPill('Personal', 2),
-                const SizedBox(width: 6),
-                filterPill('Income', 3),
-              ],
+                  const SizedBox(width: 6),
+                  filterPill('Personal', 2),
+                  const SizedBox(width: 6),
+                  filterPill('Income', 3),
+                ],
+              ),
             ),
           ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-        SliverList.builder(
-          itemCount: groups.length,
-          itemBuilder: (_, i) =>
-              groupSection(groups[i], first: i == 0),
-        ),
-      ],
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          SliverList.builder(
+            itemCount: groups.length,
+            itemBuilder: (_, i) => groupSection(groups[i], first: i == 0),
+          ),
+        ],
       ),
     );
   }

@@ -4,9 +4,12 @@ import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
 import 'package:hestia/presentation/blocs/transaction_sources/transaction_sources_bloc.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
+import 'package:uuid/uuid.dart';
 
 /// Bottom-sheet form for creating / editing / deleting a [TransactionSource].
 class TransactionSourceForm extends StatefulWidget {
@@ -29,6 +32,8 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
   late final TextEditingController _name;
   late TransactionSourceKind _kind;
   late int _colorIdx;
+  late String? _imageUrl;
+  late final String _formId;
 
   @override
   void initState() {
@@ -36,6 +41,8 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
     _name = TextEditingController(text: widget.existing?.name ?? '');
     _kind = widget.existing?.kind ?? TransactionSourceKind.merchant;
     _colorIdx = 0;
+    _imageUrl = widget.existing?.imageUrl;
+    _formId = widget.existing?.id ?? const Uuid().v4();
   }
 
   @override
@@ -72,6 +79,7 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
         name: name,
         kind: _kind,
         color: hex,
+        imageUrl: _imageUrl,
         createdBy: widget.userId,
         createdAt: now,
         lastUpdate: now,
@@ -82,6 +90,8 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
         name: name,
         kind: _kind,
         color: hex,
+        imageUrl: _imageUrl,
+        clearImageUrl: _imageUrl == null,
         lastUpdate: now,
       );
       context
@@ -126,7 +136,8 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
         Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
     final border =
         Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+    final fg =
+        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
     final muted =
         Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
     final accent =
@@ -134,12 +145,28 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
     final swatches = _swatches(theme);
     final isEdit = widget.existing != null;
 
+    final fallbackText = _name.text.trim().isEmpty
+        ? '?'
+        : _name.text.trim().substring(0, 1).toUpperCase();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 14,
         children: [
+          Center(
+            child: ImagePickerField(
+              bucket: ImageBuckets.sources,
+              path: '${widget.householdId}/$_formId.jpg',
+              value: _imageUrl,
+              onChanged: (v) => setState(() => _imageUrl = v),
+              size: 88,
+              circle: false,
+              fallbackColor: swatches[_colorIdx],
+              fallbackText: fallbackText,
+            ),
+          ),
           _label('Name', muted),
           Container(
             decoration: BoxDecoration(
@@ -158,7 +185,13 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
           ),
           _label('Kind', muted),
           SegmentedControl(
-            options: const ['Merchant', 'Employer', 'Service', 'Platform', 'Other'],
+            options: const [
+              'Merchant',
+              'Employer',
+              'Service',
+              'Platform',
+              'Other'
+            ],
             active: TransactionSourceKind.values.indexOf(_kind),
             onChanged: (i) =>
                 setState(() => _kind = TransactionSourceKind.values[i]),

@@ -6,9 +6,10 @@ import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/dashboard/scope_pill.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show ArrowDown, ArrowUp;
+import 'package:iconoir_flutter/iconoir_flutter.dart' show ArrowDown, ArrowUp;
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Credit-card style account card. Renders the bundled bank PNG when a matching
 /// asset exists at `assets/banks/<institution>.png`, else a primary-color
@@ -93,15 +94,32 @@ class _WalletCardState extends State<WalletCard>
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: context.read<UserPrefsBloc>(),
+      child: BlocConsumer<UserPrefsBloc, UserPrefsState>(
+        listenWhen: (prev, curr) => prev.themeType != curr.themeType,
+        listener: (_, __) {},
+        buildWhen: (prev, curr) => prev.themeType != curr.themeType,
+        builder: (context, _) => _buildCard(context),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     final theme = context.myTheme;
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     final surface = _c(theme.surfaceColor);
+    final primary = _c(theme.primaryColor);
     // Placeholder uses neutral grayscale to hint "no bank visual yet" — once
     // a custom color is set or a bank PNG drops in, that wins.
+    final themeFallbackCard = Color.alphaBlend(
+      primary.withValues(alpha: 0.28),
+      surface,
+    );
     final cardColor = widget.source.color != null
         ? _c(widget.source.color!)
-        : const Color(0xFF4A4F58);
+        : themeFallbackCard;
 
     final card = AnimatedBuilder(
       animation: _enter,
@@ -188,7 +206,8 @@ class _WalletCardState extends State<WalletCard>
                                   overflow: TextOverflow.ellipsis,
                                   style: AppFonts.body(
                                     fontSize: 11,
-                                    color: CupertinoColors.white.withValues(alpha: 0.85),
+                                    color: CupertinoColors.white
+                                        .withValues(alpha: 0.85),
                                   ),
                                 ),
                                 Text(
@@ -249,7 +268,7 @@ class _GradientCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             color,
-            ui.Color.lerp(color, const Color(0xFF000000), 0.35) ?? color,
+            ui.Color.lerp(color, const Color(0xFF000000), 0.22) ?? color,
           ],
         ),
       ),
@@ -276,8 +295,7 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final red = Color(int.parse(theme.colorRed.replaceFirst('#', '0xff')));
-    final green =
-        Color(int.parse(theme.colorGreen.replaceFirst('#', '0xff')));
+    final green = Color(int.parse(theme.colorGreen.replaceFirst('#', '0xff')));
     final isOverdraft = balance < 0;
     final trend = trend30d ?? 0;
     final up = trend >= 0;

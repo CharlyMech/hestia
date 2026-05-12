@@ -84,7 +84,6 @@ class _SheetContainer extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(AppRadii.xl),
               ),
-              border: Border.all(color: border, width: 1),
             ),
             child: SafeArea(
               top: false,
@@ -94,13 +93,7 @@ class _SheetContainer extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const SizedBox(width: 12),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size.square(28),
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Icon(CupertinoIcons.xmark, size: 16, color: fg),
-                      ),
+                      const SizedBox(width: 44),
                       const Spacer(),
                       Container(
                         width: 40,
@@ -111,7 +104,13 @@ class _SheetContainer extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      const SizedBox(width: 44),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size.square(28),
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Icon(CupertinoIcons.xmark, size: 16, color: fg),
+                      ),
+                      const SizedBox(width: 12),
                     ],
                   ),
                   if (title != null) ...[

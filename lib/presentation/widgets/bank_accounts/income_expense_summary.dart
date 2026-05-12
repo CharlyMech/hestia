@@ -46,7 +46,6 @@ class IncomeExpenseSummary extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.xl),
       ),
       child: Column(

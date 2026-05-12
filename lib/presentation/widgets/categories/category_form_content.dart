@@ -12,6 +12,7 @@ import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 class CategoryFormContent extends StatefulWidget {
   final Category? existing;
   final String householdId;
+
   /// Used when [existing] is null.
   final TransactionType initialType;
 
@@ -191,13 +192,13 @@ class _CategoryFormContentState extends State<CategoryFormContent> {
         Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
     final border =
         Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+    final fg =
+        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
     final muted =
         Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
     final accent =
         Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
-    final expense =
-        Color(int.parse(theme.colorRed.replaceFirst('#', '0xff')));
+    final expense = Color(int.parse(theme.colorRed.replaceFirst('#', '0xff')));
     final swatches = _swatches(theme);
     final isEdit = widget.existing != null;
 

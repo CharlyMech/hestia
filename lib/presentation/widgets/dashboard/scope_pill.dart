@@ -13,13 +13,11 @@ class ScopePill extends StatelessWidget {
     final shared = kind == ScopeKind.shared;
     final fg = shared ? const Color(0xFF9BC8F0) : const Color(0xFFB8BEC9);
     final bg = shared ? const Color(0x1A0077B6) : const Color(0xFF1A2230);
-    final border = shared ? const Color(0x440077B6) : const Color(0xFF2A3441);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: border, width: 1),
       ),
       child: Text(
         label ?? (shared ? 'Shared' : 'Personal'),

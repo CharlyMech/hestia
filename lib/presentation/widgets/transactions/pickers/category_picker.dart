@@ -63,15 +63,13 @@ class CategoryPicker extends StatelessWidget {
                   c.name,
                   style: AppFonts.body(
                     fontSize: 15,
-                    fontWeight:
-                        selected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     color: fg,
                   ),
                 ),
               ),
               if (selected)
-                Icon(CupertinoIcons.check_mark,
-                    size: 18, color: accent),
+                Icon(CupertinoIcons.check_mark, size: 18, color: accent),
             ],
           ),
         );

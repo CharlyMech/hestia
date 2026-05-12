@@ -77,8 +77,9 @@ class BalanceLineChart extends StatelessWidget {
     double netInWindow = 0;
     for (final tx in transactions) {
       if (_dayInWindow(tx.date, start, end)) {
-        netInWindow +=
-            tx.type == TransactionType.income ? tx.amount.abs() : -tx.amount.abs();
+        netInWindow += tx.type == TransactionType.income
+            ? tx.amount.abs()
+            : -tx.amount.abs();
       }
     }
     double running = currentBalance - netInWindow;
@@ -157,7 +158,8 @@ class BalanceLineChart extends StatelessWidget {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: ((maxY - minY).abs() / 4).clamp(1, double.infinity),
+            horizontalInterval:
+                ((maxY - minY).abs() / 4).clamp(1, double.infinity),
             getDrawingHorizontalLine: (_) =>
                 FlLine(color: grid, strokeWidth: 0.6),
           ),

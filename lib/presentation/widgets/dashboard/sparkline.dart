@@ -48,7 +48,8 @@ class _SparklinePainter extends CustomPainter {
     final path = Path();
     for (var i = 0; i < points.length; i++) {
       final x = i * step;
-      final y = size.height - ((points[i] - minV) / range) * (size.height - 8) - 4;
+      final y =
+          size.height - ((points[i] - minV) / range) * (size.height - 8) - 4;
       if (i == 0) {
         path.moveTo(x, y);
       } else {
