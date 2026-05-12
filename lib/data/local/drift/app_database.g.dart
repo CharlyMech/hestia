@@ -37,6 +37,12 @@ class $LocalTransactionsTable extends LocalTransactions
   late final GeneratedColumn<String> bankAccountId = GeneratedColumn<String>(
       'bank_account_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _transactionSourceIdMeta =
+      const VerificationMeta('transactionSourceId');
+  @override
+  late final GeneratedColumn<String> transactionSourceId =
+      GeneratedColumn<String>('transaction_source_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
@@ -112,6 +118,7 @@ class $LocalTransactionsTable extends LocalTransactions
         userId,
         categoryId,
         bankAccountId,
+        transactionSourceId,
         amount,
         type,
         note,
@@ -167,6 +174,12 @@ class $LocalTransactionsTable extends LocalTransactions
               data['bank_account_id']!, _bankAccountIdMeta));
     } else if (isInserting) {
       context.missing(_bankAccountIdMeta);
+    }
+    if (data.containsKey('transaction_source_id')) {
+      context.handle(
+          _transactionSourceIdMeta,
+          transactionSourceId.isAcceptableOrUnknown(
+              data['transaction_source_id']!, _transactionSourceIdMeta));
     }
     if (data.containsKey('amount')) {
       context.handle(_amountMeta,
@@ -243,6 +256,8 @@ class $LocalTransactionsTable extends LocalTransactions
           .read(DriftSqlType.string, data['${effectivePrefix}category_id'])!,
       bankAccountId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}bank_account_id'])!,
+      transactionSourceId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}transaction_source_id']),
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
       type: attachedDatabase.typeMapping
@@ -279,6 +294,7 @@ class LocalTransaction extends DataClass
   final String userId;
   final String categoryId;
   final String bankAccountId;
+  final String? transactionSourceId;
   final double amount;
   final String type;
   final String? note;
@@ -295,6 +311,7 @@ class LocalTransaction extends DataClass
       required this.userId,
       required this.categoryId,
       required this.bankAccountId,
+      this.transactionSourceId,
       required this.amount,
       required this.type,
       this.note,
@@ -313,6 +330,9 @@ class LocalTransaction extends DataClass
     map['user_id'] = Variable<String>(userId);
     map['category_id'] = Variable<String>(categoryId);
     map['bank_account_id'] = Variable<String>(bankAccountId);
+    if (!nullToAbsent || transactionSourceId != null) {
+      map['transaction_source_id'] = Variable<String>(transactionSourceId);
+    }
     map['amount'] = Variable<double>(amount);
     map['type'] = Variable<String>(type);
     if (!nullToAbsent || note != null) {
@@ -337,6 +357,9 @@ class LocalTransaction extends DataClass
       userId: Value(userId),
       categoryId: Value(categoryId),
       bankAccountId: Value(bankAccountId),
+      transactionSourceId: transactionSourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionSourceId),
       amount: Value(amount),
       type: Value(type),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
@@ -361,6 +384,8 @@ class LocalTransaction extends DataClass
       userId: serializer.fromJson<String>(json['userId']),
       categoryId: serializer.fromJson<String>(json['categoryId']),
       bankAccountId: serializer.fromJson<String>(json['bankAccountId']),
+      transactionSourceId:
+          serializer.fromJson<String?>(json['transactionSourceId']),
       amount: serializer.fromJson<double>(json['amount']),
       type: serializer.fromJson<String>(json['type']),
       note: serializer.fromJson<String?>(json['note']),
@@ -382,6 +407,7 @@ class LocalTransaction extends DataClass
       'userId': serializer.toJson<String>(userId),
       'categoryId': serializer.toJson<String>(categoryId),
       'bankAccountId': serializer.toJson<String>(bankAccountId),
+      'transactionSourceId': serializer.toJson<String?>(transactionSourceId),
       'amount': serializer.toJson<double>(amount),
       'type': serializer.toJson<String>(type),
       'note': serializer.toJson<String?>(note),
@@ -401,6 +427,7 @@ class LocalTransaction extends DataClass
           String? userId,
           String? categoryId,
           String? bankAccountId,
+          Value<String?> transactionSourceId = const Value.absent(),
           double? amount,
           String? type,
           Value<String?> note = const Value.absent(),
@@ -417,6 +444,9 @@ class LocalTransaction extends DataClass
         userId: userId ?? this.userId,
         categoryId: categoryId ?? this.categoryId,
         bankAccountId: bankAccountId ?? this.bankAccountId,
+        transactionSourceId: transactionSourceId.present
+            ? transactionSourceId.value
+            : this.transactionSourceId,
         amount: amount ?? this.amount,
         type: type ?? this.type,
         note: note.present ? note.value : this.note,
@@ -440,6 +470,9 @@ class LocalTransaction extends DataClass
       bankAccountId: data.bankAccountId.present
           ? data.bankAccountId.value
           : this.bankAccountId,
+      transactionSourceId: data.transactionSourceId.present
+          ? data.transactionSourceId.value
+          : this.transactionSourceId,
       amount: data.amount.present ? data.amount.value : this.amount,
       type: data.type.present ? data.type.value : this.type,
       note: data.note.present ? data.note.value : this.note,
@@ -465,6 +498,7 @@ class LocalTransaction extends DataClass
           ..write('userId: $userId, ')
           ..write('categoryId: $categoryId, ')
           ..write('bankAccountId: $bankAccountId, ')
+          ..write('transactionSourceId: $transactionSourceId, ')
           ..write('amount: $amount, ')
           ..write('type: $type, ')
           ..write('note: $note, ')
@@ -486,6 +520,7 @@ class LocalTransaction extends DataClass
       userId,
       categoryId,
       bankAccountId,
+      transactionSourceId,
       amount,
       type,
       note,
@@ -505,6 +540,7 @@ class LocalTransaction extends DataClass
           other.userId == this.userId &&
           other.categoryId == this.categoryId &&
           other.bankAccountId == this.bankAccountId &&
+          other.transactionSourceId == this.transactionSourceId &&
           other.amount == this.amount &&
           other.type == this.type &&
           other.note == this.note &&
@@ -523,6 +559,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
   final Value<String> userId;
   final Value<String> categoryId;
   final Value<String> bankAccountId;
+  final Value<String?> transactionSourceId;
   final Value<double> amount;
   final Value<String> type;
   final Value<String?> note;
@@ -540,6 +577,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     this.userId = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.bankAccountId = const Value.absent(),
+    this.transactionSourceId = const Value.absent(),
     this.amount = const Value.absent(),
     this.type = const Value.absent(),
     this.note = const Value.absent(),
@@ -558,6 +596,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     required String userId,
     required String categoryId,
     required String bankAccountId,
+    this.transactionSourceId = const Value.absent(),
     required double amount,
     required String type,
     this.note = const Value.absent(),
@@ -585,6 +624,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     Expression<String>? userId,
     Expression<String>? categoryId,
     Expression<String>? bankAccountId,
+    Expression<String>? transactionSourceId,
     Expression<double>? amount,
     Expression<String>? type,
     Expression<String>? note,
@@ -603,6 +643,8 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       if (userId != null) 'user_id': userId,
       if (categoryId != null) 'category_id': categoryId,
       if (bankAccountId != null) 'bank_account_id': bankAccountId,
+      if (transactionSourceId != null)
+        'transaction_source_id': transactionSourceId,
       if (amount != null) 'amount': amount,
       if (type != null) 'type': type,
       if (note != null) 'note': note,
@@ -623,6 +665,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       Value<String>? userId,
       Value<String>? categoryId,
       Value<String>? bankAccountId,
+      Value<String?>? transactionSourceId,
       Value<double>? amount,
       Value<String>? type,
       Value<String?>? note,
@@ -640,6 +683,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       userId: userId ?? this.userId,
       categoryId: categoryId ?? this.categoryId,
       bankAccountId: bankAccountId ?? this.bankAccountId,
+      transactionSourceId: transactionSourceId ?? this.transactionSourceId,
       amount: amount ?? this.amount,
       type: type ?? this.type,
       note: note ?? this.note,
@@ -671,6 +715,10 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     }
     if (bankAccountId.present) {
       map['bank_account_id'] = Variable<String>(bankAccountId.value);
+    }
+    if (transactionSourceId.present) {
+      map['transaction_source_id'] =
+          Variable<String>(transactionSourceId.value);
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
@@ -716,6 +764,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
           ..write('userId: $userId, ')
           ..write('categoryId: $categoryId, ')
           ..write('bankAccountId: $bankAccountId, ')
+          ..write('transactionSourceId: $transactionSourceId, ')
           ..write('amount: $amount, ')
           ..write('type: $type, ')
           ..write('note: $note, ')
@@ -3504,6 +3553,7 @@ typedef $$LocalTransactionsTableCreateCompanionBuilder
   required String userId,
   required String categoryId,
   required String bankAccountId,
+  Value<String?> transactionSourceId,
   required double amount,
   required String type,
   Value<String?> note,
@@ -3523,6 +3573,7 @@ typedef $$LocalTransactionsTableUpdateCompanionBuilder
   Value<String> userId,
   Value<String> categoryId,
   Value<String> bankAccountId,
+  Value<String?> transactionSourceId,
   Value<double> amount,
   Value<String> type,
   Value<String?> note,
@@ -3559,6 +3610,10 @@ class $$LocalTransactionsTableFilterComposer
 
   ColumnFilters<String> get bankAccountId => $composableBuilder(
       column: $table.bankAccountId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get transactionSourceId => $composableBuilder(
+      column: $table.transactionSourceId,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnFilters(column));
@@ -3616,6 +3671,10 @@ class $$LocalTransactionsTableOrderingComposer
       column: $table.bankAccountId,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get transactionSourceId => $composableBuilder(
+      column: $table.transactionSourceId,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnOrderings(column));
 
@@ -3671,6 +3730,9 @@ class $$LocalTransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get bankAccountId => $composableBuilder(
       column: $table.bankAccountId, builder: (column) => column);
+
+  GeneratedColumn<String> get transactionSourceId => $composableBuilder(
+      column: $table.transactionSourceId, builder: (column) => column);
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
@@ -3736,6 +3798,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             Value<String> userId = const Value.absent(),
             Value<String> categoryId = const Value.absent(),
             Value<String> bankAccountId = const Value.absent(),
+            Value<String?> transactionSourceId = const Value.absent(),
             Value<double> amount = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<String?> note = const Value.absent(),
@@ -3754,6 +3817,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             userId: userId,
             categoryId: categoryId,
             bankAccountId: bankAccountId,
+            transactionSourceId: transactionSourceId,
             amount: amount,
             type: type,
             note: note,
@@ -3772,6 +3836,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             required String userId,
             required String categoryId,
             required String bankAccountId,
+            Value<String?> transactionSourceId = const Value.absent(),
             required double amount,
             required String type,
             Value<String?> note = const Value.absent(),
@@ -3790,6 +3855,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             userId: userId,
             categoryId: categoryId,
             bankAccountId: bankAccountId,
+            transactionSourceId: transactionSourceId,
             amount: amount,
             type: type,
             note: note,
