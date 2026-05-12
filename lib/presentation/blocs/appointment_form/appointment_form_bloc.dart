@@ -74,6 +74,20 @@ class FormToggleReminder extends AppointmentFormEvent {
   List<Object?> get props => [offset];
 }
 
+class FormPetChanged extends AppointmentFormEvent {
+  final String? petId;
+  const FormPetChanged(this.petId);
+  @override
+  List<Object?> get props => [petId];
+}
+
+class FormCarChanged extends AppointmentFormEvent {
+  final String? carId;
+  const FormCarChanged(this.carId);
+  @override
+  List<Object?> get props => [carId];
+}
+
 class FormSubmit extends AppointmentFormEvent {
   const FormSubmit();
 }
@@ -94,6 +108,8 @@ class AppointmentFormState extends Equatable {
   final AppointmentCategory category;
   final List<Duration> reminderOffsets;
   final String? googleEventId;
+  final String? petId;
+  final String? carId;
   final DateTime createdAt;
 
   final bool submitting;
@@ -113,6 +129,8 @@ class AppointmentFormState extends Equatable {
     this.category = AppointmentCategory.other,
     this.reminderOffsets = const [Duration(hours: 1)],
     this.googleEventId,
+    this.petId,
+    this.carId,
     required this.createdAt,
     this.submitting = false,
     this.saved = false,
@@ -131,6 +149,10 @@ class AppointmentFormState extends Equatable {
     Duration? duration,
     AppointmentCategory? category,
     List<Duration>? reminderOffsets,
+    String? petId,
+    String? carId,
+    bool clearPetId = false,
+    bool clearCarId = false,
     bool? submitting,
     bool? saved,
     bool? deleted,
@@ -149,6 +171,8 @@ class AppointmentFormState extends Equatable {
         category: category ?? this.category,
         reminderOffsets: reminderOffsets ?? this.reminderOffsets,
         googleEventId: googleEventId,
+        petId: clearPetId ? null : (petId ?? this.petId),
+        carId: clearCarId ? null : (carId ?? this.carId),
         createdAt: createdAt,
         submitting: submitting ?? this.submitting,
         saved: saved ?? this.saved,
@@ -169,6 +193,8 @@ class AppointmentFormState extends Equatable {
         category,
         reminderOffsets,
         googleEventId,
+        petId,
+        carId,
         createdAt,
         submitting,
         saved,
@@ -202,6 +228,8 @@ class AppointmentFormBloc
           category: existing?.category ?? AppointmentCategory.other,
           reminderOffsets:
               existing?.reminderOffsets ?? const [Duration(hours: 1)],
+          petId: existing?.petId,
+          carId: existing?.carId,
           createdAt: existing?.createdAt ?? DateTime.now(),
         )) {
     on<FormTitleChanged>((e, emit) => emit(state.copyWith(title: e.title)));
@@ -215,6 +243,12 @@ class AppointmentFormBloc
     on<FormCategoryChanged>(
         (e, emit) => emit(state.copyWith(category: e.category)));
     on<FormToggleReminder>(_onToggleReminder);
+    on<FormPetChanged>((e, emit) => emit(e.petId == null
+        ? state.copyWith(clearPetId: true)
+        : state.copyWith(petId: e.petId)));
+    on<FormCarChanged>((e, emit) => emit(e.carId == null
+        ? state.copyWith(clearCarId: true)
+        : state.copyWith(carId: e.carId)));
     on<FormSubmit>(_onSubmit);
     on<FormDelete>(_onDelete);
   }
@@ -227,9 +261,7 @@ class AppointmentFormBloc
       return DateTime(base.year, base.month, base.day, 9);
     }
     final rem = stripped.minute % 15;
-    return rem == 0
-        ? stripped
-        : stripped.add(Duration(minutes: 15 - rem));
+    return rem == 0 ? stripped : stripped.add(Duration(minutes: 15 - rem));
   }
 
   void _onToggleReminder(
@@ -264,12 +296,13 @@ class AppointmentFormBloc
       category: state.category,
       reminderOffsets: state.reminderOffsets,
       googleEventId: state.googleEventId,
+      petId: state.petId,
+      carId: state.carId,
       createdAt: state.createdAt,
     );
 
-    final result = state.isEdit
-        ? await _repo.update(appt)
-        : await _repo.create(appt);
+    final result =
+        state.isEdit ? await _repo.update(appt) : await _repo.create(appt);
 
     if (result.$2 != null) {
       emit(state.copyWith(submitting: false, error: result.$2!.message));

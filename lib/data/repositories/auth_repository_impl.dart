@@ -107,7 +107,8 @@ class AuthRepositoryImpl implements AuthRepository {
         return (
           null,
           AuthFailure(
-            (response.data is Map ? response.data['error'] : null)?.toString() ??
+            (response.data is Map ? response.data['error'] : null)
+                    ?.toString() ??
                 'Create user failed (${response.status})',
           ),
         );
@@ -163,6 +164,9 @@ class AuthRepositoryImpl implements AuthRepository {
       avatarUrl: response['avatar_url'] as String?,
       preferredCurrency: (response['preferred_currency'] as String?) ?? 'EUR',
       calendarColor: response['calendar_color'] as String?,
+      birthDate: response['birth_date'] != null
+          ? DateTime.tryParse(response['birth_date'] as String)
+          : null,
       isSuperuser: (response['is_superuser'] as bool?) ?? false,
       createdAt: (response['created_at'] as int).fromUnix,
       lastUpdate: (response['last_update'] as int).fromUnix,
@@ -178,6 +182,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'avatar_url': profile.avatarUrl,
         'preferred_currency': profile.preferredCurrency,
         'calendar_color': profile.calendarColor,
+        'birth_date': profile.birthDate?.toIso8601String().substring(0, 10),
         'last_update': now,
       }).eq('id', profile.id);
       return (profile.copyWith(lastUpdate: DateTime.now()), null);

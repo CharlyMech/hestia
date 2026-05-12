@@ -45,7 +45,9 @@ class NotificationService extends SupabaseService {
 
   Future<void> delete(String notificationId) async {
     try {
-      await from(SupabaseTables.notifications).delete().eq('id', notificationId);
+      await from(SupabaseTables.notifications)
+          .delete()
+          .eq('id', notificationId);
     } catch (e) {
       throw ServerException('Failed to delete notification: $e');
     }

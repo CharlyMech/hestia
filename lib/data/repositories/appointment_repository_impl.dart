@@ -11,7 +11,8 @@ import 'package:rxdart/rxdart.dart';
 class AppointmentRepositoryImpl implements AppointmentRepository {
   final AppointmentService _service;
   final GoogleCalendarService _gcal;
-  final BehaviorSubject<List<Appointment>> _subject = BehaviorSubject.seeded(const []);
+  final BehaviorSubject<List<Appointment>> _subject =
+      BehaviorSubject.seeded(const []);
 
   AppointmentRepositoryImpl(this._service, this._gcal);
 
@@ -65,7 +66,8 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   Future<(Appointment?, Failure?)> getById(String id) async {
     try {
       final row = await _service.getById(id);
-      if (row == null) return (null, const ServerFailure('Appointment not found'));
+      if (row == null)
+        return (null, const ServerFailure('Appointment not found'));
       return (row.toAppointment(), null);
     } on ServerException catch (e) {
       return (null, ServerFailure(e.message));
@@ -106,9 +108,8 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
           await _gcal.updateEvent(saved);
         } catch (_) {}
       }
-      final list = _subject.value
-          .map((a) => a.id == saved.id ? saved : a)
-          .toList();
+      final list =
+          _subject.value.map((a) => a.id == saved.id ? saved : a).toList();
       _subject.add(list);
       return (saved, null);
     } on ServerException catch (e) {
@@ -119,7 +120,10 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   @override
   Future<Failure?> delete(String id) async {
     try {
-      final existing = _subject.value.where((a) => a.id == id).cast<Appointment?>().firstOrNull;
+      final existing = _subject.value
+          .where((a) => a.id == id)
+          .cast<Appointment?>()
+          .firstOrNull;
       await _service.delete(id);
       if (existing?.googleEventId != null && await _gcal.isLinked()) {
         try {
@@ -150,7 +154,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
       // Pull side: insert/update local from remote.
       for (final ev in remote) {
-        if (ev.id == null || ev.start?.dateTime == null || ev.end?.dateTime == null) {
+        if (ev.id == null ||
+            ev.start?.dateTime == null ||
+            ev.end?.dateTime == null) {
           continue;
         }
         final existing = localByGoogle[ev.id];
@@ -162,10 +168,10 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
           notes: ev.description,
           location: ev.location,
           startsAt: ev.start!.dateTime!.toLocal(),
-          duration:
-              ev.end!.dateTime!.difference(ev.start!.dateTime!),
+          duration: ev.end!.dateTime!.difference(ev.start!.dateTime!),
           category: existing?.category ?? AppointmentCategory.other,
-          reminderOffsets: existing?.reminderOffsets ?? const [Duration(hours: 1)],
+          reminderOffsets:
+              existing?.reminderOffsets ?? const [Duration(hours: 1)],
           googleEventId: ev.id,
           createdAt: existing?.createdAt ?? DateTime.now(),
         );

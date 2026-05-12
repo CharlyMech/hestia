@@ -19,6 +19,10 @@ class Appointment extends Equatable {
   /// Set when synced with Google Calendar (prod flavor only).
   final String? googleEventId;
 
+  /// Optional pet/car links for calendar integration.
+  final String? petId;
+  final String? carId;
+
   final DateTime createdAt;
   final DateTime? lastUpdate;
 
@@ -34,6 +38,8 @@ class Appointment extends Equatable {
     this.category = AppointmentCategory.other,
     this.reminderOffsets = const [Duration(hours: 1)],
     this.googleEventId,
+    this.petId,
+    this.carId,
     required this.createdAt,
     this.lastUpdate,
   });
@@ -52,6 +58,8 @@ class Appointment extends Equatable {
     AppointmentCategory? category,
     List<Duration>? reminderOffsets,
     String? googleEventId,
+    String? petId,
+    String? carId,
     DateTime? createdAt,
     DateTime? lastUpdate,
   }) =>
@@ -67,6 +75,8 @@ class Appointment extends Equatable {
         category: category ?? this.category,
         reminderOffsets: reminderOffsets ?? this.reminderOffsets,
         googleEventId: googleEventId ?? this.googleEventId,
+        petId: petId ?? this.petId,
+        carId: carId ?? this.carId,
         createdAt: createdAt ?? this.createdAt,
         lastUpdate: lastUpdate ?? this.lastUpdate,
       );
@@ -84,6 +94,8 @@ class Appointment extends Equatable {
         category,
         reminderOffsets,
         googleEventId,
+        petId,
+        carId,
         createdAt,
         lastUpdate,
       ];

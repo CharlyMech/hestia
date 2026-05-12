@@ -84,7 +84,8 @@ class GoogleCalendarService {
       ..reminders = gcal.EventReminders(
         useDefault: false,
         overrides: a.reminderOffsets
-            .map((d) => gcal.EventReminder(method: 'popup', minutes: d.inMinutes))
+            .map((d) =>
+                gcal.EventReminder(method: 'popup', minutes: d.inMinutes))
             .toList(),
       );
   }

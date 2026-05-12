@@ -7,6 +7,7 @@ class Profile extends Equatable {
   final String? avatarUrl;
   final String preferredCurrency;
   final String? calendarColor;
+  final DateTime? birthDate;
   final bool isSuperuser;
   final DateTime createdAt;
   final DateTime lastUpdate;
@@ -18,6 +19,7 @@ class Profile extends Equatable {
     this.avatarUrl,
     this.preferredCurrency = 'EUR',
     this.calendarColor,
+    this.birthDate,
     this.isSuperuser = false,
     required this.createdAt,
     required this.lastUpdate,
@@ -28,8 +30,11 @@ class Profile extends Equatable {
     String? email,
     String? displayName,
     String? avatarUrl,
+    bool clearAvatar = false,
     String? preferredCurrency,
     String? calendarColor,
+    DateTime? birthDate,
+    bool clearBirthDate = false,
     bool? isSuperuser,
     DateTime? createdAt,
     DateTime? lastUpdate,
@@ -38,9 +43,10 @@ class Profile extends Equatable {
         id: id ?? this.id,
         email: email ?? this.email,
         displayName: displayName ?? this.displayName,
-        avatarUrl: avatarUrl ?? this.avatarUrl,
+        avatarUrl: clearAvatar ? null : (avatarUrl ?? this.avatarUrl),
         preferredCurrency: preferredCurrency ?? this.preferredCurrency,
         calendarColor: calendarColor ?? this.calendarColor,
+        birthDate: clearBirthDate ? null : (birthDate ?? this.birthDate),
         isSuperuser: isSuperuser ?? this.isSuperuser,
         createdAt: createdAt ?? this.createdAt,
         lastUpdate: lastUpdate ?? this.lastUpdate,
@@ -54,6 +60,7 @@ class Profile extends Equatable {
         avatarUrl,
         preferredCurrency,
         calendarColor,
+        birthDate,
         isSuperuser,
       ];
 }

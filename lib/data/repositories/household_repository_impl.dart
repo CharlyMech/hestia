@@ -81,9 +81,8 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
           .from(SupabaseTables.householdMembers)
           .select('user_id')
           .eq('household_id', householdId);
-      final ids = (memberRows as List)
-          .map((r) => r['user_id'] as String)
-          .toList();
+      final ids =
+          (memberRows as List).map((r) => r['user_id'] as String).toList();
       if (ids.isEmpty) return (<Profile>[], null);
 
       final rows = await _service
@@ -97,9 +96,11 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
           email: json['email'] as String,
           displayName: json['display_name'] as String?,
           avatarUrl: json['avatar_url'] as String?,
-          preferredCurrency:
-              json['preferred_currency'] as String? ?? 'EUR',
+          preferredCurrency: json['preferred_currency'] as String? ?? 'EUR',
           calendarColor: json['calendar_color'] as String?,
+          birthDate: json['birth_date'] != null
+              ? DateTime.tryParse(json['birth_date'] as String)
+              : null,
           isSuperuser: json['is_superuser'] as bool? ?? false,
           createdAt: (json['created_at'] as int).fromUnix,
           lastUpdate: (json['last_update'] as int).fromUnix,

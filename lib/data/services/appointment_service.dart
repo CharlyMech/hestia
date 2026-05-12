@@ -115,7 +115,8 @@ extension AppointmentRowMapper on Map<String, dynamic> {
       notes: this['notes'] as String?,
       location: this['location'] as String?,
       startsAt: DateTime.parse(this['starts_at'] as String),
-      duration: Duration(minutes: (this['duration_minutes'] as num?)?.toInt() ?? 60),
+      duration:
+          Duration(minutes: (this['duration_minutes'] as num?)?.toInt() ?? 60),
       category: _categoryFromName(this['category'] as String?),
       reminderOffsets: ((this['reminder_offsets_minutes'] as List?) ?? const [])
           .map((m) => Duration(minutes: (m as num).toInt()))
