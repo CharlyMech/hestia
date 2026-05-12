@@ -47,9 +47,8 @@ List<PositionedEvent> resolveLayout(
       continue;
     }
     final last = clusters.last;
-    final clusterEnd = last
-        .map((a) => a.endsAt)
-        .reduce((a, b) => a.isAfter(b) ? a : b);
+    final clusterEnd =
+        last.map((a) => a.endsAt).reduce((a, b) => a.isAfter(b) ? a : b);
     if (appt.startsAt.isBefore(clusterEnd)) {
       last.add(appt);
     } else {
@@ -62,10 +61,8 @@ List<PositionedEvent> resolveLayout(
     final columnEnds = <int>[];
 
     for (final appt in cluster) {
-      final startMin =
-          appt.startsAt.hour * 60 + appt.startsAt.minute;
-      final endMin =
-          appt.endsAt.hour * 60 + appt.endsAt.minute;
+      final startMin = appt.startsAt.hour * 60 + appt.startsAt.minute;
+      final endMin = appt.endsAt.hour * 60 + appt.endsAt.minute;
       final durMin = (endMin - startMin).clamp(1, 24 * 60);
 
       int col = columnEnds.indexWhere((end) => end <= startMin);

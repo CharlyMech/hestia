@@ -46,12 +46,10 @@ class DayTransactionStrip extends StatelessWidget {
             onTap: () => context.push(AppRoutes.editTransaction, extra: t),
             behavior: HitTestBehavior.opaque,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
               decoration: BoxDecoration(
                 color: accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: accent.withValues(alpha: 0.3)),
               ),
               child: Text(
                 label,

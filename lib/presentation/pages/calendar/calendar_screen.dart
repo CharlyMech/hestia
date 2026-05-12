@@ -2,10 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show MaterialLocalizations;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:forui/forui.dart';
 import 'package:hestia/domain/entities/appointment.dart';
-// ignore: implementation_imports
-import 'package:forui/src/widgets/line_calendar/line_calendar.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -59,15 +56,11 @@ class _Body extends StatefulWidget {
 }
 
 class _BodyState extends State<_Body> {
-  late final FCalendarController<DateTime?> _lineController;
   Map<String, String> _ownerColors = const {};
 
   @override
   void initState() {
     super.initState();
-    final today = _utc(DateTime.now());
-    _lineController = FCalendarController.date(initialSelection: today);
-    _lineController.addListener(_onLineControllerChanged);
     _loadOwnerColors();
   }
 
@@ -88,64 +81,6 @@ class _BodyState extends State<_Body> {
       };
     });
   }
-
-  void _onLineControllerChanged() {
-    final d = _lineController.value;
-    if (d == null) return;
-    final local = DateTime(d.year, d.month, d.day);
-    final bloc = context.read<CalendarBloc>();
-    if (bloc.state.selectedDate != local) {
-      bloc.add(CalendarSelectDate(local));
-    }
-  }
-
-  @override
-  void dispose() {
-    _lineController.removeListener(_onLineControllerChanged);
-    _lineController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _showMonthPicker(
-      BuildContext context, CalendarState state) async {
-    final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final l10n = AppLocalizations.of(context);
-    final startDay = context.read<UserPrefsBloc>().state.startDay;
-
-    final picked = await showAppBottomSheet<DateTime>(
-      context: context,
-      title: l10n.nav_calendar,
-      heightFactor: 0.72,
-      expand: true,
-      child: _MonthPickerSheetBody(
-        calendarBloc: context.read<CalendarBloc>(),
-        userId: widget.userId,
-        initialSelected: state.selectedDate,
-        initialMonth: state.visibleMonth,
-        startDayOfWeek: startDay,
-        surface: surface,
-        fg: _c(theme.onBackgroundColor),
-        muted: _c(theme.onInactiveColor),
-        accent: _c(theme.primaryColor),
-        income: _c(theme.colorGreen),
-        border: _c(theme.borderColor),
-      ),
-    );
-
-    if (picked != null && context.mounted) {
-      context.read<CalendarBloc>().add(CalendarSelectDate(picked));
-      context.read<CalendarBloc>().add(
-            CalendarMonthChanged(DateTime(picked.year, picked.month)),
-          );
-      final utc = _utc(picked);
-      if (_lineController.value != utc) {
-        _lineController.select(utc);
-      }
-    }
-  }
-
-  DateTime _utc(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
   void _openAddSheet(BuildContext context, DateTime defaultDate) {
     final prefs = context.read<UserPrefsBloc>().state;
@@ -193,7 +128,8 @@ class _BodyState extends State<_Body> {
                   children: [
                     CupertinoButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancel', style: AppFonts.body(fontSize: 14, color: fg)),
+                      child: Text('Cancel',
+                          style: AppFonts.body(fontSize: 14, color: fg)),
                     ),
                     const Spacer(),
                     CupertinoButton(
@@ -202,7 +138,9 @@ class _BodyState extends State<_Body> {
                           title: title.text.trim().isEmpty
                               ? appointment.title
                               : title.text.trim(),
-                          notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
+                          notes: notes.text.trim().isEmpty
+                              ? null
+                              : notes.text.trim(),
                           lastUpdate: DateTime.now(),
                         );
                         await AppDependencies.instance.appointmentRepository
@@ -226,7 +164,8 @@ class _BodyState extends State<_Body> {
                   controller: title,
                   placeholder: 'Title',
                   style: AppFonts.body(fontSize: 14, color: fg),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: surface,
                     borderRadius: BorderRadius.circular(12),
@@ -241,7 +180,8 @@ class _BodyState extends State<_Body> {
                   maxLines: 5,
                   placeholder: 'Notes',
                   style: AppFonts.body(fontSize: 14, color: fg),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: surface,
                     borderRadius: BorderRadius.circular(12),
@@ -266,7 +206,9 @@ class _BodyState extends State<_Body> {
                         title: title.text.trim().isEmpty
                             ? appointment.title
                             : title.text.trim(),
-                        notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
+                        notes: notes.text.trim().isEmpty
+                            ? null
+                            : notes.text.trim(),
                         lastUpdate: DateTime.now(),
                       );
                       await AppDependencies.instance.appointmentRepository
@@ -301,20 +243,38 @@ class _BodyState extends State<_Body> {
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     final accent = _c(theme.primaryColor);
+    final income = _c(theme.colorGreen);
+    final l10n = AppLocalizations.of(context);
 
     return CupertinoPageScaffold(
       backgroundColor: bg,
-      child: SizedBox.expand(
-        child: BlocListener<CalendarBloc, CalendarState>(
-        listenWhen: (p, n) => p.selectedDate != n.selectedDate,
-        listener: (context, state) {
-          final utc = _utc(state.selectedDate);
-          if (_lineController.value != utc) {
-            _lineController.select(utc);
-          }
-        },
-        child: BlocBuilder<UserPrefsBloc, UserPrefsState>(
-          builder: (context, prefs) => BlocBuilder<CalendarBloc, CalendarState>(
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: bg,
+        border: Border(
+          bottom: BorderSide(color: border.withValues(alpha: 0.5), width: 0.5),
+        ),
+        middle: Text(
+          l10n.calendar_title,
+          style: AppFonts.heading(
+              fontSize: 17, fontWeight: FontWeight.w600, color: fg),
+        ),
+        trailing: GestureDetector(
+          onTap: () {
+            final state = context.read<CalendarBloc>().state;
+            _openAddSheet(context, state.selectedDate);
+          },
+          behavior: HitTestBehavior.opaque,
+          child: IconBtn(
+            icon: Plus(width: 16, height: 16, color: fg),
+            surface: surface,
+            border: border,
+            size: 32,
+            radius: 9,
+          ),
+        ),
+      ),
+      child: BlocBuilder<UserPrefsBloc, UserPrefsState>(
+        builder: (context, prefs) => BlocBuilder<CalendarBloc, CalendarState>(
           buildWhen: (p, n) =>
               p.selectedDate != n.selectedDate ||
               p.appointments != n.appointments ||
@@ -325,62 +285,61 @@ class _BodyState extends State<_Body> {
               p.allDayAppointmentIds != n.allDayAppointmentIds ||
               p.onlyMine != n.onlyMine,
           builder: (context, state) {
-            final l10n = AppLocalizations.of(context);
             final dayItems =
                 state.itemsForDayFor(state.selectedDate, widget.userId);
             final dayAppts = dayItems.whereType<AppointmentItem>().toList();
             final dayTxs = dayItems.whereType<TransactionItem>().toList();
 
-            return SafeArea(
-              bottom: false,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
+                CupertinoSliverRefreshControl(
+                  onRefresh: () {
+                    final bloc = context.read<CalendarBloc>();
+                    final completer = Completer<void>();
+                    late StreamSubscription<CalendarState> sub;
+                    sub = bloc.stream.listen((s) {
+                      if (!s.loading) {
+                        if (!completer.isCompleted) completer.complete();
+                        sub.cancel();
+                      }
+                    });
+                    bloc.add(CalendarRefresh());
+                    return completer.future;
+                  },
                 ),
-                slivers: [
-                  CupertinoSliverRefreshControl(
-                    onRefresh: () {
-                      final bloc = context.read<CalendarBloc>();
-                      final completer = Completer<void>();
-                      late StreamSubscription<CalendarState> sub;
-                      sub = bloc.stream.listen((s) {
-                        if (!s.loading) {
-                          if (!completer.isCompleted) {
-                            completer.complete();
-                          }
-                          sub.cancel();
-                        }
-                      });
-                      bloc.add(CalendarRefresh());
-                      return completer.future;
-                    },
-                  ),
-                  SliverToBoxAdapter(
-                    child: _FixedTopBar(
+                // Month grid
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: _MonthGrid(
                       state: state,
-                      lineController: _lineController,
+                      userId: widget.userId,
+                      startDayOfWeek: prefs.startDay,
+                      surface: surface,
                       fg: fg,
                       muted: muted,
                       accent: accent,
+                      income: income,
+                      border: border,
+                    ),
+                  ),
+                ),
+                // Filters
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: _Filters(
+                      showAppointments: state.showAppointments,
+                      showTransactions: state.showTransactions,
+                      onlyMine: state.onlyMine,
+                      accent: accent,
                       surface: surface,
                       border: border,
-                      bg: bg,
-                      screenTitle: l10n.calendar_title,
-                      fullCalendarLabel: l10n.nav_calendar,
-                      todayLabel: l10n.common_today,
-                      onAddTap: () =>
-                          _openAddSheet(context, state.selectedDate),
-                      onMonthTap: () => _showMonthPicker(context, state),
-                      onTodayTap: () {
-                        final today = DateTime.now();
-                        final local =
-                            DateTime(today.year, today.month, today.day);
-                        context
-                            .read<CalendarBloc>()
-                            .add(CalendarSelectDate(local));
-                        context.read<CalendarBloc>().add(CalendarMonthChanged(
-                            DateTime(local.year, local.month)));
-                      },
+                      fg: fg,
+                      muted: muted,
                       onToggleAppointments: () => context
                           .read<CalendarBloc>()
                           .add(const CalendarToggleEventos()),
@@ -392,64 +351,54 @@ class _BodyState extends State<_Body> {
                           .add(const CalendarToggleOnlyMine()),
                     ),
                   ),
-                  SliverFillRemaining(
-                    hasScrollBody: true,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      transitionBuilder: (child, animation) => FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.02, 0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: child,
-                        ),
-                      ),
-                      child: DayView(
-                        key: ValueKey(state.selectedDate),
-                        date: state.selectedDate,
-                        appointments: dayAppts,
-                        transactions: dayTxs,
-                        showAppointments: state.showAppointments,
-                        showTransactions: state.showTransactions,
-                        allDayIds: state.allDayAppointmentIds,
-                        use24h: prefs.use24h,
-                        ownerColors: _ownerColors,
-                        onTapSlot: (dt) => _openAddSheet(context, dt),
-                        onTapAppointment: (a) =>
-                            _openAppointmentInfoSheet(context, a),
+                ),
+                // Day view
+                SliverFillRemaining(
+                  hasScrollBody: true,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.02, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
                       ),
                     ),
+                    child: DayView(
+                      key: ValueKey(state.selectedDate),
+                      date: state.selectedDate,
+                      appointments: dayAppts,
+                      transactions: dayTxs,
+                      showAppointments: state.showAppointments,
+                      showTransactions: state.showTransactions,
+                      allDayIds: state.allDayAppointmentIds,
+                      use24h: prefs.use24h,
+                      ownerColors: _ownerColors,
+                      onTapSlot: (dt) => _openAddSheet(context, dt),
+                      onTapAppointment: (a) =>
+                          _openAppointmentInfoSheet(context, a),
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
-        ),
-      ),
       ),
     );
   }
 }
 
-// ── Full month picker (bottom sheet) ──────────────────────────────────────────
-///
-/// Custom month grid (not [FCalendar]) so every cell uses [surface], tiles can
-/// scale to full width, and we can draw appointment / transaction markers.
-/// Tap a day applies immediately and closes the sheet (no Done button).
-/// See [ForUI calendar concepts](https://forui.dev/docs/data/calendar).
+// ── Inline month grid ─────────────────────────────────────────────────────────
 
-class _MonthPickerSheetBody extends StatefulWidget {
-  /// Required because [showAppBottomSheet] uses the root navigator; the sheet
-  /// route is not under [BlocProvider<CalendarBloc>].
-  final CalendarBloc calendarBloc;
+class _MonthGrid extends StatefulWidget {
+  final CalendarState state;
   final String userId;
-  final DateTime initialSelected;
-  final DateTime initialMonth;
   final int startDayOfWeek;
   final Color surface;
   final Color fg;
@@ -458,11 +407,9 @@ class _MonthPickerSheetBody extends StatefulWidget {
   final Color income;
   final Color border;
 
-  const _MonthPickerSheetBody({
-    required this.calendarBloc,
+  const _MonthGrid({
+    required this.state,
     required this.userId,
-    required this.initialSelected,
-    required this.initialMonth,
     required this.startDayOfWeek,
     required this.surface,
     required this.fg,
@@ -473,17 +420,25 @@ class _MonthPickerSheetBody extends StatefulWidget {
   });
 
   @override
-  State<_MonthPickerSheetBody> createState() => _MonthPickerSheetBodyState();
+  State<_MonthGrid> createState() => _MonthGridState();
 }
 
-class _MonthPickerSheetBodyState extends State<_MonthPickerSheetBody> {
+class _MonthGridState extends State<_MonthGrid> {
   late DateTime _viewMonth;
 
   @override
   void initState() {
     super.initState();
-    _viewMonth =
-        DateTime(widget.initialMonth.year, widget.initialMonth.month);
+    _viewMonth = DateTime(
+      widget.state.visibleMonth.year,
+      widget.state.visibleMonth.month,
+    );
+  }
+
+  void _shiftMonth(int delta) {
+    final n = DateTime(_viewMonth.year, _viewMonth.month + delta);
+    setState(() => _viewMonth = n);
+    context.read<CalendarBloc>().add(CalendarMonthChanged(n));
   }
 
   static int _leadingBlanks(DateTime firstOfMonth, int startDay) {
@@ -511,189 +466,184 @@ class _MonthPickerSheetBodyState extends State<_MonthPickerSheetBody> {
 
   static DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  void _shiftMonth(int delta) {
-    final n = DateTime(_viewMonth.year, _viewMonth.month + delta);
-    setState(() => _viewMonth = n);
-    widget.calendarBloc.add(CalendarMonthChanged(n));
-  }
-
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final monthTitle =
-        DateFormat.yMMMM(locale).format(_viewMonth);
+    final monthTitle = DateFormat.yMMMM(locale).format(_viewMonth);
     final loc = MaterialLocalizations.of(context);
+    final state = widget.state;
+    final today = _dayOnly(DateTime.now());
+    final selected = _dayOnly(state.selectedDate);
+    final cells = _cellsForMonth(_viewMonth, widget.startDayOfWeek);
 
-    return BlocBuilder<CalendarBloc, CalendarState>(
-      bloc: widget.calendarBloc,
-      builder: (context, state) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final maxW = constraints.maxWidth;
-            final cell = (maxW / DateTime.daysPerWeek).clamp(48.0, 68.0);
-            final cellH = cell * 1.12;
-            final cells = _cellsForMonth(_viewMonth, widget.startDayOfWeek);
-            final today = _dayOnly(DateTime.now());
-            final selected = _dayOnly(widget.initialSelected);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cell =
+            (constraints.maxWidth / DateTime.daysPerWeek).clamp(44.0, 64.0);
+        final cellH = cell * 1.12;
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                  child: Row(
-                    children: [
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: state.loading ? null : () => _shiftMonth(-1),
-                        child: Icon(
-                          CupertinoIcons.chevron_back,
-                          size: 22,
-                          color: state.loading ? widget.muted : widget.fg,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          monthTitle,
-                          textAlign: TextAlign.center,
-                          style: AppFonts.body(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: widget.accent,
-                          ),
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: state.loading ? null : () => _shiftMonth(1),
-                        child: Icon(
-                          CupertinoIcons.chevron_forward,
-                          size: 22,
-                          color: state.loading ? widget.muted : widget.fg,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: List.generate(7, (col) {
-                    final w = ((widget.startDayOfWeek - 1 + col) % 7) + 1;
-                    final idx = w % 7;
-                    return SizedBox(
-                      width: cell,
-                      child: Center(
-                        child: Text(
-                          loc.narrowWeekdays[idx],
-                          style: AppFonts.body(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: widget.muted,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 4),
-                if (state.loading)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Center(
-                      child: CupertinoActivityIndicator(color: widget.accent),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Month navigation header
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: state.loading ? null : () => _shiftMonth(-1),
+                    child: Icon(
+                      CupertinoIcons.chevron_back,
+                      size: 20,
+                      color: state.loading ? widget.muted : widget.fg,
                     ),
                   ),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
-                    mainAxisExtent: cellH,
+                  Expanded(
+                    child: Text(
+                      monthTitle,
+                      textAlign: TextAlign.center,
+                      style: AppFonts.body(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: widget.accent,
+                      ),
+                    ),
                   ),
-                  itemCount: cells.length,
-                  itemBuilder: (context, i) {
-                    final day = cells[i];
-                    if (day == null) {
-                      return SizedBox(width: cell, height: cellH);
-                    }
-                    final inMonth = day.month == _viewMonth.month;
-                    final items =
-                        state.itemsForDayFor(day, widget.userId);
-                    final hasAppt =
-                        items.any((e) => e is AppointmentItem);
-                    final hasTx =
-                        items.any((e) => e is TransactionItem);
-                    final isToday = _dayOnly(day) == today;
-                    final isSelected = _dayOnly(day) == selected;
-                    final dOnly = _dayOnly(day);
-                    final isPast = dOnly.isBefore(today);
-                    final isFuture = dOnly.isAfter(today);
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: state.loading ? null : () => _shiftMonth(1),
+                    child: Icon(
+                      CupertinoIcons.chevron_forward,
+                      size: 20,
+                      color: state.loading ? widget.muted : widget.fg,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Weekday headers
+            Row(
+              children: List.generate(7, (col) {
+                final w = ((widget.startDayOfWeek - 1 + col) % 7) + 1;
+                final idx = w % 7;
+                return SizedBox(
+                  width: cell,
+                  child: Center(
+                    child: Text(
+                      loc.narrowWeekdays[idx],
+                      style: AppFonts.body(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: widget.muted,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 4),
+            if (state.loading)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: CupertinoActivityIndicator(color: widget.accent),
+                ),
+              ),
+            // Day grid
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                mainAxisExtent: cellH,
+              ),
+              itemCount: cells.length,
+              itemBuilder: (context, i) {
+                final day = cells[i];
+                if (day == null) {
+                  return SizedBox(width: cell, height: cellH);
+                }
+                final inMonth = day.month == _viewMonth.month;
+                final items = state.itemsForDayFor(day, widget.userId);
+                final hasAppt = items.any((e) => e is AppointmentItem);
+                final hasTx = items.any((e) => e is TransactionItem);
+                final isToday = _dayOnly(day) == today;
+                final isSelected = _dayOnly(day) == selected;
+                final dOnly = _dayOnly(day);
+                final isPast = dOnly.isBefore(today);
+                final isFuture = dOnly.isAfter(today);
 
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        Navigator.of(context, rootNavigator: true)
-                            .pop(DateTime(day.year, day.month, day.day));
-                      },
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: widget.surface,
-                          border: Border.all(
-                            color: isToday
-                                ? widget.accent
-                                    .withValues(alpha: 0.55)
-                                : widget.border.withValues(alpha: 0.35),
-                            width: isToday ? 1.4 : 0.6,
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    context.read<CalendarBloc>().add(CalendarSelectDate(day));
+                    if (day.month != _viewMonth.month) {
+                      final newMonth = DateTime(day.year, day.month);
+                      setState(() => _viewMonth = newMonth);
+                      context
+                          .read<CalendarBloc>()
+                          .add(CalendarMonthChanged(newMonth));
+                    }
+                  },
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? widget.accent.withValues(alpha: 0.12)
+                          : widget.surface,
+                      border: Border.all(
+                        color: isToday
+                            ? widget.accent.withValues(alpha: 0.55)
+                            : isSelected
+                                ? widget.accent.withValues(alpha: 0.4)
+                                : const Color(0x00000000),
+                        width: (isToday || isSelected) ? 1.4 : 0.6,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${day.day}',
+                          style: AppFonts.body(
+                            fontSize: 15,
+                            fontWeight:
+                                isSelected ? FontWeight.w800 : FontWeight.w600,
+                            color: !inMonth
+                                ? widget.muted.withValues(alpha: 0.4)
+                                : isSelected
+                                    ? widget.accent
+                                    : widget.fg,
                           ),
-                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Column(
+                        SizedBox(height: cell * 0.06),
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              '${day.day}',
-                              style: AppFonts.body(
-                                fontSize: 17,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                                color: !inMonth
-                                    ? widget.muted
-                                        .withValues(alpha: 0.45)
-                                    : isSelected
-                                        ? widget.accent
-                                        : widget.fg,
+                            if (hasAppt)
+                              _EventDot(
+                                color: widget.accent,
+                                dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
                               ),
-                            ),
-                            SizedBox(height: cell * 0.08),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (hasAppt)
-                                  _EventDot(
-                                    color: widget.accent,
-                                    dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
-                                  ),
-                                if (hasAppt && hasTx)
-                                  const SizedBox(width: 4),
-                                if (hasTx)
-                                  _EventDot(
-                                    color: widget.income,
-                                    dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
-                                  ),
-                                if (!hasAppt && !hasTx)
-                                  SizedBox(height: cell * 0.12),
-                              ],
-                            ),
+                            if (hasAppt && hasTx) const SizedBox(width: 3),
+                            if (hasTx)
+                              _EventDot(
+                                color: widget.income,
+                                dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
+                              ),
+                            if (!hasAppt && !hasTx)
+                              SizedBox(height: cell * 0.1),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );
@@ -713,172 +663,9 @@ class _EventDot extends StatelessWidget {
       child: Container(
         width: 6,
         height: 6,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       ),
     );
-  }
-}
-
-// ── Fixed top bar ─────────────────────────────────────────────────────────────
-
-class _FixedTopBar extends StatelessWidget {
-  final CalendarState state;
-  final FCalendarController<DateTime?> lineController;
-  final Color fg;
-  final Color muted;
-  final Color accent;
-  final Color surface;
-  final Color border;
-  final Color bg;
-  final String screenTitle;
-  final String fullCalendarLabel;
-  final String todayLabel;
-  final VoidCallback onAddTap;
-  final VoidCallback onMonthTap;
-  final VoidCallback onTodayTap;
-  final VoidCallback onToggleAppointments;
-  final VoidCallback onToggleTransactions;
-  final VoidCallback onToggleOnlyMine;
-
-  const _FixedTopBar({
-    required this.state,
-    required this.lineController,
-    required this.fg,
-    required this.muted,
-    required this.accent,
-    required this.surface,
-    required this.border,
-    required this.bg,
-    required this.screenTitle,
-    required this.fullCalendarLabel,
-    required this.todayLabel,
-    required this.onAddTap,
-    required this.onMonthTap,
-    required this.onTodayTap,
-    required this.onToggleAppointments,
-    required this.onToggleTransactions,
-    required this.onToggleOnlyMine,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: bg,
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 10,
-        children: [
-          // Title row + add button
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2,
-                  children: [
-                    Text(
-                      screenTitle,
-                      style: AppFonts.heading(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: fg,
-                      ),
-                    ),
-                    Text(
-                      _monthYear(state.visibleMonth),
-                      style: AppFonts.body(fontSize: 13, color: muted),
-                    ),
-                  ],
-                ),
-              ),
-              IconBtn(
-                icon: Plus(width: 16, height: 16, color: fg),
-                surface: surface,
-                border: border,
-                onTap: onAddTap,
-                size: 36,
-                radius: 10,
-              ),
-            ],
-          ),
-          // Month picker trigger — FButton with calendar icon + label.
-          Row(
-            children: [
-              FButton(
-                style: FButtonStyle.outline,
-                onPress: onMonthTap,
-                prefix: Icon(CupertinoIcons.calendar, size: 15, color: accent),
-                label: Text(
-                  fullCalendarLabel,
-                  style: AppFonts.body(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: accent,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              CupertinoButton(
-                minimumSize: const Size(44, 30),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                color: surface,
-                onPressed: onTodayTap,
-                child: Text(
-                  todayLabel,
-                  style: AppFonts.body(fontSize: 12, color: fg),
-                ),
-              ),
-            ],
-          ),
-          // FLineCalendar — style must be passed explicitly (forui 0.7.0 bug: style! crashes if null)
-          SizedBox(
-            height: 84,
-            child: FLineCalendar(
-              controller: lineController,
-              style: FLineCalendarStyle.inherit(
-                colorScheme: context.theme.colorScheme,
-                typography: context.theme.typography,
-                style: context.theme.style,
-              ),
-              start: DateTime.utc(2020),
-              end: DateTime.utc(2035),
-              today: DateTime.utc(
-                DateTime.now().year,
-                DateTime.now().month,
-                DateTime.now().day,
-              ),
-            ),
-          ),
-          // Filters
-          _Filters(
-            showAppointments: state.showAppointments,
-            showTransactions: state.showTransactions,
-            onlyMine: state.onlyMine,
-            accent: accent,
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            onToggleAppointments: onToggleAppointments,
-            onToggleTransactions: onToggleTransactions,
-            onToggleOnlyMine: onToggleOnlyMine,
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _monthYear(DateTime d) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    return '${months[d.month - 1]} ${d.year}';
   }
 }
 
@@ -914,14 +701,14 @@ class _Filters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      spacing: 10,
+      spacing: 8,
       children: [
         Expanded(
           child: _FilterChip(
-            label: 'Eventos',
+            label: 'Events',
             icon: Calendar(
-                width: 14,
-                height: 14,
+                width: 13,
+                height: 13,
                 color: showAppointments ? accent : muted),
             active: showAppointments,
             accent: accent,
@@ -934,10 +721,10 @@ class _Filters extends StatelessWidget {
         ),
         Expanded(
           child: _FilterChip(
-            label: 'Movimientos',
+            label: 'Transactions',
             icon: Bell(
-                width: 14,
-                height: 14,
+                width: 13,
+                height: 13,
                 color: showTransactions ? accent : muted),
             active: showTransactions,
             accent: accent,
@@ -951,10 +738,7 @@ class _Filters extends StatelessWidget {
         Expanded(
           child: _FilterChip(
             label: 'Only mine',
-            icon: User(
-                width: 14,
-                height: 14,
-                color: onlyMine ? accent : muted),
+            icon: User(width: 13, height: 13, color: onlyMine ? accent : muted),
             active: onlyMine,
             accent: accent,
             surface: surface,
@@ -998,18 +782,18 @@ class _FilterChip extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
         decoration: BoxDecoration(
           color: active ? accent.withValues(alpha: 0.14) : surface,
           border: Border.all(
-            color: active ? accent : border,
+            color: active ? accent : const Color(0x00000000),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 8,
+          spacing: 6,
           children: [
             icon,
             Flexible(
@@ -1019,7 +803,7 @@ class _FilterChip extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: AppFonts.body(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: active ? accent : muted,
                 ),
@@ -1032,7 +816,6 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-
 // ── Signed out ────────────────────────────────────────────────────────────────
 
 class _SignedOut extends StatelessWidget {
@@ -1041,7 +824,8 @@ class _SignedOut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final bg =
+        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
     final muted =
         Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
     return CupertinoPageScaffold(

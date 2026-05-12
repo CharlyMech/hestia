@@ -131,93 +131,95 @@ class _DayViewState extends State<DayView> {
                 child: SizedBox(
                   height: _totalGridHeight + widget.bottomPadding,
                   child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final laneWidth = constraints.maxWidth - _timeColWidth;
-                  return Stack(
-                    children: [
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: _HourGrid(
-                          fg: fg,
-                          muted: muted,
-                          border: border,
-                          use24h: widget.use24h,
-                        ),
-                      ),
-                      Positioned(
-                        left: _timeColWidth,
-                        top: 0,
-                        width: laneWidth,
-                        height: _totalGridHeight,
-                        child: _TapLayer(
-                          date: widget.date,
-                          onTapSlot: widget.onTapSlot,
-                        ),
-                      ),
-                      Positioned(
-                        left: _timeColWidth,
-                        top: 0,
-                        width: laneWidth,
-                        height: _totalGridHeight,
-                        child: IgnorePointer(
-                          ignoring: !widget.showAppointments,
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 240),
-                            curve: Curves.easeOutCubic,
-                            opacity: widget.showAppointments ? 1 : 0,
-                            child: Stack(
-                              children: [
-                                for (final e in positionedEvents)
-                                  Positioned(
-                                    top: e.topOffset(_hourHeight),
-                                    left: e.columnIndex /
-                                        e.totalColumns *
-                                        laneWidth,
-                                    width: laneWidth / e.totalColumns,
-                                    height: e.blockHeight(_hourHeight),
-                                    child: TweenAnimationBuilder<double>(
-                                      key: ValueKey(
-                                          '${e.appointment.id}-${widget.showAppointments}'),
-                                      tween: Tween(begin: 0.95, end: 1),
-                                      duration:
-                                          const Duration(milliseconds: 240),
-                                      curve: Curves.easeOutBack,
-                                      builder: (context, scale, child) =>
-                                          Transform.scale(
-                                        scale: scale,
-                                        alignment: Alignment.topCenter,
-                                        child: child,
-                                      ),
-                                      child: DayEventBlock(
-                                        event: e,
-                                        hourHeight: _hourHeight,
-                                        color: _ownerOrCategoryColor(
-                                            e.appointment, tints),
-                                        onTap: () => widget
-                                            .onTapAppointment(e.appointment),
-                                        use24h: widget.use24h,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                    builder: (context, constraints) {
+                      final laneWidth = constraints.maxWidth - _timeColWidth;
+                      return Stack(
+                        children: [
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: _HourGrid(
+                              fg: fg,
+                              muted: muted,
+                              border: border,
+                              use24h: widget.use24h,
                             ),
                           ),
-                        ),
-                      ),
-                      if (isToday)
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: _totalGridHeight,
-                          child: Stack(children: [_NowLine(accent: accent)]),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                          Positioned(
+                            left: _timeColWidth,
+                            top: 0,
+                            width: laneWidth,
+                            height: _totalGridHeight,
+                            child: _TapLayer(
+                              date: widget.date,
+                              onTapSlot: widget.onTapSlot,
+                            ),
+                          ),
+                          Positioned(
+                            left: _timeColWidth,
+                            top: 0,
+                            width: laneWidth,
+                            height: _totalGridHeight,
+                            child: IgnorePointer(
+                              ignoring: !widget.showAppointments,
+                              child: AnimatedOpacity(
+                                duration: const Duration(milliseconds: 240),
+                                curve: Curves.easeOutCubic,
+                                opacity: widget.showAppointments ? 1 : 0,
+                                child: Stack(
+                                  children: [
+                                    for (final e in positionedEvents)
+                                      Positioned(
+                                        top: e.topOffset(_hourHeight),
+                                        left: e.columnIndex /
+                                            e.totalColumns *
+                                            laneWidth,
+                                        width: laneWidth / e.totalColumns,
+                                        height: e.blockHeight(_hourHeight),
+                                        child: TweenAnimationBuilder<double>(
+                                          key: ValueKey(
+                                              '${e.appointment.id}-${widget.showAppointments}'),
+                                          tween: Tween(begin: 0.95, end: 1),
+                                          duration:
+                                              const Duration(milliseconds: 240),
+                                          curve: Curves.easeOutBack,
+                                          builder: (context, scale, child) =>
+                                              Transform.scale(
+                                            scale: scale,
+                                            alignment: Alignment.topCenter,
+                                            child: child,
+                                          ),
+                                          child: DayEventBlock(
+                                            event: e,
+                                            hourHeight: _hourHeight,
+                                            color: _ownerOrCategoryColor(
+                                                e.appointment, tints),
+                                            onTap: () =>
+                                                widget.onTapAppointment(
+                                                    e.appointment),
+                                            use24h: widget.use24h,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (isToday)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: _totalGridHeight,
+                              child:
+                                  Stack(children: [_NowLine(accent: accent)]),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -452,7 +454,6 @@ class _AllDayChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,

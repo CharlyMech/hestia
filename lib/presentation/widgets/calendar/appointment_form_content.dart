@@ -6,7 +6,11 @@ import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/domain/entities/car.dart' show Car;
+import 'package:hestia/domain/entities/pet.dart' show Pet;
 import 'package:hestia/presentation/blocs/appointment_form/appointment_form_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
 class AppointmentFormContent extends StatefulWidget {
@@ -33,6 +37,36 @@ class AppointmentFormContent extends StatefulWidget {
 
 class _AppointmentFormContentState extends State<AppointmentFormContent> {
   bool _allDay = false;
+  List<Pet> _pets = const [];
+  List<Car> _cars = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPetsCars();
+  }
+
+  Future<void> _loadPetsCars() async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) return;
+    final deps = AppDependencies.instance;
+    final (household, _) =
+        await deps.householdRepository.getCurrentHousehold(auth.profile.id);
+    if (household == null || !mounted) return;
+    final (pets, _) = await deps.petRepository.getPets(
+      householdId: household.id,
+      activeOnly: true,
+    );
+    final (cars, _) = await deps.carRepository.getCars(
+      householdId: household.id,
+      activeOnly: true,
+    );
+    if (!mounted) return;
+    setState(() {
+      _pets = pets;
+      _cars = cars;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,193 +97,241 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              // Title
-              _LabeledField(
-                label: 'Title',
-                muted: muted,
-                child: _Input(
-                  initial: state.title,
-                  placeholder: 'Dentist · Gym · Meeting…',
-                  surface: surface,
-                  border: border,
-                  fg: fg,
+                // Title
+                _LabeledField(
+                  label: 'Title',
                   muted: muted,
-                  onChanged: (v) => context
-                      .read<AppointmentFormBloc>()
-                      .add(FormTitleChanged(v)),
-                ),
-              ),
-              const SizedBox(height: 14),
-              // All day
-              Row(
-                children: [
-                  FCheckbox(
-                    value: _allDay,
-                    onChange: (v) {
-                      setState(() => _allDay = v);
-                      if (_allDay) {
-                        final d = state.startsAt;
-                        final midnight = DateTime(d.year, d.month, d.day);
-                        context
-                            .read<AppointmentFormBloc>()
-                            .add(FormStartChanged(midnight));
-                        context
-                            .read<AppointmentFormBloc>()
-                            .add(const FormDurationChanged(Duration(hours: 24)));
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'All day',
-                    style: AppFonts.body(fontSize: 14, color: fg),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              // Date
-              _LabeledField(
-                label: 'Date',
-                muted: muted,
-                child: _TappableRow(
-                  value: _fmtDate(state.startsAt),
-                  surface: surface,
-                  border: border,
-                  fg: fg,
-                  muted: muted,
-                  onTap: () => _pickDate(context, state.startsAt),
-                ),
-              ),
-              const SizedBox(height: 14),
-              // Start time
-              Opacity(
-                opacity: _allDay ? 0.38 : 1.0,
-                child: _LabeledField(
-                  label: 'Start time',
-                  muted: muted,
-                  child: _TappableRow(
-                    value: _fmtTime(state.startsAt),
+                  child: _Input(
+                    initial: state.title,
+                    placeholder: 'Dentist · Gym · Meeting…',
                     surface: surface,
                     border: border,
                     fg: fg,
                     muted: muted,
-                    onTap: _allDay
-                        ? null
-                        : () => _pickTime(context, state.startsAt,
-                            onPicked: (t) {
-                              context
-                                  .read<AppointmentFormBloc>()
-                                  .add(FormStartChanged(t));
-                            }),
+                    onChanged: (v) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormTitleChanged(v)),
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              // End time
-              Opacity(
-                opacity: _allDay ? 0.38 : 1.0,
-                child: _LabeledField(
-                  label: 'End time',
+                const SizedBox(height: 14),
+                // All day
+                Row(
+                  children: [
+                    FCheckbox(
+                      value: _allDay,
+                      onChange: (v) {
+                        setState(() => _allDay = v);
+                        if (_allDay) {
+                          final d = state.startsAt;
+                          final midnight = DateTime(d.year, d.month, d.day);
+                          context
+                              .read<AppointmentFormBloc>()
+                              .add(FormStartChanged(midnight));
+                          context.read<AppointmentFormBloc>().add(
+                              const FormDurationChanged(Duration(hours: 24)));
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'All day',
+                      style: AppFonts.body(fontSize: 14, color: fg),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                // Date
+                _LabeledField(
+                  label: 'Date',
                   muted: muted,
                   child: _TappableRow(
-                    value: _fmtTime(state.startsAt.add(state.duration)),
+                    value: _fmtDate(state.startsAt),
                     surface: surface,
                     border: border,
                     fg: fg,
                     muted: muted,
-                    onTap: _allDay
-                        ? null
-                        : () => _pickTime(
-                              context,
-                              state.startsAt.add(state.duration),
-                              onPicked: (t) {
-                                var dur = t.difference(state.startsAt);
-                                if (dur.inMinutes < 15) {
-                                  dur = const Duration(minutes: 15);
-                                }
+                    onTap: () => _pickDate(context, state.startsAt),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Start time
+                Opacity(
+                  opacity: _allDay ? 0.38 : 1.0,
+                  child: _LabeledField(
+                    label: 'Start time',
+                    muted: muted,
+                    child: _TappableRow(
+                      value: _fmtTime(state.startsAt),
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                      onTap: _allDay
+                          ? null
+                          : () =>
+                              _pickTime(context, state.startsAt, onPicked: (t) {
                                 context
                                     .read<AppointmentFormBloc>()
-                                    .add(FormDurationChanged(dur));
-                              },
-                            ),
+                                    .add(FormStartChanged(t));
+                              }),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              // Category
-              _LabeledField(
-                label: 'Category',
-                muted: muted,
-                child: _CategoryPicker(
-                  value: state.category,
-                  surface: surface,
-                  border: border,
-                  fg: fg,
-                  muted: muted,
-                  accent: accent,
-                  onChanged: (c) => context
-                      .read<AppointmentFormBloc>()
-                      .add(FormCategoryChanged(c)),
+                const SizedBox(height: 14),
+                // End time
+                Opacity(
+                  opacity: _allDay ? 0.38 : 1.0,
+                  child: _LabeledField(
+                    label: 'End time',
+                    muted: muted,
+                    child: _TappableRow(
+                      value: _fmtTime(state.startsAt.add(state.duration)),
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                      onTap: _allDay
+                          ? null
+                          : () => _pickTime(
+                                context,
+                                state.startsAt.add(state.duration),
+                                onPicked: (t) {
+                                  var dur = t.difference(state.startsAt);
+                                  if (dur.inMinutes < 15) {
+                                    dur = const Duration(minutes: 15);
+                                  }
+                                  context
+                                      .read<AppointmentFormBloc>()
+                                      .add(FormDurationChanged(dur));
+                                },
+                              ),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              // Reminders
-              _LabeledField(
-                label: 'Reminders',
-                muted: muted,
-                child: _Reminders(
-                  selected: state.reminderOffsets,
-                  surface: surface,
-                  border: border,
-                  fg: fg,
+                const SizedBox(height: 14),
+                // Category
+                _LabeledField(
+                  label: 'Category',
                   muted: muted,
-                  accent: accent,
-                  onToggle: (d) => context
-                      .read<AppointmentFormBloc>()
-                      .add(FormToggleReminder(d)),
+                  child: _CategoryPicker(
+                    value: state.category,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                    onChanged: (c) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormCategoryChanged(c)),
+                  ),
                 ),
-              ),
-              if (state.error != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  state.error!,
-                  style: AppFonts.body(fontSize: 13, color: errorColor),
+                const SizedBox(height: 14),
+                // Reminders
+                _LabeledField(
+                  label: 'Reminders',
+                  muted: muted,
+                  child: _Reminders(
+                    selected: state.reminderOffsets,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                    onToggle: (d) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormToggleReminder(d)),
+                  ),
+                ),
+                if (_pets.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  _LabeledField(
+                    label: 'Pet (optional)',
+                    muted: muted,
+                    child: _EntityPicker(
+                      items: [
+                        ('', 'None'),
+                        for (final p in _pets) (p.id, p.name),
+                      ],
+                      selected: state.petId ?? '',
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                      accent: accent,
+                      onChanged: (id) => context
+                          .read<AppointmentFormBloc>()
+                          .add(FormPetChanged(id.isEmpty ? null : id)),
+                    ),
+                  ),
+                ],
+                if (_cars.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  _LabeledField(
+                    label: 'Vehicle (optional)',
+                    muted: muted,
+                    child: _EntityPicker(
+                      items: [
+                        ('', 'None'),
+                        for (final c in _cars)
+                          (
+                            c.id,
+                            '${c.make ?? ''} ${c.model ?? ''} ${c.licensePlate}'
+                                .trim()
+                          ),
+                      ],
+                      selected: state.carId ?? '',
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                      accent: accent,
+                      onChanged: (id) => context
+                          .read<AppointmentFormBloc>()
+                          .add(FormCarChanged(id.isEmpty ? null : id)),
+                    ),
+                  ),
+                ],
+                if (state.error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    state.error!,
+                    style: AppFonts.body(fontSize: 13, color: errorColor),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                // Save button
+                GestureDetector(
+                  onTap: (state.titleValid && !state.submitting)
+                      ? () => context
+                          .read<AppointmentFormBloc>()
+                          .add(const FormSubmit())
+                      : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: state.titleValid
+                          ? accent
+                          : accent.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(AppRadii.xl),
+                    ),
+                    child: Center(
+                      child: state.submitting
+                          ? const CupertinoActivityIndicator()
+                          : Text(
+                              'Save',
+                              style: AppFonts.body(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.white,
+                              ),
+                            ),
+                    ),
+                  ),
                 ),
               ],
-              const SizedBox(height: 20),
-              // Save button
-              GestureDetector(
-                onTap: (state.titleValid && !state.submitting)
-                    ? () => context
-                        .read<AppointmentFormBloc>()
-                        .add(const FormSubmit())
-                    : null,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: state.titleValid
-                        ? accent
-                        : accent.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(AppRadii.xl),
-                  ),
-                  child: Center(
-                    child: state.submitting
-                        ? const CupertinoActivityIndicator()
-                        : Text(
-                            'Save',
-                            style: AppFonts.body(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.white,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+            ),
+          );
         },
       ),
     );
@@ -277,8 +359,8 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
       context: context,
       builder: (ctx) {
         final ctrl = FCalendarController.date(
-          initialSelection: DateTime.utc(
-              current.year, current.month, current.day),
+          initialSelection:
+              DateTime.utc(current.year, current.month, current.day),
         );
         return Container(
           height: 420,
@@ -315,8 +397,11 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                         DateTime.now().month, DateTime.now().day),
                     onPress: (d) {
                       selected = DateTime(
-                        d.year, d.month, d.day,
-                        current.hour, current.minute,
+                        d.year,
+                        d.month,
+                        d.day,
+                        current.hour,
+                        current.minute,
                       );
                     },
                   ),
@@ -395,8 +480,18 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
 
   String _fmtDate(DateTime d) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
@@ -518,14 +613,12 @@ class _TappableRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: surface,
-          border: Border.all(color: border),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Expanded(
-              child: Text(value,
-                  style: AppFonts.body(fontSize: 14, color: fg)),
+              child: Text(value, style: AppFonts.body(fontSize: 14, color: fg)),
             ),
             ChevronIcon(color: muted),
           ],
@@ -564,12 +657,11 @@ class _CategoryPicker extends StatelessWidget {
           GestureDetector(
             onTap: () => onChanged(c),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: c == value ? accent.withValues(alpha: 0.14) : surface,
                 border: Border.all(
-                    color: c == value ? accent : border),
+                    color: c == value ? accent : const Color(0x00000000)),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -639,7 +731,8 @@ class _Reminders extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isOn ? accent.withValues(alpha: 0.14) : surface,
-                  border: Border.all(color: isOn ? accent : border),
+                  border: Border.all(
+                      color: isOn ? accent : const Color(0x00000000)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -662,5 +755,63 @@ class _Reminders extends StatelessWidget {
     if (d.inHours < 24) return '${d.inHours}h';
     final days = d.inDays;
     return days == 1 ? '1 day' : '$days days';
+  }
+}
+
+// ── Entity picker (pet / car) ─────────────────────────────────────────────────
+
+class _EntityPicker extends StatelessWidget {
+  /// List of (id, label) pairs. First entry should be ('', 'None').
+  final List<(String, String)> items;
+  final String selected;
+  final Color surface;
+  final Color border;
+  final Color fg;
+  final Color muted;
+  final Color accent;
+  final ValueChanged<String> onChanged;
+
+  const _EntityPicker({
+    required this.items,
+    required this.selected,
+    required this.surface,
+    required this.border,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final (id, label) in items)
+          GestureDetector(
+            onTap: () => onChanged(id),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color:
+                    id == selected ? accent.withValues(alpha: 0.14) : surface,
+                border: Border.all(
+                  color: id == selected ? accent : const Color(0x00000000),
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                label,
+                style: AppFonts.body(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: id == selected ? accent : muted,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
