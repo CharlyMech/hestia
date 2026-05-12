@@ -7,9 +7,22 @@ abstract class ShoppingRepository {
     required String householdId,
     required String userId,
     ShoppingListStatus? status,
+    ShoppingListKind? kind,
   });
 
   Future<(ShoppingList?, Failure?)> createList(ShoppingList list);
+
+  /// Creates an active session; copies unchecked template lines when
+  /// [templateListId] is set.
+  Future<(ShoppingList?, Failure?)> startShoppingSession({
+    required String householdId,
+    required String userId,
+    required String name,
+    required ShoppingListScope scope,
+    String? bankAccountId,
+    String? transactionSourceId,
+    String? templateListId,
+  });
 
   Future<Failure?> updateList(ShoppingList list);
 

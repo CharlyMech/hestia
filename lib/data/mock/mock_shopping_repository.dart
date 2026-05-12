@@ -8,19 +8,36 @@ import 'package:uuid/uuid.dart';
 class MockShoppingRepository implements ShoppingRepository {
   static const _uuid = Uuid();
 
+  void _autoExpireSessions(MockStore store) {
+    final now = DateTime.now();
+    for (var i = 0; i < store.shoppingLists.length; i++) {
+      final l = store.shoppingLists[i];
+      if (!l.shouldAutoExpireSession()) continue;
+      store.shoppingLists[i] = l.copyWith(
+        status: ShoppingListStatus.cancelled,
+        sessionEndedAt: now,
+        lastUpdate: now,
+      );
+    }
+  }
+
   @override
   Future<(List<ShoppingList>, Failure?)> getLists({
     required String householdId,
     required String userId,
     ShoppingListStatus? status,
+    ShoppingListKind? kind,
   }) async {
+    _autoExpireSessions(MockStore.instance);
     final lists = MockStore.instance.shoppingLists
         .where((l) => l.householdId == householdId)
         .where((l) {
-      // Personal lists are visible only to their owner; shared to everyone.
-      if (l.scope == ShoppingListScope.shared) return true;
-      return l.ownerId == userId;
-    }).where((l) => status == null || l.status == status).toList()
+          if (l.scope == ShoppingListScope.shared) return true;
+          return l.ownerId == userId;
+        })
+        .where((l) => status == null || l.status == status)
+        .where((l) => kind == null || l.kind == kind)
+        .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return (lists, null);
   }
@@ -34,6 +51,58 @@ class MockShoppingRepository implements ShoppingRepository {
     );
     MockStore.instance.shoppingLists.add(created);
     return (created, null);
+  }
+
+  @override
+  Future<(ShoppingList?, Failure?)> startShoppingSession({
+    required String householdId,
+    required String userId,
+    required String name,
+    required ShoppingListScope scope,
+    String? bankAccountId,
+    String? transactionSourceId,
+    String? templateListId,
+  }) async {
+    final now = DateTime.now();
+    final session = ShoppingList(
+      id: _uuid.v4(),
+      householdId: householdId,
+      ownerId: userId,
+      scope: scope,
+      name: name,
+      status: ShoppingListStatus.active,
+      kind: ShoppingListKind.session,
+      templateId: templateListId,
+      sessionStartedAt: now,
+      bankAccountId: bankAccountId,
+      transactionSourceId: transactionSourceId,
+      createdAt: now,
+      lastUpdate: now,
+    );
+    MockStore.instance.shoppingLists.add(session);
+
+    if (templateListId != null) {
+      final srcItems = MockStore.instance.shoppingListItems
+          .where((i) => i.listId == templateListId)
+          .toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      var order = 0;
+      for (final it in srcItems) {
+        MockStore.instance.shoppingListItems.add(
+          ShoppingListItem(
+            id: _uuid.v4(),
+            listId: session.id,
+            name: it.name,
+            qty: it.qty,
+            sortOrder: order++,
+            isChecked: false,
+            createdAt: now,
+            lastUpdate: now,
+          ),
+        );
+      }
+    }
+    return (session, null);
   }
 
   @override
@@ -58,7 +127,6 @@ class MockShoppingRepository implements ShoppingRepository {
         .where((i) => i.listId == listId)
         .toList()
       ..sort((a, b) {
-        // Unchecked first, then by sortOrder; checked items pushed to bottom.
         if (a.isChecked != b.isChecked) return a.isChecked ? 1 : -1;
         return a.sortOrder.compareTo(b.sortOrder);
       });

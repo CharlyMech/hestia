@@ -34,6 +34,26 @@ class ShoppingListsCreate extends ShoppingListsEvent {
   List<Object?> get props => [list];
 }
 
+class ShoppingListsStartSession extends ShoppingListsEvent {
+  final String name;
+  final ShoppingListScope scope;
+  final String? bankAccountId;
+  final String? transactionSourceId;
+  final String? templateListId;
+
+  const ShoppingListsStartSession({
+    required this.name,
+    required this.scope,
+    this.bankAccountId,
+    this.transactionSourceId,
+    this.templateListId,
+  });
+
+  @override
+  List<Object?> get props =>
+      [name, scope, bankAccountId, transactionSourceId, templateListId];
+}
+
 class ShoppingListsCancel extends ShoppingListsEvent {
   final String listId;
   const ShoppingListsCancel(this.listId);
@@ -66,16 +86,32 @@ class ShoppingListsLoading extends ShoppingListsState {
 
 class ShoppingListsLoaded extends ShoppingListsState {
   final List<ShoppingList> lists;
-  const ShoppingListsLoaded(this.lists);
 
-  List<ShoppingList> get active =>
-      lists.where((l) => l.status == ShoppingListStatus.active).toList();
-  List<ShoppingList> get history => lists
-      .where((l) => l.status != ShoppingListStatus.active)
+  /// Increments on every successful list fetch so pull-to-refresh can await completion.
+  final int revision;
+  const ShoppingListsLoaded(this.lists, {this.revision = 0});
+
+  List<ShoppingList> get activeSessions => lists
+      .where((l) =>
+          l.kind == ShoppingListKind.session &&
+          l.status == ShoppingListStatus.active)
       .toList();
 
+  List<ShoppingList> get templates =>
+      lists.where((l) => l.kind == ShoppingListKind.template).toList();
+
+  List<ShoppingList> get sessionHistory => lists
+      .where((l) =>
+          l.kind == ShoppingListKind.session &&
+          l.status != ShoppingListStatus.active)
+      .toList();
+
+  /// Backwards-compatible names.
+  List<ShoppingList> get active => activeSessions;
+  List<ShoppingList> get history => sessionHistory;
+
   @override
-  List<Object?> get props => [lists];
+  List<Object?> get props => [lists, revision];
 }
 
 class ShoppingListsError extends ShoppingListsState {
@@ -85,16 +121,17 @@ class ShoppingListsError extends ShoppingListsState {
   List<Object?> get props => [message];
 }
 
-class ShoppingListsBloc
-    extends Bloc<ShoppingListsEvent, ShoppingListsState> {
+class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
   final ShoppingRepository _repo;
   String? _householdId;
   String? _userId;
+  int _listRevision = 0;
 
   ShoppingListsBloc(this._repo) : super(const ShoppingListsInitial()) {
     on<ShoppingListsLoad>(_onLoad);
     on<ShoppingListsRefresh>(_onRefresh);
     on<ShoppingListsCreate>(_onCreate);
+    on<ShoppingListsStartSession>(_onStartSession);
     on<ShoppingListsCancel>(_onCancel);
     on<ShoppingListsMarkPaid>(_onMarkPaid);
   }
@@ -109,8 +146,13 @@ class ShoppingListsBloc
 
   Future<void> _onRefresh(
       ShoppingListsRefresh e, Emitter<ShoppingListsState> emit) async {
-    if (_householdId == null) return;
-    emit(const ShoppingListsLoading());
+    if (_householdId == null || _userId == null) {
+      final cur = state;
+      if (cur is ShoppingListsLoaded) {
+        _emitLoaded(emit, cur.lists);
+      }
+      return;
+    }
     await _fetch(emit);
   }
 
@@ -120,13 +162,31 @@ class ShoppingListsBloc
     await _fetch(emit);
   }
 
+  Future<void> _onStartSession(
+      ShoppingListsStartSession e, Emitter<ShoppingListsState> emit) async {
+    if (_householdId == null || _userId == null) return;
+    await _repo.startShoppingSession(
+      householdId: _householdId!,
+      userId: _userId!,
+      name: e.name,
+      scope: e.scope,
+      bankAccountId: e.bankAccountId,
+      transactionSourceId: e.transactionSourceId,
+      templateListId: e.templateListId,
+    );
+    await _fetch(emit);
+  }
+
   Future<void> _onCancel(
       ShoppingListsCancel e, Emitter<ShoppingListsState> emit) async {
     final cur = state;
     if (cur is! ShoppingListsLoaded) return;
     final l = cur.lists.where((x) => x.id == e.listId).firstOrNull;
     if (l == null) return;
-    await _repo.updateList(l.copyWith(status: ShoppingListStatus.cancelled));
+    await _repo.updateList(l.copyWith(
+      status: ShoppingListStatus.cancelled,
+      sessionEndedAt: DateTime.now(),
+    ));
     await _fetch(emit);
   }
 
@@ -136,12 +196,22 @@ class ShoppingListsBloc
     if (cur is! ShoppingListsLoaded) return;
     final l = cur.lists.where((x) => x.id == e.listId).firstOrNull;
     if (l == null) return;
+    final now = DateTime.now();
     await _repo.updateList(l.copyWith(
       status: ShoppingListStatus.paid,
       transactionId: e.transactionId,
-      paidAt: DateTime.now(),
+      paidAt: now,
+      sessionEndedAt: now,
     ));
     await _fetch(emit);
+  }
+
+  void _emitLoaded(Emitter<ShoppingListsState> emit, List<ShoppingList> lists) {
+    _listRevision++;
+    emit(ShoppingListsLoaded(
+      List<ShoppingList>.from(lists),
+      revision: _listRevision,
+    ));
   }
 
   Future<void> _fetch(Emitter<ShoppingListsState> emit) async {
@@ -153,6 +223,6 @@ class ShoppingListsBloc
       emit(ShoppingListsError(failure.message));
       return;
     }
-    emit(ShoppingListsLoaded(lists));
+    _emitLoaded(emit, lists);
   }
 }

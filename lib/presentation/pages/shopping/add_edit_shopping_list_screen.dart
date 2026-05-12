@@ -43,9 +43,8 @@ class _AddEditShoppingListScreenState extends State<AddEditShoppingListScreen> {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: widget.existing != null
-          ? 'Edit shopping list'
-          : 'New shopping list',
+      titleText:
+          widget.existing != null ? 'Edit shopping list' : 'New shopping list',
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () => _formKey.currentState?.submit(),

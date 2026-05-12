@@ -6,18 +6,22 @@ import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
 import 'package:hestia/domain/entities/shopping_list_item.dart';
+import 'package:hestia/domain/entities/transaction.dart';
+import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_list_bloc.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/shopping/start_shopping_session_content.dart';
 import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Plus, Trash, Check;
+import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus, Trash, Check;
 
-/// Detail screen for a single [ShoppingList]: items list, add input, finish &
-/// pay flow, cancel. Items animate to bottom on check (350ms delay).
+/// Detail screen for a single [ShoppingList]: items, add row, finish session,
+/// or start a session from a template.
 class ShoppingListDetailScreen extends StatelessWidget {
   final ShoppingList list;
   const ShoppingListDetailScreen({super.key, required this.list});
@@ -25,8 +29,9 @@ class ShoppingListDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ShoppingListBloc(AppDependencies.instance.shoppingRepository)
-        ..add(ShoppingListLoad(list)),
+      create: (_) =>
+          ShoppingListBloc(AppDependencies.instance.shoppingRepository)
+            ..add(ShoppingListLoad(list)),
       child: _Body(list: list),
     );
   }
@@ -70,69 +75,149 @@ class _BodyState extends State<_Body> {
       ),
     );
     if (ok != true || !context.mounted) return;
-    // Reuse the index bloc if we can find it; else hit the repo directly.
     try {
       context.read<ShoppingListsBloc>().add(ShoppingListsCancel(list.id));
     } catch (_) {
-      await AppDependencies.instance.shoppingRepository
-          .updateList(list.copyWith(status: ShoppingListStatus.cancelled));
+      await AppDependencies.instance.shoppingRepository.updateList(
+        list.copyWith(
+          status: ShoppingListStatus.cancelled,
+          sessionEndedAt: DateTime.now(),
+        ),
+      );
     }
     if (context.mounted) context.pop();
   }
 
-  Future<void> _openFinishAndPay(
-      BuildContext context, ShoppingList list, double subtotal) async {
-    final auth =
-        AppDependencies.instance.authRepository.currentUserId;
+  Future<void> _openFinishSession(
+      BuildContext context, ShoppingList list) async {
+    final auth = AppDependencies.instance.authRepository.currentUserId;
     if (auth == null) return;
 
-    // Show the transaction form prefilled. Listen for `mounted` to know if
-    // the form actually completed (success path) — if the user dismisses,
-    // the list stays active.
-    final beforeIds = await _transactionIdsForUser(auth);
+    final deps = AppDependencies.instance;
+    final (cats, _) = await deps.categoryRepository.getCategories(
+      householdId: list.householdId,
+    );
+    Category? expenseCat;
+    for (final c in cats) {
+      if (c.type == TransactionType.expense) {
+        expenseCat = c;
+        break;
+      }
+    }
+    expenseCat ??= cats.isNotEmpty ? cats.first : null;
+    if (expenseCat == null || !context.mounted) return;
+
+    final (accounts, _) = await deps.bankAccountRepository.getBankAccounts(
+      householdId: list.householdId,
+      viewMode: ViewMode.personal,
+      userId: auth,
+    );
+    final bankId =
+        list.bankAccountId ?? (accounts.isNotEmpty ? accounts.first.id : '');
+
+    final initial = Transaction(
+      id: '',
+      householdId: list.householdId,
+      userId: auth,
+      categoryId: expenseCat.id,
+      bankAccountId: bankId,
+      transactionSourceId: list.transactionSourceId,
+      amount: 0,
+      type: TransactionType.expense,
+      date: DateTime.now(),
+      createdAt: DateTime.now(),
+      lastUpdate: DateTime.now(),
+    );
+
+    var paid = false;
     if (!context.mounted) return;
     await showAppBottomSheet<void>(
       context: context,
-      title: 'Finish & pay',
+      title: 'Finish session',
       heightFactor: 0.92,
       expand: true,
       child: TransactionForm(
         householdId: list.householdId,
         userId: auth,
+        initialTransaction: initial,
+        onSubmitted: (tx) {
+          paid = true;
+          try {
+            context.read<ShoppingListsBloc>().add(
+                  ShoppingListsMarkPaid(listId: list.id, transactionId: tx.id),
+                );
+          } catch (_) {
+            deps.shoppingRepository.updateList(
+              list.copyWith(
+                status: ShoppingListStatus.paid,
+                transactionId: tx.id,
+                paidAt: DateTime.now(),
+                sessionEndedAt: DateTime.now(),
+              ),
+            );
+          }
+        },
       ),
     );
-    final afterIds = await _transactionIdsForUser(auth);
-    final newId = afterIds.difference(beforeIds).firstOrNull;
-    if (newId == null || !context.mounted) return;
-    // Mark paid via the index bloc if mounted; otherwise direct repo write.
-    try {
-      context.read<ShoppingListsBloc>().add(
-            ShoppingListsMarkPaid(listId: list.id, transactionId: newId),
-          );
-    } catch (_) {
-      await AppDependencies.instance.shoppingRepository.updateList(
-        list.copyWith(
-          status: ShoppingListStatus.paid,
-          transactionId: newId,
-          paidAt: DateTime.now(),
-        ),
-      );
-    }
-    if (context.mounted) context.pop();
-    // Silence unused subtotal — future revision will pre-fill the amount.
-    // ignore: unused_local_variable
-    final _ = subtotal;
+    if (paid && context.mounted) context.pop();
   }
 
-  Future<Set<String>> _transactionIdsForUser(String userId) async {
-    final (txs, _) =
-        await AppDependencies.instance.transactionRepository.getTransactions(
-      householdId: widget.list.householdId,
-      viewMode: ViewMode.household,
-      userId: userId,
-      limit: 200,
+  Future<void> _openStartFromTemplate(
+      BuildContext context, ShoppingList template) async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) return;
+    final (household, _) = await AppDependencies.instance.householdRepository
+        .getCurrentHousehold(auth.profile.id);
+    if (household == null || !context.mounted) return;
+
+    ShoppingListsBloc? listsBloc;
+    try {
+      listsBloc = context.read<ShoppingListsBloc>();
+    } catch (_) {
+      listsBloc = null;
+    }
+
+    await showAppBottomSheet<void>(
+      context: context,
+      title: 'Start from template',
+      heightFactor: 0.88,
+      expand: true,
+      child: StartShoppingSessionContent(
+        householdId: household.id,
+        userId: auth.profile.id,
+        template: template,
+        onStart: ({
+          required String name,
+          required ShoppingListScope scope,
+          String? bankAccountId,
+          String? transactionSourceId,
+          String? templateListId,
+        }) {
+          if (listsBloc != null) {
+            listsBloc.add(ShoppingListsStartSession(
+              name: name,
+              scope: scope,
+              bankAccountId: bankAccountId,
+              transactionSourceId: transactionSourceId,
+              templateListId: templateListId,
+            ));
+          } else {
+            AppDependencies.instance.shoppingRepository.startShoppingSession(
+              householdId: household.id,
+              userId: auth.profile.id,
+              name: name,
+              scope: scope,
+              bankAccountId: bankAccountId,
+              transactionSourceId: transactionSourceId,
+              templateListId: templateListId,
+            );
+          }
+          if (context.mounted) {
+            Navigator.of(context, rootNavigator: true).pop();
+          }
+        },
+      ),
     );
-    return txs.map((t) => t.id).toSet();
   }
 
   @override
@@ -152,6 +237,8 @@ class _BodyState extends State<_Body> {
         final list = loaded?.list ?? widget.list;
         final items = loaded?.items ?? const <ShoppingListItem>[];
         final immutable = list.isImmutable;
+        final isTemplate = list.kind == ShoppingListKind.template;
+        final showCancel = !immutable && !isTemplate;
 
         return CupertinoPushedRouteShell(
           backgroundColor: bg,
@@ -159,7 +246,7 @@ class _BodyState extends State<_Body> {
           borderColor: border,
           foregroundColor: fg,
           titleText: list.name,
-          trailing: immutable
+          trailing: !showCancel
               ? null
               : Padding(
                   padding: const EdgeInsets.only(right: 4),
@@ -180,11 +267,9 @@ class _BodyState extends State<_Body> {
                 child: state is ShoppingListLoading
                     ? const Center(child: CupertinoActivityIndicator())
                     : ListView.separated(
-                        padding:
-                            const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                         itemCount: items.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 8),
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
                         itemBuilder: (_, i) => _ItemRow(
                           key: ValueKey(items[i].id),
                           item: items[i],
@@ -219,12 +304,11 @@ class _BodyState extends State<_Body> {
                         children: [
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
                                 color: bg,
-                                border:
-                                    Border.all(color: border, width: 1),
+                                border: Border.all(color: border, width: 1),
                                 borderRadius:
                                     BorderRadius.circular(AppRadii.lg),
                               ),
@@ -232,10 +316,9 @@ class _BodyState extends State<_Body> {
                                 controller: _newItemCtrl,
                                 placeholder: 'Add an item…',
                                 decoration: const BoxDecoration(),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 12),
-                                style: AppFonts.body(
-                                    fontSize: 14, color: fg),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                style: AppFonts.body(fontSize: 14, color: fg),
                                 onSubmitted: _submitNewItem,
                               ),
                             ),
@@ -243,11 +326,9 @@ class _BodyState extends State<_Body> {
                           CupertinoButton(
                             padding: EdgeInsets.zero,
                             minimumSize: const Size.square(44),
-                            borderRadius:
-                                BorderRadius.circular(AppRadii.lg),
+                            borderRadius: BorderRadius.circular(AppRadii.lg),
                             color: accent,
-                            onPressed: () =>
-                                _submitNewItem(_newItemCtrl.text),
+                            onPressed: () => _submitNewItem(_newItemCtrl.text),
                             child: Plus(
                               width: 18,
                               height: 18,
@@ -256,26 +337,45 @@ class _BodyState extends State<_Body> {
                           ),
                         ],
                       ),
-                      SizedBox(
-                        height: 50,
-                        child: CupertinoButton(
-                          color: accent,
-                          borderRadius: BorderRadius.circular(AppRadii.xl),
-                          padding: EdgeInsets.zero,
-                          onPressed: items.isEmpty
-                              ? null
-                              : () => _openFinishAndPay(
-                                  context, list, 0),
-                          child: Text(
-                            'Finish & pay',
-                            style: AppFonts.body(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.white,
+                      if (isTemplate)
+                        SizedBox(
+                          height: 50,
+                          child: CupertinoButton(
+                            color: accent,
+                            borderRadius: BorderRadius.circular(AppRadii.xl),
+                            padding: EdgeInsets.zero,
+                            onPressed: () =>
+                                _openStartFromTemplate(context, list),
+                            child: Text(
+                              'Start shopping session',
+                              style: AppFonts.body(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.white,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          height: 50,
+                          child: CupertinoButton(
+                            color: accent,
+                            borderRadius: BorderRadius.circular(AppRadii.xl),
+                            padding: EdgeInsets.zero,
+                            onPressed: items.isEmpty
+                                ? null
+                                : () => _openFinishSession(context, list),
+                            child: Text(
+                              'Finish session',
+                              style: AppFonts.body(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.white,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -328,7 +428,6 @@ class _ItemRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: checked ? surface.withValues(alpha: 0.6) : surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.lg),
       ),
       child: Row(
@@ -344,7 +443,7 @@ class _ItemRow extends StatelessWidget {
               decoration: BoxDecoration(
                 color: checked ? accent : const Color(0x00000000),
                 border: Border.all(
-                  color: checked ? accent : border,
+                  color: checked ? accent : const Color(0x00000000),
                   width: 1.5,
                 ),
                 borderRadius: BorderRadius.circular(AppRadii.sm),
@@ -368,9 +467,8 @@ class _ItemRow extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: checked ? muted : fg,
               ).copyWith(
-                decoration: checked
-                    ? TextDecoration.lineThrough
-                    : TextDecoration.none,
+                decoration:
+                    checked ? TextDecoration.lineThrough : TextDecoration.none,
                 decorationColor: muted,
               ),
             ),

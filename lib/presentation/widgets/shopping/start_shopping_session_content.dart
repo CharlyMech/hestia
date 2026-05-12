@@ -9,49 +9,52 @@ import 'package:hestia/domain/entities/shopping_list.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
-/// Create / edit shopping list form for a bottom sheet or pushed route.
-class ShoppingListFormContent extends StatefulWidget {
+/// Bottom-sheet body: confirm name, scope, optional bank/source, then start a
+/// shopping session (optionally seeded from [template]).
+class StartShoppingSessionContent extends StatefulWidget {
   final String householdId;
   final String userId;
-  final ShoppingList? existing;
+  final ShoppingList? template;
+  final void Function({
+    required String name,
+    required ShoppingListScope scope,
+    String? bankAccountId,
+    String? transactionSourceId,
+    String? templateListId,
+  }) onStart;
 
-  /// When true, creates a reusable template instead of a live session.
-  final bool asTemplate;
-  final VoidCallback onSuccess;
-
-  const ShoppingListFormContent({
+  const StartShoppingSessionContent({
     super.key,
     required this.householdId,
     required this.userId,
-    this.existing,
-    this.asTemplate = false,
-    required this.onSuccess,
+    this.template,
+    required this.onStart,
   });
 
   @override
-  State<ShoppingListFormContent> createState() =>
-      ShoppingListFormContentState();
+  State<StartShoppingSessionContent> createState() =>
+      _StartShoppingSessionContentState();
 }
 
-class ShoppingListFormContentState extends State<ShoppingListFormContent> {
+class _StartShoppingSessionContentState
+    extends State<StartShoppingSessionContent> {
   late final TextEditingController _name;
   late ShoppingListScope _scope;
   String? _bankAccountId;
-  String? _transactionSourceId;
+  String? _sourceId;
   List<BankAccount> _accounts = const [];
   List<TransactionSource> _sources = const [];
-  bool _saving = false;
+  bool _busy = false;
 
   @override
   void initState() {
     super.initState();
-    final e = widget.existing;
-    _name = TextEditingController(text: e?.name ?? '');
-    _scope = e?.scope ?? ShoppingListScope.shared;
-    _bankAccountId = e?.bankAccountId;
-    _transactionSourceId = e?.transactionSourceId;
-    _loadAccounts();
-    _loadSources();
+    final t = widget.template;
+    _name = TextEditingController(text: t?.name ?? '');
+    _scope = t?.scope ?? ShoppingListScope.shared;
+    _bankAccountId = t?.bankAccountId;
+    _sourceId = t?.transactionSourceId;
+    _load();
   }
 
   @override
@@ -60,71 +63,85 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
     super.dispose();
   }
 
-  Future<void> _loadAccounts() async {
-    final (accounts, _) =
-        await AppDependencies.instance.bankAccountRepository.getBankAccounts(
+  Future<void> _load() async {
+    final deps = AppDependencies.instance;
+    final (accounts, _) = await deps.bankAccountRepository.getBankAccounts(
       householdId: widget.householdId,
       viewMode: ViewMode.household,
       userId: widget.userId,
     );
-    if (!mounted) return;
-    setState(() => _accounts = accounts);
-  }
-
-  Future<void> _loadSources() async {
-    final (sources, _) =
-        await AppDependencies.instance.transactionSourceRepository.getAll(
+    final (sources, _) = await deps.transactionSourceRepository.getAll(
       householdId: widget.householdId,
     );
     if (!mounted) return;
-    setState(() => _sources = sources);
+    setState(() {
+      _accounts = accounts;
+      _sources = sources;
+    });
   }
 
-  Future<void> submit() async {
-    final trimmed = _name.text.trim();
-    if (trimmed.isEmpty || _saving) return;
-    setState(() => _saving = true);
-    final now = DateTime.now();
-    final existing = widget.existing;
-    if (existing != null) {
-      final err = await AppDependencies.instance.shoppingRepository.updateList(
-        existing.copyWith(
-          name: trimmed,
-          scope: _scope,
-          bankAccountId: _bankAccountId,
-          transactionSourceId: _transactionSourceId,
-          lastUpdate: now,
+  void _submit() {
+    final n = _name.text.trim();
+    if (n.isEmpty || _busy) return;
+    setState(() => _busy = true);
+    widget.onStart(
+      name: n,
+      scope: _scope,
+      bankAccountId: _bankAccountId,
+      transactionSourceId: _sourceId,
+      templateListId: widget.template?.id,
+    );
+  }
+
+  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+
+  Future<void> _pickSource() async {
+    final theme = context.myTheme;
+    final surface = _c(theme.surfaceColor);
+    final fg = _c(theme.onBackgroundColor);
+    final accent = _c(theme.primaryColor);
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (_) => Container(
+        color: surface,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoButton(
+                onPressed: () {
+                  setState(() => _sourceId = null);
+                  Navigator.of(context).pop();
+                },
+                child:
+                    Text('None', style: AppFonts.body(fontSize: 15, color: fg)),
+              ),
+              for (final s in _sources)
+                CupertinoButton(
+                  onPressed: () {
+                    setState(() => _sourceId = s.id);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    s.name,
+                    style: AppFonts.body(
+                      fontSize: 15,
+                      fontWeight:
+                          s.id == _sourceId ? FontWeight.w700 : FontWeight.w400,
+                      color: s.id == _sourceId ? accent : fg,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
-      );
-      if (!mounted) return;
-      setState(() => _saving = false);
-      if (err != null) return;
-      widget.onSuccess();
-      return;
-    }
-    await AppDependencies.instance.shoppingRepository.createList(
-      ShoppingList(
-        id: '',
-        householdId: widget.householdId,
-        ownerId: widget.userId,
-        scope: _scope,
-        name: trimmed,
-        kind: widget.asTemplate
-            ? ShoppingListKind.template
-            : ShoppingListKind.session,
-        sessionStartedAt: widget.asTemplate ? null : now,
-        bankAccountId: _bankAccountId,
-        transactionSourceId: _transactionSourceId,
-        createdAt: now,
-        lastUpdate: now,
       ),
     );
-    if (!mounted) return;
-    setState(() => _saving = false);
-    widget.onSuccess();
   }
 
-  Future<void> _pickBankAccount() async {
+  Future<void> _pickBank() async {
     final theme = context.myTheme;
     final surface = _c(theme.surfaceColor);
     final fg = _c(theme.onBackgroundColor);
@@ -144,10 +161,8 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
                   setState(() => _bankAccountId = null);
                   Navigator.of(context).pop();
                 },
-                child: Text(
-                  'None',
-                  style: AppFonts.body(fontSize: 15, color: fg),
-                ),
+                child:
+                    Text('None', style: AppFonts.body(fontSize: 15, color: fg)),
               ),
               for (final a in _accounts)
                 CupertinoButton(
@@ -173,57 +188,6 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
     );
   }
 
-  Future<void> _pickSource() async {
-    final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (_) => Container(
-        color: surface,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CupertinoButton(
-                onPressed: () {
-                  setState(() => _transactionSourceId = null);
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'None',
-                  style: AppFonts.body(fontSize: 15, color: fg),
-                ),
-              ),
-              for (final s in _sources)
-                CupertinoButton(
-                  onPressed: () {
-                    setState(() => _transactionSourceId = s.id);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    s.name,
-                    style: AppFonts.body(
-                      fontSize: 15,
-                      fontWeight: s.id == _transactionSourceId
-                          ? FontWeight.w700
-                          : FontWeight.w400,
-                      color: s.id == _transactionSourceId ? accent : fg,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
@@ -232,18 +196,16 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
     final fg = _c(theme.onBackgroundColor);
     final muted = _c(theme.onInactiveColor);
     final accent = _c(theme.primaryColor);
-
-    final selectedAccount =
+    final selectedBank =
         _accounts.where((a) => a.id == _bankAccountId).firstOrNull;
-    final selectedSource =
-        _sources.where((s) => s.id == _transactionSourceId).firstOrNull;
+    final selectedSrc = _sources.where((s) => s.id == _sourceId).firstOrNull;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('NAME', style: AppFonts.sectionLabel(color: muted)),
+          Text('SESSION NAME', style: AppFonts.sectionLabel(color: muted)),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -254,9 +216,7 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
             ),
             child: CupertinoTextField(
               controller: _name,
-              placeholder: widget.asTemplate
-                  ? 'e.g. Mercadona staples'
-                  : 'e.g. Weekly groceries',
+              placeholder: 'e.g. Saturday groceries',
               decoration: const BoxDecoration(),
               padding: const EdgeInsets.symmetric(vertical: 14),
               style: AppFonts.body(fontSize: 14, color: fg),
@@ -278,10 +238,7 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
             activeFg: CupertinoColors.white,
           ),
           const SizedBox(height: 14),
-          Text(
-            'DEFAULT SOURCE (OPTIONAL)',
-            style: AppFonts.sectionLabel(color: muted),
-          ),
+          Text('SOURCE (OPTIONAL)', style: AppFonts.sectionLabel(color: muted)),
           const SizedBox(height: 6),
           GestureDetector(
             onTap: _pickSource,
@@ -293,7 +250,7 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
                 borderRadius: BorderRadius.circular(AppRadii.lg),
               ),
               child: Text(
-                selectedSource?.name ?? 'None',
+                selectedSrc?.name ?? 'Mercadona, Lidl, …',
                 style: AppFonts.body(fontSize: 14, color: fg),
               ),
             ),
@@ -305,7 +262,7 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
           ),
           const SizedBox(height: 6),
           GestureDetector(
-            onTap: _pickBankAccount,
+            onTap: _pickBank,
             behavior: HitTestBehavior.opaque,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -314,14 +271,14 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
                 borderRadius: BorderRadius.circular(AppRadii.lg),
               ),
               child: Text(
-                selectedAccount?.name ?? 'None',
+                selectedBank?.name ?? 'None',
                 style: AppFonts.body(fontSize: 14, color: fg),
               ),
             ),
           ),
           const SizedBox(height: 22),
           GestureDetector(
-            onTap: _saving ? null : submit,
+            onTap: _busy ? null : _submit,
             behavior: HitTestBehavior.opaque,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -330,16 +287,11 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
                 borderRadius: BorderRadius.circular(AppRadii.xl),
               ),
               alignment: Alignment.center,
-              child: _saving
+              child: _busy
                   ? const CupertinoActivityIndicator(
-                      color: CupertinoColors.white,
-                    )
+                      color: CupertinoColors.white)
                   : Text(
-                      widget.existing != null
-                          ? 'Save changes'
-                          : (widget.asTemplate
-                              ? 'Create template'
-                              : 'Create session'),
+                      'Start session',
                       style: AppFonts.body(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
