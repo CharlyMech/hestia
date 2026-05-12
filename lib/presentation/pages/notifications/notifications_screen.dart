@@ -6,6 +6,7 @@ import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/notification.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
@@ -34,9 +35,16 @@ class NotificationsScreen extends StatelessWidget {
   }
 }
 
-class _NotificationsBody extends StatelessWidget {
+class _NotificationsBody extends StatefulWidget {
   final String userId;
   const _NotificationsBody({required this.userId});
+
+  @override
+  State<_NotificationsBody> createState() => _NotificationsBodyState();
+}
+
+class _NotificationsBodyState extends State<_NotificationsBody> {
+  bool _readExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +65,12 @@ class _NotificationsBody extends StatelessWidget {
       titleText: 'Inbox',
       trailing: BlocBuilder<NotificationsBloc, NotificationsState>(
         builder: (context, state) {
-          final enabled =
-              state is NotificationsLoaded && state.unreadCount > 0;
+          final enabled = state is NotificationsLoaded && state.unreadCount > 0;
           return GestureDetector(
             onTap: enabled
                 ? () => context
                     .read<NotificationsBloc>()
-                    .add(NotificationsMarkAllRead(userId))
+                    .add(NotificationsMarkAllRead(widget.userId))
                 : null,
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -92,7 +99,6 @@ class _NotificationsBody extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: surface,
-                      border: Border.all(color: border, width: 1),
                       borderRadius: BorderRadius.circular(AppRadii.xl),
                     ),
                     child: Column(
@@ -110,7 +116,9 @@ class _NotificationsBody extends StatelessWidget {
                             child: Text(
                               'Notification placeholder',
                               style: AppFonts.body(
-                                  fontSize: 14, color: fg, fontWeight: FontWeight.w600),
+                                  fontSize: 14,
+                                  color: fg,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                       ],
@@ -156,22 +164,15 @@ class _NotificationsBody extends StatelessWidget {
             );
           }
 
-          final now = DateTime.now();
-          final today = <AppNotification>[];
-          final earlier = <AppNotification>[];
-          for (final n in items) {
-            if (_isSameDay(n.createdAt, now)) {
-              today.add(n);
-            } else {
-              earlier.add(n);
-            }
-          }
+          final unread =
+              items.where((n) => !n.isRead).toList(growable: false);
+          final read = items.where((n) => n.isRead).toList(growable: false);
+          final l10n = AppLocalizations.of(context);
 
           Widget card(List<AppNotification> rows) => Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
                   color: surface,
-                  border: Border.all(color: border, width: 1),
                   borderRadius: BorderRadius.circular(AppRadii.xl),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -274,16 +275,47 @@ class _NotificationsBody extends StatelessWidget {
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 22)),
-              if (today.isNotEmpty) ...[
-                SliverToBoxAdapter(child: SectionLabel('Today', color: muted)),
+              if (unread.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                    child: SectionLabel(l10n.notifications_unread, color: muted)),
                 const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                SliverToBoxAdapter(child: card(today)),
+                SliverToBoxAdapter(child: card(unread)),
                 const SliverToBoxAdapter(child: SizedBox(height: 22)),
               ],
-              if (earlier.isNotEmpty) ...[
-                SliverToBoxAdapter(child: SectionLabel('Earlier', color: muted)),
-                const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                SliverToBoxAdapter(child: card(earlier)),
+              if (read.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => setState(() => _readExpanded = !_readExpanded),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SectionLabel(
+                              l10n.notifications_read,
+                              color: muted,
+                            ),
+                          ),
+                          Text(
+                            _readExpanded
+                                ? l10n.notifications_hideRead
+                                : l10n.notifications_showRead,
+                            style: AppFonts.body(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (_readExpanded) ...[
+                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                  SliverToBoxAdapter(child: card(read)),
+                ],
               ],
             ],
           );
@@ -358,12 +390,16 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final bg =
+        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
     final surface =
         Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
-    final border = Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
-    final muted = Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+    final border =
+        Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
+    final fg =
+        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+    final muted =
+        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
       navBackground: surface,

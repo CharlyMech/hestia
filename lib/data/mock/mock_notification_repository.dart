@@ -77,7 +77,8 @@ class MockNotificationRepository implements NotificationRepository {
     required String userId,
     required String token,
     required String platform,
-  }) async => null;
+  }) async =>
+      null;
 
   @override
   Future<Failure?> removeDeviceToken(String token) async => null;
