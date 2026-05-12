@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/core/services/location_service.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/domain/entities/transfer.dart';
 import 'package:hestia/domain/repositories/transaction_repository.dart';
@@ -10,6 +11,7 @@ import 'package:hestia/presentation/blocs/transaction_form/transaction_form_stat
 class TransactionFormBloc
     extends Bloc<TransactionFormEvent, TransactionFormState> {
   final TransactionRepository _transactionRepository;
+  final LocationService _locationService;
   final String householdId;
   final String userId;
 
@@ -18,10 +20,12 @@ class TransactionFormBloc
 
   TransactionFormBloc({
     required TransactionRepository transactionRepository,
+    required LocationService locationService,
     required this.householdId,
     required this.userId,
     this.initialTransaction,
   })  : _transactionRepository = transactionRepository,
+        _locationService = locationService,
         super(_buildInitial(initialTransaction)) {
     on<TransactionFormInit>(_onInit);
     on<TransactionFormKindChanged>((e, emit) =>
@@ -42,6 +46,17 @@ class TransactionFormBloc
         (e, emit) => emit(state.copyWith(isRecurring: e.value)));
     on<TransactionFormNoteChanged>(
         (e, emit) => emit(state.copyWith(note: e.value)));
+    on<TransactionFormLocationToggled>(_onLocationToggled);
+    on<TransactionFormLocationSet>((e, emit) {
+      final err = Map<String, String>.from(state.errors)..remove('location');
+      emit(state.copyWith(
+        latitude: e.latitude,
+        longitude: e.longitude,
+        locationLoading: false,
+        errors: err,
+      ));
+    });
+    on<TransactionFormLocationFetchRequested>(_onLocationFetch);
     on<TransactionFormSubmit>(_onSubmit);
     on<TransactionFormDelete>(_onDelete);
   }
@@ -49,7 +64,7 @@ class TransactionFormBloc
   static TransactionFormState _buildInitial(Transaction? t) {
     if (t == null) return TransactionFormState.initial();
     return TransactionFormState(
-      editingId: t.id,
+      editingId: t.id.isEmpty ? null : t.id,
       kind: t.type == TransactionType.expense
           ? TransactionKind.expense
           : TransactionKind.income,
@@ -60,6 +75,9 @@ class TransactionFormBloc
       date: t.date,
       isRecurring: t.isRecurring,
       note: t.note ?? '',
+      attachLocation: t.hasLocation,
+      latitude: t.latitude,
+      longitude: t.longitude,
     );
   }
 
@@ -91,8 +109,80 @@ class TransactionFormBloc
       if (state.bankAccountId == null) {
         errors['bankAccount'] = 'Pick a bank account';
       }
+      if (state.attachLocation &&
+          (state.latitude == null || state.longitude == null)) {
+        errors['location'] =
+            'Pick a location on the map or use your current position';
+      }
     }
     return errors;
+  }
+
+  Future<void> _onLocationToggled(
+    TransactionFormLocationToggled event,
+    Emitter<TransactionFormState> emit,
+  ) async {
+    if (!event.value) {
+      final err = Map<String, String>.from(state.errors)..remove('location');
+      emit(state.copyWith(
+        attachLocation: false,
+        latitude: null,
+        longitude: null,
+        locationLoading: false,
+        errors: err,
+      ));
+      return;
+    }
+    final err = Map<String, String>.from(state.errors)..remove('location');
+    // Keep existing coordinates (map or saved) — do not auto-call GPS.
+    if (state.latitude != null && state.longitude != null) {
+      emit(state.copyWith(
+        attachLocation: true,
+        locationLoading: false,
+        errors: err,
+      ));
+      return;
+    }
+    emit(state.copyWith(
+      attachLocation: true,
+      locationLoading: true,
+      errors: err,
+    ));
+    await _fillGps(emit);
+  }
+
+  Future<void> _onLocationFetch(
+    TransactionFormLocationFetchRequested event,
+    Emitter<TransactionFormState> emit,
+  ) async {
+    emit(state.copyWith(locationLoading: true));
+    await _fillGps(emit);
+  }
+
+  Future<void> _fillGps(Emitter<TransactionFormState> emit) async {
+    final pos = await _locationService.getCurrentPosition();
+    if (pos == null) {
+      final err = Map<String, String>.from(state.errors);
+      // If map / saved coords already exist, GPS failure is non-blocking.
+      if (state.latitude == null || state.longitude == null) {
+        err['location'] =
+            'Could not use GPS. Pick a point on the map or open Settings to allow location.';
+      } else {
+        err.remove('location');
+      }
+      emit(state.copyWith(
+        locationLoading: false,
+        errors: err,
+      ));
+      return;
+    }
+    final err = Map<String, String>.from(state.errors)..remove('location');
+    emit(state.copyWith(
+      latitude: pos.latitude,
+      longitude: pos.longitude,
+      locationLoading: false,
+      errors: err,
+    ));
   }
 
   Future<void> _onSubmit(
@@ -134,7 +224,10 @@ class TransactionFormBloc
         ));
         return;
       }
-      emit(state.copyWith(status: TransactionFormStatus.success));
+      emit(state.copyWith(
+        status: TransactionFormStatus.success,
+        submittedTransaction: null,
+      ));
       return;
     }
 
@@ -154,8 +247,16 @@ class TransactionFormBloc
       note: state.note.isEmpty ? null : state.note,
       date: state.date,
       isRecurring: state.isRecurring,
+      recurringRule: initialTransaction?.recurringRule,
       createdAt: initialTransaction?.createdAt ?? now,
       lastUpdate: now,
+      latitude: state.attachLocation ? state.latitude : null,
+      longitude: state.attachLocation ? state.longitude : null,
+      categoryName: initialTransaction?.categoryName,
+      categoryColor: initialTransaction?.categoryColor,
+      bankAccountName: initialTransaction?.bankAccountName,
+      transactionSourceName: initialTransaction?.transactionSourceName,
+      userName: initialTransaction?.userName,
     );
 
     if (state.isEditing) {
@@ -166,7 +267,10 @@ class TransactionFormBloc
             status: TransactionFormStatus.error, failure: failure));
         return;
       }
-      emit(state.copyWith(status: TransactionFormStatus.success));
+      emit(state.copyWith(
+        status: TransactionFormStatus.success,
+        submittedTransaction: transaction,
+      ));
     } else {
       final (created, failure) =
           await _transactionRepository.createTransaction(transaction);
@@ -178,7 +282,10 @@ class TransactionFormBloc
         ));
         return;
       }
-      emit(state.copyWith(status: TransactionFormStatus.success));
+      emit(state.copyWith(
+        status: TransactionFormStatus.success,
+        submittedTransaction: created,
+      ));
     }
   }
 

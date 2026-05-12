@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
+import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -10,6 +12,7 @@ import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_bloc.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_event.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_state.dart';
@@ -24,12 +27,14 @@ import 'package:hestia/presentation/widgets/transactions/pickers/date_picker.dar
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Cart, CreditCard, Calendar, Refresh, EditPencil, Trash, Shop, Plus;
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 
 class TransactionForm extends StatefulWidget {
   final String householdId;
   final String userId;
   final Transaction? initialTransaction;
   final VoidCallback? onClose;
+  final void Function(Transaction transaction)? onSubmitted;
 
   const TransactionForm({
     super.key,
@@ -37,6 +42,7 @@ class TransactionForm extends StatefulWidget {
     required this.userId,
     this.initialTransaction,
     this.onClose,
+    this.onSubmitted,
   });
 
   @override
@@ -106,6 +112,7 @@ class _TransactionFormState extends State<TransactionForm> {
     return BlocProvider(
       create: (_) => TransactionFormBloc(
         transactionRepository: AppDependencies.instance.transactionRepository,
+        locationService: AppDependencies.instance.locationService,
         householdId: widget.householdId,
         userId: widget.userId,
         initialTransaction: widget.initialTransaction,
@@ -117,8 +124,10 @@ class _TransactionFormState extends State<TransactionForm> {
         bankAccounts: _bankAccounts,
         txSources: _txSources,
         loadingLookups: _loadingLookups,
-        isEditing: widget.initialTransaction != null,
+        isEditing: widget.initialTransaction != null &&
+            widget.initialTransaction!.id.isNotEmpty,
         onClose: widget.onClose,
+        onSubmitted: widget.onSubmitted,
         householdId: widget.householdId,
         userId: widget.userId,
         onReloadTransactionSources: _reloadTransactionSources,
@@ -136,6 +145,7 @@ class _FormBody extends StatelessWidget {
   final bool loadingLookups;
   final bool isEditing;
   final VoidCallback? onClose;
+  final void Function(Transaction transaction)? onSubmitted;
   final String householdId;
   final String userId;
   final Future<void> Function() onReloadTransactionSources;
@@ -149,6 +159,7 @@ class _FormBody extends StatelessWidget {
     required this.loadingLookups,
     required this.isEditing,
     required this.onClose,
+    this.onSubmitted,
     required this.householdId,
     required this.userId,
     required this.onReloadTransactionSources,
@@ -171,18 +182,22 @@ class _FormBody extends StatelessWidget {
     return BlocConsumer<TransactionFormBloc, TransactionFormState>(
       listener: (context, state) {
         if (state.status == TransactionFormStatus.success) {
+          final t = state.submittedTransaction;
+          if (t != null) {
+            onSubmitted?.call(t);
+          }
           onClose?.call();
           Navigator.of(context).maybePop();
         }
       },
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
         final bloc = context.read<TransactionFormBloc>();
         final isTransfer = state.kind == TransactionKind.transfer;
         final amountColor =
             state.kind == TransactionKind.income ? income : expense;
-        final selectedCategory = categories
-            .where((c) => c.id == state.categoryId)
-            .firstOrNull;
+        final selectedCategory =
+            categories.where((c) => c.id == state.categoryId).firstOrNull;
         final selectedAccount =
             bankAccounts.where((s) => s.id == state.bankAccountId).firstOrNull;
         final selectedTo = bankAccounts
@@ -208,8 +223,7 @@ class _FormBody extends StatelessWidget {
                 activeColor: surface2,
               ),
               const SizedBox(height: 24),
-              Text('AMOUNT · EUR',
-                  style: AppFonts.sectionLabel(color: muted)),
+              Text('AMOUNT · EUR', style: AppFonts.sectionLabel(color: muted)),
               const SizedBox(height: 6),
               CupertinoTextField(
                 controller: amountCtrl,
@@ -259,8 +273,7 @@ class _FormBody extends StatelessWidget {
                   ),
                 if (!isTransfer) const SizedBox(height: 8),
                 _PickerTile(
-                  icon:
-                      CreditCard(width: 18, height: 18, color: tints[2]),
+                  icon: CreditCard(width: 18, height: 18, color: tints[2]),
                   iconColor: tints[2],
                   label: isTransfer ? 'From account' : 'Bank account',
                   value: selectedAccount?.name ?? 'Select',
@@ -273,13 +286,13 @@ class _FormBody extends StatelessWidget {
                   border: border,
                   fg: fg,
                   muted: muted,
-                  onTap: () => _openBankAccountPicker(context, bloc, state, false),
+                  onTap: () =>
+                      _openBankAccountPicker(context, bloc, state, false),
                 ),
                 if (isTransfer) ...[
                   const SizedBox(height: 8),
                   _PickerTile(
-                    icon: CreditCard(
-                        width: 18, height: 18, color: tints[3]),
+                    icon: CreditCard(width: 18, height: 18, color: tints[3]),
                     iconColor: tints[3],
                     label: 'To account',
                     value: selectedTo?.name ?? 'Select',
@@ -365,8 +378,7 @@ class _FormBody extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
-                        child: EditPencil(
-                            width: 16, height: 16, color: muted),
+                        child: EditPencil(width: 16, height: 16, color: muted),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -385,6 +397,94 @@ class _FormBody extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                if (!isTransfer) ...[
+                  const SizedBox(height: 8),
+                  _ToggleTile(
+                    icon: Plus(width: 18, height: 18, color: tints[3]),
+                    iconColor: tints[3],
+                    label: 'Attach location',
+                    value: state.attachLocation ? 'On' : 'Off',
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                    switchOn: state.attachLocation,
+                    onChanged: (v) =>
+                        bloc.add(TransactionFormLocationToggled(v)),
+                  ),
+                  if (state.attachLocation) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CupertinoButton(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            color: surface,
+                            onPressed: state.locationLoading
+                                ? null
+                                : () => bloc.add(
+                                      const TransactionFormLocationFetchRequested(),
+                                    ),
+                            child: state.locationLoading
+                                ? const CupertinoActivityIndicator()
+                                : Text(
+                                    'Use GPS',
+                                    style: AppFonts.body(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: accent),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: CupertinoButton(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            color: surface,
+                            onPressed: state.locationLoading
+                                ? null
+                                : () => _openLocationMap(context, bloc, state),
+                            child: Text(
+                              'Map',
+                              style: AppFonts.body(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: accent),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (state.latitude != null && state.longitude != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          '${state.latitude!.toStringAsFixed(5)}, ${state.longitude!.toStringAsFixed(5)}',
+                          style: AppFonts.body(fontSize: 12, color: muted),
+                        ),
+                      ),
+                  ],
+                ],
+              ],
+              if (state.errors['location'] != null) ...[
+                _ErrorLine(text: state.errors['location']!, color: expense),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: CupertinoButton(
+                    padding: const EdgeInsets.only(top: 4, bottom: 4),
+                    onPressed: () => AppDependencies.instance.locationService
+                        .openSystemAppSettings(),
+                    child: Text(
+                      l10n.settings_locationOpenSettings,
+                      style: AppFonts.body(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: accent,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -407,8 +507,7 @@ class _FormBody extends StatelessWidget {
                                   TransactionFormStatus.submitting
                               ? null
                               : () => bloc.add(const TransactionFormDelete()),
-                          child:
-                              Trash(width: 18, height: 18, color: expense),
+                          child: Trash(width: 18, height: 18, color: expense),
                         ),
                       ),
                     ),
@@ -419,12 +518,11 @@ class _FormBody extends StatelessWidget {
                         color: accent,
                         borderRadius: BorderRadius.circular(AppRadii.xl),
                         padding: EdgeInsets.zero,
-                        onPressed: state.status ==
-                                TransactionFormStatus.submitting
-                            ? null
-                            : () => bloc.add(const TransactionFormSubmit()),
-                        child: state.status ==
-                                TransactionFormStatus.submitting
+                        onPressed:
+                            state.status == TransactionFormStatus.submitting
+                                ? null
+                                : () => bloc.add(const TransactionFormSubmit()),
+                        child: state.status == TransactionFormStatus.submitting
                             ? const CupertinoActivityIndicator()
                             : Text(
                                 isEditing ? 'Update' : 'Save transaction',
@@ -447,8 +545,27 @@ class _FormBody extends StatelessWidget {
     );
   }
 
-  void _openCategoryPicker(BuildContext context,
-      TransactionFormBloc bloc, TransactionFormState state) {
+  Future<void> _openLocationMap(
+    BuildContext context,
+    TransactionFormBloc bloc,
+    TransactionFormState state,
+  ) async {
+    final initial = (state.latitude != null && state.longitude != null)
+        ? LatLng(state.latitude!, state.longitude!)
+        : const LatLng(40.4168, -3.7038);
+    final result = await context.push<LatLng>(
+      AppRoutes.transactionMapPicker,
+      extra: initial,
+    );
+    if (!context.mounted || result == null) return;
+    bloc.add(TransactionFormLocationSet(
+      latitude: result.latitude,
+      longitude: result.longitude,
+    ));
+  }
+
+  void _openCategoryPicker(BuildContext context, TransactionFormBloc bloc,
+      TransactionFormState state) {
     final type = state.kind == TransactionKind.income
         ? TransactionType.income
         : TransactionType.expense;
@@ -717,7 +834,8 @@ class _PickerTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: surface,
           border: Border.all(
-              color: error != null ? errorColor : border, width: 1),
+              color: error != null ? errorColor : const Color(0x00000000),
+              width: 1),
           borderRadius: BorderRadius.circular(AppRadii.xl),
         ),
         child: Row(
@@ -747,8 +865,7 @@ class _PickerTile extends StatelessWidget {
                   if (error != null) ...[
                     const SizedBox(height: 3),
                     Text(error!,
-                        style:
-                            AppFonts.body(fontSize: 11, color: errorColor)),
+                        style: AppFonts.body(fontSize: 11, color: errorColor)),
                   ],
                 ],
               ),
@@ -794,7 +911,6 @@ class _ToggleTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.xl),
       ),
       child: Row(
@@ -811,9 +927,7 @@ class _ToggleTile extends StatelessWidget {
                 const SizedBox(height: 1),
                 Text(value,
                     style: AppFonts.body(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: fg)),
+                        fontSize: 14, fontWeight: FontWeight.w500, color: fg)),
               ],
             ),
           ),

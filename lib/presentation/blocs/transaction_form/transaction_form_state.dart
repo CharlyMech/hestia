@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hestia/core/error/failures.dart';
+import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_event.dart';
 
 enum TransactionFormStatus { idle, loading, submitting, success, error }
@@ -11,6 +12,7 @@ class TransactionFormState extends Equatable {
   final String amount;
   final String? categoryId;
   final String? bankAccountId;
+
   /// Transfer destination bank account.
   final String? toBankAccountId;
   final String? transactionSourceId;
@@ -19,6 +21,15 @@ class TransactionFormState extends Equatable {
   final String note;
   final Map<String, String> errors;
   final Failure? failure;
+
+  /// Set when a create/update succeeds, before the sheet pops.
+  final Transaction? submittedTransaction;
+
+  /// When true, [latitude]/[longitude] are persisted on the transaction.
+  final bool attachLocation;
+  final double? latitude;
+  final double? longitude;
+  final bool locationLoading;
 
   const TransactionFormState({
     this.status = TransactionFormStatus.idle,
@@ -34,10 +45,17 @@ class TransactionFormState extends Equatable {
     this.note = '',
     this.errors = const {},
     this.failure,
+    this.submittedTransaction,
+    this.attachLocation = false,
+    this.latitude,
+    this.longitude,
+    this.locationLoading = false,
   });
 
-  factory TransactionFormState.initial() =>
-      TransactionFormState(date: DateTime.now());
+  factory TransactionFormState.initial() => TransactionFormState(
+        date: DateTime.now(),
+        submittedTransaction: null,
+      );
 
   bool get isEditing => editingId != null;
 
@@ -61,6 +79,11 @@ class TransactionFormState extends Equatable {
     String? note,
     Map<String, String>? errors,
     Object? failure = _unset,
+    Object? submittedTransaction = _unset,
+    bool? attachLocation,
+    Object? latitude = _unset,
+    Object? longitude = _unset,
+    bool? locationLoading,
   }) {
     return TransactionFormState(
       status: status ?? this.status,
@@ -83,6 +106,13 @@ class TransactionFormState extends Equatable {
       note: note ?? this.note,
       errors: errors ?? this.errors,
       failure: failure == _unset ? this.failure : failure as Failure?,
+      submittedTransaction: submittedTransaction == _unset
+          ? this.submittedTransaction
+          : submittedTransaction as Transaction?,
+      attachLocation: attachLocation ?? this.attachLocation,
+      latitude: latitude == _unset ? this.latitude : latitude as double?,
+      longitude: longitude == _unset ? this.longitude : longitude as double?,
+      locationLoading: locationLoading ?? this.locationLoading,
     );
   }
 
@@ -101,6 +131,11 @@ class TransactionFormState extends Equatable {
         note,
         errors,
         failure,
+        submittedTransaction,
+        attachLocation,
+        latitude,
+        longitude,
+        locationLoading,
       ];
 }
 

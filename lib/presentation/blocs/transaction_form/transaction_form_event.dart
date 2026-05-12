@@ -95,3 +95,22 @@ class TransactionFormSubmit extends TransactionFormEvent {
 class TransactionFormDelete extends TransactionFormEvent {
   const TransactionFormDelete();
 }
+
+class TransactionFormLocationToggled extends TransactionFormEvent {
+  final bool value;
+  const TransactionFormLocationToggled(this.value);
+  @override
+  List<Object?> get props => [value];
+}
+
+class TransactionFormLocationSet extends TransactionFormEvent {
+  final double? latitude;
+  final double? longitude;
+  const TransactionFormLocationSet({this.latitude, this.longitude});
+  @override
+  List<Object?> get props => [latitude, longitude];
+}
+
+class TransactionFormLocationFetchRequested extends TransactionFormEvent {
+  const TransactionFormLocationFetchRequested();
+}

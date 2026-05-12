@@ -13,6 +13,8 @@ class TransactionDto {
   final Map<String, dynamic>? recurringRule;
   final int createdAt;
   final int lastUpdate;
+  final double? latitude;
+  final double? longitude;
 
   // Joined relations (nullable — only present on select with joins)
   final Map<String, dynamic>? categories;
@@ -35,6 +37,8 @@ class TransactionDto {
     this.recurringRule,
     required this.createdAt,
     required this.lastUpdate,
+    this.latitude,
+    this.longitude,
     this.categories,
     this.bankAccounts,
     this.transactionSources,
@@ -57,6 +61,8 @@ class TransactionDto {
       recurringRule: json['recurring_rule'] as Map<String, dynamic>?,
       createdAt: json['created_at'] as int,
       lastUpdate: json['last_update'] as int,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       categories: json['categories'] as Map<String, dynamic>?,
       bankAccounts: json['money_sources'] as Map<String, dynamic>?,
       transactionSources: json['transaction_sources'] as Map<String, dynamic>?,
@@ -64,30 +70,39 @@ class TransactionDto {
     );
   }
 
-  Map<String, dynamic> toInsertJson() => {
-        'household_id': householdId,
-        'user_id': userId,
-        'category_id': categoryId,
-        'money_source_id': bankAccountId,
-        'transaction_source_id': transactionSourceId,
-        'amount': amount,
-        'type': type,
-        'note': note,
-        'date': date,
-        'is_recurring': isRecurring,
-        'recurring_rule': recurringRule,
-      };
+  Map<String, dynamic> toInsertJson() {
+    final m = <String, dynamic>{
+      'household_id': householdId,
+      'user_id': userId,
+      'category_id': categoryId,
+      'money_source_id': bankAccountId,
+      'transaction_source_id': transactionSourceId,
+      'amount': amount,
+      'type': type,
+      'note': note,
+      'date': date,
+      'is_recurring': isRecurring,
+      'recurring_rule': recurringRule,
+    };
+    if (latitude != null) m['latitude'] = latitude;
+    if (longitude != null) m['longitude'] = longitude;
+    return m;
+  }
 
-  Map<String, dynamic> toUpdateJson() => {
-        'category_id': categoryId,
-        'money_source_id': bankAccountId,
-        'transaction_source_id': transactionSourceId,
-        'amount': amount,
-        'type': type,
-        'note': note,
-        'date': date,
-        'is_recurring': isRecurring,
-        'recurring_rule': recurringRule,
-        'last_update': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      };
+  Map<String, dynamic> toUpdateJson() {
+    return {
+      'category_id': categoryId,
+      'money_source_id': bankAccountId,
+      'transaction_source_id': transactionSourceId,
+      'amount': amount,
+      'type': type,
+      'note': note,
+      'date': date,
+      'is_recurring': isRecurring,
+      'recurring_rule': recurringRule,
+      'last_update': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+  }
 }

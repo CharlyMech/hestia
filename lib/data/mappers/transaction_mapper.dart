@@ -22,6 +22,8 @@ abstract final class TransactionMapper {
       recurringRule: dto.recurringRule,
       createdAt: dto.createdAt.fromUnix,
       lastUpdate: dto.lastUpdate.fromUnix,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
       categoryName: dto.categories?['name'] as String?,
       categoryColor: dto.categories?['color'] as String?,
       bankAccountName: dto.bankAccounts?['name'] as String?,
@@ -48,6 +50,8 @@ abstract final class TransactionMapper {
       recurringRule: entity.recurringRule,
       createdAt: entity.createdAt.toUnix,
       lastUpdate: entity.lastUpdate.toUnix,
+      latitude: entity.latitude,
+      longitude: entity.longitude,
     );
   }
 
