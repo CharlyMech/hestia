@@ -31,8 +31,8 @@ class _CreateUserFormState extends State<CreateUserForm> {
       _submitting = true;
       _error = null;
     });
-    final (profile, failure) = await AppDependencies.instance.authRepository
-        .createUser(
+    final (profile, failure) =
+        await AppDependencies.instance.authRepository.createUser(
       email: _emailCtrl.text.trim(),
       password: _passwordCtrl.text,
       displayName: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),

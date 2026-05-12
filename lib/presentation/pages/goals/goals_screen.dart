@@ -84,7 +84,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     height: 140,
                     decoration: BoxDecoration(
                       color: surface,
-                      border: Border.all(color: border),
                       borderRadius: BorderRadius.circular(AppRadii.xl),
                     ),
                   ),
@@ -138,8 +137,8 @@ class _BodyState extends State<_Body> {
   }
 
   Future<void> _loadMoneySources() async {
-    final (sources, _) = await AppDependencies.instance.bankAccountRepository
-        .getBankAccounts(
+    final (sources, _) =
+        await AppDependencies.instance.bankAccountRepository.getBankAccounts(
       householdId: widget.householdId,
       viewMode: ViewMode.household,
       userId: widget.userId,
@@ -327,8 +326,7 @@ class _BodyState extends State<_Body> {
                 )
               else
                 SliverPadding(
-                  padding:
-                      const EdgeInsets.fromLTRB(20, 0, 20, 32),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
                   sliver: SliverList.separated(
                     itemCount: filtered.length,
                     itemBuilder: (_, i) {
@@ -415,7 +413,6 @@ class _SummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.xl),
       ),
       child: Row(
@@ -506,7 +503,8 @@ class _Pill extends StatelessWidget {
         decoration: BoxDecoration(
           color: active ? surface : const Color(0x00000000),
           border: Border.all(
-            color: active ? muted.withValues(alpha: 0.4) : border,
+            color:
+                active ? muted.withValues(alpha: 0.4) : const Color(0x00000000),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(999),

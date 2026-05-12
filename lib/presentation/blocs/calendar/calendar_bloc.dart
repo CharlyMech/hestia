@@ -232,9 +232,8 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         _transactionRepo = transactionRepository,
         super(CalendarState(
           selectedDate: _stripTime(initialDate ?? DateTime.now()),
-          visibleMonth:
-              DateTime(initialDate?.year ?? DateTime.now().year,
-                  initialDate?.month ?? DateTime.now().month),
+          visibleMonth: DateTime(initialDate?.year ?? DateTime.now().year,
+              initialDate?.month ?? DateTime.now().month),
         )) {
     on<CalendarLoad>(_onLoad);
     on<CalendarSelectDate>(_onSelectDate);

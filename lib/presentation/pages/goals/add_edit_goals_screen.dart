@@ -73,155 +73,157 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         padding: const EdgeInsets.fromLTRB(0, 12, 0, 32),
         children: [
           // Preview card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: surface,
-                  border: Border.all(color: border, width: 1),
-                  borderRadius: BorderRadius.circular(AppRadii.xl),
-                ),
-                child: Row(
-                  children: [
-                    ProgressRing(
-                      value: 0,
-                      size: 48,
-                      stroke: 4,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadii.xl),
+              ),
+              child: Row(
+                children: [
+                  ProgressRing(
+                    value: 0,
+                    size: 48,
+                    stroke: 4,
+                    color: selectedColor,
+                    trackColor: border,
+                    child: CatTile(
+                      icon: Sparks(width: 14, height: 14, color: selectedColor),
                       color: selectedColor,
-                      trackColor: border,
-                      child: CatTile(
-                        icon:
-                            Sparks(width: 14, height: 14, color: selectedColor),
-                        color: selectedColor,
-                        size: 24,
-                        radius: 6,
+                      size: 24,
+                      radius: 6,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Summer trip · Sicily',
+                          style: AppFonts.body(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: fg,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '0 / 3,000€ · 0% complete',
+                          style: AppFonts.body(fontSize: 11, color: muted),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
+          // Form
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                FormFieldTile(
+                  label: 'Name',
+                  value: 'Summer trip · Sicily',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+                const SizedBox(height: 12),
+                _LabeledSegmented(
+                  label: 'Scope',
+                  options: const ['Personal', 'Household'],
+                  active: _scope,
+                  onChanged: (i) => setState(() => _scope = i),
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  activeColor: accent,
+                  activeFg: CupertinoColors.white,
+                ),
+                const SizedBox(height: 12),
+                _LabeledSegmented(
+                  label: 'Goal type',
+                  options: const [
+                    'Reach target',
+                    'Save monthly',
+                    'Reduce spend'
+                  ],
+                  active: _type,
+                  onChanged: (i) => setState(() => _type = i),
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FormFieldTile(
+                        label: 'Target amount',
+                        value: '3,000',
+                        trailing: 'EUR',
+                        surface: surface,
+                        border: border,
+                        fg: fg,
+                        muted: muted,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Summer trip · Sicily',
-                            style: AppFonts.body(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: fg,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '0 / 3,000€ · 0% complete',
-                            style: AppFonts.body(fontSize: 11, color: muted),
-                          ),
-                        ],
+                      child: FormFieldTile(
+                        label: 'Deadline',
+                        value: '31 Aug 2026',
+                        surface: surface,
+                        border: border,
+                        fg: fg,
+                        muted: muted,
                       ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                FormFieldTile(
+                  label: 'Linked source',
+                  value: 'Household Savings · BBVA',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 22),
+          const SizedBox(height: 22),
 
-            // Form
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  FormFieldTile(
-                    label: 'Name',
-                    value: 'Summer trip · Sicily',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                  ),
-                  const SizedBox(height: 12),
-                  _LabeledSegmented(
-                    label: 'Scope',
-                    options: const ['Personal', 'Household'],
-                    active: _scope,
-                    onChanged: (i) => setState(() => _scope = i),
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    activeColor: accent,
-                    activeFg: CupertinoColors.white,
-                  ),
-                  const SizedBox(height: 12),
-                  _LabeledSegmented(
-                    label: 'Goal type',
-                    options: const ['Reach target', 'Save monthly', 'Reduce spend'],
-                    active: _type,
-                    onChanged: (i) => setState(() => _type = i),
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FormFieldTile(
-                          label: 'Target amount',
-                          value: '3,000',
-                          trailing: 'EUR',
-                          surface: surface,
-                          border: border,
-                          fg: fg,
-                          muted: muted,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FormFieldTile(
-                          label: 'Deadline',
-                          value: '31 Aug 2026',
-                          surface: surface,
-                          border: border,
-                          fg: fg,
-                          muted: muted,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  FormFieldTile(
-                    label: 'Linked source',
-                    value: 'Household Savings · BBVA',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                  ),
-                ],
-              ),
+          // Color picker
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('COLOR', style: AppFonts.sectionLabel(color: muted)),
+                const SizedBox(height: 10),
+                ColorSwatchRow(
+                  colors: swatches,
+                  selected: _color,
+                  onSelected: (i) => setState(() => _color = i),
+                  bg: bg,
+                ),
+              ],
             ),
-
-            const SizedBox(height: 22),
-
-            // Color picker
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('COLOR', style: AppFonts.sectionLabel(color: muted)),
-                  const SizedBox(height: 10),
-                  ColorSwatchRow(
-                    colors: swatches,
-                    selected: _color,
-                    onSelected: (i) => setState(() => _color = i),
-                    bg: bg,
-                  ),
-                ],
-              ),
-            ),
+          ),
         ],
       ),
     );
@@ -260,8 +262,7 @@ class _LabeledSegmented extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(),
-            style: AppFonts.sectionLabel(color: muted)),
+        Text(label.toUpperCase(), style: AppFonts.sectionLabel(color: muted)),
         const SizedBox(height: 6),
         SegmentedControl(
           options: options,

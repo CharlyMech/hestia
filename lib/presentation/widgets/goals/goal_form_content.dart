@@ -83,7 +83,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
 
   Future<void> _pickDeadline(BuildContext context) async {
     final theme = context.myTheme;
-    final surface = Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+    final surface =
+        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
     DateTime tmp = _deadline ?? DateTime.now().add(const Duration(days: 90));
     await showCupertinoModalPopup<void>(
       context: context,
@@ -121,9 +122,12 @@ class _GoalFormContentState extends State<GoalFormContent> {
 
   Future<void> _pickMoneySource(BuildContext context) async {
     final theme = context.myTheme;
-    final surface = Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
-    final accent = Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+    final surface =
+        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+    final fg =
+        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+    final accent =
+        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
@@ -237,16 +241,20 @@ class _GoalFormContentState extends State<GoalFormContent> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final surface = Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
-    final border = Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
-    final muted = Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
-    final accent = Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+    final surface =
+        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+    final border =
+        Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
+    final fg =
+        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+    final muted =
+        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+    final accent =
+        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
     final swatches = _swatches(theme);
 
-    final selectedSource = widget.bankAccounts
-        .where((ms) => ms.id == _moneySourceId)
-        .firstOrNull;
+    final selectedSource =
+        widget.bankAccounts.where((ms) => ms.id == _moneySourceId).firstOrNull;
     final isEdit = widget.existing != null;
 
     return Padding(
@@ -267,8 +275,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
           SegmentedControl(
             options: const ['Personal', 'Household'],
             active: _scope == GoalScope.personal ? 0 : 1,
-            onChanged: (i) => setState(
-                () => _scope = i == 0 ? GoalScope.personal : GoalScope.household),
+            onChanged: (i) => setState(() =>
+                _scope = i == 0 ? GoalScope.personal : GoalScope.household),
             surface: surface,
             border: border,
             fg: fg,
@@ -302,7 +310,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
             _input(
               controller: _target,
               placeholder: '0',
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               surface: surface,
               border: border,
               fg: fg,
@@ -315,7 +324,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
             _input(
               controller: _monthly,
               placeholder: '0',
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               surface: surface,
               border: border,
               fg: fg,
@@ -331,7 +341,6 @@ class _GoalFormContentState extends State<GoalFormContent> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: BoxDecoration(
                 color: surface,
-                border: Border.all(color: border, width: 1),
                 borderRadius: BorderRadius.circular(AppRadii.lg),
               ),
               child: Text(
@@ -352,7 +361,6 @@ class _GoalFormContentState extends State<GoalFormContent> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
               decoration: BoxDecoration(
                 color: surface,
-                border: Border.all(color: border, width: 1),
                 borderRadius: BorderRadius.circular(AppRadii.lg),
               ),
               child: Text(
@@ -382,8 +390,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
                       style: AppFonts.body(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(
-                            int.parse(theme.colorRed.replaceFirst('#', '0xff'))),
+                        color: Color(int.parse(
+                            theme.colorRed.replaceFirst('#', '0xff'))),
                       ),
                     ),
                   ),
@@ -446,8 +454,18 @@ class _GoalFormContentState extends State<GoalFormContent> {
 
   String _monthName(int m) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[m - 1];
   }

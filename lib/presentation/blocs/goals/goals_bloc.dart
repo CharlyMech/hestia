@@ -73,8 +73,7 @@ class GoalsLoaded extends GoalsState {
       goals.where((g) => g.bankAccountId == bankAccountId).toList();
 
   double get totalCurrent => goals.fold(0, (s, g) => s + g.currentAmount);
-  double get totalTarget =>
-      goals.fold(0, (s, g) => s + (g.targetAmount ?? 0));
+  double get totalTarget => goals.fold(0, (s, g) => s + (g.targetAmount ?? 0));
   double get overallProgress {
     if (totalTarget == 0) return 0;
     return (totalCurrent / totalTarget).clamp(0.0, 1.0);

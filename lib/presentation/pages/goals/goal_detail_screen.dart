@@ -52,212 +52,209 @@ class GoalDetailScreen extends StatelessWidget {
       child: Stack(
         children: [
           ListView(
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 140),
-              children: [
-                // Hero
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      Row(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 140),
+            children: [
+              // Hero
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CatTile(
+                          icon: Sparks(width: 16, height: 16, color: accent),
+                          color: accent,
+                          size: 28,
+                          radius: 8,
+                        ),
+                        const SizedBox(width: 8),
+                        const ScopePill(kind: ScopeKind.shared),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Summer trip · Sicily',
+                      textAlign: TextAlign.center,
+                      style: AppFonts.heading(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Reach target · by August 2026',
+                      style: AppFonts.body(fontSize: 12, color: muted),
+                    ),
+                    const SizedBox(height: 22),
+                    ProgressRing(
+                      value: 0.62,
+                      size: 148,
+                      stroke: 10,
+                      color: accent,
+                      trackColor: border,
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CatTile(
-                            icon: Sparks(width: 16, height: 16, color: accent),
-                            color: accent,
-                            size: 28,
-                            radius: 8,
+                          Text(
+                            'SAVED',
+                            style: AppFonts.sectionLabel(color: muted),
                           ),
-                          const SizedBox(width: 8),
-                          const ScopePill(kind: ScopeKind.shared),
+                          const SizedBox(height: 4),
+                          Text(
+                            '1,860€',
+                            style: AppFonts.numeric(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: fg,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'of 3,000€',
+                            style: AppFonts.numeric(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: muted,
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Summer trip · Sicily',
-                        textAlign: TextAlign.center,
-                        style: AppFonts.heading(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 22),
+
+              // Stat row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    _StatCell(
+                      label: 'Remaining',
+                      value: '1,140€',
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                    ),
+                    const SizedBox(width: 10),
+                    _StatCell(
+                      label: 'Monthly need',
+                      value: '285€',
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                    ),
+                    const SizedBox(width: 10),
+                    _StatCell(
+                      label: 'Days left',
+                      value: '120',
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 22),
+
+              // Linked source
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SectionLabel('Linked source', color: muted),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
+                  ),
+                  child: Row(
+                    children: [
+                      CatTile(
+                        icon: PiggyBank(
+                          width: 18,
+                          height: 18,
+                          color: tints[3],
                         ),
+                        color: tints[3],
+                        size: 36,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Reach target · by August 2026',
-                        style: AppFonts.body(fontSize: 12, color: muted),
-                      ),
-                      const SizedBox(height: 22),
-                      ProgressRing(
-                        value: 0.62,
-                        size: 148,
-                        stroke: 10,
-                        color: accent,
-                        trackColor: border,
+                      const SizedBox(width: 12),
+                      Expanded(
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'SAVED',
-                              style: AppFonts.sectionLabel(color: muted),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '1,860€',
-                              style: AppFonts.numeric(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
+                              'Household Savings',
+                              style: AppFonts.body(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                                 color: fg,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'of 3,000€',
-                              style: AppFonts.numeric(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w400,
-                                color: muted,
-                              ),
+                              'BBVA · 12,400€',
+                              style: AppFonts.body(fontSize: 12, color: muted),
                             ),
                           ],
                         ),
                       ),
+                      ChevronIcon(color: muted),
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 22),
+              const SizedBox(height: 22),
 
-                // Stat row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
+              // Contributions
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SectionLabel(
+                  'Contributions',
+                  action: 'Add',
+                  color: muted,
+                  actionColor: accent,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
                     children: [
-                      _StatCell(
-                        label: 'Remaining',
-                        value: '1,140€',
-                        surface: surface,
-                        border: border,
-                        fg: fg,
-                        muted: muted,
-                      ),
-                      const SizedBox(width: 10),
-                      _StatCell(
-                        label: 'Monthly need',
-                        value: '285€',
-                        surface: surface,
-                        border: border,
-                        fg: fg,
-                        muted: muted,
-                      ),
-                      const SizedBox(width: 10),
-                      _StatCell(
-                        label: 'Days left',
-                        value: '120',
-                        surface: surface,
-                        border: border,
-                        fg: fg,
-                        muted: muted,
-                      ),
+                      for (var i = 0; i < contribs.length; i++)
+                        _ContribRow(
+                          c: contribs[i],
+                          divider: i < contribs.length - 1,
+                          border: border,
+                          fg: fg,
+                          muted: muted,
+                          income: income,
+                        ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 22),
-
-                // Linked source
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SectionLabel('Linked source', color: muted),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: surface,
-                      border: Border.all(color: border, width: 1),
-                      borderRadius: BorderRadius.circular(AppRadii.xl),
-                    ),
-                    child: Row(
-                      children: [
-                        CatTile(
-                          icon: PiggyBank(
-                            width: 18,
-                            height: 18,
-                            color: tints[3],
-                          ),
-                          color: tints[3],
-                          size: 36,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Household Savings',
-                                style: AppFonts.body(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: fg,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'BBVA · 12,400€',
-                                style:
-                                    AppFonts.body(fontSize: 12, color: muted),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ChevronIcon(color: muted),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 22),
-
-                // Contributions
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SectionLabel(
-                    'Contributions',
-                    action: 'Add',
-                    color: muted,
-                    actionColor: accent,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: surface,
-                      border: Border.all(color: border, width: 1),
-                      borderRadius: BorderRadius.circular(AppRadii.xl),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < contribs.length; i++)
-                          _ContribRow(
-                            c: contribs[i],
-                            divider: i < contribs.length - 1,
-                            border: border,
-                            fg: fg,
-                            muted: muted,
-                            income: income,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
 
           // Bottom CTA with gradient mask
           Positioned(
@@ -343,7 +340,6 @@ class _StatCell extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           color: surface,
-          border: Border.all(color: border, width: 1),
           borderRadius: BorderRadius.circular(AppRadii.xl),
         ),
         child: Column(

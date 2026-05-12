@@ -39,8 +39,8 @@ class _AddEditMoneySourceScreenState extends State<AddEditBankAccountScreen> {
     final preferredCurrency =
         (context.watch<AuthBloc>().state is AuthAuthenticated)
             ? (context.watch<AuthBloc>().state as AuthAuthenticated)
-                    .profile
-                    .preferredCurrency
+                .profile
+                .preferredCurrency
             : 'EUR';
 
     final swatches = <Color>[
@@ -92,190 +92,191 @@ class _AddEditMoneySourceScreenState extends State<AddEditBankAccountScreen> {
         ),
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
         children: [
-            // Preview card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: surface,
-                  border: Border.all(color: border, width: 1),
-                  borderRadius: BorderRadius.circular(AppRadii.xl),
-                ),
-                child: Row(
-                  children: [
-                    CatTile(
-                      icon: selectedIcon,
-                      color: selectedColor,
-                      size: 48,
-                      radius: 12,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Revolut',
-                            style: AppFonts.body(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: fg,
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            'Checking · $preferredCurrency',
-                            style: AppFonts.body(fontSize: 12, color: muted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      '0.00€',
-                      style: AppFonts.numeric(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: fg,
-                      ),
-                    ),
-                  ],
-                ),
+          // Preview card
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadii.xl),
               ),
-            ),
-
-            const SizedBox(height: 22),
-
-            // Form
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
+              child: Row(
                 children: [
-                  FormFieldTile(
-                    label: 'Name',
-                    value: 'Revolut',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
+                  CatTile(
+                    icon: selectedIcon,
+                    color: selectedColor,
+                    size: 48,
+                    radius: 12,
                   ),
-                  const SizedBox(height: 12),
-                  FormFieldTile(
-                    label: 'Institution',
-                    value: 'Revolut Ltd.',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Revolut',
+                          style: AppFonts.body(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: fg,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          'Checking · $preferredCurrency',
+                          style: AppFonts.body(fontSize: 12, color: muted),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _LabeledSegmented(
-                    label: 'Type',
-                    options: const [
-                      'Checking',
-                      'Savings',
-                      'Credit',
-                      'Cash',
-                      'Investment'
-                    ],
-                    active: _typeIdx,
-                    onChanged: (i) => setState(() => _typeIdx = i),
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                  ),
-                  const SizedBox(height: 12),
-                  _LabeledSegmented(
-                    label: 'Ownership',
-                    options: const ['Personal', 'Shared'],
-                    active: _ownerIdx,
-                    onChanged: (i) => setState(() => _ownerIdx = i),
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    activeColor: accent,
-                    activeFg: CupertinoColors.white,
-                  ),
-                  const SizedBox(height: 12),
-                  FormFieldTile(
-                    label: 'Initial balance',
-                    value: '0.00 $preferredCurrency',
-                    trailing: preferredCurrency,
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
+                  Text(
+                    '0.00€',
+                    style: AppFonts.numeric(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: fg,
+                    ),
                   ),
                 ],
               ),
             ),
+          ),
 
-            const SizedBox(height: 22),
+          const SizedBox(height: 22),
 
-            // Icon picker
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('ICON', style: AppFonts.sectionLabel(color: muted)),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      for (var i = 0; i < iconCtors.length; i++)
-                        GestureDetector(
-                          onTap: () => setState(() => _iconIdx = i),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
+          // Form
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                FormFieldTile(
+                  label: 'Name',
+                  value: 'Revolut',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+                const SizedBox(height: 12),
+                FormFieldTile(
+                  label: 'Institution',
+                  value: 'Revolut Ltd.',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+                const SizedBox(height: 12),
+                _LabeledSegmented(
+                  label: 'Type',
+                  options: const [
+                    'Checking',
+                    'Savings',
+                    'Credit',
+                    'Cash',
+                    'Investment'
+                  ],
+                  active: _typeIdx,
+                  onChanged: (i) => setState(() => _typeIdx = i),
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+                const SizedBox(height: 12),
+                _LabeledSegmented(
+                  label: 'Ownership',
+                  options: const ['Personal', 'Shared'],
+                  active: _ownerIdx,
+                  onChanged: (i) => setState(() => _ownerIdx = i),
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  activeColor: accent,
+                  activeFg: CupertinoColors.white,
+                ),
+                const SizedBox(height: 12),
+                FormFieldTile(
+                  label: 'Initial balance',
+                  value: '0.00 $preferredCurrency',
+                  trailing: preferredCurrency,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 22),
+
+          // Icon picker
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('ICON', style: AppFonts.sectionLabel(color: muted)),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (var i = 0; i < iconCtors.length; i++)
+                      GestureDetector(
+                        onTap: () => setState(() => _iconIdx = i),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: i == _iconIdx
+                                ? accent.withValues(alpha: 0.13)
+                                : surface,
+                            border: Border.all(
                               color: i == _iconIdx
-                                  ? accent.withValues(alpha: 0.13)
-                                  : surface,
-                              border: Border.all(
-                                color: i == _iconIdx ? accent : border,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
+                                  ? accent
+                                  : const Color(0x00000000),
+                              width: 1,
                             ),
-                            child: Center(
-                              child: iconCtors[i](
-                                i == _iconIdx ? accent : muted,
-                              ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: iconCtors[i](
+                              i == _iconIdx ? accent : muted,
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                ],
-              ),
+                      ),
+                  ],
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 18),
+          const SizedBox(height: 18),
 
-            // Color picker
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('COLOR', style: AppFonts.sectionLabel(color: muted)),
-                  const SizedBox(height: 10),
-                  ColorSwatchRow(
-                    colors: swatches,
-                    selected: _colorIdx,
-                    onSelected: (i) => setState(() => _colorIdx = i),
-                    bg: bg,
-                  ),
-                ],
-              ),
+          // Color picker
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('COLOR', style: AppFonts.sectionLabel(color: muted)),
+                const SizedBox(height: 10),
+                ColorSwatchRow(
+                  colors: swatches,
+                  selected: _colorIdx,
+                  onSelected: (i) => setState(() => _colorIdx = i),
+                  bg: bg,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -312,8 +313,7 @@ class _LabeledSegmented extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(),
-            style: AppFonts.sectionLabel(color: muted)),
+        Text(label.toUpperCase(), style: AppFonts.sectionLabel(color: muted)),
         const SizedBox(height: 6),
         SegmentedControl(
           options: options,

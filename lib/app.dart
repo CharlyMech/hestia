@@ -75,7 +75,8 @@ class HestiaApp extends StatelessWidget {
                   // Honor explicit user pick when set; else fall back to
                   // device locale if supported, else 'en'.
                   if (prefs.languageCode.isNotEmpty &&
-                      supported.any((l) => l.languageCode == prefs.languageCode)) {
+                      supported
+                          .any((l) => l.languageCode == prefs.languageCode)) {
                     return Locale(prefs.languageCode);
                   }
                   if (deviceLocale != null &&

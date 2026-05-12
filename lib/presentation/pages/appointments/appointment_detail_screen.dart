@@ -74,158 +74,153 @@ class AppointmentDetailScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
-            Row(
-              children: [
-                CatTile(icon: icon, color: color, size: 56),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        appointment.title,
-                        style: AppFonts.heading(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
+          Row(
+            children: [
+              CatTile(icon: icon, color: color, size: 56),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      appointment.title,
+                      style: AppFonts.heading(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _categoryLabel(appointment.category),
-                        style: AppFonts.body(fontSize: 13, color: muted),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _categoryLabel(appointment.category),
+                      style: AppFonts.body(fontSize: 13, color: muted),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          _Card(
+            surface: surface,
+            border: border,
+            children: [
+              _Row(
+                label: 'Starts',
+                value: _fmtDateTime(appointment.startsAt),
+                fg: fg,
+                muted: muted,
+              ),
+              _Row(
+                label: 'Ends',
+                value: _fmtDateTime(appointment.endsAt),
+                fg: fg,
+                muted: muted,
+              ),
+              _Row(
+                label: 'Duration',
+                value: _fmtDuration(appointment.duration),
+                fg: fg,
+                muted: muted,
+                showDivider: false,
+              ),
+            ],
+          ),
+          if (appointment.location != null &&
+              appointment.location!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _Card(
+              surface: surface,
+              border: border,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      MapPin(width: 18, height: 18, color: muted),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          appointment.location!,
+                          style: AppFonts.body(fontSize: 14, color: fg),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 22),
-            _Card(
-              surface: surface,
-              border: border,
-              children: [
-                _Row(
-                  label: 'Starts',
-                  value: _fmtDateTime(appointment.startsAt),
-                  fg: fg,
-                  muted: muted,
-                ),
-                _Row(
-                  label: 'Ends',
-                  value: _fmtDateTime(appointment.endsAt),
-                  fg: fg,
-                  muted: muted,
-                ),
-                _Row(
-                  label: 'Duration',
-                  value: _fmtDuration(appointment.duration),
-                  fg: fg,
-                  muted: muted,
-                  showDivider: false,
-                ),
-              ],
-            ),
-            if (appointment.location != null &&
-                appointment.location!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              _Card(
-                surface: surface,
-                border: border,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        MapPin(width: 18, height: 18, color: muted),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            appointment.location!,
-                            style: AppFonts.body(fontSize: 14, color: fg),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            if (appointment.notes != null &&
-                appointment.notes!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              SectionLabel('Notes', color: muted),
-              const SizedBox(height: 10),
-              _Card(
-                surface: surface,
-                border: border,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      appointment.notes!,
-                      style: AppFonts.body(
-                          fontSize: 14, color: fg, height: 1.5),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          ],
+          if (appointment.notes != null && appointment.notes!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            SectionLabel('Reminders', color: muted),
+            SectionLabel('Notes', color: muted),
             const SizedBox(height: 10),
             _Card(
               surface: surface,
               border: border,
               children: [
-                if (appointment.reminderOffsets.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'No reminders set',
-                      style: AppFonts.body(fontSize: 13, color: muted),
-                    ),
-                  )
-                else
-                  for (var i = 0; i < appointment.reminderOffsets.length; i++)
-                    _ReminderRow(
-                      offset: appointment.reminderOffsets[i],
-                      fg: fg,
-                      muted: muted,
-                      showDivider:
-                          i < appointment.reminderOffsets.length - 1,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    appointment.notes!,
+                    style: AppFonts.body(fontSize: 14, color: fg, height: 1.5),
+                  ),
+                ),
               ],
             ),
-            if (appointment.googleEventId != null) ...[
-              const SizedBox(height: 18),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(CupertinoIcons.link,
-                        size: 14, color: accent),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Synced with Google Calendar',
-                      style: AppFonts.label(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: accent,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
-        ),
+          const SizedBox(height: 16),
+          SectionLabel('Reminders', color: muted),
+          const SizedBox(height: 10),
+          _Card(
+            surface: surface,
+            border: border,
+            children: [
+              if (appointment.reminderOffsets.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'No reminders set',
+                    style: AppFonts.body(fontSize: 13, color: muted),
+                  ),
+                )
+              else
+                for (var i = 0; i < appointment.reminderOffsets.length; i++)
+                  _ReminderRow(
+                    offset: appointment.reminderOffsets[i],
+                    fg: fg,
+                    muted: muted,
+                    showDivider: i < appointment.reminderOffsets.length - 1,
+                  ),
+            ],
+          ),
+          if (appointment.googleEventId != null) ...[
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(CupertinoIcons.link, size: 14, color: accent),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Synced with Google Calendar',
+                    style: AppFonts.label(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: accent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -240,8 +235,18 @@ class AppointmentDetailScreen extends StatelessWidget {
 
   String _fmtDateTime(DateTime d) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hh = d.hour.toString().padLeft(2, '0');
     final mm = d.minute.toString().padLeft(2, '0');
@@ -272,7 +277,6 @@ class _Card extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: surface,
-        border: Border.all(color: border, width: 1),
         borderRadius: BorderRadius.circular(AppRadii.xl),
       ),
       clipBehavior: Clip.antiAlias,

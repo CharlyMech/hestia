@@ -13,6 +13,7 @@ import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/bank_accounts/bank_accounts_bloc.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/common/dotted_border.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
@@ -59,76 +60,62 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
     if (auth is! AuthAuthenticated) {
       return const _SignedOut();
     }
+
+    // Tab-embedded: bloc is already provided by MainTabShell. Go straight to body.
+    if (widget.embeddedInTabShell) {
+      return _Body(embeddedInTabShell: true);
+    }
+
+    // Pushed-route: needs its own bloc instance.
     if (_resolving || _householdId == null) {
       final theme = context.myTheme;
       final bg = _c(theme.backgroundColor);
+      final surface = _c(theme.surfaceColor);
       final border = _c(theme.borderColor);
       final fg = _c(theme.onBackgroundColor);
       final muted = _c(theme.onInactiveColor);
       final l10n = AppLocalizations.of(context);
 
-      Widget loadingBody = Skeletonizer(
-        enabled: true,
-        child: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.embeddedInTabShell) ...[
-                      Text(
-                        l10n.bankAccounts_title,
-                        style: AppFonts.heading(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                    ],
-                    Text(
-                      l10n.bankAccounts_totalNetWorth,
-                      style: AppFonts.body(fontSize: 13, color: muted),
-                    ),
-                    Text(
-                      '9999.99 EUR',
-                      style: AppFonts.numeric(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: fg,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text('Placeholder label', style: AppFonts.sectionLabel(color: muted)),
-                    const SizedBox(height: 140),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-
-      if (widget.embeddedInTabShell) {
-        return ColoredBox(
-          color: bg,
-          child: SafeArea(
-            bottom: false,
-            child: loadingBody,
-          ),
-        );
-      }
-      final surface = _c(theme.surfaceColor);
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
         navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: l10n.bankAccounts_title,
-        child: loadingBody,
+        child: Skeletonizer(
+          enabled: true,
+          child: CustomScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.bankAccounts_totalNetWorth,
+                        style: AppFonts.body(fontSize: 13, color: muted),
+                      ),
+                      Text(
+                        '9999.99 EUR',
+                        style: AppFonts.numeric(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: fg,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text('Placeholder label',
+                          style: AppFonts.sectionLabel(color: muted)),
+                      const SizedBox(height: 140),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
     return BlocProvider(
@@ -138,7 +125,7 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
           householdId: _householdId!,
           userId: auth.profile.id,
         )),
-      child: _Body(embeddedInTabShell: widget.embeddedInTabShell),
+      child: _Body(embeddedInTabShell: false),
     );
   }
 
@@ -203,118 +190,117 @@ class _BodyState extends State<_Body> {
         },
         child: BlocBuilder<BankAccountsBloc, BankAccountsState>(
           builder: (context, state) {
-          if (state is BankAccountsLoading || state is BankAccountsInitial) {
-            return Skeletonizer(
-              key: ValueKey(_skeletonEpoch),
-              enabled: true,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: _Header(
-                      l10n: l10n,
-                      fg: fg,
-                      muted: muted,
-                      accent: accent,
-                      total: 88888.88,
-                      currency: 'EUR',
-                      showLargeTitle: widget.embeddedInTabShell,
-                    ),
+            if (state is BankAccountsLoading || state is BankAccountsInitial) {
+              return Skeletonizer(
+                key: ValueKey(_skeletonEpoch),
+                enabled: true,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    sliver: SliverList.list(
-                      children: [
-                        for (var i = 0; i < 3; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: AspectRatio(
-                              aspectRatio: 1.586,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: muted.withValues(alpha: 0.12),
-                                  borderRadius:
-                                      BorderRadius.circular(AppRadii.xl),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _Header(
+                        l10n: l10n,
+                        fg: fg,
+                        muted: muted,
+                        accent: accent,
+                        total: 88888.88,
+                        currency: 'EUR',
+                        showLargeTitle: widget.embeddedInTabShell,
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverList.list(
+                        children: [
+                          for (var i = 0; i < 3; i++)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: AspectRatio(
+                                aspectRatio: 1.586,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: muted.withValues(alpha: 0.12),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadii.xl),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            if (state is BankAccountsError) {
+              return ScreenShell(
+                bg: bg,
+                slivers: [
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Text(state.message,
+                          style: AppFonts.body(fontSize: 13, color: muted)),
                     ),
                   ),
                 ],
-              ),
-            );
-          }
-          if (state is BankAccountsError) {
+              );
+            }
+            final loaded = state as BankAccountsLoaded;
             return ScreenShell(
               bg: bg,
+              onRefresh: () async {
+                final bloc = context.read<BankAccountsBloc>();
+                bloc.add(const BankAccountsRefresh());
+                await bloc.stream.firstWhere((s) => s is! BankAccountsLoading);
+              },
               slivers: [
-                SliverFillRemaining(
-                  child: Center(
-                    child: Text(state.message,
-                        style: AppFonts.body(fontSize: 13, color: muted)),
+                SliverToBoxAdapter(
+                  child: _Header(
+                    l10n: l10n,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                    total: loaded.totalBalance,
+                    currency: loaded.sources.firstOrNull?.currency ?? 'EUR',
+                    showLargeTitle: widget.embeddedInTabShell,
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                if (loaded.shared.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: SectionLabel(l10n.bankAccounts_shared, color: muted),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                  _CardList(sources: loaded.shared, indexOffset: 0),
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
+                if (loaded.personal.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child:
+                        SectionLabel(l10n.bankAccounts_personal, color: muted),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                  _CardList(
+                    sources: loaded.personal,
+                    indexOffset: loaded.shared.length,
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                ],
+                SliverToBoxAdapter(
+                  child: _AddCardPlaceholder(
+                    border: border,
+                    muted: muted,
+                    label: l10n.bankAccounts_addCard,
+                    onTap: () => context.push(AppRoutes.addBankAccount),
                   ),
                 ),
               ],
             );
-          }
-          final loaded = state as BankAccountsLoaded;
-          return ScreenShell(
-            bg: bg,
-            onRefresh: () async {
-              final bloc = context.read<BankAccountsBloc>();
-              bloc.add(const BankAccountsRefresh());
-              await bloc.stream
-                  .firstWhere((s) => s is! BankAccountsLoading);
-            },
-            slivers: [
-              SliverToBoxAdapter(
-                child: _Header(
-                  l10n: l10n,
-                  fg: fg,
-                  muted: muted,
-                  accent: accent,
-                  total: loaded.totalBalance,
-                  currency: loaded.sources.firstOrNull?.currency ?? 'EUR',
-                  showLargeTitle: widget.embeddedInTabShell,
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              if (loaded.shared.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: SectionLabel(l10n.bankAccounts_shared, color: muted),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                _CardList(sources: loaded.shared, indexOffset: 0),
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              ],
-              if (loaded.personal.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child:
-                      SectionLabel(l10n.bankAccounts_personal, color: muted),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                _CardList(
-                  sources: loaded.personal,
-                  indexOffset: loaded.shared.length,
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              ],
-              SliverToBoxAdapter(
-                child: _AddCardPlaceholder(
-                  border: border,
-                  muted: muted,
-                  label: l10n.bankAccounts_addCard,
-                  onTap: () => context.push(AppRoutes.addBankAccount),
-                ),
-              ),
-            ],
-          );
-        },
+          },
         ),
       ),
     );
@@ -450,66 +436,6 @@ class _AddCardPlaceholder extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Lightweight dashed-border container — avoids adding a dotted_border package.
-class DottedBorder extends StatelessWidget {
-  final Color color;
-  final double radius;
-  final Widget child;
-
-  const DottedBorder({
-    super.key,
-    required this.color,
-    required this.radius,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _DashedRRectPainter(color: color, radius: radius),
-      child: child,
-    );
-  }
-}
-
-class _DashedRRectPainter extends CustomPainter {
-  final Color color;
-  final double radius;
-  _DashedRRectPainter({required this.color, required this.radius});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-    final path = Path()..addRRect(rrect);
-    final dashed = _dash(path, dash: 6, gap: 4);
-    canvas.drawPath(dashed, paint);
-  }
-
-  Path _dash(Path source, {required double dash, required double gap}) {
-    final out = Path();
-    for (final metric in source.computeMetrics()) {
-      double dist = 0;
-      while (dist < metric.length) {
-        final next = dist + dash;
-        out.addPath(metric.extractPath(dist, next), Offset.zero);
-        dist = next + gap;
-      }
-    }
-    return out;
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedRRectPainter old) =>
-      old.color != color || old.radius != radius;
 }
 
 class _SignedOut extends StatelessWidget {

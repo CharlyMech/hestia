@@ -18,7 +18,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 /// Household categories (expense / income) with create / edit via bottom sheet.
 class CategoriesScreen extends StatefulWidget {
-  const CategoriesScreen({super.key});
+  final bool embedded;
+
+  const CategoriesScreen({super.key, this.embedded = false});
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
@@ -82,10 +84,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   TransactionType get _selectedType =>
       _tab == 0 ? TransactionType.expense : TransactionType.income;
 
-  List<Category> get _filtered => _categories
-      .where((c) => c.type == _selectedType && c.isActive)
-      .toList()
-    ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+  List<Category> get _filtered =>
+      _categories.where((c) => c.type == _selectedType && c.isActive).toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
   Future<void> _openSheet({Category? existing}) async {
     if (_householdId == null) return;
@@ -115,90 +116,104 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final accent = _c(theme.primaryColor);
 
     if (_loading) {
+      final body = Skeletonizer(
+        enabled: true,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          children: [
+            Text(
+              '0 expense categories',
+              style: AppFonts.body(fontSize: 13, color: muted),
+            ),
+            const SizedBox(height: 18),
+            const SizedBox(height: 44),
+            const SizedBox(height: 20),
+            Container(
+              height: 280,
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadii.xl),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (widget.embedded) return body;
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
         navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: 'Categories',
-        child: Skeletonizer(
-          enabled: true,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            children: [
-              Text(
-                '0 expense categories',
-                style: AppFonts.body(fontSize: 13, color: muted),
-              ),
-              const SizedBox(height: 18),
-              SizedBox(height: 44),
-              const SizedBox(height: 20),
-              Container(
-                height: 280,
-                decoration: BoxDecoration(
-                  color: surface,
-                  border: Border.all(color: border),
-                  borderRadius:
-                      BorderRadius.circular(AppRadii.xl),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: body,
       );
     }
     if (_error != null) {
+      final body = Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            _error!,
+            textAlign: TextAlign.center,
+            style: AppFonts.body(fontSize: 14, color: muted),
+          ),
+        ),
+      );
+      if (widget.embedded) return body;
       return CupertinoPushedRouteShell(
         backgroundColor: bg,
         navBackground: surface,
         borderColor: border,
         foregroundColor: fg,
         titleText: 'Categories',
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: AppFonts.body(fontSize: 14, color: muted),
-            ),
-          ),
-        ),
+        child: body,
       );
     }
 
     final shown = _filtered;
-
-    return CupertinoPushedRouteShell(
-      backgroundColor: bg,
-      navBackground: surface,
-      borderColor: border,
-      foregroundColor: fg,
-      titleText: 'Categories',
-      trailing: GestureDetector(
-        onTap: () => _openSheet(),
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: accent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Plus(
-              width: 18,
-              height: 18,
-              color: CupertinoColors.white,
-            ),
+    final addButton = GestureDetector(
+      onTap: () => _openSheet(),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: accent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Plus(
+            width: 18,
+            height: 18,
+            color: CupertinoColors.white,
           ),
         ),
       ),
-      child: ScreenShell(
-        bg: bg,
-        bottomPadding: 24,
-        onRefresh: _load,
-        slivers: [
+    );
+
+    final content = ScreenShell(
+      bg: bg,
+      bottomPadding: 24,
+      onRefresh: _load,
+      slivers: [
+        if (widget.embedded)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${shown.length} ${_tab == 0 ? 'expense' : 'income'} categories',
+                      style: AppFonts.body(fontSize: 13, color: muted),
+                    ),
+                  ),
+                  addButton,
+                ],
+              ),
+            ),
+          )
+        else
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
@@ -208,46 +223,56 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 18)),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SegmentedControl(
-                options: const ['Expense', 'Income'],
-                active: _tab,
-                onChanged: (i) => setState(() => _tab = i),
-                surface: surface,
-                border: border,
-                fg: fg,
-                muted: muted,
-                activeColor: surface2,
-              ),
+        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SegmentedControl(
+              options: const ['Expense', 'Income'],
+              active: _tab,
+              onChanged: (i) => setState(() => _tab = i),
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              activeColor: surface2,
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          if (shown.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  'No categories yet — tap + to add one',
-                  style: AppFonts.body(fontSize: 13, color: muted),
-                ),
-              ),
-            )
-          else
-            SliverToBoxAdapter(
-              child: _CategoryCard(
-                categories: shown,
-                surface: surface,
-                border: border,
-                fg: fg,
-                muted: muted,
-                onTap: (c) => _openSheet(existing: c),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        if (shown.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Text(
+                'No categories yet — tap + to add one',
+                style: AppFonts.body(fontSize: 13, color: muted),
               ),
             ),
-        ],
-      ),
+          )
+        else
+          SliverToBoxAdapter(
+            child: _CategoryCard(
+              categories: shown,
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              onTap: (c) => _openSheet(existing: c),
+            ),
+          ),
+      ],
+    );
+
+    if (widget.embedded) return content;
+    return CupertinoPushedRouteShell(
+      backgroundColor: bg,
+      navBackground: surface,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: 'Categories',
+      trailing: addButton,
+      child: content,
     );
   }
 
@@ -278,7 +303,6 @@ class _CategoryCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: surface,
-          border: Border.all(color: border, width: 1),
           borderRadius: BorderRadius.circular(AppRadii.xl),
         ),
         clipBehavior: Clip.antiAlias,
@@ -303,7 +327,8 @@ class _CategoryCard extends StatelessWidget {
                         height: 38,
                         decoration: BoxDecoration(
                           color: (categories[i].color != null
-                                  ? Color(int.parse(categories[i].color!
+                                  ? Color(int.parse(categories[i]
+                                      .color!
                                       .replaceFirst('#', '0xff')))
                                   : muted)
                               .withValues(alpha: 0.2),
@@ -318,7 +343,8 @@ class _CategoryCard extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: categories[i].color != null
-                                ? Color(int.parse(categories[i].color!
+                                ? Color(int.parse(categories[i]
+                                    .color!
                                     .replaceFirst('#', '0xff')))
                                 : fg,
                           ),

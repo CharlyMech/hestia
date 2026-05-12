@@ -1,6 +1,5 @@
 import 'package:logger/logger.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'
-    hide AuthException;
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
 import 'exceptions.dart';
 import 'failures.dart';

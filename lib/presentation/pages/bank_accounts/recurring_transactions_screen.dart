@@ -42,8 +42,8 @@ class _RecurringTransactionsScreenState
     final (household, _) = await AppDependencies.instance.householdRepository
         .getCurrentHousehold(profile.id);
     if (household == null) return;
-    final (sources, _) = await AppDependencies.instance.bankAccountRepository
-        .getBankAccounts(
+    final (sources, _) =
+        await AppDependencies.instance.bankAccountRepository.getBankAccounts(
       householdId: household.id,
       viewMode: ViewMode.personal,
       userId: profile.id,
@@ -99,8 +99,7 @@ class _RecurringTransactionsScreenState
                 ? Skeletonizer(
                     enabled: true,
                     child: ListView(
-                      padding:
-                          const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                       children: [
                         for (var i = 0; i < 5; i++)
                           Padding(
@@ -109,7 +108,6 @@ class _RecurringTransactionsScreenState
                               height: 56,
                               decoration: BoxDecoration(
                                 color: surface,
-                                border: Border.all(color: border),
                                 borderRadius:
                                     BorderRadius.circular(AppRadii.xl),
                               ),
@@ -122,32 +120,26 @@ class _RecurringTransactionsScreenState
                     ? Center(
                         child: Text(
                           'No recurring transactions yet',
-                          style: AppFonts.body(
-                              fontSize: 13, color: muted),
+                          style: AppFonts.body(fontSize: 13, color: muted),
                         ),
                       )
                     : ListView.separated(
                         physics: const AlwaysScrollableScrollPhysics(
                           parent: BouncingScrollPhysics(),
                         ),
-                        padding:
-                            const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                         itemCount: _recurring.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (_, i) {
                           final tx = _recurring[i];
-                          final isIncome =
-                              tx.type == TransactionType.income;
+                          final isIncome = tx.type == TransactionType.income;
                           final tint = isIncome ? income : expense;
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 14, vertical: 12),
                             decoration: BoxDecoration(
                               color: surface,
-                              border: Border.all(color: border, width: 1),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadii.xl),
+                              borderRadius: BorderRadius.circular(AppRadii.xl),
                             ),
                             child: Row(
                               spacing: 12,

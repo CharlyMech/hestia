@@ -67,8 +67,7 @@ class _Form extends StatelessWidget {
           navBackground: surface,
           borderColor: border,
           foregroundColor: fg,
-          titleText:
-              state.isEdit ? 'Edit appointment' : 'New appointment',
+          titleText: state.isEdit ? 'Edit appointment' : 'New appointment',
           trailing: state.submitting
               ? const Padding(
                   padding: EdgeInsets.only(right: 12),
@@ -95,161 +94,161 @@ class _Form extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
             children: [
-                _LabeledField(
-                  label: 'Title',
+              _LabeledField(
+                label: 'Title',
+                muted: muted,
+                child: _Input(
+                  initial: state.title,
+                  placeholder: 'Dentist · Dr. Marín',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
                   muted: muted,
-                  child: _Input(
-                    initial: state.title,
-                    placeholder: 'Dentist · Dr. Marín',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    onChanged: (v) => context
-                        .read<AppointmentFormBloc>()
-                        .add(FormTitleChanged(v)),
-                  ),
+                  onChanged: (v) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormTitleChanged(v)),
                 ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: 'Location',
+                muted: muted,
+                child: _Input(
+                  initial: state.location,
+                  placeholder: 'Optional',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  onChanged: (v) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormLocationChanged(v)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: 'Notes',
+                muted: muted,
+                child: _Input(
+                  initial: state.notes,
+                  placeholder: 'Optional',
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  minLines: 3,
+                  maxLines: 6,
+                  onChanged: (v) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormNotesChanged(v)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: 'Starts at',
+                muted: muted,
+                child: _DateRow(
+                  value: state.startsAt,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  onPick: () async {
+                    final picked = await _pickDateTime(context, state.startsAt);
+                    if (picked != null && context.mounted) {
+                      context
+                          .read<AppointmentFormBloc>()
+                          .add(FormStartChanged(picked));
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: 'Duration',
+                muted: muted,
+                child: _DurationPicker(
+                  value: state.duration,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  accent: accent,
+                  onChanged: (d) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormDurationChanged(d)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: 'Category',
+                muted: muted,
+                child: _CategoryPicker(
+                  value: state.category,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  accent: accent,
+                  onChanged: (c) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormCategoryChanged(c)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: 'Reminders',
+                muted: muted,
+                child: _Reminders(
+                  selected: state.reminderOffsets,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  accent: accent,
+                  onToggle: (d) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormToggleReminder(d)),
+                ),
+              ),
+              if (state.error != null) ...[
                 const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Location',
-                  muted: muted,
-                  child: _Input(
-                    initial: state.location,
-                    placeholder: 'Optional',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    onChanged: (v) => context
-                        .read<AppointmentFormBloc>()
-                        .add(FormLocationChanged(v)),
-                  ),
+                Text(
+                  state.error!,
+                  style: AppFonts.body(fontSize: 13, color: expense),
                 ),
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Notes',
-                  muted: muted,
-                  child: _Input(
-                    initial: state.notes,
-                    placeholder: 'Optional',
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    minLines: 3,
-                    maxLines: 6,
-                    onChanged: (v) => context
-                        .read<AppointmentFormBloc>()
-                        .add(FormNotesChanged(v)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Starts at',
-                  muted: muted,
-                  child: _DateRow(
-                    value: state.startsAt,
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    onPick: () async {
-                      final picked = await _pickDateTime(context, state.startsAt);
-                      if (picked != null && context.mounted) {
-                        context
-                            .read<AppointmentFormBloc>()
-                            .add(FormStartChanged(picked));
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Duration',
-                  muted: muted,
-                  child: _DurationPicker(
-                    value: state.duration,
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    accent: accent,
-                    onChanged: (d) => context
-                        .read<AppointmentFormBloc>()
-                        .add(FormDurationChanged(d)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Category',
-                  muted: muted,
-                  child: _CategoryPicker(
-                    value: state.category,
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    accent: accent,
-                    onChanged: (c) => context
-                        .read<AppointmentFormBloc>()
-                        .add(FormCategoryChanged(c)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Reminders',
-                  muted: muted,
-                  child: _Reminders(
-                    selected: state.reminderOffsets,
-                    surface: surface,
-                    border: border,
-                    fg: fg,
-                    muted: muted,
-                    accent: accent,
-                    onToggle: (d) => context
-                        .read<AppointmentFormBloc>()
-                        .add(FormToggleReminder(d)),
-                  ),
-                ),
-                if (state.error != null) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    state.error!,
-                    style: AppFonts.body(fontSize: 13, color: expense),
-                  ),
-                ],
-                if (state.isEdit) ...[
-                  const SizedBox(height: 28),
-                  GestureDetector(
-                    onTap: state.submitting
-                        ? null
-                        : () => context
-                            .read<AppointmentFormBloc>()
-                            .add(const FormDelete()),
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: expense.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Delete appointment',
-                          style: AppFonts.body(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: expense,
-                          ),
+              ],
+              if (state.isEdit) ...[
+                const SizedBox(height: 28),
+                GestureDetector(
+                  onTap: state.submitting
+                      ? null
+                      : () => context
+                          .read<AppointmentFormBloc>()
+                          .add(const FormDelete()),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: expense.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Delete appointment',
+                        style: AppFonts.body(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: expense,
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ],
-            ),
-          );
+            ],
+          ),
+        );
       },
     );
   }
@@ -412,7 +411,6 @@ class _DateRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: surface,
-          border: Border.all(color: border, width: 1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -432,8 +430,18 @@ class _DateRow extends StatelessWidget {
 
   String _fmt(DateTime d) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hh = d.hour.toString().padLeft(2, '0');
     final mm = d.minute.toString().padLeft(2, '0');
@@ -483,7 +491,7 @@ class _DurationPicker extends StatelessWidget {
               decoration: BoxDecoration(
                 color: d == value ? accent.withValues(alpha: 0.14) : surface,
                 border: Border.all(
-                  color: d == value ? accent : border,
+                  color: d == value ? accent : Color(0x00000000),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -542,7 +550,7 @@ class _CategoryPicker extends StatelessWidget {
               decoration: BoxDecoration(
                 color: c == value ? accent.withValues(alpha: 0.14) : surface,
                 border: Border.all(
-                  color: c == value ? accent : border,
+                  color: c == value ? accent : Color(0x00000000),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -606,8 +614,7 @@ class _Reminders extends StatelessWidget {
       children: [
         for (final d in _options)
           () {
-            final isOn =
-                selected.any((s) => s.inMinutes == d.inMinutes);
+            final isOn = selected.any((s) => s.inMinutes == d.inMinutes);
             return GestureDetector(
               onTap: () => onToggle(d),
               child: Container(
@@ -616,7 +623,7 @@ class _Reminders extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isOn ? accent.withValues(alpha: 0.14) : surface,
                   border: Border.all(
-                    color: isOn ? accent : border,
+                    color: isOn ? accent : Color(0x00000000),
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(10),
