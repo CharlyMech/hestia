@@ -28,6 +28,14 @@
 		<true/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Authenticate to access your household finances</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Take photos for your profile, sources, cars and pets</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Choose photos for your profile, sources, cars and pets</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Save edited images back to your photo library</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Hestia uses your location to optionally tag transactions and show them on maps.</string>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>
