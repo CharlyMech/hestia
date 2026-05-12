@@ -13,6 +13,7 @@ class TransactionSource extends Equatable {
   final TransactionSourceKind kind;
   final String? color;
   final String? icon;
+  final String? imageUrl;
   final bool isActive;
   final String createdBy;
   final DateTime createdAt;
@@ -25,6 +26,7 @@ class TransactionSource extends Equatable {
     this.kind = TransactionSourceKind.other,
     this.color,
     this.icon,
+    this.imageUrl,
     this.isActive = true,
     required this.createdBy,
     required this.createdAt,
@@ -40,6 +42,8 @@ class TransactionSource extends Equatable {
     bool clearColor = false,
     String? icon,
     bool clearIcon = false,
+    String? imageUrl,
+    bool clearImageUrl = false,
     bool? isActive,
     String? createdBy,
     DateTime? createdAt,
@@ -52,6 +56,7 @@ class TransactionSource extends Equatable {
         kind: kind ?? this.kind,
         color: clearColor ? null : (color ?? this.color),
         icon: clearIcon ? null : (icon ?? this.icon),
+        imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
         isActive: isActive ?? this.isActive,
         createdBy: createdBy ?? this.createdBy,
         createdAt: createdAt ?? this.createdAt,
@@ -59,7 +64,7 @@ class TransactionSource extends Equatable {
       );
 
   @override
-  List<Object?> get props => [id, householdId, name, kind];
+  List<Object?> get props => [id, householdId, name, kind, imageUrl];
 }
 
 enum TransactionSourceKind {

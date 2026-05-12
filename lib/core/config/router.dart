@@ -1,6 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:hestia/presentation/pages/auth/login_screen.dart';
+import 'package:hestia/presentation/pages/fuel/add_edit_car_screen.dart';
+import 'package:hestia/presentation/pages/pets/add_edit_health_record_screen.dart';
+import 'package:hestia/presentation/pages/pets/add_edit_pet_screen.dart';
+import 'package:hestia/presentation/pages/pets/pet_detail_screen.dart';
+import 'package:hestia/presentation/pages/transactions/transaction_location_stats_screen.dart';
+import 'package:hestia/presentation/pages/transactions/transaction_map_picker_screen.dart';
+import 'package:hestia/domain/entities/pet_health_record.dart';
+import 'package:hestia/presentation/pages/fuel/add_edit_fuel_entry_screen.dart';
+import 'package:hestia/presentation/pages/fuel/car_detail_screen.dart';
+import 'package:hestia/presentation/pages/fuel/cars_standalone_screen.dart';
+import 'package:hestia/presentation/pages/fuel/fuel_analytics_screen.dart';
+import 'package:hestia/domain/entities/fuel_entry.dart';
 import 'package:hestia/presentation/pages/categories/categories_screen.dart';
 import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
@@ -13,10 +26,12 @@ import 'package:hestia/presentation/pages/bank_accounts/recurring_transactions_s
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/presentation/pages/appointments/add_edit_appointment_screen.dart';
 import 'package:hestia/presentation/pages/appointments/appointment_detail_screen.dart';
+import 'package:hestia/presentation/pages/calendar/calendar_screen.dart';
 import 'package:hestia/presentation/pages/notifications/notification_detail_screen.dart';
 import 'package:hestia/presentation/pages/notifications/notifications_screen.dart';
 import 'package:hestia/presentation/pages/profile/profile_screen.dart';
 import 'package:hestia/presentation/pages/settings/settings_screen.dart';
+import 'package:hestia/presentation/pages/settings/data_management_screen.dart';
 import 'package:hestia/presentation/pages/splash/custom_splash_screen.dart';
 import 'package:hestia/domain/entities/notification.dart';
 import 'package:hestia/domain/entities/transaction.dart';
@@ -32,20 +47,22 @@ abstract final class AppRoutes {
   static const splash = '/';
   static const login = '/login';
 
-  /// Persistent tab shell — Dashboard / Calendar / Shopping / Accounts.
-  /// Use `?tab=N` (0..3) to land on a specific tab.
+  /// Persistent tab shell — Home · Accounts · Pets · [Cars] · Shopping.
+  /// Use `?tab=N` with a [PageView] index (see constants below).
   static const main = '/main';
 
-  /// Tab indices for [main] deep-links.
   static const tabHome = 0;
-  static const tabCalendar = 1;
-  static const tabShopping = 2;
-  static const tabAccounts = 3;
+  static const tabAccounts = 1;
+  static const tabPets = 2;
 
-  // Convenience aliases — push goes to /main with tab query.
+  /// Page index when the cars module is enabled (between Pets and Shopping).
+  static const tabCars = 3;
+
+  /// Shopping is always the last page: index 3 without cars, 4 with cars.
+  static const tabShoppingNoCars = 3;
+  static const tabShoppingWithCars = 4;
+
   static const dashboard = '$main?tab=$tabHome';
-  static const calendar = '$main?tab=$tabCalendar';
-  static const shopping = '$main?tab=$tabShopping';
   static const accounts = '$main?tab=$tabAccounts';
 
   /// Goals is now a pushed route, not a tab.
@@ -70,9 +87,34 @@ abstract final class AppRoutes {
   static const notificationDetail = '/notifications/detail';
   static const profile = '/profile';
   static const settings = '/settings';
+  static const dataManagement = '/data-management';
   static const addAppointment = '/appointments/add';
   static const editAppointment = '/appointments/edit';
   static const appointmentDetail = '/appointments/detail';
+
+  // Pets module
+  static const pets = '/pets';
+  static const addPet = '/pets/add';
+  static const editPet = '/pets/edit';
+  static const petDetail = '/pets/detail';
+  static const addHealthRecord = '/pets/health/add';
+  static const editHealthRecord = '/pets/health/edit';
+
+  // Calendar (pushed route — not a tab)
+  static const calendarScreen = '/calendar';
+
+  // Cars module
+  static const cars = '/cars';
+  static const addCar = '/cars/add';
+  static const editCar = '/cars/edit';
+  static const carDetail = '/cars/detail';
+  static const addCarEntry = '/cars/entries/add';
+  static const editCarEntry = '/cars/entries/edit';
+  static const carAnalytics = '/cars/analytics';
+
+  /// Pick GPS coordinates for a transaction (returns [LatLng] via `pop`).
+  static const transactionMapPicker = '/transactions/map-picker';
+  static const transactionLocationStats = '/transactions/location-stats';
 }
 
 final appRouter = GoRouter(
@@ -252,6 +294,12 @@ final appRouter = GoRouter(
       ),
     ),
     GoRoute(
+      path: AppRoutes.dataManagement,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: DataManagementScreen(),
+      ),
+    ),
+    GoRoute(
       path: AppRoutes.addAppointment,
       pageBuilder: (context, state) {
         final defaultDate = state.extra as DateTime?;
@@ -268,6 +316,115 @@ final appRouter = GoRouter(
           child: AddEditAppointmentScreen(existing: appointment),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.pets,
+      redirect: (context, state) =>
+          '${AppRoutes.main}?tab=${AppRoutes.tabPets}',
+    ),
+    GoRoute(
+      path: AppRoutes.addPet,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: AddEditPetScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.editPet,
+      pageBuilder: (context, state) {
+        final id = state.extra as String;
+        return CupertinoPage(child: AddEditPetScreen(petId: id));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.petDetail,
+      pageBuilder: (context, state) {
+        final id = state.extra as String;
+        return CupertinoPage(child: PetDetailScreen(petId: id));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.addHealthRecord,
+      pageBuilder: (context, state) {
+        final petId = state.extra as String;
+        return CupertinoPage(child: AddEditHealthRecordScreen(petId: petId));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.editHealthRecord,
+      pageBuilder: (context, state) {
+        final record = state.extra as PetHealthRecord;
+        return CupertinoPage(
+            child: AddEditHealthRecordScreen(existing: record));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.cars,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: CarsStandaloneScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.addCar,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: AddEditCarScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.editCar,
+      pageBuilder: (context, state) {
+        final id = state.extra as String;
+        return CupertinoPage(child: AddEditCarScreen(carId: id));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.carDetail,
+      pageBuilder: (context, state) {
+        final id = state.extra as String;
+        return CupertinoPage(child: CarDetailScreen(carId: id));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.addCarEntry,
+      pageBuilder: (context, state) {
+        final carId = state.extra as String;
+        return CupertinoPage(child: AddEditFuelEntryScreen(carId: carId));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.editCarEntry,
+      pageBuilder: (context, state) {
+        final entry = state.extra as FuelEntry;
+        return CupertinoPage(child: AddEditFuelEntryScreen(entry: entry));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.carAnalytics,
+      pageBuilder: (context, state) {
+        final id = state.extra as String;
+        return CupertinoPage(child: FuelAnalyticsScreen(carId: id));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.transactionMapPicker,
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        final initial = extra is LatLng ? extra : null;
+        return CupertinoPage(
+          child: TransactionMapPickerScreen(initialPosition: initial),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.transactionLocationStats,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: TransactionLocationStatsScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.calendarScreen,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: CalendarScreen(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.appointmentDetail,

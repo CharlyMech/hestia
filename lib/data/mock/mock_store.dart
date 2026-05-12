@@ -1,9 +1,15 @@
+import 'package:hestia/core/audit/audit_logger.dart';
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/household.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/domain/entities/car.dart';
+import 'package:hestia/domain/entities/car_member.dart';
+import 'package:hestia/domain/entities/fuel_entry.dart';
 import 'package:hestia/domain/entities/notification.dart';
+import 'package:hestia/domain/entities/pet.dart';
+import 'package:hestia/domain/entities/pet_health_record.dart';
 import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
 import 'package:hestia/domain/entities/shopping_list_item.dart';
@@ -34,6 +40,12 @@ class MockStore {
   final List<Appointment> appointments = [];
   final List<ShoppingList> shoppingLists = [];
   final List<ShoppingListItem> shoppingListItems = [];
+  final List<Car> cars = [];
+  final List<CarMember> carMembers = [];
+  final List<FuelEntry> fuelEntries = [];
+  final List<Pet> pets = [];
+  final List<PetHealthRecord> petHealthRecords = [];
+  final List<AuditEntry> auditLog = [];
 
   void clear() {
     currentProfile = null;
@@ -51,5 +63,11 @@ class MockStore {
     appointments.clear();
     shoppingLists.clear();
     shoppingListItems.clear();
+    cars.clear();
+    carMembers.clear();
+    fuelEntries.clear();
+    pets.clear();
+    petHealthRecords.clear();
+    auditLog.clear();
   }
 }
