@@ -16,7 +16,8 @@ class MockAppointmentRepository implements AppointmentRepository {
     _emit();
   }
 
-  void _emit() => _subject.add(List.unmodifiable(MockStore.instance.appointments));
+  void _emit() =>
+      _subject.add(List.unmodifiable(MockStore.instance.appointments));
 
   @override
   Stream<List<Appointment>> watchRange({
@@ -50,7 +51,8 @@ class MockAppointmentRepository implements AppointmentRepository {
         .where((a) => a.id == id)
         .cast<Appointment?>()
         .firstWhere((_) => true, orElse: () => null);
-    if (found == null) return (null, const ServerFailure('Appointment not found'));
+    if (found == null)
+      return (null, const ServerFailure('Appointment not found'));
     return (found, null);
   }
 
@@ -81,7 +83,8 @@ class MockAppointmentRepository implements AppointmentRepository {
     final list = MockStore.instance.appointments;
     final before = list.length;
     list.removeWhere((a) => a.id == id);
-    if (list.length == before) return const ServerFailure('Appointment not found');
+    if (list.length == before)
+      return const ServerFailure('Appointment not found');
     _emit();
     return null;
   }

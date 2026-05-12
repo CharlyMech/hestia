@@ -26,7 +26,10 @@ class MockTransactionRepository implements TransactionRepository {
     await mockReadLatency();
     final all = MockStore.instance.transactions
         .where((t) => t.householdId == householdId)
-        .where((t) => viewMode == ViewMode.household || userId == null || t.userId == userId)
+        .where((t) =>
+            viewMode == ViewMode.household ||
+            userId == null ||
+            t.userId == userId)
         .where((t) => startDate == null || !t.date.isBefore(startDate))
         .where((t) => endDate == null || !t.date.isAfter(endDate))
         .where((t) => categoryId == null || t.categoryId == categoryId)
@@ -40,11 +43,17 @@ class MockTransactionRepository implements TransactionRepository {
   }
 
   @override
-  Future<(Transaction?, Failure?)> createTransaction(Transaction transaction) async {
+  Future<(Transaction?, Failure?)> createTransaction(
+      Transaction transaction) async {
     final store = MockStore.instance;
-    final cat = store.categories.where((c) => c.id == transaction.categoryId).firstOrNull;
-    final ms = store.bankAccounts.where((m) => m.id == transaction.bankAccountId).firstOrNull;
-    final user = store.profiles.where((p) => p.id == transaction.userId).firstOrNull;
+    final cat = store.categories
+        .where((c) => c.id == transaction.categoryId)
+        .firstOrNull;
+    final ms = store.bankAccounts
+        .where((m) => m.id == transaction.bankAccountId)
+        .firstOrNull;
+    final user =
+        store.profiles.where((p) => p.id == transaction.userId).firstOrNull;
     final txSrc = transaction.transactionSourceId == null
         ? null
         : store.transactionSources
@@ -66,6 +75,8 @@ class MockTransactionRepository implements TransactionRepository {
       recurringRule: transaction.recurringRule,
       createdAt: DateTime.now(),
       lastUpdate: DateTime.now(),
+      latitude: transaction.latitude,
+      longitude: transaction.longitude,
       categoryName: cat?.name,
       categoryColor: cat?.color,
       bankAccountName: ms?.name,
@@ -81,9 +92,14 @@ class MockTransactionRepository implements TransactionRepository {
     final store = MockStore.instance;
     final i = store.transactions.indexWhere((t) => t.id == transaction.id);
     if (i < 0) return const ServerFailure('Transaction not found');
-    final cat = store.categories.where((c) => c.id == transaction.categoryId).firstOrNull;
-    final ms = store.bankAccounts.where((m) => m.id == transaction.bankAccountId).firstOrNull;
-    final user = store.profiles.where((p) => p.id == transaction.userId).firstOrNull;
+    final cat = store.categories
+        .where((c) => c.id == transaction.categoryId)
+        .firstOrNull;
+    final ms = store.bankAccounts
+        .where((m) => m.id == transaction.bankAccountId)
+        .firstOrNull;
+    final user =
+        store.profiles.where((p) => p.id == transaction.userId).firstOrNull;
     final txSrc = transaction.transactionSourceId == null
         ? null
         : store.transactionSources
@@ -104,6 +120,8 @@ class MockTransactionRepository implements TransactionRepository {
       recurringRule: transaction.recurringRule,
       createdAt: transaction.createdAt,
       lastUpdate: DateTime.now(),
+      latitude: transaction.latitude,
+      longitude: transaction.longitude,
       categoryName: cat?.name,
       categoryColor: cat?.color,
       bankAccountName: ms?.name,
@@ -137,8 +155,12 @@ class MockTransactionRepository implements TransactionRepository {
   @override
   Future<(Transfer?, Failure?)> createTransfer(Transfer transfer) async {
     final store = MockStore.instance;
-    final from = store.bankAccounts.where((m) => m.id == transfer.fromSourceId).firstOrNull;
-    final to = store.bankAccounts.where((m) => m.id == transfer.toSourceId).firstOrNull;
+    final from = store.bankAccounts
+        .where((m) => m.id == transfer.fromSourceId)
+        .firstOrNull;
+    final to = store.bankAccounts
+        .where((m) => m.id == transfer.toSourceId)
+        .firstOrNull;
     final created = Transfer(
       id: _uuid.v4(),
       householdId: transfer.householdId,

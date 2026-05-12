@@ -23,7 +23,8 @@ class MockTransactionSourceRepository implements TransactionSourceRepository {
   }
 
   @override
-  Future<(TransactionSource?, Failure?)> create(TransactionSource source) async {
+  Future<(TransactionSource?, Failure?)> create(
+      TransactionSource source) async {
     final created = source.copyWith(
       id: _uuid.v4(),
       createdAt: DateTime.now(),

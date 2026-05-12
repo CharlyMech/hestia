@@ -31,7 +31,8 @@ class MockBankAccountRepository implements BankAccountRepository {
 
   @override
   Future<(BankAccount?, Failure?)> createBankAccount(BankAccount source) async {
-    final created = _copy(source, id: _uuid.v4(), createdAt: DateTime.now(), lastUpdate: DateTime.now());
+    final created = _copy(source,
+        id: _uuid.v4(), createdAt: DateTime.now(), lastUpdate: DateTime.now());
     MockStore.instance.bankAccounts.add(created);
     return (created, null);
   }

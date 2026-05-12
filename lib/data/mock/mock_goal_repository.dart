@@ -31,7 +31,8 @@ class MockGoalRepository implements GoalRepository {
 
   @override
   Future<(FinancialGoal?, Failure?)> createGoal(FinancialGoal goal) async {
-    final created = _copy(goal, id: _uuid.v4(), createdAt: DateTime.now(), lastUpdate: DateTime.now());
+    final created = _copy(goal,
+        id: _uuid.v4(), createdAt: DateTime.now(), lastUpdate: DateTime.now());
     MockStore.instance.goals.add(created);
     return (created, null);
   }
@@ -64,7 +65,8 @@ class MockGoalRepository implements GoalRepository {
     final i = list.indexWhere((g) => g.id == goalId);
     if (i < 0) return const ServerFailure('Goal not found');
     final g = list[i];
-    list[i] = _copy(g, currentAmount: g.currentAmount + amount, lastUpdate: DateTime.now());
+    list[i] = _copy(g,
+        currentAmount: g.currentAmount + amount, lastUpdate: DateTime.now());
     return null;
   }
 

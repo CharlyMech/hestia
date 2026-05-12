@@ -13,7 +13,8 @@ class MockHouseholdRepository implements HouseholdRepository {
   }
 
   @override
-  Future<(List<HouseholdMember>, Failure?)> getMembers(String householdId) async {
+  Future<(List<HouseholdMember>, Failure?)> getMembers(
+      String householdId) async {
     final list = MockStore.instance.members
         .where((m) => m.householdId == householdId)
         .toList();
