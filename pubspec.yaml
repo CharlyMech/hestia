@@ -44,6 +44,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   iconoir_flutter: ^7.11.0
   google_fonts: ^6.2.1
+  liquid_glass_easy: ^1.0.0
+
+  # --- Images ---
+  image_picker: ^1.1.2
+  image_cropper: ^8.0.2
+  cached_network_image: ^3.4.1
 
   # --- Charts ---
   fl_chart: ^0.70.2
@@ -70,6 +76,10 @@ dependencies:
   google_sign_in: ^6.2.2
   http: ^1.2.2
   extension_google_sign_in_as_googleapis_auth: ^2.0.12
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
+  geolocator: ^14.0.2
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:
@@ -92,3 +102,4 @@ flutter:
   assets:
     - assets/images/
     - assets/banks/
+    - assets/icons/
