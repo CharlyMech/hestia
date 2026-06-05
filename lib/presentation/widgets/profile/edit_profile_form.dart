@@ -5,6 +5,7 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/profile.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
@@ -61,13 +62,13 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   Future<void> _pickBirthDate() async {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
+    final fg = hexToColor(theme.onBackgroundColor);
     DateTime tmp = _birthDate ?? DateTime(2000, 1, 1);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => Container(
         height: 280,
-        color: _c(theme.surfaceColor),
+        color: hexToColor(theme.surfaceColor),
         child: SafeArea(
           top: false,
           child: Column(
@@ -76,7 +77,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
                 children: [
                   CupertinoButton(
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text('Cancel',
+                    child: Text(AppLocalizations.of(ctx).common_cancel,
                         style: AppFonts.body(fontSize: 14, color: fg)),
                   ),
                   const Spacer(),
@@ -85,7 +86,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
                       setState(() => _birthDate = tmp);
                       Navigator.of(ctx).pop();
                     },
-                    child: Text('Done',
+                    child: Text(AppLocalizations.of(ctx).common_done,
                         style: AppFonts.body(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -111,12 +112,12 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
   Future<void> _pickCurrency() async {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
     final picked = await showCupertinoModalPopup<String>(
       context: context,
       builder: (ctx) => Container(
-        color: _c(theme.surfaceColor),
+        color: hexToColor(theme.surfaceColor),
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: SafeArea(
           top: false,
@@ -175,18 +176,15 @@ class _EditProfileFormState extends State<EditProfileForm> {
     context.read<AuthBloc>().add(AuthUpdateProfile(updated));
     Navigator.of(context).maybePop();
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final surface = _c(theme.surfaceColor);
-    final bg = _c(theme.backgroundColor);
-    final accent = _c(theme.primaryColor);
-    final onPrimary = _c(theme.onPrimaryColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final accent = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
 
     final swatches = <Color>[
       accent,
@@ -229,11 +227,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
             ),
           ),
           const SizedBox(height: 24),
-          _label('Display name', muted),
+          _label(AppLocalizations.of(context).profile_displayName, muted),
           const SizedBox(height: 6),
           CupertinoTextField(
             controller: _name,
-            placeholder: 'Your name',
+            placeholder: AppLocalizations.of(context).profile_displayName,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             style: AppFonts.body(fontSize: 15, color: fg),
             placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
@@ -241,7 +239,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 16),
-          _label('Birth date', muted),
+          _label(AppLocalizations.of(context).profile_birthDate, muted),
           const SizedBox(height: 6),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -253,7 +251,9 @@ class _EditProfileFormState extends State<EditProfileForm> {
                 children: [
                   Expanded(
                     child: Text(
-                      _birthDate == null ? 'Not set' : _formatDate(_birthDate!),
+                      _birthDate == null
+                          ? AppLocalizations.of(context).common_notSet
+                          : _formatDate(_birthDate!),
                       style: AppFonts.body(
                         fontSize: 15,
                         color: _birthDate == null ? muted : fg,
@@ -273,7 +273,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
             ),
           ),
           const SizedBox(height: 16),
-          _label('Preferred currency', muted),
+          _label(AppLocalizations.of(context).profile_preferredCurrency, muted),
           const SizedBox(height: 6),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -295,7 +295,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
             ),
           ),
           const SizedBox(height: 16),
-          _label('Calendar color', muted),
+          _label(AppLocalizations.of(context).profile_calendarColor, muted),
           const SizedBox(height: 8),
           ColorSwatchRow(
             colors: swatches,
@@ -319,7 +319,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
               child: _saving
                   ? const CupertinoActivityIndicator()
                   : Text(
-                      'Save',
+                      AppLocalizations.of(context).common_save,
                       style: AppFonts.body(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,

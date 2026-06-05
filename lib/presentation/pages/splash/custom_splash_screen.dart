@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
@@ -20,7 +21,9 @@ class CustomSplashScreen extends StatelessWidget {
       listener: (context, state) {
         switch (state) {
           case AuthUnauthenticated():
-            context.go(AppRoutes.login);
+            final seen =
+                AppDependencies.instance.userPreferencesService.onboardingSeen;
+            context.go(seen ? AppRoutes.login : AppRoutes.onboarding);
           case AuthBiometricRequired():
             context.read<AuthBloc>().add(const AuthBiometricCheck());
           case AuthAuthenticated():

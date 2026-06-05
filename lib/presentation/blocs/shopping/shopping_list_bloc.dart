@@ -50,6 +50,11 @@ class ShoppingListToggleItem extends ShoppingListEvent {
   List<Object?> get props => [itemId];
 }
 
+/// Remote peer changed items — refetch without a full-screen loading state.
+class ShoppingListRemoteSync extends ShoppingListEvent {
+  const ShoppingListRemoteSync();
+}
+
 abstract class ShoppingListState extends Equatable {
   const ShoppingListState();
   @override
@@ -92,6 +97,7 @@ class ShoppingListBloc extends Bloc<ShoppingListEvent, ShoppingListState> {
     on<ShoppingListUpdateItem>(_onUpdate);
     on<ShoppingListDeleteItem>(_onDelete);
     on<ShoppingListToggleItem>(_onToggle);
+    on<ShoppingListRemoteSync>(_onRemoteSync);
   }
 
   Future<void> _onLoad(
@@ -131,6 +137,12 @@ class ShoppingListBloc extends Bloc<ShoppingListEvent, ShoppingListState> {
   Future<void> _onDelete(
       ShoppingListDeleteItem e, Emitter<ShoppingListState> emit) async {
     await _repo.deleteItem(e.itemId);
+    await _fetch(emit);
+  }
+
+  Future<void> _onRemoteSync(
+      ShoppingListRemoteSync e, Emitter<ShoppingListState> emit) async {
+    if (_list == null) return;
     await _fetch(emit);
   }
 

@@ -37,11 +37,11 @@ class TxRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
     final isIncome = tx.amount >= 0;
-    final amountColor = isIncome ? _c(theme.colorGreen) : _c(theme.colorRed);
+    final amountColor = isIncome ? hexToColor(theme.colorGreen) : hexToColor(theme.colorRed);
     final prefix = isIncome ? '+' : '−';
     final abs = tx.amount.abs().toStringAsFixed(2);
 
@@ -121,6 +121,4 @@ class TxRow extends StatelessWidget {
       child: body,
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

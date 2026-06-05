@@ -114,3 +114,16 @@ class TransactionFormLocationSet extends TransactionFormEvent {
 class TransactionFormLocationFetchRequested extends TransactionFormEvent {
   const TransactionFormLocationFetchRequested();
 }
+
+/// Set the optional actor association — exactly one of [petId], [carId],
+/// [homeId] should be non-null; passing all null clears the actor.
+class TransactionFormActorChanged extends TransactionFormEvent {
+  final String? petId;
+  final String? carId;
+  final String? homeId;
+
+  const TransactionFormActorChanged({this.petId, this.carId, this.homeId});
+
+  @override
+  List<Object?> get props => [petId, carId, homeId];
+}

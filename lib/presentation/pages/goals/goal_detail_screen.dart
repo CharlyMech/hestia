@@ -18,14 +18,14 @@ class GoalDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final tints = theme.categoryTints.map(_c).toList();
-    final income = _c(theme.colorGreen);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
+    final income = hexToColor(theme.colorGreen);
 
     final contribs = <_Contrib>[
       _Contrib('Ana', tints[0], 'Apr 15', 200),
@@ -312,8 +312,6 @@ class GoalDetailScreen extends StatelessWidget {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _StatCell extends StatelessWidget {

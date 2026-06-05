@@ -76,20 +76,38 @@ class CupertinoPushedRouteShell extends StatelessWidget {
               ),
               child: Padding(
                 padding: topPadding,
-                child: Row(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(40, 40),
-                      onPressed: goBack,
-                      child: NavArrowLeft(
-                        width: 20,
-                        height: 20,
-                        color: foregroundColor,
+                    // Centre title — unaffected by button widths.
+                    Positioned.fill(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 48),
+                          child: middle,
+                        ),
                       ),
                     ),
-                    Expanded(child: middle),
-                    if (trailing != null) trailing!,
+                    // Back button pinned left.
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(40, 40),
+                        onPressed: goBack,
+                        child: NavArrowLeft(
+                          width: 20,
+                          height: 20,
+                          color: foregroundColor,
+                        ),
+                      ),
+                    ),
+                    // Trailing pinned right.
+                    if (trailing != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: trailing!,
+                      ),
                   ],
                 ),
               ),

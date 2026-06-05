@@ -59,9 +59,9 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
   Future<void> _open() async {
     if (_busy) return;
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final expense = _c(theme.colorRed);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final expense = hexToColor(theme.colorRed);
 
     final action = await showAppBottomSheet<_PickAction>(
       context: context,
@@ -143,14 +143,11 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
     );
   }
 
-  Widget _divider(theme) => Container(height: 1, color: _c(theme.borderColor));
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
+  Widget _divider(theme) => Container(height: 1, color: hexToColor(theme.borderColor));
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final muted = _c(theme.onInactiveColor);
+    final muted = hexToColor(theme.onInactiveColor);
 
     final radius = widget.circle ? widget.size / 2 : 16.0;
     final hasImage = widget.value != null && widget.value!.isNotEmpty;
@@ -197,7 +194,7 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: _c(theme.surfaceColor),
+                color: hexToColor(theme.surfaceColor),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,

@@ -92,14 +92,11 @@ class _StartShoppingSessionContentState
       templateListId: widget.template?.id,
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
   Future<void> _pickSource() async {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
@@ -143,9 +140,9 @@ class _StartShoppingSessionContentState
 
   Future<void> _pickBank() async {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
@@ -191,11 +188,11 @@ class _StartShoppingSessionContentState
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
     final selectedBank =
         _accounts.where((a) => a.id == _bankAccountId).firstOrNull;
     final selectedSrc = _sources.where((s) => s.id == _sourceId).firstOrNull;

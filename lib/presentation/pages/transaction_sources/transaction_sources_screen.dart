@@ -58,11 +58,11 @@ class _TransactionSourcesScreenState extends State<TransactionSourcesScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthBloc>().state;
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
     if (auth is! AuthAuthenticated || _resolving || _householdId == null) {
       final body = auth is! AuthAuthenticated
           ? Center(
@@ -111,8 +111,6 @@ class _TransactionSourcesScreenState extends State<TransactionSourcesScreen> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Body extends StatelessWidget {
@@ -144,12 +142,12 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
     final addButton = IconBtn(
       icon: Plus(width: 16, height: 16, color: fg),
@@ -160,7 +158,8 @@ class _Body extends StatelessWidget {
       radius: AppRadii.lg,
     );
 
-    final content = BlocBuilder<TransactionSourcesBloc, TransactionSourcesState>(
+    final content =
+        BlocBuilder<TransactionSourcesBloc, TransactionSourcesState>(
       builder: (context, state) {
         if (state is TransactionSourcesLoading ||
             state is TransactionSourcesInitial) {
@@ -300,8 +299,6 @@ class _Body extends StatelessWidget {
       child: content,
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _SourceIcon extends StatelessWidget {

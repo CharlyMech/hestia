@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/appointment_form/appointment_form_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
@@ -46,20 +49,19 @@ class _Form extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final expense = _c(theme.colorRed);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final expense = hexToColor(theme.colorRed);
+    final l10n = AppLocalizations.of(context);
 
     return BlocConsumer<AppointmentFormBloc, AppointmentFormState>(
       listenWhen: (p, n) => p.saved != n.saved || p.deleted != n.deleted,
       listener: (context, state) {
-        if (state.saved || state.deleted) {
-          context.pop();
-        }
+        if (state.saved || state.deleted) context.pop();
       },
       builder: (context, state) {
         return CupertinoPushedRouteShell(
@@ -67,7 +69,9 @@ class _Form extends StatelessWidget {
           navBackground: surface,
           borderColor: border,
           foregroundColor: fg,
-          titleText: state.isEdit ? 'Edit appointment' : 'New appointment',
+          titleText: state.isEdit
+              ? l10n.calendar_appointment
+              : l10n.calendar_newAppointment,
           trailing: state.submitting
               ? const Padding(
                   padding: EdgeInsets.only(right: 12),
@@ -82,7 +86,7 @@ class _Form extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: Text(
-                      'Save',
+                      l10n.common_save,
                       style: AppFonts.body(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -94,12 +98,56 @@ class _Form extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
             children: [
+              // All day toggle
+              Row(
+                children: [
+                  FCheckbox(
+                    value: state.isAllDay,
+                    onChange: (v) {
+                      context
+                          .read<AppointmentFormBloc>()
+                          .add(FormAllDayChanged(v));
+                      if (v) {
+                        final d = state.startsAt;
+                        final midnight = DateTime(d.year, d.month, d.day);
+                        context
+                            .read<AppointmentFormBloc>()
+                            .add(FormStartChanged(midnight));
+                        context
+                            .read<AppointmentFormBloc>()
+                            .add(const FormDurationChanged(Duration(hours: 24)));
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Text(l10n.appointments_allDay,
+                      style: AppFonts.body(fontSize: 14, color: fg)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Share with household
+              Row(
+                children: [
+                  FCheckbox(
+                    value: state.isShared,
+                    onChange: (v) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormSharedChanged(v)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(l10n.appointments_shareHousehold,
+                        style: AppFonts.body(fontSize: 14, color: fg)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               _LabeledField(
-                label: 'Title',
+                label: l10n.appointments_title,
                 muted: muted,
                 child: _Input(
                   initial: state.title,
-                  placeholder: 'Dentist · Dr. Marín',
+                  placeholder: l10n.appointments_titlePlaceholder,
                   surface: surface,
                   border: border,
                   fg: fg,
@@ -111,11 +159,11 @@ class _Form extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _LabeledField(
-                label: 'Location',
+                label: l10n.appointments_location,
                 muted: muted,
                 child: _Input(
                   initial: state.location,
-                  placeholder: 'Optional',
+                  placeholder: l10n.common_none,
                   surface: surface,
                   border: border,
                   fg: fg,
@@ -127,11 +175,11 @@ class _Form extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _LabeledField(
-                label: 'Notes',
+                label: l10n.appointments_notes,
                 muted: muted,
                 child: _Input(
                   initial: state.notes,
-                  placeholder: 'Optional',
+                  placeholder: l10n.common_none,
                   surface: surface,
                   border: border,
                   fg: fg,
@@ -144,17 +192,20 @@ class _Form extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              // Starts at (hide time pickers when all-day)
               _LabeledField(
-                label: 'Starts at',
+                label: l10n.appointments_date,
                 muted: muted,
                 child: _DateRow(
                   value: state.startsAt,
+                  showTime: !state.isAllDay,
                   surface: surface,
                   border: border,
                   fg: fg,
                   muted: muted,
                   onPick: () async {
-                    final picked = await _pickDateTime(context, state.startsAt);
+                    final picked =
+                        await _pickDateTime(context, state.startsAt, state.isAllDay);
                     if (picked != null && context.mounted) {
                       context
                           .read<AppointmentFormBloc>()
@@ -163,25 +214,27 @@ class _Form extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 16),
-              _LabeledField(
-                label: 'Duration',
-                muted: muted,
-                child: _DurationPicker(
-                  value: state.duration,
-                  surface: surface,
-                  border: border,
-                  fg: fg,
+              if (!state.isAllDay) ...[
+                const SizedBox(height: 16),
+                _LabeledField(
+                  label: 'Duration',
                   muted: muted,
-                  accent: accent,
-                  onChanged: (d) => context
-                      .read<AppointmentFormBloc>()
-                      .add(FormDurationChanged(d)),
+                  child: _DurationPicker(
+                    value: state.duration,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    accent: accent,
+                    onChanged: (d) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormDurationChanged(d)),
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 16),
               _LabeledField(
-                label: 'Category',
+                label: l10n.appointments_category,
                 muted: muted,
                 child: _CategoryPicker(
                   value: state.category,
@@ -197,7 +250,18 @@ class _Form extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _LabeledField(
-                label: 'Reminders',
+                label: l10n.appointments_color,
+                muted: muted,
+                child: _ColorPicker(
+                  selected: state.color,
+                  onChanged: (hex) => context
+                      .read<AppointmentFormBloc>()
+                      .add(FormColorChanged(hex)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _LabeledField(
+                label: l10n.appointments_reminders,
                 muted: muted,
                 child: _Reminders(
                   selected: state.reminderOffsets,
@@ -218,34 +282,6 @@ class _Form extends StatelessWidget {
                   style: AppFonts.body(fontSize: 13, color: expense),
                 ),
               ],
-              if (state.isEdit) ...[
-                const SizedBox(height: 28),
-                GestureDetector(
-                  onTap: state.submitting
-                      ? null
-                      : () => context
-                          .read<AppointmentFormBloc>()
-                          .add(const FormDelete()),
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: expense.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Delete appointment',
-                        style: AppFonts.body(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: expense,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         );
@@ -254,8 +290,9 @@ class _Form extends StatelessWidget {
   }
 
   Future<DateTime?> _pickDateTime(
-      BuildContext context, DateTime initial) async {
+      BuildContext context, DateTime initial, bool dateOnly) async {
     DateTime selected = initial;
+    final l10n = AppLocalizations.of(context);
     final picked = await showCupertinoModalPopup<DateTime>(
       context: context,
       builder: (ctx) {
@@ -271,17 +308,19 @@ class _Form extends StatelessWidget {
                   children: [
                     CupertinoButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.common_cancel),
                     ),
                     CupertinoButton(
                       onPressed: () => Navigator.of(ctx).pop(selected),
-                      child: const Text('Done'),
+                      child: Text(l10n.common_done),
                     ),
                   ],
                 ),
                 Expanded(
                   child: CupertinoDatePicker(
-                    mode: CupertinoDatePickerMode.dateAndTime,
+                    mode: dateOnly
+                        ? CupertinoDatePickerMode.date
+                        : CupertinoDatePickerMode.dateAndTime,
                     initialDateTime: initial,
                     minuteInterval: 5,
                     use24hFormat: true,
@@ -296,9 +335,9 @@ class _Form extends StatelessWidget {
     );
     return picked;
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
+
+// ── Sub-widgets ───────────────────────────────────────────────────────────────
 
 class _LabeledField extends StatelessWidget {
   final String label;
@@ -387,6 +426,7 @@ class _InputState extends State<_Input> {
 
 class _DateRow extends StatelessWidget {
   final DateTime value;
+  final bool showTime;
   final Color surface;
   final Color border;
   final Color fg;
@@ -395,6 +435,7 @@ class _DateRow extends StatelessWidget {
 
   const _DateRow({
     required this.value,
+    required this.showTime,
     required this.surface,
     required this.border,
     required this.fg,
@@ -417,7 +458,7 @@ class _DateRow extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                _fmt(value),
+                _fmt(value, showTime),
                 style: AppFonts.body(fontSize: 14, color: fg),
               ),
             ),
@@ -428,24 +469,16 @@ class _DateRow extends StatelessWidget {
     );
   }
 
-  String _fmt(DateTime d) {
+  String _fmt(DateTime d, bool withTime) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
+    final base = '${months[d.month - 1]} ${d.day}, ${d.year}';
+    if (!withTime) return base;
     final hh = d.hour.toString().padLeft(2, '0');
     final mm = d.minute.toString().padLeft(2, '0');
-    return '${months[d.month - 1]} ${d.day}, ${d.year} · $hh:$mm';
+    return '$base · $hh:$mm';
   }
 }
 
@@ -491,7 +524,7 @@ class _DurationPicker extends StatelessWidget {
               decoration: BoxDecoration(
                 color: d == value ? accent.withValues(alpha: 0.14) : surface,
                 border: Border.all(
-                  color: d == value ? accent : Color(0x00000000),
+                  color: d == value ? accent : const Color(0x00000000),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -550,7 +583,7 @@ class _CategoryPicker extends StatelessWidget {
               decoration: BoxDecoration(
                 color: c == value ? accent.withValues(alpha: 0.14) : surface,
                 border: Border.all(
-                  color: c == value ? accent : Color(0x00000000),
+                  color: c == value ? accent : const Color(0x00000000),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -577,6 +610,57 @@ class _CategoryPicker extends StatelessWidget {
         AppointmentCategory.personal => 'Personal',
         AppointmentCategory.other => 'Other',
       };
+}
+
+class _ColorPicker extends StatelessWidget {
+  final String? selected;
+  final ValueChanged<String?> onChanged;
+
+  const _ColorPicker({required this.selected, required this.onChanged});
+
+  static Color _parse(String hex) =>
+      Color(int.parse(hex.replaceFirst('#', '0xff')));
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        for (final hex in AppointmentColors.palette)
+          GestureDetector(
+            onTap: () => onChanged(selected == hex ? null : hex),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _parse(hex),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected == hex
+                      ? _parse(hex)
+                      : const Color(0x00000000),
+                  width: 3,
+                ),
+                boxShadow: selected == hex
+                    ? [
+                        BoxShadow(
+                          color: _parse(hex).withValues(alpha: 0.5),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: selected == hex
+                  ? const Icon(CupertinoIcons.checkmark,
+                      size: 14, color: CupertinoColors.white)
+                  : null,
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 class _Reminders extends StatelessWidget {
@@ -623,7 +707,7 @@ class _Reminders extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isOn ? accent.withValues(alpha: 0.14) : surface,
                   border: Border.all(
-                    color: isOn ? accent : Color(0x00000000),
+                    color: isOn ? accent : const Color(0x00000000),
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(10),

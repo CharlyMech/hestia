@@ -11,6 +11,7 @@ import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/categories/category_form_content.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
@@ -107,13 +108,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final surface2 = _c(theme.surface2Color);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
     if (_loading) {
       final body = Skeletonizer(
@@ -227,15 +227,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SegmentedControl(
-              options: const ['Expense', 'Income'],
-              active: _tab,
+            child: AnimatedPillTabs(
+              labels: const ['Expense', 'Income'],
+              selectedIndex: _tab,
               onChanged: (i) => setState(() => _tab = i),
               surface: surface,
               border: border,
               fg: fg,
               muted: muted,
-              activeColor: surface2,
+              pillColor: accent,
             ),
           ),
         ),
@@ -275,8 +275,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       child: content,
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _CategoryCard extends StatelessWidget {

@@ -11,13 +11,16 @@ import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
+
 import 'package:hestia/presentation/widgets/common/dotted_border.dart';
 import 'package:hestia/presentation/widgets/shopping/shopping_list_form_content.dart';
 import 'package:hestia/presentation/widgets/shopping/start_shopping_session_content.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show CartAlt;
+import 'package:iconoir_flutter/iconoir_flutter.dart' show CartAlt, PlaySolid;
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Shopping index — sessions, templates, and history.
 class ShoppingScreen extends StatefulWidget {
@@ -60,6 +63,30 @@ class _BodyState extends State<_Body> {
   /// 0 Sessions · 1 Templates · 2 History
   int _segment = 0;
   bool _refreshing = false;
+  RealtimeChannel? _householdChannel;
+  String? _subscribedHouseholdId;
+
+  @override
+  void dispose() {
+    AppDependencies.instance.shoppingRealtimeService
+        .unsubscribe(_householdChannel);
+    super.dispose();
+  }
+
+  void _syncHouseholdSubscription(String? householdId) {
+    if (householdId == null || householdId == _subscribedHouseholdId) return;
+    AppDependencies.instance.shoppingRealtimeService
+        .unsubscribe(_householdChannel);
+    _subscribedHouseholdId = householdId;
+    _householdChannel = AppDependencies.instance.shoppingRealtimeService
+        .subscribeToHouseholdShopping(
+      householdId: householdId,
+      onChanged: () {
+        if (!mounted) return;
+        context.read<ShoppingListsBloc>().add(const ShoppingListsRemoteSync());
+      },
+    );
+  }
 
   Future<void> _onPullRefresh(BuildContext context) async {
     setState(() => _refreshing = true);
@@ -90,7 +117,9 @@ class _BodyState extends State<_Body> {
     final bloc = context.read<ShoppingListsBloc>();
     await showAppBottomSheet<void>(
       context: context,
-      title: template == null ? 'Start shopping' : 'Start from template',
+      title: template == null
+          ? AppLocalizations.of(context).shopping_startSession
+          : AppLocalizations.of(context).shopping_startFromTemplate,
       heightFactor: 0.88,
       expand: true,
       child: StartShoppingSessionContent(
@@ -127,7 +156,7 @@ class _BodyState extends State<_Body> {
     final bloc = context.read<ShoppingListsBloc>();
     await showAppBottomSheet<void>(
       context: context,
-      title: 'New template',
+      title: AppLocalizations.of(context).shopping_newTemplate,
       heightFactor: 0.88,
       expand: true,
       child: ShoppingListFormContent(
@@ -153,108 +182,110 @@ class _BodyState extends State<_Body> {
     final muted = _c(theme.onInactiveColor);
     final accent = _c(theme.primaryColor);
 
+    final topInset = MediaQuery.viewPaddingOf(context).top;
     return ColoredBox(
       color: bg,
-      child: SafeArea(
-        bottom: false,
-        child: BlocBuilder<ShoppingListsBloc, ShoppingListsState>(
-          builder: (context, state) {
-            return Skeletonizer(
-              enabled: _refreshing,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
+      child: BlocConsumer<ShoppingListsBloc, ShoppingListsState>(
+        listenWhen: (prev, next) =>
+            context.read<ShoppingListsBloc>().householdId !=
+            _subscribedHouseholdId,
+        listener: (context, state) {
+          _syncHouseholdSubscription(
+            context.read<ShoppingListsBloc>().householdId,
+          );
+        },
+        builder: (context, state) {
+          _syncHouseholdSubscription(
+            context.read<ShoppingListsBloc>().householdId,
+          );
+          return Skeletonizer(
+            enabled: _refreshing,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
+                CupertinoSliverRefreshControl(
+                  onRefresh: () => _onPullRefresh(context),
                 ),
-                slivers: [
-                  CupertinoSliverRefreshControl(
-                    onRefresh: () => _onPullRefresh(context),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.shopping_title,
-                              style: AppFonts.heading(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                                color: fg,
-                              ),
-                            ),
-                          ),
-                          IconBtn(
-                            icon: Icon(
-                              CupertinoIcons.play_circle_fill,
-                              size: 20,
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.shopping_title,
+                            style: AppFonts.heading(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
                               color: fg,
                             ),
-                            surface: surface,
-                            border: border,
-                            onTap: () => _openStartSession(context),
-                            size: 36,
-                            radius: AppRadii.lg,
                           ),
-                        ],
-                      ),
+                        ),
+                        AnimatedButton(
+                          size: 32,
+                          padding: const EdgeInsets.all(4),
+                          onTap: () => _openStartSession(context),
+                          child: PlaySolid(width: 22, height: 22, color: fg),
+                        ),
+                      ],
                     ),
                   ),
-                  if (state is ShoppingListsLoaded &&
-                      state.activeSessions.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                        child: _ActiveSessionBanner(
-                          list: state.activeSessions.first,
-                          surface: surface,
-                          border: border,
-                          fg: fg,
-                          muted: muted,
-                          accent: accent,
-                          onOpen: () async {
-                            final bloc = context.read<ShoppingListsBloc>();
-                            await context.push(
-                              AppRoutes.shoppingListDetail,
-                              extra: state.activeSessions.first,
-                            );
-                            if (context.mounted) {
-                              bloc.add(ShoppingListsRefresh());
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                ),
+                if (state is ShoppingListsLoaded &&
+                    state.activeSessions.isNotEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: SegmentedControl(
-                        options: [
-                          l10n.shopping_sessionsTab,
-                          l10n.shopping_templatesTab,
-                          l10n.shopping_history,
-                        ],
-                        active: _segment,
-                        onChanged: (i) => setState(() => _segment = i),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      child: _ActiveSessionBanner(
+                        list: state.activeSessions.first,
                         surface: surface,
                         border: border,
                         fg: fg,
                         muted: muted,
-                        activeColor: accent,
-                        activeFg: CupertinoColors.white,
+                        accent: accent,
+                        onOpen: () async {
+                          final bloc = context.read<ShoppingListsBloc>();
+                          await context.push(
+                            AppRoutes.shoppingListDetail,
+                            extra: state.activeSessions.first,
+                          );
+                          if (context.mounted) {
+                            bloc.add(ShoppingListsRefresh());
+                          }
+                        },
                       ),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                  ..._buildBody(
-                      context, state, surface, border, fg, muted, accent),
-                  const SliverToBoxAdapter(child: SizedBox(height: 110)),
-                ],
-              ),
-            );
-          },
-        ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: AnimatedPillTabs(
+                      labels: [
+                        l10n.shopping_sessionsTab,
+                        l10n.shopping_templatesTab,
+                        l10n.shopping_history,
+                      ],
+                      selectedIndex: _segment,
+                      onChanged: (i) => setState(() => _segment = i),
+                      surface: surface,
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                      pillColor: accent,
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                ..._buildBody(
+                    context, state, surface, border, fg, muted, accent),
+                const SliverToBoxAdapter(child: SizedBox(height: 110)),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -301,7 +332,7 @@ class _BodyState extends State<_Body> {
                 children: [
                   CartAlt(width: 44, height: 44, color: muted),
                   Text(
-                    'No active sessions — tap play to start',
+                    AppLocalizations.of(context).shopping_noActiveSessions,
                     style: AppFonts.body(fontSize: 13, color: muted),
                   ),
                 ],
@@ -381,7 +412,7 @@ class _BodyState extends State<_Body> {
           hasScrollBody: false,
           child: Center(
             child: Text(
-              'No finished sessions yet',
+              AppLocalizations.of(context).shopping_noFinishedSessions,
               style: AppFonts.body(fontSize: 13, color: muted),
             ),
           ),
@@ -460,7 +491,7 @@ class _ActiveSessionBanner extends StatelessWidget {
                 spacing: 2,
                 children: [
                   Text(
-                    'Active shopping',
+                    AppLocalizations.of(context).dashboard_activeShoppingSession,
                     style: AppFonts.body(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -479,7 +510,7 @@ class _ActiveSessionBanner extends StatelessWidget {
                   ),
                   if (shared)
                     Text(
-                      'Shared · anyone in the household can collaborate',
+                      AppLocalizations.of(context).shopping_sharedCollaboration,
                       style: AppFonts.body(fontSize: 11, color: muted),
                     ),
                 ],
@@ -521,7 +552,7 @@ class _CreateTemplateTile extends StatelessWidget {
               children: [
                 Icon(CupertinoIcons.add_circled, size: 22, color: muted),
                 Text(
-                  'Create new template',
+                  AppLocalizations.of(context).shopping_createTemplate,
                   style: AppFonts.body(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -558,11 +589,11 @@ class _ListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
-    final green = Color(int.parse(theme.colorGreen.replaceFirst('#', '0xff')));
-    final red = Color(int.parse(theme.colorRed.replaceFirst('#', '0xff')));
+    final accent = hexToColor(theme.primaryColor);
+    final green = hexToColor(theme.colorGreen);
+    final red = hexToColor(theme.colorRed);
     final tint = template
         ? accent
         : switch (list.status) {
@@ -571,14 +602,15 @@ class _ListTile extends StatelessWidget {
             ShoppingListStatus.cancelled => red,
           };
     final statusLabel = template
-        ? 'Template'
+        ? l10n.shopping_kindTemplate
         : switch (list.status) {
-            ShoppingListStatus.active => 'Active',
-            ShoppingListStatus.paid => 'Paid',
-            ShoppingListStatus.cancelled => 'Cancelled',
+            ShoppingListStatus.active => l10n.shopping_active,
+            ShoppingListStatus.paid => l10n.shopping_statusPaid,
+            ShoppingListStatus.cancelled => l10n.shopping_statusCancelled,
           };
-    final kindBit =
-        list.kind == ShoppingListKind.template ? 'Template' : 'Session';
+    final kindBit = list.kind == ShoppingListKind.template
+        ? l10n.shopping_kindTemplate
+        : l10n.shopping_kindSession;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,

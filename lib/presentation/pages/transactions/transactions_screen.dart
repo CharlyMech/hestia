@@ -23,16 +23,16 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final surface2 = _c(theme.surface2Color);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final tints = theme.categoryTints.map(_c).toList();
-    final income = _c(theme.colorGreen);
-    final expense = _c(theme.colorRed);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final surface2 = hexToColor(theme.surface2Color);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
+    final income = hexToColor(theme.colorGreen);
+    final expense = hexToColor(theme.colorRed);
 
     final groups = <_Group>[
       _Group('Today · April 22', -72.70, [
@@ -302,8 +302,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Group {

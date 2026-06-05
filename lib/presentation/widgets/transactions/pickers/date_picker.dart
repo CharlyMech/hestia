@@ -28,9 +28,9 @@ class _TransactionDatePickerState extends State<TransactionDatePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
-    final onPrimary = _c(theme.onPrimaryColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
 
     return SizedBox(
       height: 320,
@@ -80,6 +80,4 @@ class _TransactionDatePickerState extends State<TransactionDatePicker> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

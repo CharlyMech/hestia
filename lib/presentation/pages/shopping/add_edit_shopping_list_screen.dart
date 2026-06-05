@@ -32,11 +32,11 @@ class _AddEditShoppingListScreenState extends State<AddEditShoppingListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
@@ -71,6 +71,4 @@ class _AddEditShoppingListScreenState extends State<AddEditShoppingListScreen> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

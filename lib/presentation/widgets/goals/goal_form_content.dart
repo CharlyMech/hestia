@@ -8,7 +8,9 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/presentation/blocs/goals/goals_bloc.dart';
+import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/common/primary_button.dart';
 
 /// Reusable goal form. Opens inside `showAppBottomSheet` from goals screen,
 /// money source detail, or anywhere else. Handles create/edit/delete via the
@@ -191,6 +193,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
         lastUpdate: now,
       );
       context.read<GoalsBloc>().add(GoalsCreate(goal));
+      context.showToast(
+          const AppToastConfig(type: ToastType.success, title: 'Goal created'));
     } else {
       final g = widget.existing!;
       final updated = g.copyWith(
@@ -209,6 +213,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
         lastUpdate: now,
       );
       context.read<GoalsBloc>().add(GoalsUpdate(updated));
+      context.showToast(
+          const AppToastConfig(type: ToastType.success, title: 'Goal updated'));
     }
     Navigator.of(context).pop();
   }
@@ -234,6 +240,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
     );
     if (ok == true && mounted) {
       context.read<GoalsBloc>().add(GoalsDelete(widget.existing!.id));
+      context.showToast(
+          const AppToastConfig(type: ToastType.neutral, title: 'Goal deleted'));
       Navigator.of(context).pop();
     }
   }
@@ -398,9 +406,9 @@ class _GoalFormContentState extends State<GoalFormContent> {
                 ),
               Expanded(
                 flex: isEdit ? 1 : 2,
-                child: CupertinoButton.filled(
+                child: PrimaryButton(
+                  label: isEdit ? 'Save' : 'Create goal',
                   onPressed: _save,
-                  child: Text(isEdit ? 'Save' : 'Create'),
                 ),
               ),
             ],

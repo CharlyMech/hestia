@@ -137,7 +137,10 @@ class CarsBloc extends Bloc<CarsEvent, CarsState> {
   }
 
   Future<void> _fetch(Emitter<CarsState> emit) async {
-    if (_householdId == null) return;
+    if (_householdId == null) {
+      _emitCarsLoaded(emit, const []);
+      return;
+    }
     final (cars, failure) =
         await _repo.getCars(householdId: _householdId!, activeOnly: false);
     if (failure != null) {

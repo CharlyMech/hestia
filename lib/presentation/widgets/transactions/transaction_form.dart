@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/core/constants/known_banks.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +18,9 @@ import 'package:hestia/presentation/blocs/transaction_form/transaction_form_bloc
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_event.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_state.dart';
 import 'package:hestia/presentation/blocs/transaction_sources/transaction_sources_bloc.dart';
+import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/toggle_switch.dart';
 import 'package:hestia/presentation/widgets/transaction_sources/transaction_source_form.dart';
@@ -27,7 +30,6 @@ import 'package:hestia/presentation/widgets/transactions/pickers/date_picker.dar
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Cart, CreditCard, Calendar, Refresh, EditPencil, Trash, Shop, Plus;
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 
 class TransactionForm extends StatefulWidget {
   final String householdId;
@@ -168,16 +170,15 @@ class _FormBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final surface2 = _c(theme.surface2Color);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final onPrimary = _c(theme.onPrimaryColor);
-    final expense = _c(theme.colorRed);
-    final income = _c(theme.colorGreen);
-    final tints = theme.categoryTints.map(_c).toList();
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
+    final expense = hexToColor(theme.colorRed);
+    final income = hexToColor(theme.colorGreen);
+    final tints = theme.categoryTints.map(hexToColor).toList();
 
     return BlocConsumer<TransactionFormBloc, TransactionFormState>(
       listener: (context, state) {
@@ -185,9 +186,28 @@ class _FormBody extends StatelessWidget {
           final t = state.submittedTransaction;
           if (t != null) {
             onSubmitted?.call(t);
+            context.showToast(AppToastConfig(
+              type: ToastType.success,
+              title: t.isExpense ? 'Expense saved' : 'Income saved',
+              description: t.note ?? t.categoryName,
+              position: ToastPosition.bottom,
+            ));
+          } else {
+            context.showToast(const AppToastConfig(
+              type: ToastType.neutral,
+              title: 'Transaction deleted',
+              position: ToastPosition.bottom,
+            ));
           }
           onClose?.call();
           Navigator.of(context).maybePop();
+        } else if (state.status == TransactionFormStatus.error) {
+          context.showToast(AppToastConfig(
+            type: ToastType.error,
+            title: 'Something went wrong',
+            description: state.failure?.message,
+            position: ToastPosition.bottom,
+          ));
         }
       },
       builder: (context, state) {
@@ -210,9 +230,9 @@ class _FormBody extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SegmentedControl(
-                options: const ['Expense', 'Income', 'Transfer'],
-                active: state.kind.index,
+              AnimatedPillTabs(
+                labels: const ['Expense', 'Income', 'Transfer'],
+                selectedIndex: state.kind.index,
                 onChanged: (i) => bloc.add(
                   TransactionFormKindChanged(TransactionKind.values[i]),
                 ),
@@ -220,7 +240,7 @@ class _FormBody extends StatelessWidget {
                 border: border,
                 fg: fg,
                 muted: muted,
-                activeColor: surface2,
+                pillColor: accent,
               ),
               const SizedBox(height: 24),
               Text('AMOUNT · EUR', style: AppFonts.sectionLabel(color: muted)),
@@ -273,7 +293,11 @@ class _FormBody extends StatelessWidget {
                   ),
                 if (!isTransfer) const SizedBox(height: 8),
                 _PickerTile(
-                  icon: CreditCard(width: 18, height: 18, color: tints[2]),
+                  icon: selectedAccount?.institution != null
+                      ? _BankLogo(
+                          institution: selectedAccount!.institution!,
+                          fallbackColor: tints[2])
+                      : CreditCard(width: 18, height: 18, color: tints[2]),
                   iconColor: tints[2],
                   label: isTransfer ? 'From account' : 'Bank account',
                   value: selectedAccount?.name ?? 'Select',
@@ -292,7 +316,11 @@ class _FormBody extends StatelessWidget {
                 if (isTransfer) ...[
                   const SizedBox(height: 8),
                   _PickerTile(
-                    icon: CreditCard(width: 18, height: 18, color: tints[3]),
+                    icon: selectedTo?.institution != null
+                        ? _BankLogo(
+                            institution: selectedTo!.institution!,
+                            fallbackColor: tints[3])
+                        : CreditCard(width: 18, height: 18, color: tints[3]),
                     iconColor: tints[3],
                     label: 'To account',
                     value: selectedTo?.name ?? 'Select',
@@ -490,6 +518,22 @@ class _FormBody extends StatelessWidget {
               ],
               if (state.failure != null)
                 _ErrorLine(text: state.failure!.message, color: expense),
+              // ── Actor "Related to" picker ──────────────────────────────
+              _ActorPicker(
+                petId: state.petId,
+                carId: state.carId,
+                homeId: state.homeId,
+                householdId: householdId,
+                surface: surface,
+                border: border,
+                fg: fg,
+                muted: muted,
+                accent: accent,
+                onChanged: (petId, carId, homeId) => bloc.add(
+                  TransactionFormActorChanged(
+                      petId: petId, carId: carId, homeId: homeId),
+                ),
+              ),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -550,17 +594,16 @@ class _FormBody extends StatelessWidget {
     TransactionFormBloc bloc,
     TransactionFormState state,
   ) async {
-    final initial = (state.latitude != null && state.longitude != null)
-        ? LatLng(state.latitude!, state.longitude!)
-        : const LatLng(40.4168, -3.7038);
-    final result = await context.push<LatLng>(
+    final initialLat = state.latitude ?? 40.4168;
+    final initialLng = state.longitude ?? -3.7038;
+    final result = await context.push<(double, double)>(
       AppRoutes.transactionMapPicker,
-      extra: initial,
+      extra: (initialLat, initialLng),
     );
     if (!context.mounted || result == null) return;
     bloc.add(TransactionFormLocationSet(
-      latitude: result.latitude,
-      longitude: result.longitude,
+      latitude: result.$1,
+      longitude: result.$2,
     ));
   }
 
@@ -647,8 +690,6 @@ class _FormBody extends StatelessWidget {
     }
     return DateFormat('dd MMM yyyy').format(d);
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 /// Bottom-sheet body: create/edit + shrink-wrapped list (no nested viewport).
@@ -695,10 +736,10 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final border = _c(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final border = hexToColor(theme.borderColor);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -791,8 +832,50 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
       ],
     );
   }
+}
 
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+/// Small bank logo for the account picker. Renders the bundled PNG when an
+/// asset exists for the institution slug, else a brand-colored letter badge.
+class _BankLogo extends StatelessWidget {
+  final String institution;
+  final Color fallbackColor;
+
+  const _BankLogo({required this.institution, required this.fallbackColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final slug = bankSlug(institution);
+    final known = kKnownBanks.cast<KnownBank?>().firstWhere(
+          (b) => b?.slug == slug,
+          orElse: () => null,
+        );
+    final brand = known != null
+        ? Color(int.parse(known.brandColor.replaceFirst('#', '0xff')))
+        : fallbackColor;
+    final letter =
+        institution.isNotEmpty ? institution[0].toUpperCase() : '?';
+
+    return SizedBox(
+      width: 18,
+      height: 18,
+      child: Image.asset(
+        'assets/banks/$slug.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => Container(
+          decoration: BoxDecoration(
+            color: brand.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            letter,
+            style: AppFonts.heading(
+                fontSize: 10, fontWeight: FontWeight.w700, color: brand),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _PickerTile extends StatelessWidget {
@@ -958,6 +1041,218 @@ class _ErrorLine extends StatelessWidget {
         text,
         textAlign: TextAlign.center,
         style: AppFonts.body(fontSize: 12, color: color),
+      ),
+    );
+  }
+}
+
+// ── Actor "Related to" picker ─────────────────────────────────────────────────
+
+class _ActorPicker extends StatefulWidget {
+  final String? petId;
+  final String? carId;
+  final String? homeId;
+  final String householdId;
+  final Color surface, border, fg, muted, accent;
+  final void Function(String? petId, String? carId, String? homeId) onChanged;
+
+  const _ActorPicker({
+    required this.householdId,
+    required this.surface,
+    required this.border,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.onChanged,
+    this.petId,
+    this.carId,
+    this.homeId,
+  });
+
+  @override
+  State<_ActorPicker> createState() => _ActorPickerState();
+}
+
+class _ActorPickerState extends State<_ActorPicker> {
+  List<({String id, String name, String icon})> _pets = [];
+  List<({String id, String name, String icon})> _cars = [];
+  List<({String id, String name, String icon})> _homes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOptions();
+  }
+
+  Future<void> _loadOptions() async {
+    final deps = AppDependencies.instance;
+    final (pets, _) =
+        await deps.petRepository.getPets(householdId: widget.householdId);
+    final (cars, _) =
+        await deps.carRepository.getCars(householdId: widget.householdId);
+    final (homes, _) = await deps.homeRepository.getHomes(widget.householdId);
+    if (!mounted) return;
+    setState(() {
+      _pets = pets.map((p) => (id: p.id, name: p.name, icon: '🐾')).toList();
+      _cars = cars.map((c) => (id: c.id, name: c.name, icon: '🚗')).toList();
+      _homes = homes.map((h) => (id: h.id, name: h.name, icon: '🏠')).toList();
+    });
+  }
+
+  String? get _activeLabel {
+    if (widget.petId != null) {
+      final pet = _pets.where((p) => p.id == widget.petId).firstOrNull;
+      return pet != null ? '${pet.icon} ${pet.name}' : null;
+    }
+    if (widget.carId != null) {
+      final car = _cars.where((c) => c.id == widget.carId).firstOrNull;
+      return car != null ? '${car.icon} ${car.name}' : null;
+    }
+    if (widget.homeId != null) {
+      final home = _homes.where((h) => h.id == widget.homeId).firstOrNull;
+      return home != null ? '${home.icon} ${home.name}' : null;
+    }
+    return null;
+  }
+
+  void _openPicker() async {
+    if (_pets.isEmpty && _cars.isEmpty && _homes.isEmpty) return;
+
+    final options = <({String id, String label, String type})>[
+      for (final p in _pets)
+        (id: p.id, label: '${p.icon} ${p.name}', type: 'pet'),
+      for (final c in _cars)
+        (id: c.id, label: '${c.icon} ${c.name}', type: 'car'),
+      for (final h in _homes)
+        (id: h.id, label: '${h.icon} ${h.name}', type: 'home'),
+    ];
+
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => Container(
+        color: widget.surface,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Clear option
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onChanged(null, null, null);
+                  Navigator.of(ctx).pop();
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  child: Row(
+                    children: [
+                      Text('None',
+                          style:
+                              AppFonts.body(fontSize: 15, color: widget.muted)),
+                    ],
+                  ),
+                ),
+              ),
+              Container(height: 0.5, color: widget.border),
+              for (final opt in options) ...[
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    widget.onChanged(
+                      opt.type == 'pet' ? opt.id : null,
+                      opt.type == 'car' ? opt.id : null,
+                      opt.type == 'home' ? opt.id : null,
+                    );
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(opt.label,
+                              style: AppFonts.body(
+                                  fontSize: 15,
+                                  color: widget.fg,
+                                  fontWeight: (opt.type == 'pet' &&
+                                              opt.id == widget.petId) ||
+                                          (opt.type == 'car' &&
+                                              opt.id == widget.carId) ||
+                                          (opt.type == 'home' &&
+                                              opt.id == widget.homeId)
+                                      ? FontWeight.w600
+                                      : FontWeight.w400)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(height: 0.5, color: widget.border),
+              ],
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasActor =
+        widget.petId != null || widget.carId != null || widget.homeId != null;
+    final label = _activeLabel;
+
+    if (_pets.isEmpty && _cars.isEmpty && _homes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return GestureDetector(
+      onTap: _openPicker,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: widget.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: widget.border, width: 0.8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 2,
+                children: [
+                  Text('Related to',
+                      style: AppFonts.body(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: widget.muted,
+                          letterSpacing: 0.5)),
+                  Text(
+                    label ?? 'None',
+                    style: AppFonts.body(
+                      fontSize: 14,
+                      color: hasActor ? widget.fg : widget.muted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (hasActor)
+              GestureDetector(
+                onTap: () => widget.onChanged(null, null, null),
+                child: Icon(
+                  CupertinoIcons.xmark_circle_fill,
+                  size: 18,
+                  color: widget.muted,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

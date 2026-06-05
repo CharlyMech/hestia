@@ -1,30 +1,39 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/core/services/location_service.dart';
+import 'package:hestia/presentation/widgets/common/user_avatar_button.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
-import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/transaction.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/blocs/map/map_bloc.dart';
 import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
+import 'package:hestia/domain/entities/shopping_list.dart';
+import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/date_range_selector.dart';
-import 'package:hestia/presentation/widgets/dashboard/balance_trend_line.dart';
-import 'package:hestia/presentation/widgets/dashboard/range_cash_flow_bars.dart';
+import 'package:hestia/presentation/widgets/dashboard/map_preview_card.dart';
 import 'package:hestia/presentation/widgets/dashboard/spend_donut.dart';
 import 'package:hestia/presentation/widgets/dashboard/tx_row.dart';
+
 import 'package:hestia/presentation/widgets/dashboard/week_calendar_strip.dart';
-import 'package:hestia/presentation/widgets/goals/goal_progress_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, Bank, CreditCard, Settings;
+    show Bell, Bank, CreditCard, Settings, CartAlt;
+import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -41,11 +50,22 @@ class _DashboardScreenState extends State<DashboardScreen>
   List<Transaction> _allTransactions = const [];
   List<TxData> _recentTx = const [];
   List<Transaction> _recentTransactions = const [];
-  List<FinancialGoal> _goals = const [];
   List<Appointment> _weekAppointments = const [];
+  StreamSubscription<List<Appointment>>? _weekAppointmentsSub;
+  StreamSubscription<Position>? _locationSub;
   bool _loading = true;
   bool _refreshing = false;
   DateRangePreset _range = DateRangePreset.d30;
+
+  static const _rangePresets = [
+    DateRangePreset.d7,
+    DateRangePreset.d30,
+    DateRangePreset.d90,
+    DateRangePreset.m6,
+    DateRangePreset.y1,
+  ];
+
+  static const _rangeLabels = ['7d', '30d', '90d', '6m', '1y'];
 
   @override
   bool get wantKeepAlive => true;
@@ -54,6 +74,45 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     _load();
+    _startLocationStream();
+  }
+
+  @override
+  void dispose() {
+    _weekAppointmentsSub?.cancel();
+    _locationSub?.cancel();
+    super.dispose();
+  }
+
+  void _startLocationStream() async {
+    // Only start if permission already granted — never request here.
+    final granted = await LocationService().hasPermission();
+    if (!granted || !mounted) return;
+
+    // First fix recentres the shared map camera on the user.
+    try {
+      final current = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        context.read<MapBloc>().add(
+              MapUserLocationUpdated(current.latitude, current.longitude,
+                  recenter: true),
+            );
+      }
+    } catch (_) {
+      // Stream may still deliver a fix shortly after.
+    }
+
+    _locationSub = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 20,
+      ),
+    ).listen((pos) {
+      if (!mounted) return;
+      context
+          .read<MapBloc>()
+          .add(MapUserLocationUpdated(pos.latitude, pos.longitude));
+    });
   }
 
   Future<void> _load({bool fromPullRefresh = false}) async {
@@ -61,6 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     try {
       final authState = context.read<AuthBloc>().state;
       if (authState is! AuthAuthenticated) {
+        await _weekAppointmentsSub?.cancel();
         if (mounted) setState(() => _loading = false);
         return;
       }
@@ -69,6 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       final (household, _) =
           await deps.householdRepository.getCurrentHousehold(profile.id);
       if (household == null) {
+        await _weekAppointmentsSub?.cancel();
         if (mounted) {
           setState(() {
             _loading = false;
@@ -76,45 +137,32 @@ class _DashboardScreenState extends State<DashboardScreen>
             _allTransactions = const [];
             _recentTx = const [];
             _recentTransactions = const [];
-            _goals = const [];
             _weekAppointments = const [];
           });
         }
         return;
       }
 
+      _watchWeekAppointments(profile.id);
+
+      // Global (household-wide) data — all members' accounts & transactions.
       final (accounts, _) = await deps.bankAccountRepository.getBankAccounts(
         householdId: household.id,
-        viewMode: ViewMode.personal,
+        viewMode: ViewMode.household,
         userId: profile.id,
       );
       final (transactions, _) =
           await deps.transactionRepository.getTransactions(
         householdId: household.id,
-        viewMode: ViewMode.personal,
+        viewMode: ViewMode.household,
         userId: profile.id,
         limit: 500,
       );
-      final (goals, _) = await deps.goalRepository.getGoals(
-        householdId: household.id,
-        viewMode: ViewMode.personal,
-        userId: profile.id,
-      );
-
-      final now = DateTime.now();
-      final weekStart = now.subtract(Duration(days: (now.weekday - 1) % 7));
-      final weekEnd = weekStart.add(const Duration(days: 7));
-      final (appointments, _) = await deps.appointmentRepository.getRange(
-        userId: profile.id,
-        from: weekStart,
-        to: weekEnd,
-      );
-
       if (mounted) {
         context.read<NotificationsBloc>().add(NotificationsLoad(profile.id));
       }
 
-      final recentTransactions = transactions.take(6).toList();
+      final recentTransactions = transactions.take(8).toList();
       final recent =
           recentTransactions.map((tx) => _toTxData(tx, accounts)).toList();
 
@@ -124,8 +172,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         _allTransactions = transactions;
         _recentTx = recent;
         _recentTransactions = recentTransactions;
-        _goals = goals.where((g) => g.isActive).toList();
-        _weekAppointments = appointments;
         _loading = false;
       });
     } finally {
@@ -135,6 +181,28 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
   }
 
+  void _watchWeekAppointments(String userId) {
+    final startDay = context.read<UserPrefsBloc>().state.startDay;
+    final now = DateTime.now();
+    final weekStart = _dateOnly(now)
+        .subtract(Duration(days: (now.weekday - startDay + 7) % 7));
+    final weekEnd = weekStart.add(const Duration(days: 7));
+
+    _weekAppointmentsSub?.cancel();
+    _weekAppointmentsSub = AppDependencies.instance.appointmentRepository
+        .watchRange(
+      userId: userId,
+      from: weekStart,
+      to: weekEnd,
+    )
+        .listen((appointments) {
+      if (!mounted) return;
+      setState(() => _weekAppointments = appointments);
+    });
+  }
+
+  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
   List<Transaction> _txInRange() {
     final r = DateRange.fromPreset(_range);
     return _allTransactions
@@ -142,155 +210,148 @@ class _DashboardScreenState extends State<DashboardScreen>
         .toList();
   }
 
-  int _trendDays() => switch (_range) {
-        DateRangePreset.d7 => 7,
-        DateRangePreset.d30 => 30,
-        DateRangePreset.d90 => 90,
-        DateRangePreset.m6 => 180,
-        DateRangePreset.y1 => 365,
-        DateRangePreset.custom => 30,
-      };
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final income = _c(theme.colorGreen);
-    final expense = _c(theme.colorRed);
-    final tints = theme.categoryTints.map(_c).toList();
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
+    final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthBloc>().state;
-    final initials = auth is AuthAuthenticated
-        ? _initials(auth.profile.displayName ?? auth.profile.email)
-        : '··';
-
+    final topInset = MediaQuery.viewPaddingOf(context).top;
     return ColoredBox(
       color: bg,
-      child: SafeArea(
-        bottom: false,
-        child: _loading
-            ? Skeletonizer(
-                enabled: true,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'User name goes here long',
-                            style: AppFonts.heading(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: fg,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: surface,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'BANK ACCOUNTS',
-                        style: AppFonts.body(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: muted,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        height: 172,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: 262,
-                            height: 148,
-                            decoration: BoxDecoration(
-                              color: surface,
-                              borderRadius: BorderRadius.circular(AppRadii.xl),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Text(
-                            'SPENDING',
-                            style: AppFonts.body(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: muted,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                      const SizedBox(height: 220),
-                      const SizedBox(height: 220),
-                      Text(
-                        'RECENT ACTIVITY placeholder',
-                        style: AppFonts.body(
-                          fontSize: 12,
-                          color: muted,
-                        ),
-                      ),
-                    ],
-                  ),
+      child: _loading
+          ? Skeletonizer(
+              enabled: true,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
                 ),
-              )
-            : Skeletonizer(
-                enabled: _refreshing,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  slivers: [
-                    CupertinoSliverRefreshControl(
-                        onRefresh: () => _load(fromPullRefresh: true)),
-                    SliverPadding(
-                      padding: const EdgeInsets.only(bottom: 110),
-                      sliver: SliverList.list(children: [
+                padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 110),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 20,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'User name goes here long',
+                          style: AppFonts.heading(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: fg,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: surface,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: 148,
+                      width: 262,
+                      decoration: BoxDecoration(
+                        color: surface,
+                        borderRadius: BorderRadius.circular(AppRadii.xl),
+                      ),
+                    ),
+                    Text(
+                      'RECENT ACTIVITY placeholder',
+                      style: AppFonts.body(fontSize: 12, color: muted),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Skeletonizer(
+              enabled: _refreshing,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                      onRefresh: () => _load(fromPullRefresh: true)),
+                  SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 140),
+                    sliver: SliverList.list(children: [
                       _Header(
                         fg: fg,
                         muted: muted,
                         surface: surface,
                         border: border,
                         accent: accent,
-                        initials: initials,
+                        profile:
+                            auth is AuthAuthenticated ? auth.profile : null,
                         unreadCount: (context.watch<NotificationsBloc>().state
-                                  is NotificationsLoaded)
-                              ? (context.watch<NotificationsBloc>().state
-                                      as NotificationsLoaded)
-                                  .unreadCount
-                              : 0,
-                        ),
-                        const SizedBox(height: 20),
-                        _SectionLabel(
-                          label: 'Bank accounts',
-                          muted: muted,
-                        ),
-                        const SizedBox(height: 12),
-                        // Real WalletCard carousel.
+                                is NotificationsLoaded)
+                            ? (context.watch<NotificationsBloc>().state
+                                    as NotificationsLoaded)
+                                .unreadCount
+                            : 0,
+                      ),
+                      const SizedBox(height: 20),
+                      _SectionLabel(
+                          label: l10n.dashboard_accounts, muted: muted),
+                      const SizedBox(height: 12),
+                      if (_accounts.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () async {
+                              await context
+                                  .push<bool>(AppRoutes.addBankAccount);
+                              if (mounted) _load();
+                            },
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: accent.withValues(alpha: 0.4),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 18),
+                                child: Row(
+                                  spacing: 12,
+                                  children: [
+                                    Icon(CupertinoIcons.add_circled,
+                                        size: 22, color: accent),
+                                    Expanded(
+                                      child: Text(
+                                        l10n.bankAccounts_addCard,
+                                        style: AppFonts.body(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: fg),
+                                      ),
+                                    ),
+                                    Icon(CupertinoIcons.chevron_right,
+                                        size: 16, color: muted),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      else
                         SizedBox(
                           height: 180,
                           child: ListView.separated(
@@ -300,207 +361,191 @@ class _DashboardScreenState extends State<DashboardScreen>
                             itemCount: _accounts.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(width: 12),
-                            itemBuilder: (_, i) {
-                              return SizedBox(
-                                width: 280,
-                                child: WalletCard(
-                                  source: _accounts[i],
-                                  index: i,
-                                  onTap: () => (widget.onOpenMoneySource ??
-                                          ((id) => context.push(
-                                              AppRoutes.bankAccountDetail,
-                                              extra: id)))
-                                      .call(_accounts[i].id),
-                                ),
-                              );
-                            },
+                            itemBuilder: (_, i) => SizedBox(
+                              width: 280,
+                              child: WalletCard(
+                                source: _accounts[i],
+                                index: i,
+                                onTap: () => (widget.onOpenMoneySource ??
+                                        ((id) => context.push(
+                                            AppRoutes.bankAccountDetail,
+                                            extra: id)))
+                                    .call(_accounts[i].id),
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        WeekCalendarStrip(
-                          appointments: _weekAppointments,
-                          transactions: _allTransactions,
-                          accent: accent,
+                      // Active shopping session banner
+                      Builder(builder: (ctx) {
+                        final shState = ctx.watch<ShoppingListsBloc>().state;
+                        final sessions = shState is ShoppingListsLoaded
+                            ? shState.activeSessions
+                            : <ShoppingList>[];
+                        if (sessions.isEmpty) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: accent.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(AppRadii.lg),
+                              border: Border.all(
+                                  color: accent.withValues(alpha: 0.25),
+                                  width: 0.8),
+                            ),
+                            child: Row(
+                              spacing: 10,
+                              children: [
+                                CartAlt(width: 18, height: 18, color: fg),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 2,
+                                    children: [
+                                      Text(
+                                        sessions.length == 1
+                                            ? l10n
+                                                .dashboard_activeShoppingSession
+                                            : l10n
+                                                .dashboard_activeShoppingSessions(
+                                                sessions.length,
+                                              ),
+                                        style: AppFonts.body(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: fg),
+                                      ),
+                                      Text(
+                                        sessions.first.name,
+                                        style: AppFonts.body(
+                                            fontSize: 12, color: muted),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => context.push(
+                                      AppRoutes.shoppingListDetail,
+                                      extra: sessions.first.id),
+                                  child: Text(l10n.common_viewAll,
+                                      style: AppFonts.body(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: accent)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 20),
+                      _CalendarSectionLabel(accent: accent, muted: muted),
+                      const SizedBox(height: 8),
+                      WeekCalendarStrip(
+                        appointments: _weekAppointments,
+                        transactions: _allTransactions,
+                        accent: accent,
+                        fg: fg,
+                        muted: muted,
+                        surface: surface,
+                        income: hexToColor(theme.colorGreen),
+                        startDay: context.read<UserPrefsBloc>().state.startDay,
+                      ),
+                      const SizedBox(height: 20),
+                      // Date range — animated pill tabs
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: AnimatedPillTabs(
+                          labels: _rangeLabels,
+                          selectedIndex: _rangePresets.indexOf(_range),
+                          onChanged: (i) =>
+                              setState(() => _range = _rangePresets[i]),
+                          surface: surface,
+                          border: border,
                           fg: fg,
                           muted: muted,
-                          surface: surface,
-                          income: income,
-                          startDay:
-                              context.read<UserPrefsBloc>().state.startDay,
+                          pillColor: primary,
+                          height: 40,
                         ),
-                        const SizedBox(height: 20),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: DateRangeSelector(
-                            selected: _range,
-                            onChanged: (r) => setState(() => _range = r),
-                            surface: surface,
-                            border: border,
-                            fg: fg,
-                            muted: muted,
-                            activeColor: accent,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _SectionLabel(
-                          label: 'Spending',
+                      ),
+                      const SizedBox(height: 16),
+                      _SectionLabel(
+                          label: l10n.dashboard_spending, muted: muted),
+                      const SizedBox(height: 8),
+                      _ChartCard(
+                        surface: surface,
+                        border: border,
+                        child: SpendDonut(
+                          transactions: _txInRange(),
+                          fg: fg,
                           muted: muted,
-                          accent: accent,
-                        ),
-                        const SizedBox(height: 8),
-                        _ChartCard(
-                          surface: surface,
                           border: border,
-                          child: SpendDonut(
-                            transactions: _txInRange(),
-                            fg: fg,
-                            muted: muted,
-                            border: border,
-                            palette: tints,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _ChartCard(
                           surface: surface,
-                          border: border,
-                          child: RangeCashFlowBars(
-                            transactions: _txInRange(),
-                            income: income,
-                            expense: expense,
-                            axis: muted,
-                            grid: border,
-                            fg: fg,
-                            periodLabel: dateRangePresetShortLabel(_range),
-                          ),
+                          palette: tints,
                         ),
-                        const SizedBox(height: 12),
-                        _ChartCard(
-                          surface: surface,
-                          border: border,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 8,
-                            children: [
-                              Text(
-                                'Balance trend · ${_trendDays()}d',
-                                style: AppFonts.sectionLabel(color: muted),
+                      ),
+                      const SizedBox(height: 24),
+                      _SectionLabel(label: l10n.dashboard_recent, muted: muted),
+                      const SizedBox(height: 8),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: surface,
+                          borderRadius: BorderRadius.circular(AppRadii.lg),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: _recentTx.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(18),
+                                child: Text(
+                                  'No transactions yet',
+                                  style:
+                                      AppFonts.body(fontSize: 13, color: muted),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : Column(
+                                children: [
+                                  for (var i = 0; i < _recentTx.length; i++)
+                                    TxRow(
+                                      tx: _recentTx[i],
+                                      showDivider: i < _recentTx.length - 1,
+                                      onTap: () => context.push(
+                                        AppRoutes.transactionDetail,
+                                        extra: _recentTransactions[i],
+                                      ),
+                                    ),
+                                ],
                               ),
-                              BalanceTrendLine(
-                                transactions: _allTransactions,
-                                bankAccounts: _accounts,
-                                line: accent,
-                                grid: border,
-                                axis: muted,
-                                tooltipBg: fg,
-                                tooltipFg: bg,
-                                days: _trendDays(),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        _SectionLabel(
-                          label: 'Active goals',
-                          action: 'See all',
-                          muted: muted,
-                          accent: accent,
-                          onTap: () => context.push(AppRoutes.goals),
-                        ),
-                        const SizedBox(height: 8),
-                        if (_goals.isEmpty)
+                      ),
+
+                      // Map preview — always visible; opens the global map.
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 24),
+                          _SectionLabel(
+                              label: l10n.dashboard_map, muted: muted),
+                          const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 18),
-                              decoration: BoxDecoration(
-                                color: surface,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadii.xl),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'No active goals — tap See all to create one',
-                                  style:
-                                      AppFonts.body(fontSize: 12, color: muted),
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          SizedBox(
-                            height: 86,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              itemCount: _goals.take(4).length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(width: 10),
-                              itemBuilder: (_, i) {
-                                final g = _goals[i];
-                                final color = g.color != null
-                                    ? Color(int.parse(
-                                        g.color!.replaceFirst('#', '0xff')))
-                                    : accent;
-                                return SizedBox(
-                                  width: 240,
-                                  child: GoalProgressCard(
-                                    goal: g,
-                                    color: color,
-                                    surface: surface,
-                                    border: border,
-                                    fg: fg,
-                                    muted: muted,
-                                    onTap: () => context.push(AppRoutes.goals),
-                                  ),
-                                );
-                              },
+                            child: MapPreviewCard(
+                              surface: surface,
+                              border: border,
                             ),
                           ),
-                        const SizedBox(height: 24),
-                        _SectionLabel(
-                          label: 'Recent',
-                          muted: muted,
-                          accent: accent,
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: surface,
-                            borderRadius: BorderRadius.circular(AppRadii.xl),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Column(
-                            children: [
-                              for (var i = 0; i < _recentTx.length; i++)
-                                TxRow(
-                                  tx: _recentTx[i],
-                                  showDivider: i < _recentTx.length - 1,
-                                  onTap: () => context.push(
-                                    AppRoutes.transactionDetail,
-                                    extra: _recentTransactions[i],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ]),
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
+                    ]),
+                  ),
+                ],
               ),
-      ),
+            ),
     );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '··';
-    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
-        .toUpperCase();
   }
 
   TxData _toTxData(Transaction tx, List<BankAccount> sources) {
@@ -521,17 +566,13 @@ class _DashboardScreenState extends State<DashboardScreen>
       shared: isShared,
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
+// ── Sub-widgets ───────────────────────────────────────────────────────────────
+
 class _Header extends StatelessWidget {
-  final Color fg;
-  final Color muted;
-  final Color surface;
-  final Color border;
-  final Color accent;
-  final String initials;
+  final Color fg, muted, surface, border, accent;
+  final dynamic profile; // Profile? — dynamic to avoid import cycle
   final int unreadCount;
 
   const _Header({
@@ -540,37 +581,26 @@ class _Header extends StatelessWidget {
     required this.surface,
     required this.border,
     required this.accent,
-    required this.initials,
+    required this.profile,
     required this.unreadCount,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+      padding: EdgeInsets.fromLTRB(
+          20, MediaQuery.viewPaddingOf(context).top + 12, 20, 0),
       child: Row(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 2,
-              children: [
-                Text(
-                  'Welcome back',
-                  style: AppFonts.body(fontSize: 13, color: muted),
-                ),
-                Text(
-                  'Overview',
-                  style: AppFonts.heading(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    color: fg,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          if (profile != null)
+            UserAvatarButton(
+              profile: profile,
+              size: 40,
+              onTap: () => context.push(AppRoutes.profile),
+            )
+          else
+            const SizedBox(width: 40),
+          const Spacer(),
           GestureDetector(
             onTap: () => context.push(AppRoutes.notifications),
             behavior: HitTestBehavior.opaque,
@@ -584,9 +614,7 @@ class _Header extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Center(
-                    child: Bell(width: 18, height: 18, color: fg),
-                  ),
+                  Center(child: Bell(width: 18, height: 18, color: fg)),
                   if (unreadCount > 0)
                     Positioned(
                       top: 6,
@@ -626,55 +654,63 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final String label;
-  final String? action;
+class _CalendarSectionLabel extends StatelessWidget {
+  final Color accent;
   final Color muted;
-  final Color? accent;
-  final VoidCallback? onTap;
-
-  const _SectionLabel({
-    required this.label,
-    this.action,
-    required this.muted,
-    this.accent,
-    this.onTap,
-  });
+  const _CalendarSectionLabel({required this.accent, required this.muted});
 
   @override
   Widget build(BuildContext context) {
-    final linkColor = accent ?? muted;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final month = DateFormat('MMMM', locale).format(DateTime.now());
+    final isEs = locale.startsWith('es');
+    final prefix = isEs ? 'Calendario de ' : 'Calendar of ';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Expanded(
-            child: Text(
-              label.toUpperCase(),
+      child: RichText(
+        text: TextSpan(
+          text: prefix.toUpperCase(),
+          style: AppFonts.body(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: muted,
+            letterSpacing: 1.0,
+          ),
+          children: [
+            TextSpan(
+              text: month.toUpperCase(),
               style: AppFonts.body(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: muted,
+                color: accent,
                 letterSpacing: 1.0,
               ),
             ),
-          ),
-          if (action != null)
-            GestureDetector(
-              onTap: onTap,
-              behavior: HitTestBehavior.opaque,
-              child: Text(
-                action!,
-                style: AppFonts.body(
-                  fontSize: 12,
-                  color: linkColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  final Color muted;
+
+  const _SectionLabel({required this.label, required this.muted});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Text(
+        label.toUpperCase(),
+        style: AppFonts.body(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: muted,
+          letterSpacing: 1.0,
+        ),
       ),
     );
   }
@@ -682,21 +718,17 @@ class _SectionLabel extends StatelessWidget {
 
 class _ChartCard extends StatelessWidget {
   final Widget child;
-  final Color surface;
-  final Color border;
+  final Color surface, border;
 
-  const _ChartCard({
-    required this.child,
-    required this.surface,
-    required this.border,
-  });
+  const _ChartCard(
+      {required this.child, required this.surface, required this.border});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(AppRadii.lg),
         decoration: BoxDecoration(
           color: surface,
           borderRadius: BorderRadius.circular(AppRadii.xl),

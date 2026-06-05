@@ -9,8 +9,10 @@ import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/pet.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
+import 'package:hestia/presentation/widgets/common/primary_button.dart';
 
 class AddEditPetScreen extends StatelessWidget {
   final String? petId;
@@ -111,41 +113,26 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
       final (_, failure) = await repo.createPet(pet);
       if (!mounted) return;
       if (failure != null) {
-        // ignore: use_build_context_synchronously
-        showCupertinoDialog<void>(
-          context: context,
-          builder: (c) => CupertinoAlertDialog(
-            title: const Text('Could not save'),
-            content: Text(failure.message),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(c),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        context.showToast(AppToastConfig(
+            type: ToastType.error,
+            title: 'Could not save',
+            description: failure.message));
         return;
       }
+      context.showToast(
+          AppToastConfig(type: ToastType.success, title: '${pet.name} added'));
     } else {
       final failure = await repo.updatePet(pet);
       if (!mounted) return;
       if (failure != null) {
-        showCupertinoDialog<void>(
-          context: context,
-          builder: (c) => CupertinoAlertDialog(
-            title: const Text('Could not save'),
-            content: Text(failure.message),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(c),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        context.showToast(AppToastConfig(
+            type: ToastType.error,
+            title: 'Could not save',
+            description: failure.message));
         return;
       }
+      context.showToast(AppToastConfig(
+          type: ToastType.success, title: '${pet.name} updated'));
     }
     if (!mounted) return;
     context.pop();
@@ -154,12 +141,15 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+
+    final authState = context.read<AuthBloc>().state;
+    final uid = authState is AuthAuthenticated ? authState.profile.id : 'anon';
 
     if (_loading) {
       return CupertinoPushedRouteShell(
@@ -197,7 +187,8 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
             Center(
               child: ImagePickerField(
                 bucket: ImageBuckets.pets,
-                path: 'pet_${_existing?.id ?? 'new'}',
+                // First path segment must be the auth uid for storage RLS.
+                path: '$uid/pet_${_existing?.id ?? 'new'}.jpg',
                 value: _imageUrl,
                 onChanged: (url) => setState(() => _imageUrl = url),
                 circle: false,
@@ -228,20 +219,9 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
             _label('Notes', fg),
             _field(_notes, 'Optional notes…', fg, surface, border, maxLines: 3),
             const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              child: CupertinoButton(
-                color: accent,
-                borderRadius: BorderRadius.circular(AppRadii.xl),
-                onPressed: _save,
-                child: Text(
-                  widget.petId == null ? 'Add Pet' : 'Save Changes',
-                  style: AppFonts.body(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.white),
-                ),
-              ),
+            PrimaryButton(
+              label: widget.petId == null ? 'Add pet' : 'Save changes',
+              onPressed: _save,
             ),
           ],
         ),
@@ -481,6 +461,4 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
         PetGender.female => 'Female',
         PetGender.unknown => 'Unknown',
       };
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

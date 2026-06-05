@@ -70,6 +70,11 @@ class ShoppingListsMarkPaid extends ShoppingListsEvent {
   List<Object?> get props => [listId, transactionId];
 }
 
+/// Remote peer changed lists/sessions — refetch in the background.
+class ShoppingListsRemoteSync extends ShoppingListsEvent {
+  const ShoppingListsRemoteSync();
+}
+
 abstract class ShoppingListsState extends Equatable {
   const ShoppingListsState();
   @override
@@ -127,6 +132,8 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
   String? _userId;
   int _listRevision = 0;
 
+  String? get householdId => _householdId;
+
   ShoppingListsBloc(this._repo) : super(const ShoppingListsInitial()) {
     on<ShoppingListsLoad>(_onLoad);
     on<ShoppingListsRefresh>(_onRefresh);
@@ -134,6 +141,7 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
     on<ShoppingListsStartSession>(_onStartSession);
     on<ShoppingListsCancel>(_onCancel);
     on<ShoppingListsMarkPaid>(_onMarkPaid);
+    on<ShoppingListsRemoteSync>(_onRemoteSync);
   }
 
   Future<void> _onLoad(
@@ -187,6 +195,12 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
       status: ShoppingListStatus.cancelled,
       sessionEndedAt: DateTime.now(),
     ));
+    await _fetch(emit);
+  }
+
+  Future<void> _onRemoteSync(
+      ShoppingListsRemoteSync e, Emitter<ShoppingListsState> emit) async {
+    if (_householdId == null || _userId == null) return;
     await _fetch(emit);
   }
 

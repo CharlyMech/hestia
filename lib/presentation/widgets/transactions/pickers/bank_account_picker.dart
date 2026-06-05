@@ -21,10 +21,10 @@ class BankAccountPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final border = _c(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final border = hexToColor(theme.borderColor);
 
     final visible = accounts.where((s) => s.id != excludeId).toList();
 
@@ -84,6 +84,4 @@ class BankAccountPicker extends StatelessWidget {
       },
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

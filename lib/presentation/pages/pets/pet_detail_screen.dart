@@ -9,10 +9,11 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/pet.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/pets/paw_icon.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' as iconoir;
+import 'package:skeletonizer/skeletonizer.dart';
 
 class PetDetailScreen extends StatelessWidget {
   final String petId;
@@ -61,11 +62,12 @@ class _PetDetailViewState extends State<_PetDetailView> {
   }
 
   void _confirmDelete(BuildContext ctx, Color accent) {
+    final l10n = AppLocalizations.of(ctx);
     showCupertinoDialog(
       context: ctx,
       builder: (_) => CupertinoAlertDialog(
-        title: const Text('Delete Pet'),
-        content: Text('Remove ${_pet!.name}? This cannot be undone.'),
+        title: Text(l10n.pets_deletePetTitle),
+        content: Text(l10n.pets_deletePetConfirm(_pet!.name)),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -75,11 +77,11 @@ class _PetDetailViewState extends State<_PetDetailView> {
                   .deletePet(widget.petId);
               if (ctx.mounted) ctx.pop();
             },
-            child: const Text('Delete'),
+            child: Text(l10n.common_delete),
           ),
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
         ],
       ),
@@ -87,11 +89,12 @@ class _PetDetailViewState extends State<_PetDetailView> {
   }
 
   void _confirmDeleteRecord(BuildContext ctx, PetHealthRecord record) {
+    final l10n = AppLocalizations.of(ctx);
     showCupertinoDialog(
       context: ctx,
       builder: (_) => CupertinoAlertDialog(
-        title: const Text('Delete Record'),
-        content: Text('Remove "${record.title}"?'),
+        title: Text(l10n.pets_deleteRecordTitle),
+        content: Text(l10n.pets_deleteRecordConfirm(record.title)),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -101,11 +104,11 @@ class _PetDetailViewState extends State<_PetDetailView> {
                   .deleteHealthRecord(record.id);
               if (ctx.mounted) await _loadRecords();
             },
-            child: const Text('Delete'),
+            child: Text(l10n.common_delete),
           ),
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
         ],
       ),
@@ -114,191 +117,240 @@ class _PetDetailViewState extends State<_PetDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
-    if (_loading) {
-      return CupertinoPushedRouteShell(
-        backgroundColor: bg,
-        navBackground: surface,
-        borderColor: border,
-        foregroundColor: fg,
-        titleText: '',
-        child: const Center(child: CupertinoActivityIndicator()),
-      );
-    }
-
-    if (_pet == null) {
-      return CupertinoPushedRouteShell(
-        backgroundColor: bg,
-        navBackground: surface,
-        borderColor: border,
-        foregroundColor: fg,
-        titleText: 'Pet',
-        child: Center(
-          child: Text('Not found',
+    // Not-found state — no data after load finished.
+    if (!_loading && _pet == null) {
+      return SliverPushedRouteShell(
+        title: l10n.pets_title,
+        content: Center(
+          heightFactor: 1,
+          child: Text(l10n.pets_notFound,
               style: AppFonts.body(fontSize: 14, color: muted)),
         ),
       );
     }
 
-    final pet = _pet!;
+    final pet = _pet;
 
-    return CupertinoPushedRouteShell(
-      backgroundColor: bg,
-      navBackground: surface,
-      borderColor: border,
-      foregroundColor: fg,
-      titleText: pet.name,
-      trailing: Padding(
-        padding: const EdgeInsets.only(right: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () async {
-                await context.push(
-                  AppRoutes.editPet,
-                  extra: pet.id,
-                );
-                if (mounted) await _load();
-              },
-              child: Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                child: iconoir.EditPencil(width: 18, height: 18, color: accent),
+    return SliverPushedRouteShell(
+      title: pet?.name ?? '',
+      header: pet != null ? _PetHeader(pet: pet) : null,
+      onRefresh: _load,
+      actions: pet == null
+          ? null
+          : [
+              AppMenuAction(
+                icon: iconoir.EditPencil(width: 18, height: 18, color: accent),
+                label: l10n.common_edit,
+                onTap: () async {
+                  await context.push(AppRoutes.editPet, extra: pet.id);
+                  if (mounted) await _load();
+                },
               ),
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => _confirmDelete(context, accent),
-              child: Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                child: iconoir.Trash(
+              AppMenuAction(
+                icon: pet.isActive
+                    ? iconoir.EyeClosed(width: 18, height: 18, color: fg)
+                    : iconoir.Eye(width: 18, height: 18, color: accent),
+                label: pet.isActive
+                    ? l10n.pets_setInactive
+                    : l10n.pets_setActive,
+                onTap: () async {
+                  await AppDependencies.instance.petRepository
+                      .updatePet(pet.copyWith(isActive: !pet.isActive));
+                  if (mounted) await _load();
+                },
+              ),
+              AppMenuAction(
+                icon: iconoir.Trash(
                     width: 18,
                     height: 18,
                     color: CupertinoColors.destructiveRed),
+                label: l10n.common_delete,
+                isDestructive: true,
+                onTap: () => _confirmDelete(context, accent),
+              ),
+            ],
+      content: Skeletonizer(
+        enabled: _loading,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
+          child: _loading
+              ? _PetSkeleton(surface: surface, muted: muted)
+              : _PetBody(
+                  l10n: l10n,
+                  pet: pet!,
+                  records: _records,
+                  surface: surface,
+                  fg: fg,
+                  muted: muted,
+                  accent: accent,
+                  onAddRecord: () async {
+                    await context.push(AppRoutes.addHealthRecord,
+                        extra: pet.id);
+                    if (mounted) await _loadRecords();
+                  },
+                  onEditRecord: (r) async {
+                    await context.push(AppRoutes.editHealthRecord, extra: r);
+                    if (mounted) await _loadRecords();
+                  },
+                  onDeleteRecord: (r) => _confirmDeleteRecord(context, r),
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Skeleton placeholder ──────────────────────────────────────────────────────
+
+class _PetSkeleton extends StatelessWidget {
+  final Color surface;
+  final Color muted;
+  const _PetSkeleton({required this.surface, required this.muted});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Hero card shape
+        Container(
+          height: 112,
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Section title
+        Container(
+          height: 16,
+          width: 140,
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Record card shapes
+        for (var i = 0; i < 3; i++) ...[
+          Container(
+            height: 72,
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadii.xl),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ],
+    );
+  }
+}
+
+// ── Real body ─────────────────────────────────────────────────────────────────
+
+class _PetBody extends StatelessWidget {
+  final AppLocalizations l10n;
+  final Pet pet;
+  final List<PetHealthRecord> records;
+  final Color surface, fg, muted, accent;
+  final VoidCallback onAddRecord;
+  final void Function(PetHealthRecord) onEditRecord;
+  final void Function(PetHealthRecord) onDeleteRecord;
+
+  const _PetBody({
+    required this.l10n,
+    required this.pet,
+    required this.records,
+    required this.surface,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.onAddRecord,
+    required this.onEditRecord,
+    required this.onDeleteRecord,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _HeroCard(
+            pet: pet,
+            l10n: l10n,
+            surface: surface,
+            fg: fg,
+            muted: muted,
+            accent: accent),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: Text(l10n.pets_healthRecords,
+                  style: AppFonts.body(
+                      fontSize: 15, fontWeight: FontWeight.w600, color: fg)),
+            ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onAddRecord,
+              child: Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                child: iconoir.Plus(width: 18, height: 18, color: accent),
               ),
             ),
           ],
         ),
-      ),
-      child: ScreenShell(
-        bg: bg,
-        bottomPadding: 40,
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+        const SizedBox(height: 10),
+        if (records.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HeroCard(
-                    pet: pet,
-                    surface: surface,
-                    fg: fg,
-                    muted: muted,
-                    accent: accent,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Health Records',
-                          style: AppFonts.body(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: fg,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          await context.push(
-                            AppRoutes.addHealthRecord,
-                            extra: pet.id,
-                          );
-                          if (mounted) await _loadRecords();
-                        },
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          alignment: Alignment.center,
-                          child: iconoir.Plus(
-                              width: 18, height: 18, color: accent),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (_records.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Column(
-                        children: [
-                          PawIcon(size: 36, color: muted),
-                          const SizedBox(height: 8),
-                          Text(
-                            'No health records yet',
-                            style: AppFonts.body(
-                              fontSize: 13,
-                              color: muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    Column(
-                      children: _records
-                          .map(
-                            (r) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _RecordCard(
-                                record: r,
-                                surface: surface,
-                                fg: fg,
-                                muted: muted,
-                                accent: accent,
-                                onEdit: () async {
-                                  await context.push(
-                                    AppRoutes.editHealthRecord,
-                                    extra: r,
-                                  );
-                                  if (mounted) await _loadRecords();
-                                },
-                                onDelete: () =>
-                                    _confirmDeleteRecord(context, r),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
+                  PawIcon(size: 36, color: muted),
+                  const SizedBox(height: 8),
+                  Text(l10n.pets_noHealthRecordsYet,
+                      style: AppFonts.body(fontSize: 13, color: muted)),
                 ],
               ),
             ),
+          )
+        else
+          Column(
+            children: records
+                .map((r) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _RecordCard(
+                        l10n: l10n,
+                        record: r,
+                        surface: surface,
+                        fg: fg,
+                        muted: muted,
+                        accent: accent,
+                        onEdit: () => onEditRecord(r),
+                        onDelete: () => onDeleteRecord(r),
+                      ),
+                    ))
+                .toList(),
           ),
-        ],
-      ),
+      ],
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _HeroCard extends StatelessWidget {
   final Pet pet;
+  final AppLocalizations l10n;
   final Color surface;
   final Color fg;
   final Color muted;
@@ -306,6 +358,7 @@ class _HeroCard extends StatelessWidget {
 
   const _HeroCard({
     required this.pet,
+    required this.l10n,
     required this.surface,
     required this.fg,
     required this.muted,
@@ -335,18 +388,16 @@ class _HeroCard extends StatelessWidget {
                     placeholder: (_, __) => Container(color: accent),
                     errorWidget: (_, __, ___) => _initBox(initial, accent),
                   )
-                : Image.file(
-                    File(pet.imageUrl!),
+                : Image.file(File(pet.imageUrl!),
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _initBox(initial, accent),
-                  ))
+                    errorBuilder: (_, __, ___) => _initBox(initial, accent)))
             : _initBox(initial, accent),
       ),
     );
 
-    final speciesLabel = _speciesLabel(pet.species);
+    final speciesLabel = _speciesLabel(pet.species, l10n);
     final genderLabel =
-        pet.gender != PetGender.unknown ? _genderLabel(pet.gender) : null;
+        pet.gender != PetGender.unknown ? _genderLabel(pet.gender, l10n) : null;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -363,14 +414,9 @@ class _HeroCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  pet.name,
-                  style: AppFonts.body(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: fg,
-                  ),
-                ),
+                Text(pet.name,
+                    style: AppFonts.body(
+                        fontSize: 18, fontWeight: FontWeight.w700, color: fg)),
                 const SizedBox(height: 4),
                 Text(
                   [
@@ -388,13 +434,14 @@ class _HeroCard extends StatelessWidget {
                     children: [
                       if (pet.ageYears != null)
                         _Chip(
-                          label:
-                              '${pet.ageYears} yr${pet.ageYears == 1 ? '' : 's'}',
+                          label: l10n.pets_ageYears(pet.ageYears!),
                           accent: accent,
                         ),
                       if (pet.weightKg != null)
                         _Chip(
-                          label: '${pet.weightKg!.toStringAsFixed(1)} kg',
+                          label: l10n.pets_weightKg(
+                            pet.weightKg!.toStringAsFixed(1),
+                          ),
                           accent: accent,
                         ),
                     ],
@@ -402,12 +449,10 @@ class _HeroCard extends StatelessWidget {
                 ],
                 if (pet.notes != null) ...[
                   const SizedBox(height: 8),
-                  Text(
-                    pet.notes!,
-                    style: AppFonts.body(fontSize: 12, color: muted),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(pet.notes!,
+                      style: AppFonts.body(fontSize: 12, color: muted),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis),
                 ],
               ],
             ),
@@ -420,30 +465,27 @@ class _HeroCard extends StatelessWidget {
   Widget _initBox(String initial, Color color) => Container(
         color: color.withValues(alpha: 0.3),
         alignment: Alignment.center,
-        child: Text(
-          initial,
-          style: const TextStyle(
-            color: CupertinoColors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        child: Text(initial,
+            style: const TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w700)),
       );
 
-  String _speciesLabel(PetSpecies s) => switch (s) {
-        PetSpecies.dog => 'Dog',
-        PetSpecies.cat => 'Cat',
-        PetSpecies.bird => 'Bird',
-        PetSpecies.rabbit => 'Rabbit',
-        PetSpecies.fish => 'Fish',
-        PetSpecies.reptile => 'Reptile',
-        PetSpecies.other => 'Other',
+  String _speciesLabel(PetSpecies s, AppLocalizations l10n) => switch (s) {
+        PetSpecies.dog => l10n.pets_speciesDog,
+        PetSpecies.cat => l10n.pets_speciesCat,
+        PetSpecies.bird => l10n.pets_speciesBird,
+        PetSpecies.rabbit => l10n.pets_speciesRabbit,
+        PetSpecies.fish => l10n.pets_speciesFish,
+        PetSpecies.reptile => l10n.pets_speciesReptile,
+        PetSpecies.other => l10n.pets_speciesOther,
       };
 
-  String _genderLabel(PetGender g) => switch (g) {
-        PetGender.male => 'Male',
-        PetGender.female => 'Female',
-        PetGender.unknown => 'Unknown',
+  String _genderLabel(PetGender g, AppLocalizations l10n) => switch (g) {
+        PetGender.male => l10n.pets_genderMaleFull,
+        PetGender.female => l10n.pets_genderFemaleFull,
+        PetGender.unknown => l10n.pets_genderUnknown,
       };
 }
 
@@ -460,24 +502,20 @@ class _Chip extends StatelessWidget {
         color: accent.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        label,
-        style: AppFonts.numeric(fontSize: 11, color: accent),
-      ),
+      child: Text(label, style: AppFonts.numeric(fontSize: 11, color: accent)),
     );
   }
 }
 
 class _RecordCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final PetHealthRecord record;
-  final Color surface;
-  final Color fg;
-  final Color muted;
-  final Color accent;
+  final Color surface, fg, muted, accent;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _RecordCard({
+    required this.l10n,
     required this.record,
     required this.surface,
     required this.fg,
@@ -523,36 +561,26 @@ class _RecordCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  record.title,
-                  style: AppFonts.body(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: fg,
-                  ),
-                ),
+                Text(record.title,
+                    style: AppFonts.body(
+                        fontSize: 14, fontWeight: FontWeight.w600, color: fg)),
                 const SizedBox(height: 2),
-                Text(
-                  _typeLabel(record.type),
-                  style: AppFonts.label(fontSize: 10, color: muted),
-                ),
+                Text(_typeLabel(record.type, l10n),
+                    style: AppFonts.label(fontSize: 10, color: muted)),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(dateStr,
                         style: AppFonts.numeric(fontSize: 11, color: muted)),
                     if (dueStr != null) ...[
-                      Text(' · Next: ',
+                      Text(l10n.pets_recordNextDue,
                           style: AppFonts.body(fontSize: 11, color: muted)),
-                      Text(
-                        dueStr,
-                        style: AppFonts.numeric(
-                          fontSize: 11,
-                          color: isOverdue
-                              ? CupertinoColors.destructiveRed
-                              : muted,
-                        ),
-                      ),
+                      Text(dueStr,
+                          style: AppFonts.numeric(
+                              fontSize: 11,
+                              color: isOverdue
+                                  ? CupertinoColors.destructiveRed
+                                  : muted)),
                     ],
                   ],
                 ),
@@ -563,19 +591,15 @@ class _RecordCard extends StatelessWidget {
                 ],
                 if (record.cost != null) ...[
                   const SizedBox(height: 2),
-                  Text(
-                    '€${record.cost!.toStringAsFixed(2)}',
-                    style: AppFonts.numeric(fontSize: 11, color: accent),
-                  ),
+                  Text(l10n.pets_costEuro(record.cost!.toStringAsFixed(2)),
+                      style: AppFonts.numeric(fontSize: 11, color: accent)),
                 ],
                 if (record.notes != null) ...[
                   const SizedBox(height: 4),
-                  Text(
-                    record.notes!,
-                    style: AppFonts.body(fontSize: 11, color: muted),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(record.notes!,
+                      style: AppFonts.body(fontSize: 11, color: muted),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
                 ],
               ],
             ),
@@ -625,12 +649,58 @@ class _RecordCard extends StatelessWidget {
     };
   }
 
-  String _typeLabel(HealthRecordType t) => switch (t) {
-        HealthRecordType.vaccine => 'Vaccine',
-        HealthRecordType.vet => 'Vet visit',
-        HealthRecordType.medication => 'Medication',
-        HealthRecordType.grooming => 'Grooming',
-        HealthRecordType.deworming => 'Deworming',
-        HealthRecordType.other => 'Other',
+  String _typeLabel(HealthRecordType t, AppLocalizations l10n) => switch (t) {
+        HealthRecordType.vaccine => l10n.pets_healthTypeVaccine,
+        HealthRecordType.vet => l10n.pets_healthTypeVet,
+        HealthRecordType.medication => l10n.pets_healthTypeMedication,
+        HealthRecordType.grooming => l10n.pets_healthTypeGrooming,
+        HealthRecordType.deworming => l10n.pets_healthTypeDeworming,
+        HealthRecordType.other => l10n.pets_healthTypeOther,
       };
+}
+
+// Full-bleed sliver header: pet photo if available, else colour + initial.
+class _PetHeader extends StatelessWidget {
+  final Pet pet;
+
+  const _PetHeader({required this.pet});
+
+  bool get _hasImage => pet.imageUrl != null && pet.imageUrl!.isNotEmpty;
+  bool get _isRemote =>
+      _hasImage &&
+      (pet.imageUrl!.startsWith('http://') ||
+          pet.imageUrl!.startsWith('https://'));
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = hexToColor(context.myTheme.primaryColor);
+    final initial = pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?';
+    if (_hasImage) {
+      return _isRemote
+          ? CachedNetworkImage(
+              imageUrl: pet.imageUrl!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (_, __) => ColoredBox(color: primary),
+              errorWidget: (_, __, ___) => _fallback(initial, primary),
+            )
+          : Image.file(File(pet.imageUrl!),
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) => _fallback(initial, primary));
+    }
+    return _fallback(initial, primary);
+  }
+
+  Widget _fallback(String initial, Color primary) => Container(
+        color: primary,
+        alignment: Alignment.center,
+        child: Text(initial,
+            style: const TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 80,
+                fontWeight: FontWeight.w700)),
+      );
 }

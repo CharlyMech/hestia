@@ -17,13 +17,13 @@ class AppointmentDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final tints = theme.categoryTints.map(_c).toList();
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
 
     final color = switch (appointment.category) {
       AppointmentCategory.health => tints[0],
@@ -258,8 +258,6 @@ class AppointmentDetailScreen extends StatelessWidget {
     if (d.inMinutes % 60 == 0) return '${d.inHours} h';
     return '${d.inHours}h ${d.inMinutes % 60}m';
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Card extends StatelessWidget {

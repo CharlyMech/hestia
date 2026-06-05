@@ -17,7 +17,8 @@ class FuelAnalyticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => FuelBloc(AppDependencies.instance.fuelEntryRepository)
+      create: (_) => FuelBloc(AppDependencies.instance.fuelEntryRepository,
+          AppDependencies.instance.carRepository)
         ..add(FuelLoad(carId)),
       child: const _AnalyticsView(),
     );
@@ -31,12 +32,12 @@ class _AnalyticsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
@@ -267,8 +268,6 @@ class _AnalyticsView extends StatelessWidget {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Kpi extends StatelessWidget {

@@ -31,6 +31,11 @@ class TransactionFormState extends Equatable {
   final double? longitude;
   final bool locationLoading;
 
+  /// Optional actor — at most one should be set at a time.
+  final String? petId;
+  final String? carId;
+  final String? homeId;
+
   const TransactionFormState({
     this.status = TransactionFormStatus.idle,
     this.editingId,
@@ -50,6 +55,9 @@ class TransactionFormState extends Equatable {
     this.latitude,
     this.longitude,
     this.locationLoading = false,
+    this.petId,
+    this.carId,
+    this.homeId,
   });
 
   factory TransactionFormState.initial() => TransactionFormState(
@@ -84,6 +92,9 @@ class TransactionFormState extends Equatable {
     Object? latitude = _unset,
     Object? longitude = _unset,
     bool? locationLoading,
+    Object? petId = _unset,
+    Object? carId = _unset,
+    Object? homeId = _unset,
   }) {
     return TransactionFormState(
       status: status ?? this.status,
@@ -113,6 +124,9 @@ class TransactionFormState extends Equatable {
       latitude: latitude == _unset ? this.latitude : latitude as double?,
       longitude: longitude == _unset ? this.longitude : longitude as double?,
       locationLoading: locationLoading ?? this.locationLoading,
+      petId: petId == _unset ? this.petId : petId as String?,
+      carId: carId == _unset ? this.carId : carId as String?,
+      homeId: homeId == _unset ? this.homeId : homeId as String?,
     );
   }
 
@@ -136,6 +150,9 @@ class TransactionFormState extends Equatable {
         latitude,
         longitude,
         locationLoading,
+        petId,
+        carId,
+        homeId,
       ];
 }
 

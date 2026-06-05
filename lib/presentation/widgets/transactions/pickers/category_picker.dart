@@ -18,10 +18,10 @@ class CategoryPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final border = _c(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final border = hexToColor(theme.borderColor);
 
     if (categories.isEmpty) {
       return Padding(
@@ -53,7 +53,7 @@ class CategoryPicker extends StatelessWidget {
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: c.color != null ? _c(c.color!) : muted,
+                  color: c.color != null ? hexToColor(c.color!) : muted,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -76,6 +76,4 @@ class CategoryPicker extends StatelessWidget {
       },
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

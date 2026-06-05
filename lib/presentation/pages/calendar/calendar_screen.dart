@@ -2,22 +2,26 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show MaterialLocalizations;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hestia/domain/entities/appointment.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
+import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/calendar/calendar_bloc.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/calendar/appointment_form_content.dart';
 import 'package:hestia/presentation/widgets/calendar/day_view.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, Calendar, Plus, User;
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart' show Bell, Calendar, Plus;
 
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
@@ -36,6 +40,7 @@ class CalendarScreen extends StatelessWidget {
         return CalendarBloc(
           appointmentRepository: deps.appointmentRepository,
           transactionRepository: deps.transactionRepository,
+          householdRepository: deps.householdRepository,
         )..add(CalendarLoad(
             userId: profile.id,
             householdId: '',
@@ -47,51 +52,20 @@ class CalendarScreen extends StatelessWidget {
   }
 }
 
-class _Body extends StatefulWidget {
+class _Body extends StatelessWidget {
   final String userId;
   const _Body({required this.userId});
-
-  @override
-  State<_Body> createState() => _BodyState();
-}
-
-class _BodyState extends State<_Body> {
-  Map<String, String> _ownerColors = const {};
-
-  @override
-  void initState() {
-    super.initState();
-    _loadOwnerColors();
-  }
-
-  Future<void> _loadOwnerColors() async {
-    final auth = context.read<AuthBloc>().state;
-    if (auth is! AuthAuthenticated) return;
-    final deps = AppDependencies.instance;
-    final (household, _) =
-        await deps.householdRepository.getCurrentHousehold(auth.profile.id);
-    if (household == null) return;
-    final (profiles, _) =
-        await deps.householdRepository.getMemberProfiles(household.id);
-    if (!mounted) return;
-    setState(() {
-      _ownerColors = {
-        for (final p in profiles)
-          if (p.calendarColor != null) p.id: p.calendarColor!,
-      };
-    });
-  }
 
   void _openAddSheet(BuildContext context, DateTime defaultDate) {
     final prefs = context.read<UserPrefsBloc>().state;
     showAppBottomSheet<void>(
       context: context,
-      title: 'New appointment',
+      title: AppLocalizations.of(context).calendar_newAppointment,
       heightFactor: 0.92,
       expand: true,
       child: AppointmentFormContent(
         defaultDate: defaultDate,
-        userId: widget.userId,
+        userId: userId,
         use24h: prefs.use24h,
         startDayOfWeek: prefs.startDay,
         onSaved: (id, isAllDay) {
@@ -104,178 +78,37 @@ class _BodyState extends State<_Body> {
     );
   }
 
-  Future<void> _openAppointmentInfoSheet(
-      BuildContext context, Appointment appointment) async {
-    final title = TextEditingController(text: appointment.title);
-    final notes = TextEditingController(text: appointment.notes ?? '');
-    final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-
-    await showAppBottomSheet<void>(
-      context: context,
-      title: 'Appointment',
-      child: StatefulBuilder(
-        builder: (context, setLocalState) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancel',
-                          style: AppFonts.body(fontSize: 14, color: fg)),
-                    ),
-                    const Spacer(),
-                    CupertinoButton(
-                      onPressed: () async {
-                        final updated = appointment.copyWith(
-                          title: title.text.trim().isEmpty
-                              ? appointment.title
-                              : title.text.trim(),
-                          notes: notes.text.trim().isEmpty
-                              ? null
-                              : notes.text.trim(),
-                          lastUpdate: DateTime.now(),
-                        );
-                        await AppDependencies.instance.appointmentRepository
-                            .update(updated);
-                        if (!context.mounted) return;
-                        context
-                            .read<CalendarBloc>()
-                            .add(const CalendarAppointmentAdded());
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Done',
-                          style: AppFonts.body(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: fg)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                CupertinoTextField(
-                  controller: title,
-                  placeholder: 'Title',
-                  style: AppFonts.body(fontSize: 14, color: fg),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: border),
-                  ),
-                  onChanged: (_) => setLocalState(() {}),
-                ),
-                const SizedBox(height: 10),
-                CupertinoTextField(
-                  controller: notes,
-                  minLines: 3,
-                  maxLines: 5,
-                  placeholder: 'Notes',
-                  style: AppFonts.body(fontSize: 14, color: fg),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: border),
-                  ),
-                  onChanged: (_) => setLocalState(() {}),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '${appointment.startsAt} · ${appointment.duration.inMinutes} min',
-                    style: AppFonts.body(fontSize: 12, color: muted),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: CupertinoButton.filled(
-                    onPressed: () async {
-                      final updated = appointment.copyWith(
-                        title: title.text.trim().isEmpty
-                            ? appointment.title
-                            : title.text.trim(),
-                        notes: notes.text.trim().isEmpty
-                            ? null
-                            : notes.text.trim(),
-                        lastUpdate: DateTime.now(),
-                      );
-                      await AppDependencies.instance.appointmentRepository
-                          .update(updated);
-                      if (!context.mounted) return;
-                      context
-                          .read<CalendarBloc>()
-                          .add(const CalendarAppointmentAdded());
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Save'),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-    title.dispose();
-    notes.dispose();
-  }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final income = _c(theme.colorGreen);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final income = hexToColor(theme.colorGreen);
     final l10n = AppLocalizations.of(context);
 
-    return CupertinoPageScaffold(
+    return CupertinoPushedRouteShell(
       backgroundColor: bg,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: bg,
-        border: Border(
-          bottom: BorderSide(color: border.withValues(alpha: 0.5), width: 0.5),
-        ),
-        middle: Text(
-          l10n.calendar_title,
-          style: AppFonts.heading(
-              fontSize: 17, fontWeight: FontWeight.w600, color: fg),
-        ),
-        trailing: GestureDetector(
-          onTap: () {
-            final state = context.read<CalendarBloc>().state;
-            _openAddSheet(context, state.selectedDate);
-          },
-          behavior: HitTestBehavior.opaque,
-          child: IconBtn(
-            icon: Plus(width: 16, height: 16, color: fg),
-            surface: surface,
-            border: border,
-            size: 32,
-            radius: 9,
-          ),
-        ),
+      navBackground: surface,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: l10n.calendar_title,
+      trailing: AnimatedButton(
+        size: 32,
+        padding: const EdgeInsets.all(4),
+        onTap: () {
+          final state = context.read<CalendarBloc>().state;
+          _openAddSheet(context, state.selectedDate);
+        },
+        child: Plus(width: 22, height: 22, color: fg),
       ),
       child: BlocBuilder<UserPrefsBloc, UserPrefsState>(
         builder: (context, prefs) => BlocBuilder<CalendarBloc, CalendarState>(
           buildWhen: (p, n) =>
+              p.loading != n.loading ||
               p.selectedDate != n.selectedDate ||
               p.appointments != n.appointments ||
               p.recurringTx != n.recurringTx ||
@@ -283,109 +116,117 @@ class _BodyState extends State<_Body> {
               p.showTransactions != n.showTransactions ||
               p.visibleMonth != n.visibleMonth ||
               p.allDayAppointmentIds != n.allDayAppointmentIds ||
-              p.onlyMine != n.onlyMine,
+              p.visibleUserIds != n.visibleUserIds ||
+              p.memberProfiles != n.memberProfiles ||
+              p.ownerColors != n.ownerColors,
           builder: (context, state) {
-            final dayItems =
-                state.itemsForDayFor(state.selectedDate, widget.userId);
+            final dayItems = state.itemsForDayFor(state.selectedDate, userId);
             final dayAppts = dayItems.whereType<AppointmentItem>().toList();
             final dayTxs = dayItems.whereType<TransactionItem>().toList();
 
-            return CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              slivers: [
-                CupertinoSliverRefreshControl(
-                  onRefresh: () {
-                    final bloc = context.read<CalendarBloc>();
-                    final completer = Completer<void>();
-                    late StreamSubscription<CalendarState> sub;
-                    sub = bloc.stream.listen((s) {
-                      if (!s.loading) {
-                        if (!completer.isCompleted) completer.complete();
-                        sub.cancel();
-                      }
-                    });
-                    bloc.add(CalendarRefresh());
-                    return completer.future;
-                  },
+            return Skeletonizer(
+              enabled: state.loading,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
                 ),
-                // Month grid
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: _MonthGrid(
-                      state: state,
-                      userId: widget.userId,
-                      startDayOfWeek: prefs.startDay,
-                      surface: surface,
-                      fg: fg,
-                      muted: muted,
-                      accent: accent,
-                      income: income,
-                      border: border,
-                    ),
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                    onRefresh: () {
+                      final bloc = context.read<CalendarBloc>();
+                      final completer = Completer<void>();
+                      late StreamSubscription<CalendarState> sub;
+                      sub = bloc.stream.listen((s) {
+                        if (!s.loading) {
+                          if (!completer.isCompleted) completer.complete();
+                          sub.cancel();
+                        }
+                      });
+                      bloc.add(CalendarRefresh());
+                      return completer.future;
+                    },
                   ),
-                ),
-                // Filters
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: _Filters(
-                      showAppointments: state.showAppointments,
-                      showTransactions: state.showTransactions,
-                      onlyMine: state.onlyMine,
-                      accent: accent,
-                      surface: surface,
-                      border: border,
-                      fg: fg,
-                      muted: muted,
-                      onToggleAppointments: () => context
-                          .read<CalendarBloc>()
-                          .add(const CalendarToggleEventos()),
-                      onToggleTransactions: () => context
-                          .read<CalendarBloc>()
-                          .add(const CalendarToggleMovimientos()),
-                      onToggleOnlyMine: () => context
-                          .read<CalendarBloc>()
-                          .add(const CalendarToggleOnlyMine()),
-                    ),
-                  ),
-                ),
-                // Day view
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    transitionBuilder: (child, animation) => FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.02, 0),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
+                  // Month grid
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: _MonthGrid(
+                        state: state,
+                        userId: userId,
+                        startDayOfWeek: prefs.startDay,
+                        surface: surface,
+                        fg: fg,
+                        muted: muted,
+                        accent: accent,
+                        income: income,
+                        border: border,
                       ),
                     ),
-                    child: DayView(
-                      key: ValueKey(state.selectedDate),
-                      date: state.selectedDate,
-                      appointments: dayAppts,
-                      transactions: dayTxs,
-                      showAppointments: state.showAppointments,
-                      showTransactions: state.showTransactions,
-                      allDayIds: state.allDayAppointmentIds,
-                      use24h: prefs.use24h,
-                      ownerColors: _ownerColors,
-                      onTapSlot: (dt) => _openAddSheet(context, dt),
-                      onTapAppointment: (a) =>
-                          _openAppointmentInfoSheet(context, a),
+                  ),
+                  // Filters
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                      child: _Filters(
+                        showAppointments: state.showAppointments,
+                        showTransactions: state.showTransactions,
+                        memberProfiles: state.memberProfiles,
+                        visibleUserIds: state.visibleUserIds,
+                        ownerColors: state.ownerColors,
+                        accent: accent,
+                        surface: surface,
+                        border: border,
+                        fg: fg,
+                        muted: muted,
+                        onToggleAppointments: () => context
+                            .read<CalendarBloc>()
+                            .add(const CalendarToggleEventos()),
+                        onToggleTransactions: () => context
+                            .read<CalendarBloc>()
+                            .add(const CalendarToggleMovimientos()),
+                        onToggleUser: (id) => context
+                            .read<CalendarBloc>()
+                            .add(CalendarToggleUser(id)),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  // Day view
+                  SliverFillRemaining(
+                    hasScrollBody: true,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.02, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      ),
+                      child: DayView(
+                        key: ValueKey(state.selectedDate),
+                        date: state.selectedDate,
+                        appointments: dayAppts,
+                        transactions: dayTxs,
+                        showAppointments: state.showAppointments,
+                        showTransactions: state.showTransactions,
+                        allDayIds: state.allDayAppointmentIds,
+                        use24h: prefs.use24h,
+                        ownerColors: state.ownerColors,
+                        onTapSlot: (dt) => _openAddSheet(context, dt),
+                        // Read-first: open the detail screen (it has an Edit
+                        // affordance) rather than an inline edit form.
+                        onTapAppointment: (a) =>
+                            context.push(AppRoutes.appointmentDetail, extra: a),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -425,6 +266,7 @@ class _MonthGrid extends StatefulWidget {
 
 class _MonthGridState extends State<_MonthGrid> {
   late DateTime _viewMonth;
+  bool _expanded = false;
 
   @override
   void initState() {
@@ -433,6 +275,16 @@ class _MonthGridState extends State<_MonthGrid> {
       widget.state.visibleMonth.year,
       widget.state.visibleMonth.month,
     );
+  }
+
+  List<DateTime?> _visibleCells(List<DateTime?> all, DateTime selected) {
+    if (_expanded) return all;
+    final sel = _dayOnly(selected);
+    for (var row = 0; row < all.length; row += 7) {
+      final week = all.sublist(row, row + 7);
+      if (week.any((d) => d != null && _dayOnly(d) == sel)) return week;
+    }
+    return all.take(7).toList();
   }
 
   void _shiftMonth(int delta) {
@@ -474,7 +326,8 @@ class _MonthGridState extends State<_MonthGrid> {
     final state = widget.state;
     final today = _dayOnly(DateTime.now());
     final selected = _dayOnly(state.selectedDate);
-    final cells = _cellsForMonth(_viewMonth, widget.startDayOfWeek);
+    final allCells = _cellsForMonth(_viewMonth, widget.startDayOfWeek);
+    final cells = _visibleCells(allCells, state.selectedDate);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -486,7 +339,6 @@ class _MonthGridState extends State<_MonthGrid> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Month navigation header
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -520,10 +372,20 @@ class _MonthGridState extends State<_MonthGrid> {
                       color: state.loading ? widget.muted : widget.fg,
                     ),
                   ),
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () => setState(() => _expanded = !_expanded),
+                    child: Icon(
+                      _expanded
+                          ? CupertinoIcons.chevron_up
+                          : CupertinoIcons.chevron_down,
+                      size: 20,
+                      color: widget.fg,
+                    ),
+                  ),
                 ],
               ),
             ),
-            // Weekday headers
             Row(
               children: List.generate(7, (col) {
                 final w = ((widget.startDayOfWeek - 1 + col) % 7) + 1;
@@ -551,103 +413,125 @@ class _MonthGridState extends State<_MonthGrid> {
                   child: CupertinoActivityIndicator(color: widget.accent),
                 ),
               ),
-            // Day grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                mainAxisExtent: cellH,
-              ),
-              itemCount: cells.length,
-              itemBuilder: (context, i) {
-                final day = cells[i];
-                if (day == null) {
-                  return SizedBox(width: cell, height: cellH);
-                }
-                final inMonth = day.month == _viewMonth.month;
-                final items = state.itemsForDayFor(day, widget.userId);
-                final hasAppt = items.any((e) => e is AppointmentItem);
-                final hasTx = items.any((e) => e is TransactionItem);
-                final isToday = _dayOnly(day) == today;
-                final isSelected = _dayOnly(day) == selected;
-                final dOnly = _dayOnly(day);
-                final isPast = dOnly.isBefore(today);
-                final isFuture = dOnly.isAfter(today);
+            AnimatedSize(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  mainAxisExtent: cellH,
+                  mainAxisSpacing: 6,
+                  crossAxisSpacing: 6,
+                ),
+                itemCount: cells.length,
+                itemBuilder: (context, i) {
+                  final day = cells[i];
+                  if (day == null) {
+                    return SizedBox(width: cell, height: cellH);
+                  }
+                  final inMonth = day.month == _viewMonth.month;
+                  final items = state.itemsForDayFor(day, widget.userId);
+                  final appts = items
+                      .whereType<AppointmentItem>()
+                      .map((e) => e.appointment)
+                      .toList();
+                  final hasTx = items.any((e) => e is TransactionItem);
+                  final isToday = _dayOnly(day) == today;
+                  final isSelected = _dayOnly(day) == selected;
+                  final dOnly = _dayOnly(day);
+                  final isPast = dOnly.isBefore(today);
+                  final isFuture = dOnly.isAfter(today);
 
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    context.read<CalendarBloc>().add(CalendarSelectDate(day));
-                    if (day.month != _viewMonth.month) {
-                      final newMonth = DateTime(day.year, day.month);
-                      setState(() => _viewMonth = newMonth);
-                      context
-                          .read<CalendarBloc>()
-                          .add(CalendarMonthChanged(newMonth));
-                    }
-                  },
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? widget.accent.withValues(alpha: 0.12)
-                          : widget.surface,
-                      border: Border.all(
-                        color: isToday
-                            ? widget.accent.withValues(alpha: 0.55)
-                            : isSelected
-                                ? widget.accent.withValues(alpha: 0.4)
-                                : const Color(0x00000000),
-                        width: (isToday || isSelected) ? 1.4 : 0.6,
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      context.read<CalendarBloc>().add(CalendarSelectDate(day));
+                      if (day.month != _viewMonth.month) {
+                        final newMonth = DateTime(day.year, day.month);
+                        setState(() => _viewMonth = newMonth);
+                        context
+                            .read<CalendarBloc>()
+                            .add(CalendarMonthChanged(newMonth));
+                      }
+                    },
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        // Transparent fill (except the selected highlight) with
+                        // a visible border outline on every cell.
+                        color: isSelected
+                            ? widget.accent.withValues(alpha: 0.12)
+                            : const Color(0x00000000),
+                        border: Border.all(
+                          color: isToday
+                              ? widget.accent.withValues(alpha: 0.55)
+                              : isSelected
+                                  ? widget.accent.withValues(alpha: 0.4)
+                                  : widget.border,
+                          width: (isToday || isSelected) ? 1.4 : 0.8,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${day.day}',
-                          style: AppFonts.body(
-                            fontSize: 15,
-                            fontWeight:
-                                isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: !inMonth
-                                ? widget.muted.withValues(alpha: 0.4)
-                                : isSelected
-                                    ? widget.accent
-                                    : widget.fg,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${day.day}',
+                            style: AppFonts.body(
+                              fontSize: 15,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              color: !inMonth
+                                  ? widget.muted.withValues(alpha: 0.4)
+                                  : isSelected
+                                      ? widget.accent
+                                      : widget.fg,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: cell * 0.06),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (hasAppt)
-                              _EventDot(
-                                color: widget.accent,
-                                dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
-                              ),
-                            if (hasAppt && hasTx) const SizedBox(width: 3),
-                            if (hasTx)
-                              _EventDot(
-                                color: widget.income,
-                                dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
-                              ),
-                            if (!hasAppt && !hasTx)
-                              SizedBox(height: cell * 0.1),
-                          ],
-                        ),
-                      ],
+                          SizedBox(height: cell * 0.06),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (var j = 0;
+                                  j < appts.length.clamp(0, 3);
+                                  j++) ...[
+                                if (j > 0) const SizedBox(width: 2),
+                                _EventDot(
+                                  color: appts[j].color != null
+                                      ? _parseHex(appts[j].color!)
+                                      : widget.accent,
+                                  dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
+                                ),
+                              ],
+                              if (appts.isNotEmpty && hasTx)
+                                const SizedBox(width: 3),
+                              if (hasTx)
+                                _EventDot(
+                                  color: widget.income,
+                                  dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
+                                ),
+                              if (appts.isEmpty && !hasTx)
+                                SizedBox(height: cell * 0.1),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ],
         );
       },
     );
   }
+
+  static Color _parseHex(String hex) =>
+      Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _EventDot extends StatelessWidget {
@@ -674,7 +558,9 @@ class _EventDot extends StatelessWidget {
 class _Filters extends StatelessWidget {
   final bool showAppointments;
   final bool showTransactions;
-  final bool onlyMine;
+  final List<Profile> memberProfiles;
+  final Set<String>? visibleUserIds;
+  final Map<String, String> ownerColors;
   final Color accent;
   final Color surface;
   final Color border;
@@ -682,12 +568,14 @@ class _Filters extends StatelessWidget {
   final Color muted;
   final VoidCallback onToggleAppointments;
   final VoidCallback onToggleTransactions;
-  final VoidCallback onToggleOnlyMine;
+  final ValueChanged<String> onToggleUser;
 
   const _Filters({
     required this.showAppointments,
     required this.showTransactions,
-    required this.onlyMine,
+    required this.memberProfiles,
+    required this.visibleUserIds,
+    required this.ownerColors,
     required this.accent,
     required this.surface,
     required this.border,
@@ -695,59 +583,75 @@ class _Filters extends StatelessWidget {
     required this.muted,
     required this.onToggleAppointments,
     required this.onToggleTransactions,
-    required this.onToggleOnlyMine,
+    required this.onToggleUser,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Expanded(
-          child: _FilterChip(
-            label: 'Events',
-            icon: Calendar(
-                width: 13,
-                height: 13,
-                color: showAppointments ? accent : muted),
-            active: showAppointments,
-            accent: accent,
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            onTap: onToggleAppointments,
-          ),
+        // Type filters row
+        Row(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: _FilterChip(
+                label: l10n.calendar_eventos,
+                icon: Calendar(
+                    width: 13,
+                    height: 13,
+                    color: showAppointments ? accent : muted),
+                active: showAppointments,
+                accent: accent,
+                surface: surface,
+                border: border,
+                fg: fg,
+                muted: muted,
+                onTap: onToggleAppointments,
+              ),
+            ),
+            Expanded(
+              child: _FilterChip(
+                label: l10n.calendar_movimientos,
+                icon: Bell(
+                    width: 13,
+                    height: 13,
+                    color: showTransactions ? accent : muted),
+                active: showTransactions,
+                accent: accent,
+                surface: surface,
+                border: border,
+                fg: fg,
+                muted: muted,
+                onTap: onToggleTransactions,
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: _FilterChip(
-            label: 'Transactions',
-            icon: Bell(
-                width: 13,
-                height: 13,
-                color: showTransactions ? accent : muted),
-            active: showTransactions,
-            accent: accent,
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            onTap: onToggleTransactions,
+        // Per-member chips — only shown when household has >1 member
+        if (memberProfiles.length > 1)
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              for (final p in memberProfiles)
+                _MemberChip(
+                  profile: p,
+                  active:
+                      visibleUserIds == null || visibleUserIds!.contains(p.id),
+                  ownerColor: ownerColors[p.id] != null
+                      ? hexToColor(ownerColors[p.id]!)
+                      : accent,
+                  surface: surface,
+                  border: border,
+                  muted: muted,
+                  onTap: () => onToggleUser(p.id),
+                ),
+            ],
           ),
-        ),
-        Expanded(
-          child: _FilterChip(
-            label: 'Only mine',
-            icon: User(width: 13, height: 13, color: onlyMine ? accent : muted),
-            active: onlyMine,
-            accent: accent,
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            onTap: onToggleOnlyMine,
-          ),
-        ),
       ],
     );
   }
@@ -816,6 +720,82 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
+class _MemberChip extends StatelessWidget {
+  final Profile profile;
+  final bool active;
+  final Color ownerColor;
+  final Color surface;
+  final Color border;
+  final Color muted;
+  final VoidCallback onTap;
+
+  const _MemberChip({
+    required this.profile,
+    required this.active,
+    required this.ownerColor,
+    required this.surface,
+    required this.border,
+    required this.muted,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final name = profile.displayName ?? profile.email;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final chipColor = ownerColor;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? chipColor.withValues(alpha: 0.14) : surface,
+          border: Border.all(
+            color: active ? chipColor : border,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 6,
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: chipColor.withValues(alpha: active ? 1.0 : 0.4),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                initial,
+                style: AppFonts.body(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: CupertinoColors.white,
+                  height: 1.0,
+                ),
+              ),
+            ),
+            Text(
+              name,
+              style: AppFonts.body(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: active ? chipColor : muted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Signed out ────────────────────────────────────────────────────────────────
 
 class _SignedOut extends StatelessWidget {
@@ -832,7 +812,7 @@ class _SignedOut extends StatelessWidget {
       backgroundColor: bg,
       child: Center(
         child: Text(
-          'Sign in to view calendar',
+          AppLocalizations.of(context).profile_signInPrompt,
           style: AppFonts.body(fontSize: 14, color: muted),
         ),
       ),

@@ -3,62 +3,64 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
-import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/pets/paw_icon.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Car, CartAlt, ReportColumns, Wallet, CoinsSwap;
+    show Car, CartAlt, ReportColumns, Wallet;
 
 /// Logical tab indices — independent of whether Cars is shown.
 enum NavTab { home, accounts, pets, cars, shopping }
 
+const double _kNavItemHorizontalPadding = 2;
+const double _kNavItemVerticalPadding = 2;
+const double _kNavPillInset = 2;
+
 /// Glass-morphism floating nav bar with animated active pill.
 ///
-/// Tab order: Home · Accounts · Pets · (Cars, if enabled) · Shopping
-/// The [activeIndex] is a *page index* (0-based, fuel page included when
-/// shown). [pageOffset] is the raw [PageController.page] value used for
-/// continuous pill tracking during swipe.
+/// Tab order: Home · Accounts · Calendar · Pets · (Cars, if enabled) · Shopping
 class FloatingNavBar extends StatelessWidget {
   final int activeIndex;
   final double? pageOffset;
   final ValueChanged<int>? onTab;
-  final VoidCallback? onPlus;
+  final double height;
 
   const FloatingNavBar({
     super.key,
     required this.activeIndex,
     this.pageOffset,
     this.onTab,
-    this.onPlus,
+    this.height = 58,
   });
 
   @override
   Widget build(BuildContext context) {
     final showFuel = context.watch<UserPrefsBloc>().state.showFuelModule;
     final tabs = _buildTabs(showFuel);
-    final accent = _c(context.myTheme.primaryColor);
-    final muted = _c(context.myTheme.onInactiveColor);
+    final accent = hexToColor(context.myTheme.primaryColor);
+    final muted = hexToColor(context.myTheme.onInactiveColor);
     final l10n = AppLocalizations.of(context);
+
+    // Shopping badge — number of active sessions
+    final shoppingState = context.watch<ShoppingListsBloc>().state;
+    final shoppingBadge = shoppingState is ShoppingListsLoaded
+        ? shoppingState.activeSessions.length
+        : 0;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: _GlassNavPill(
-              tabs: tabs,
-              activeIndex: activeIndex,
-              pageOffset: pageOffset,
-              accent: accent,
-              muted: muted,
-              l10n: l10n,
-              onTab: onTab,
-            ),
-          ),
-          const SizedBox(width: 12),
-          _PlusButton(accent: accent, onPlus: onPlus),
-        ],
+      child: _GlassNavPill(
+        tabs: tabs,
+        activeIndex: activeIndex,
+        pageOffset: pageOffset,
+        accent: accent,
+        muted: muted,
+        l10n: l10n,
+        onTab: onTab,
+        shoppingBadge: shoppingBadge,
+        height: height,
       ),
     );
   }
@@ -69,9 +71,6 @@ class FloatingNavBar extends StatelessWidget {
     tabs.add(NavTab.shopping);
     return tabs;
   }
-
-  static Color _c(String hex) =>
-      Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 // ── Glass pill container ──────────────────────────────────────────────────────
@@ -84,6 +83,8 @@ class _GlassNavPill extends StatelessWidget {
   final Color muted;
   final AppLocalizations l10n;
   final ValueChanged<int>? onTab;
+  final int shoppingBadge;
+  final double height;
 
   const _GlassNavPill({
     required this.tabs,
@@ -93,39 +94,47 @@ class _GlassNavPill extends StatelessWidget {
     required this.muted,
     required this.l10n,
     required this.onTab,
+    this.shoppingBadge = 0,
+    required this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     final position = (pageOffset ?? activeIndex.toDouble())
         .clamp(0.0, (tabs.length - 1).toDouble());
+    final theme = context.myTheme;
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final primary = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
 
+    final navRadius = height / 2;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.circular(navRadius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
         child: Container(
-          height: 64,
+          height: height,
           decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground
-                .resolveFrom(context)
-                .withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(32),
+            color: surface.withValues(alpha: 0.65),
+            borderRadius: BorderRadius.circular(navRadius),
             border: Border.all(
-              color: CupertinoColors.separator
-                  .resolveFrom(context)
-                  .withValues(alpha: 0.45),
-              width: 0.8,
+              color: border,
+              width: 1,
             ),
           ),
           child: LayoutBuilder(
             builder: (context, c) {
               final itemW = c.maxWidth / tabs.length;
-              final pillW = itemW * 0.72;
-              final pillLeft = position * itemW + (itemW - pillW) / 2;
-              final pillBg = CupertinoColors.label
-                  .resolveFrom(context)
-                  .withValues(alpha: 0.14);
+              // Fill almost entire navbar height with a tiny uniform inset.
+              final pillH =
+                  (c.maxHeight - (_kNavPillInset * 2)).clamp(0.0, c.maxHeight);
+              final pillTop = _kNavPillInset;
+              // Pill width follows NavItem width minus its horizontal padding.
+              final pillW =
+                  (itemW - (_kNavItemHorizontalPadding * 2)).clamp(0.0, itemW);
+              final pillLeft = position * itemW + _kNavItemHorizontalPadding;
+              final pillBg = primary;
 
               return Stack(
                 alignment: Alignment.center,
@@ -136,13 +145,13 @@ class _GlassNavPill extends StatelessWidget {
                         : const Duration(milliseconds: 260),
                     curve: Curves.easeOutCubic,
                     left: pillLeft,
-                    top: 6,
+                    top: pillTop,
                     width: pillW,
-                    height: 52,
+                    height: pillH,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: pillBg,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(pillH / 2),
                       ),
                     ),
                   ),
@@ -154,9 +163,14 @@ class _GlassNavPill extends StatelessWidget {
                           child: _NavItem(
                             tab: tabs[i],
                             active: activeIndex == i,
-                            accent: accent,
+                            // Active item sits on the primary pill → use
+                            // onPrimary so it reads on light themes too.
+                            activeColor: onPrimary,
+                            badgeColor: primary,
                             muted: muted,
                             l10n: l10n,
+                            badge:
+                                tabs[i] == NavTab.shopping ? shoppingBadge : 0,
                             onTap: () => onTab?.call(i),
                           ),
                         ),
@@ -172,112 +186,32 @@ class _GlassNavPill extends StatelessWidget {
   }
 }
 
-// ── Plus button ───────────────────────────────────────────────────────────────
-
-class _PlusButton extends StatefulWidget {
-  final Color accent;
-  final VoidCallback? onPlus;
-
-  const _PlusButton({required this.accent, required this.onPlus});
-
-  @override
-  State<_PlusButton> createState() => _PlusButtonState();
-}
-
-class _PlusButtonState extends State<_PlusButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-      lowerBound: 0.0,
-      upperBound: 1.0,
-    );
-    _scale = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  void _onTapDown(TapDownDetails _) => _ctrl.forward();
-
-  void _onTapUp(TapUpDetails _) {
-    _ctrl.reverse();
-    widget.onPlus?.call();
-  }
-
-  void _onTapCancel() => _ctrl.reverse();
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      child: ScaleTransition(
-        scale: _scale,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-            child: Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: widget.accent.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(
-                  color: widget.accent.withValues(alpha: 0.5),
-                  width: 0.8,
-                ),
-              ),
-              child: Center(
-                child: CoinsSwap(
-                  width: 26,
-                  height: 26,
-                  color: CupertinoColors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ── Nav item ──────────────────────────────────────────────────────────────────
 
 class _NavItem extends StatelessWidget {
   final NavTab tab;
   final bool active;
-  final Color accent;
+  final Color activeColor;
   final Color muted;
+  final Color badgeColor;
   final AppLocalizations l10n;
   final VoidCallback onTap;
+  final int badge;
 
   const _NavItem({
     required this.tab,
     required this.active,
-    required this.accent,
+    required this.activeColor,
     required this.muted,
+    required this.badgeColor,
     required this.l10n,
     required this.onTap,
+    this.badge = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? accent : muted;
+    final color = active ? activeColor : muted;
     final Widget icon = switch (tab) {
       NavTab.home => ReportColumns(width: 22, height: 22, color: color),
       NavTab.accounts => Wallet(width: 22, height: 22, color: color),
@@ -297,13 +231,51 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: _kNavItemHorizontalPadding,
+          vertical: _kNavItemVerticalPadding,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
+          spacing: 2,
           children: [
-            SizedBox(width: 22, height: 22, child: icon),
-            const SizedBox(height: 4),
+            // Icon with optional badge
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SizedBox(width: 22, height: 22, child: icon),
+                if (badge > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 14),
+                      height: 14,
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        borderRadius: BorderRadius.circular(7),
+                        border: Border.all(
+                          color: CupertinoColors.systemBackground
+                              .resolveFrom(context),
+                          width: 1.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$badge',
+                        style: const TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w700,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             Text(
               label,
               maxLines: 1,

@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -8,248 +11,251 @@ import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/member_avatar.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/profile/edit_profile_form.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show LogOut;
+import 'package:iconoir_flutter/iconoir_flutter.dart'
+    show EditPencil, Eye, EyeClosed, LogOut, Trash;
+import 'package:intl/intl.dart';
 
 /// Unified profile screen for the signed-in user.
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  void _openEdit(BuildContext context, Profile profile, List<Color> tints) {
-    showAppBottomSheet<void>(
-      context: context,
-      title: 'Edit profile',
-      heightFactor: 0.92,
-      child: EditProfileForm(profile: profile, tints: tints),
-    );
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  Future<void> _onRefresh() async {
+    context.read<AuthBloc>().add(const AuthCheckSession());
+    // Wait briefly so the refresh indicator has time to show.
+    await Future<void>.delayed(const Duration(milliseconds: 600));
   }
 
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
-  @override
-  Widget build(BuildContext context) {
+  void _confirmDelete(BuildContext context, Profile profile) {
     final l10n = AppLocalizations.of(context);
-    final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final tints = theme.categoryTints.map(_c).toList();
-    final expense = _c(theme.colorRed);
-
-    final state = context.watch<AuthBloc>().state;
-    final profile = state is AuthAuthenticated ? state.profile : null;
-
-    return CupertinoPushedRouteShell(
-      backgroundColor: bg,
-      navBackground: surface,
-      borderColor: surface,
-      foregroundColor: fg,
-      titleText: 'Profile',
-      trailing: profile == null
-          ? null
-          : GestureDetector(
-              onTap: () => _openEdit(context, profile, tints),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Text(
-                  l10n.profile_edit,
-                  style: AppFonts.body(
-                    fontSize: 13,
-                    color: accent,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-      child: ScreenShell(
-        bg: bg,
-        bottomPadding: 24,
-        slivers: [
-          if (profile == null)
-            SliverFillRemaining(
-              child: Center(
-                child: Text(
-                  'Sign in to view profile',
-                  style: AppFonts.body(fontSize: 14, color: muted),
-                ),
-              ),
-            )
-          else ...[
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    MemberAvatar(
-                      name: profile.displayName ?? profile.email,
-                      color: profile.calendarColor != null
-                          ? _c(profile.calendarColor!)
-                          : tints[0],
-                      size: 96,
-                      imageUrl: profile.avatarUrl,
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      profile.displayName ?? profile.email,
-                      textAlign: TextAlign.center,
-                      style: AppFonts.heading(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: fg,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      profile.email,
-                      textAlign: TextAlign.center,
-                      style: AppFonts.body(fontSize: 13, color: muted),
-                    ),
-                    const SizedBox(height: 10),
-                    _RoleBadge(
-                      isSuperuser: profile.isSuperuser,
-                      accent: accent,
-                      muted: muted,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 28)),
-            SliverToBoxAdapter(child: SectionLabel('Details', color: muted)),
-            const SliverToBoxAdapter(child: SizedBox(height: 10)),
-            SliverToBoxAdapter(
-              child: _MetaCard(
-                surface: surface,
-                fg: fg,
-                muted: muted,
-                items: [
-                  (
-                    'Birth date',
-                    profile.birthDate != null
-                        ? _fmtDate(profile.birthDate!)
-                        : '—'
-                  ),
-                  ('Currency', profile.preferredCurrency),
-                  ('Member since', _fmtMonthYear(profile.createdAt)),
-                  ('Last update', _fmtDate(profile.lastUpdate)),
-                ],
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: surface,
-                  borderRadius: BorderRadius.circular(AppRadii.xl),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () =>
-                      context.read<AuthBloc>().add(const AuthSignOut()),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                    child: Row(
-                      children: [
-                        CatTile(
-                          icon: LogOut(width: 16, height: 16, color: expense),
-                          color: expense,
-                          size: 34,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Sign out',
-                          style: AppFonts.body(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: expense,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            SliverToBoxAdapter(
-              child: Center(
-                child: Text(
-                  'Hestia · v1.0.0',
-                  style: AppFonts.label(
-                    fontSize: 11,
-                    color: muted.withValues(alpha: 0.55),
-                  ),
-                ),
-              ),
-            ),
-          ],
+    showCupertinoDialog(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(l10n.profile_deleteAccountTitle),
+        content: Text(l10n.profile_deleteAccountConfirm),
+        actions: [
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+              await AppDependencies.instance.authRepository
+                  .updateProfile(profile.copyWith(isActive: false));
+              if (context.mounted) {
+                context.read<AuthBloc>().add(const AuthSignOut());
+              }
+            },
+            child: Text(l10n.common_delete),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.common_cancel),
+          ),
         ],
       ),
     );
   }
 
-  String _fmtDate(DateTime d) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
+  void _openEdit(BuildContext context, Profile profile, List<Color> tints) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: AppLocalizations.of(context).profile_editProfile,
+      heightFactor: 0.92,
+      child: EditProfileForm(profile: profile, tints: tints),
+    );
   }
 
-  String _fmtMonthYear(DateTime d) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[d.month - 1]} ${d.year}';
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.myTheme;
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
+    final logoutBg = hexToColor(theme.colorRed);
+    final logoutFg = hexToColor(theme.onDestructiveColor);
+
+    final state = context.watch<AuthBloc>().state;
+    final isLoading = state is AuthLoading;
+    final profile = state is AuthAuthenticated ? state.profile : null;
+
+    return SliverPushedRouteShell(
+      title: profile?.displayName ?? profile?.email ?? '',
+      onRefresh: _onRefresh,
+      header: profile == null
+          ? null
+          : _ProfileHeader(
+              name: profile.displayName ?? profile.email,
+              color: profile.calendarColor != null
+                  ? hexToColor(profile.calendarColor!)
+                  : tints[0],
+              imageUrl: profile.avatarUrl),
+      actions: profile == null
+          ? null
+          : [
+              AppMenuAction(
+                icon: EditPencil(width: 18, height: 18, color: accent),
+                label: l10n.profile_edit,
+                onTap: () => _openEdit(context, profile, tints),
+              ),
+              AppMenuAction(
+                icon: profile.isActive
+                    ? EyeClosed(width: 18, height: 18, color: fg)
+                    : Eye(width: 18, height: 18, color: accent),
+                label: profile.isActive
+                    ? l10n.pets_setInactive
+                    : l10n.pets_setActive,
+                onTap: () async {
+                  await AppDependencies.instance.authRepository
+                      .updateProfile(
+                          profile.copyWith(isActive: !profile.isActive));
+                },
+              ),
+              AppMenuAction(
+                icon: Trash(
+                    width: 18,
+                    height: 18,
+                    color: CupertinoColors.destructiveRed),
+                label: l10n.profile_deleteAccountTitle,
+                isDestructive: true,
+                onTap: () => _confirmDelete(context, profile),
+              ),
+            ],
+      content: !isLoading && profile == null
+          ? Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: Text(l10n.profile_signInPrompt,
+                    style: AppFonts.body(fontSize: 14, color: muted)),
+              ),
+            )
+          : Skeletonizer(
+              enabled: isLoading,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
+                child: isLoading
+                    ? _ProfileSkeleton(surface: surface)
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 24,
+                        children: [
+                          Center(
+                            child: _RoleBadge(
+                              isSuperuser: profile!.isSuperuser,
+                              accent: accent,
+                              muted: muted,
+                              l10n: l10n,
+                            ),
+                          ),
+                          SectionLabel(l10n.profile_detailsSection,
+                              color: muted),
+                          _MetaCard(
+                            surface: surface,
+                            fg: fg,
+                            muted: muted,
+                            items: [
+                              (
+                                l10n.profile_birthDate,
+                                profile.birthDate != null
+                                    ? _fmtDate(
+                                        profile.birthDate!,
+                                        Localizations.localeOf(context)
+                                            .toString(),
+                                      )
+                                    : '—'
+                              ),
+                              (
+                                l10n.profile_preferredCurrency,
+                                profile.preferredCurrency
+                              ),
+                              (
+                                l10n.profile_memberSince,
+                                _fmtMonthYear(
+                                  profile.createdAt,
+                                  Localizations.localeOf(context).toString(),
+                                ),
+                              ),
+                              (
+                                l10n.profile_lastUpdate,
+                                _fmtDate(
+                                  profile.lastUpdate,
+                                  Localizations.localeOf(context).toString(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: logoutBg.withValues(alpha: 0.7),
+                              borderRadius: BorderRadius.circular(AppRadii.md),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => context
+                                  .read<AuthBloc>()
+                                  .add(const AuthSignOut()),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  spacing: 12,
+                                  children: [
+                                    Text(l10n.common_signOut,
+                                        style: AppFonts.body(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: logoutFg)),
+                                    LogOut(
+                                        width: 20, height: 20, color: logoutFg),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+    );
   }
+
+  String _fmtDate(DateTime d, String locale) =>
+      DateFormat.yMMMd(locale).format(d);
+
+  String _fmtMonthYear(DateTime d, String locale) =>
+      DateFormat.yMMMM(locale).format(d);
 }
 
 class _RoleBadge extends StatelessWidget {
   final bool isSuperuser;
   final Color accent;
   final Color muted;
+  final AppLocalizations l10n;
   const _RoleBadge({
     required this.isSuperuser,
     required this.accent,
     required this.muted,
+    required this.l10n,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = isSuperuser ? accent : muted;
-    final label = isSuperuser ? 'SUPERUSER' : 'MEMBER';
+    final label =
+        isSuperuser ? l10n.profile_roleSuperuser : l10n.profile_roleMember;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -268,6 +274,65 @@ class _RoleBadge extends StatelessWidget {
   }
 }
 
+// Full-bleed header: photo if available, else colour + initials centred.
+class _ProfileHeader extends StatelessWidget {
+  final String name;
+  final Color color;
+  final String? imageUrl;
+
+  const _ProfileHeader({
+    required this.name,
+    required this.color,
+    this.imageUrl,
+  });
+
+  bool get _hasImage => imageUrl != null && imageUrl!.isNotEmpty;
+  bool get _isRemote =>
+      _hasImage &&
+      (imageUrl!.startsWith('http://') || imageUrl!.startsWith('https://'));
+
+  String get _initials {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    return parts.take(2).map((p) => p.isEmpty ? '' : p[0]).join().toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasImage) {
+      return _isRemote
+          ? CachedNetworkImage(
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (_, __) => ColoredBox(color: color),
+              errorWidget: (_, __, ___) => _fallback(),
+            )
+          : Image.file(
+              File(imageUrl!),
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) => _fallback(),
+            );
+    }
+    return _fallback();
+  }
+
+  Widget _fallback() => Container(
+        color: color,
+        alignment: Alignment.center,
+        child: Text(
+          _initials,
+          style: const TextStyle(
+            color: CupertinoColors.white,
+            fontSize: 64,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+}
+
 class _MetaCard extends StatelessWidget {
   final Color surface;
   final Color fg;
@@ -283,7 +348,6 @@ class _MetaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(AppRadii.xl),
@@ -293,7 +357,7 @@ class _MetaCard extends StatelessWidget {
         children: [
           for (var i = 0; i < items.length; i++) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Row(
                 children: [
                   Expanded(
@@ -322,6 +386,59 @@ class _MetaCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _ProfileSkeleton extends StatelessWidget {
+  final Color surface;
+  const _ProfileSkeleton({required this.surface});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Role badge
+        Center(
+          child: Container(
+            height: 22,
+            width: 80,
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        const SizedBox(height: 28),
+        // Section label
+        Container(
+          height: 13,
+          width: 60,
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Meta card
+        Container(
+          height: 192,
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Sign-out row
+        Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+          ),
+        ),
+      ],
     );
   }
 }

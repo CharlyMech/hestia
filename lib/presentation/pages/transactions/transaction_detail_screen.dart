@@ -87,13 +87,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final income = _c(theme.colorGreen);
-    final expense = _c(theme.colorRed);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final income = hexToColor(theme.colorGreen);
+    final expense = hexToColor(theme.colorRed);
 
     final isIncome = _tx.type == TransactionType.income;
     final tintColor = isIncome ? income : expense;
@@ -211,8 +211,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     ];
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Row {

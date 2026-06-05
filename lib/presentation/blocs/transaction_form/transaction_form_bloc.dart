@@ -57,6 +57,11 @@ class TransactionFormBloc
       ));
     });
     on<TransactionFormLocationFetchRequested>(_onLocationFetch);
+    on<TransactionFormActorChanged>((e, emit) => emit(state.copyWith(
+          petId: e.petId,
+          carId: e.carId,
+          homeId: e.homeId,
+        )));
     on<TransactionFormSubmit>(_onSubmit);
     on<TransactionFormDelete>(_onDelete);
   }
@@ -78,6 +83,9 @@ class TransactionFormBloc
       attachLocation: t.hasLocation,
       latitude: t.latitude,
       longitude: t.longitude,
+      petId: t.petId,
+      carId: t.carId,
+      homeId: t.homeId,
     );
   }
 
@@ -252,6 +260,9 @@ class TransactionFormBloc
       lastUpdate: now,
       latitude: state.attachLocation ? state.latitude : null,
       longitude: state.attachLocation ? state.longitude : null,
+      petId: state.petId,
+      carId: state.carId,
+      homeId: state.homeId,
       categoryName: initialTransaction?.categoryName,
       categoryColor: initialTransaction?.categoryColor,
       bankAccountName: initialTransaction?.bankAccountName,

@@ -69,9 +69,12 @@ class BalanceTrendLine extends StatelessWidget {
     return spots;
   }
 
+  // Show at most 6 x-axis labels regardless of range.
+  int get _xInterval => (days / 6).ceil().clamp(1, days);
+
   String _xLabel(double v) {
     final i = v.toInt();
-    if (i % 7 != 0) return '';
+    if (i % _xInterval != 0) return '';
     final now = DateTime.now();
     final d = DateTime(now.year, now.month, now.day)
         .subtract(Duration(days: days - 1 - i));
@@ -127,7 +130,7 @@ class BalanceTrendLine extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 22,
-                interval: 1,
+                interval: _xInterval.toDouble(),
                 getTitlesWidget: (v, meta) => Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(_xLabel(v),

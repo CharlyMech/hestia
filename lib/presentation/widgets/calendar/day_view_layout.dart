@@ -1,10 +1,11 @@
 import 'package:hestia/domain/entities/appointment.dart';
 
-/// True when an appointment occupies the full day (midnight + ≥24 h duration).
+/// True when an appointment is flagged as all-day or occupies ≥24 h.
 bool isAllDayAppointment(Appointment a) =>
-    a.startsAt.hour == 0 &&
-    a.startsAt.minute == 0 &&
-    a.duration.inMinutes >= 1440;
+    a.isAllDay ||
+    (a.startsAt.hour == 0 &&
+        a.startsAt.minute == 0 &&
+        a.duration.inMinutes >= 1440);
 
 class PositionedEvent {
   final Appointment appointment;

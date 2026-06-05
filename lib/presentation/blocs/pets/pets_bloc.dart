@@ -225,7 +225,10 @@ class PetsBloc extends Bloc<PetsEvent, PetsState> {
   }
 
   Future<void> _fetch(Emitter<PetsState> emit) async {
-    if (_householdId == null) return;
+    if (_householdId == null) {
+      _emitPetsLoaded(emit, const []);
+      return;
+    }
     final (pets, failure) =
         await _repo.getPets(householdId: _householdId!, activeOnly: false);
     if (failure != null) {

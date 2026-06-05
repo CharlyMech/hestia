@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 
 enum ScopeKind { shared, personal }
 
@@ -10,17 +12,20 @@ class ScopePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = context.myTheme;
     final shared = kind == ScopeKind.shared;
-    final fg = shared ? const Color(0xFF9BC8F0) : const Color(0xFFB8BEC9);
-    final bg = shared ? const Color(0x1A0077B6) : const Color(0xFF1A2230);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final bg = hexToColor(theme.surfaceColor);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: bg,
+        color: bg.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        label ?? (shared ? 'Shared' : 'Personal'),
+        label ??
+            (shared ? l10n.bankAccounts_shared : l10n.bankAccounts_personal),
         style: TextStyle(
           fontFamily: 'Inter',
           fontSize: 11,

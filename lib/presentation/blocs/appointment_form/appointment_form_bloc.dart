@@ -74,6 +74,10 @@ class FormToggleReminder extends AppointmentFormEvent {
   List<Object?> get props => [offset];
 }
 
+class FormClearReminders extends AppointmentFormEvent {
+  const FormClearReminders();
+}
+
 class FormPetChanged extends AppointmentFormEvent {
   final String? petId;
   const FormPetChanged(this.petId);
@@ -86,6 +90,27 @@ class FormCarChanged extends AppointmentFormEvent {
   const FormCarChanged(this.carId);
   @override
   List<Object?> get props => [carId];
+}
+
+class FormSharedChanged extends AppointmentFormEvent {
+  final bool isShared;
+  const FormSharedChanged(this.isShared);
+  @override
+  List<Object?> get props => [isShared];
+}
+
+class FormAllDayChanged extends AppointmentFormEvent {
+  final bool isAllDay;
+  const FormAllDayChanged(this.isAllDay);
+  @override
+  List<Object?> get props => [isAllDay];
+}
+
+class FormColorChanged extends AppointmentFormEvent {
+  final String? color;
+  const FormColorChanged(this.color);
+  @override
+  List<Object?> get props => [color];
 }
 
 class FormSubmit extends AppointmentFormEvent {
@@ -110,6 +135,9 @@ class AppointmentFormState extends Equatable {
   final String? googleEventId;
   final String? petId;
   final String? carId;
+  final bool isShared;
+  final bool isAllDay;
+  final String? color;
   final DateTime createdAt;
 
   final bool submitting;
@@ -131,6 +159,9 @@ class AppointmentFormState extends Equatable {
     this.googleEventId,
     this.petId,
     this.carId,
+    this.isShared = true,
+    this.isAllDay = false,
+    this.color,
     required this.createdAt,
     this.submitting = false,
     this.saved = false,
@@ -153,6 +184,10 @@ class AppointmentFormState extends Equatable {
     String? carId,
     bool clearPetId = false,
     bool clearCarId = false,
+    bool? isShared,
+    bool? isAllDay,
+    String? color,
+    bool clearColor = false,
     bool? submitting,
     bool? saved,
     bool? deleted,
@@ -173,6 +208,9 @@ class AppointmentFormState extends Equatable {
         googleEventId: googleEventId,
         petId: clearPetId ? null : (petId ?? this.petId),
         carId: clearCarId ? null : (carId ?? this.carId),
+        isShared: isShared ?? this.isShared,
+        isAllDay: isAllDay ?? this.isAllDay,
+        color: clearColor ? null : (color ?? this.color),
         createdAt: createdAt,
         submitting: submitting ?? this.submitting,
         saved: saved ?? this.saved,
@@ -195,6 +233,9 @@ class AppointmentFormState extends Equatable {
         googleEventId,
         petId,
         carId,
+        isShared,
+        isAllDay,
+        color,
         createdAt,
         submitting,
         saved,
@@ -230,6 +271,9 @@ class AppointmentFormBloc
               existing?.reminderOffsets ?? const [Duration(hours: 1)],
           petId: existing?.petId,
           carId: existing?.carId,
+          isShared: existing?.isShared ?? true,
+          isAllDay: existing?.isAllDay ?? false,
+          color: existing?.color,
           createdAt: existing?.createdAt ?? DateTime.now(),
         )) {
     on<FormTitleChanged>((e, emit) => emit(state.copyWith(title: e.title)));
@@ -243,12 +287,21 @@ class AppointmentFormBloc
     on<FormCategoryChanged>(
         (e, emit) => emit(state.copyWith(category: e.category)));
     on<FormToggleReminder>(_onToggleReminder);
+    on<FormClearReminders>(
+        (e, emit) => emit(state.copyWith(reminderOffsets: const [])));
     on<FormPetChanged>((e, emit) => emit(e.petId == null
         ? state.copyWith(clearPetId: true)
         : state.copyWith(petId: e.petId)));
     on<FormCarChanged>((e, emit) => emit(e.carId == null
         ? state.copyWith(clearCarId: true)
         : state.copyWith(carId: e.carId)));
+    on<FormSharedChanged>(
+        (e, emit) => emit(state.copyWith(isShared: e.isShared)));
+    on<FormAllDayChanged>(
+        (e, emit) => emit(state.copyWith(isAllDay: e.isAllDay)));
+    on<FormColorChanged>((e, emit) => emit(e.color == null
+        ? state.copyWith(clearColor: true)
+        : state.copyWith(color: e.color)));
     on<FormSubmit>(_onSubmit);
     on<FormDelete>(_onDelete);
   }
@@ -298,6 +351,9 @@ class AppointmentFormBloc
       googleEventId: state.googleEventId,
       petId: state.petId,
       carId: state.carId,
+      isAllDay: state.isAllDay,
+      isShared: state.isShared,
+      color: state.color,
       createdAt: state.createdAt,
     );
 

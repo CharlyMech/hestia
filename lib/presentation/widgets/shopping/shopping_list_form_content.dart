@@ -126,9 +126,9 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
 
   Future<void> _pickBankAccount() async {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
@@ -175,9 +175,9 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
 
   Future<void> _pickSource() async {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
@@ -221,17 +221,14 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
-
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
     final selectedAccount =
         _accounts.where((a) => a.id == _bankAccountId).firstOrNull;

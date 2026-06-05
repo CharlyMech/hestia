@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/domain/entities/fuel_entry.dart';
+import 'package:hestia/domain/repositories/car_repository.dart';
 import 'package:hestia/domain/repositories/fuel_entry_repository.dart';
 
 abstract class FuelEvent extends Equatable {
@@ -160,9 +161,10 @@ class FuelLoaded extends FuelState {
 
 class FuelBloc extends Bloc<FuelEvent, FuelState> {
   final FuelEntryRepository _repo;
+  final CarRepository _carRepo;
   String? _carId;
 
-  FuelBloc(this._repo) : super(const FuelInitial()) {
+  FuelBloc(this._repo, this._carRepo) : super(const FuelInitial()) {
     on<FuelLoad>(_onLoad);
     on<FuelCreate>(_onCreate);
     on<FuelUpdate>(_onUpdate);
@@ -176,12 +178,23 @@ class FuelBloc extends Bloc<FuelEvent, FuelState> {
   }
 
   Future<void> _onCreate(FuelCreate e, Emitter<FuelState> emit) async {
-    // TODO: link to transaction repo — when [createTransaction] is true,
-    // create a paired transaction atomically (out of scope for mock-only PR).
     final (_, failure) = await _repo.create(e.entry);
     if (failure != null) {
       emit(FuelError(failure.message));
       return;
+    }
+    // Auto-update car odometer if the new entry reads higher than current.
+    final (car, _) = await _carRepo.getCar(e.entry.carId);
+    if (car != null) {
+      final current = car.currentOdometerKm ?? 0;
+      if (e.entry.odometerKm > current) {
+        await _carRepo.updateCar(
+          car.copyWith(
+            currentOdometerKm: e.entry.odometerKm,
+            lastUpdate: DateTime.now(),
+          ),
+        );
+      }
     }
     await _fetch(emit);
   }

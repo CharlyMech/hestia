@@ -8,8 +8,10 @@ import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/pet.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/pets/pets_bloc.dart';
-import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
+
 import 'package:hestia/presentation/widgets/pets/paw_icon.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' as iconoir;
 import 'package:skeletonizer/skeletonizer.dart';
@@ -51,73 +53,69 @@ class _PetsViewState extends State<_PetsView> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final tints = theme.categoryTints.map(_c).toList();
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
 
+    final l10n = AppLocalizations.of(context);
+    final topInset = MediaQuery.viewPaddingOf(context).top;
     return ColoredBox(
       color: bg,
-      child: SafeArea(
-        bottom: false,
-        child: BlocBuilder<PetsBloc, PetsState>(
-          builder: (context, state) {
-            return Skeletonizer(
-              enabled: _refreshing,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
+      child: BlocBuilder<PetsBloc, PetsState>(
+        builder: (context, state) {
+          final isLoading =
+              _refreshing || state is PetsLoading || state is PetsInitial;
+          return Skeletonizer(
+            enabled: isLoading,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: [
+                CupertinoSliverRefreshControl(
+                  onRefresh: () => _onPullRefresh(context),
                 ),
-                slivers: [
-                  CupertinoSliverRefreshControl(
-                    onRefresh: () => _onPullRefresh(context),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Pets',
-                              style: AppFonts.heading(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                                color: fg,
-                              ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.nav_pets,
+                            style: AppFonts.heading(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: fg,
                             ),
                           ),
-                          IconBtn(
-                            icon:
-                                iconoir.Plus(width: 16, height: 16, color: fg),
-                            surface: surface,
-                            border: border,
-                            onTap: () async {
-                              await context.push(AppRoutes.addPet);
-                              if (context.mounted) {
-                                context
-                                    .read<PetsBloc>()
-                                    .add(const PetsRefresh());
-                              }
-                            },
-                            size: 36,
-                            radius: AppRadii.lg,
-                          ),
-                        ],
-                      ),
+                        ),
+                        AnimatedButton(
+                          size: 32,
+                          padding: const EdgeInsets.all(4),
+                          onTap: () async {
+                            await context.push(AppRoutes.addPet);
+                            if (context.mounted) {
+                              context.read<PetsBloc>().add(const PetsRefresh());
+                            }
+                          },
+                          child: iconoir.Plus(width: 22, height: 22, color: fg),
+                        ),
+                      ],
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                  _buildBody(state, surface, fg, muted, accent, tints, context),
-                  const SliverToBoxAdapter(child: SizedBox(height: 110)),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                _buildBody(
+                    state, surface, fg, muted, accent, tints, context, l10n),
+                const SliverToBoxAdapter(child: SizedBox(height: 110)),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -130,11 +128,22 @@ class _PetsViewState extends State<_PetsView> {
     Color accent,
     List<Color> tints,
     BuildContext context,
+    AppLocalizations l10n,
   ) {
     if (state is PetsLoading || state is PetsInitial) {
-      return const SliverFillRemaining(
-        hasScrollBody: false,
-        child: Center(child: CupertinoActivityIndicator()),
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+        sliver: SliverList.separated(
+          itemCount: 3,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (_, __) => Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadii.lg),
+            ),
+          ),
+        ),
       );
     }
     if (state is PetsError) {
@@ -156,11 +165,11 @@ class _PetsViewState extends State<_PetsView> {
             children: [
               PawIcon(size: 48, color: muted),
               const SizedBox(height: 12),
-              Text('No pets yet',
+              Text(l10n.pets_noPetsYet,
                   style: AppFonts.body(
                       fontSize: 15, fontWeight: FontWeight.w600, color: fg)),
               const SizedBox(height: 6),
-              Text('Tap + to add one',
+              Text(l10n.pets_tapToAdd,
                   style: AppFonts.body(fontSize: 12, color: muted)),
             ],
           ),
@@ -174,6 +183,7 @@ class _PetsViewState extends State<_PetsView> {
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (_, i) => _PetCard(
           pet: pets[i],
+          l10n: l10n,
           surface: surface,
           fg: fg,
           muted: muted,
@@ -189,12 +199,11 @@ class _PetsViewState extends State<_PetsView> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _PetCard extends StatelessWidget {
   final Pet pet;
+  final AppLocalizations l10n;
   final Color surface;
   final Color fg;
   final Color muted;
@@ -204,6 +213,7 @@ class _PetCard extends StatelessWidget {
 
   const _PetCard({
     required this.pet,
+    required this.l10n,
     required this.surface,
     required this.fg,
     required this.muted,
@@ -245,7 +255,7 @@ class _PetCard extends StatelessWidget {
     );
 
     final subParts = <String>[
-      _speciesLabel(pet.species),
+      _speciesLabel(pet.species, l10n),
       if (pet.breed != null) pet.breed!,
     ];
 
@@ -291,7 +301,7 @@ class _PetCard extends StatelessWidget {
                   if (pet.ageYears != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '${pet.ageYears} yr${pet.ageYears == 1 ? '' : 's'}',
+                      l10n.pets_ageYears(pet.ageYears!),
                       style: AppFonts.numeric(fontSize: 12, color: muted),
                     ),
                   ],
@@ -317,14 +327,14 @@ class _PetCard extends StatelessWidget {
         ),
       );
 
-  String _speciesLabel(PetSpecies s) => switch (s) {
-        PetSpecies.dog => 'Dog',
-        PetSpecies.cat => 'Cat',
-        PetSpecies.bird => 'Bird',
-        PetSpecies.rabbit => 'Rabbit',
-        PetSpecies.fish => 'Fish',
-        PetSpecies.reptile => 'Reptile',
-        PetSpecies.other => 'Other',
+  String _speciesLabel(PetSpecies s, AppLocalizations l10n) => switch (s) {
+        PetSpecies.dog => l10n.pets_speciesDog,
+        PetSpecies.cat => l10n.pets_speciesCat,
+        PetSpecies.bird => l10n.pets_speciesBird,
+        PetSpecies.rabbit => l10n.pets_speciesRabbit,
+        PetSpecies.fish => l10n.pets_speciesFish,
+        PetSpecies.reptile => l10n.pets_speciesReptile,
+        PetSpecies.other => l10n.pets_speciesOther,
       };
 }
 
@@ -336,7 +346,9 @@ class _GenderBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (gender == PetGender.unknown) return const SizedBox.shrink();
-    final label = gender == PetGender.male ? 'M' : 'F';
+    final l10n = AppLocalizations.of(context);
+    final label =
+        gender == PetGender.male ? l10n.pets_genderMale : l10n.pets_genderFemale;
     final mutedHex = context.myTheme.onInactiveColor;
     final muted = Color(int.parse(mutedHex.replaceFirst('#', '0xff')));
     return Container(

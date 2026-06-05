@@ -8,6 +8,7 @@ class DayEventBlock extends StatelessWidget {
   final double hourHeight;
   final Color color;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final bool use24h;
 
   const DayEventBlock({
@@ -16,6 +17,7 @@ class DayEventBlock extends StatelessWidget {
     required this.hourHeight,
     required this.color,
     required this.onTap,
+    this.onLongPress,
     this.use24h = true,
   });
 
@@ -26,53 +28,48 @@ class DayEventBlock extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        scale: 1,
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          opacity: 1,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(8),
-              border: Border(
-                left: BorderSide(color: color, width: 3),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: Border(left: BorderSide(color: color, width: 3)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.12),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(8, 4, 6, 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              event.appointment.title,
+              style: AppFonts.body(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            padding: const EdgeInsets.fromLTRB(6, 3, 4, 3),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  event.appointment.title,
-                  style: AppFonts.body(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+            if (tall)
+              Text(
+                _timeRange(),
+                style: AppFonts.body(
+                  fontSize: 10,
+                  color: color.withValues(alpha: 0.72),
                 ),
-                if (tall) ...[
-                  Text(
-                    _timeRange(),
-                    style: AppFonts.body(
-                      fontSize: 10,
-                      color: color.withValues(alpha: 0.75),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
-          ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
         ),
       ),
     );

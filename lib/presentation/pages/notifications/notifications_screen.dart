@@ -10,6 +10,7 @@ import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
+import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/notif_row.dart';
@@ -49,12 +50,12 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
     final dim = muted.withValues(alpha: 0.55);
 
     return CupertinoPushedRouteShell(
@@ -68,9 +69,17 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
           final enabled = state is NotificationsLoaded && state.unreadCount > 0;
           return GestureDetector(
             onTap: enabled
-                ? () => context
-                    .read<NotificationsBloc>()
-                    .add(NotificationsMarkAllRead(widget.userId))
+                ? () {
+                    context
+                        .read<NotificationsBloc>()
+                        .add(NotificationsMarkAllRead(widget.userId));
+                    context.showToast(const AppToastConfig(
+                      type: ToastType.success,
+                      title: 'All marked as read',
+                      position: ToastPosition.bottom,
+                      duration: Duration(seconds: 2),
+                    ));
+                  }
                 : null,
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -164,8 +173,7 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
             );
           }
 
-          final unread =
-              items.where((n) => !n.isRead).toList(growable: false);
+          final unread = items.where((n) => !n.isRead).toList(growable: false);
           final read = items.where((n) => n.isRead).toList(growable: false);
           final l10n = AppLocalizations.of(context);
 
@@ -237,6 +245,14 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                                 NotificationsToggleRead(
                                     rows[i].id, rows[i].isRead),
                               );
+                          context.showToast(AppToastConfig(
+                            type: ToastType.neutral,
+                            title: rows[i].isRead
+                                ? 'Marked unread'
+                                : 'Marked as read',
+                            position: ToastPosition.bottom,
+                            duration: const Duration(seconds: 2),
+                          ));
                           return false;
                         },
                         onDismissed: (direction) {
@@ -244,6 +260,12 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                             context
                                 .read<NotificationsBloc>()
                                 .add(NotificationsDelete(rows[i].id));
+                            context.showToast(const AppToastConfig(
+                              type: ToastType.neutral,
+                              title: 'Notification deleted',
+                              position: ToastPosition.bottom,
+                              duration: Duration(seconds: 2),
+                            ));
                           }
                         },
                         child: GestureDetector(
@@ -277,7 +299,8 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
               const SliverToBoxAdapter(child: SizedBox(height: 22)),
               if (unread.isNotEmpty) ...[
                 SliverToBoxAdapter(
-                    child: SectionLabel(l10n.notifications_unread, color: muted)),
+                    child:
+                        SectionLabel(l10n.notifications_unread, color: muted)),
                 const SliverToBoxAdapter(child: SizedBox(height: 10)),
                 SliverToBoxAdapter(child: card(unread)),
                 const SliverToBoxAdapter(child: SizedBox(height: 22)),
@@ -358,8 +381,6 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
     if (diff < 7) return '$diff days ago';
     return '${d.day}/${d.month}';
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _InboxSubtitle extends StatelessWidget {

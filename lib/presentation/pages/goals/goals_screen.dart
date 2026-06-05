@@ -57,11 +57,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
     if (auth is! AuthAuthenticated || _resolving || _householdId == null) {
       final theme = context.myTheme;
-      final bg = _c(theme.backgroundColor);
-      final border = _c(theme.borderColor);
-      final fg = _c(theme.onBackgroundColor);
-      final muted = _c(theme.onInactiveColor);
-      final surface = _c(theme.surfaceColor);
+      final bg = hexToColor(theme.backgroundColor);
+      final border = hexToColor(theme.borderColor);
+      final fg = hexToColor(theme.onBackgroundColor);
+      final muted = hexToColor(theme.onInactiveColor);
+      final surface = hexToColor(theme.surfaceColor);
 
       Widget body = auth is! AuthAuthenticated
           ? Center(
@@ -113,8 +113,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Body extends StatefulWidget {
@@ -168,14 +166,14 @@ class _BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final surface2 = _c(theme.surface2Color);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final tints = theme.categoryTints.map(_c).toList();
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final surface2 = hexToColor(theme.surface2Color);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final tints = theme.categoryTints.map(hexToColor).toList();
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
@@ -359,8 +357,6 @@ class _BodyState extends State<_Body> {
     final idx = g.id.hashCode.abs() % tints.length;
     return tints[idx];
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _GoalsSubtitle extends StatelessWidget {

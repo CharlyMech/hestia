@@ -2,8 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/domain/repositories/appointment_repository.dart';
+import 'package:hestia/domain/repositories/household_repository.dart';
 import 'package:hestia/domain/repositories/transaction_repository.dart';
 
 /// Unified item shown in the calendar agenda — either an appointment
@@ -80,6 +82,20 @@ class CalendarAppointmentAdded extends CalendarEvent {
   const CalendarAppointmentAdded();
 }
 
+class CalendarAppointmentUpdated extends CalendarEvent {
+  final Appointment appointment;
+  const CalendarAppointmentUpdated(this.appointment);
+  @override
+  List<Object?> get props => [appointment];
+}
+
+class CalendarDeleteAppointment extends CalendarEvent {
+  final String appointmentId;
+  const CalendarDeleteAppointment(this.appointmentId);
+  @override
+  List<Object?> get props => [appointmentId];
+}
+
 class CalendarRefresh extends CalendarEvent {
   final int _nonce;
   CalendarRefresh() : _nonce = DateTime.now().microsecondsSinceEpoch;
@@ -94,8 +110,14 @@ class CalendarMarkAllDay extends CalendarEvent {
   List<Object?> get props => [appointmentId];
 }
 
-class CalendarToggleOnlyMine extends CalendarEvent {
-  const CalendarToggleOnlyMine();
+/// Toggles a specific user's events in/out of the visible set.
+/// When [userId] is already in [CalendarState.visibleUserIds] it is removed;
+/// otherwise it is added. At least one user always stays visible.
+class CalendarToggleUser extends CalendarEvent {
+  final String userId;
+  const CalendarToggleUser(this.userId);
+  @override
+  List<Object?> get props => [userId];
 }
 
 class CalendarState extends Equatable {
@@ -105,10 +127,16 @@ class CalendarState extends Equatable {
   final List<Transaction> recurringTx;
   final bool showAppointments;
   final bool showTransactions;
-  final bool onlyMine;
   final bool loading;
   final String? error;
   final Set<String> allDayAppointmentIds;
+  /// userId → hex color string (e.g. '#42A5F5'). Loaded from household profiles.
+  final Map<String, String> ownerColors;
+  /// All household member profiles — used to render per-member filter chips.
+  final List<Profile> memberProfiles;
+  /// Which user IDs are currently visible. Null means "show all" (legacy path).
+  /// After load this is always initialized to {currentUserId}.
+  final Set<String>? visibleUserIds;
 
   const CalendarState({
     required this.selectedDate,
@@ -117,28 +145,26 @@ class CalendarState extends Equatable {
     this.recurringTx = const [],
     this.showAppointments = true,
     this.showTransactions = true,
-    this.onlyMine = false,
     this.loading = false,
     this.error,
     this.allDayAppointmentIds = const {},
+    this.ownerColors = const {},
+    this.memberProfiles = const [],
+    this.visibleUserIds,
   });
 
   /// All items in the visible month, post-filter.
   List<CalendarItem> visibleItemsFor(String? userId) {
+    final ids = visibleUserIds;
     final items = <CalendarItem>[];
-    final myId = userId;
     if (showAppointments) {
       var appts = appointments;
-      if (onlyMine && myId != null) {
-        appts = appts.where((a) => a.userId == myId).toList();
-      }
+      if (ids != null) appts = appts.where((a) => ids.contains(a.userId)).toList();
       items.addAll(appts.map(AppointmentItem.new));
     }
     if (showTransactions) {
       var txs = recurringTx;
-      if (onlyMine && myId != null) {
-        txs = txs.where((t) => t.userId == myId).toList();
-      }
+      if (ids != null) txs = txs.where((t) => ids.contains(t.userId)).toList();
       items.addAll(txs.map(TransactionItem.new));
     }
     items.sort((a, b) => a.when.compareTo(b.when));
@@ -174,11 +200,14 @@ class CalendarState extends Equatable {
     List<Transaction>? recurringTx,
     bool? showAppointments,
     bool? showTransactions,
-    bool? onlyMine,
     bool? loading,
     String? error,
     bool clearError = false,
     Set<String>? allDayAppointmentIds,
+    Map<String, String>? ownerColors,
+    List<Profile>? memberProfiles,
+    Set<String>? visibleUserIds,
+    bool clearVisibleUserIds = false,
   }) =>
       CalendarState(
         selectedDate: selectedDate ?? this.selectedDate,
@@ -187,10 +216,13 @@ class CalendarState extends Equatable {
         recurringTx: recurringTx ?? this.recurringTx,
         showAppointments: showAppointments ?? this.showAppointments,
         showTransactions: showTransactions ?? this.showTransactions,
-        onlyMine: onlyMine ?? this.onlyMine,
         loading: loading ?? this.loading,
         error: clearError ? null : (error ?? this.error),
         allDayAppointmentIds: allDayAppointmentIds ?? this.allDayAppointmentIds,
+        ownerColors: ownerColors ?? this.ownerColors,
+        memberProfiles: memberProfiles ?? this.memberProfiles,
+        visibleUserIds:
+            clearVisibleUserIds ? null : (visibleUserIds ?? this.visibleUserIds),
       );
 
   @override
@@ -201,10 +233,12 @@ class CalendarState extends Equatable {
         recurringTx,
         showAppointments,
         showTransactions,
-        onlyMine,
         loading,
         error,
         allDayAppointmentIds,
+        ownerColors,
+        memberProfiles,
+        visibleUserIds,
       ];
 
   /// Filter helper for callers that already know the active user id.
@@ -221,15 +255,18 @@ class CalendarState extends Equatable {
 class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
   final AppointmentRepository _appointmentRepo;
   final TransactionRepository _transactionRepo;
+  final HouseholdRepository _householdRepo;
   String? _userId;
   String? _householdId;
 
   CalendarBloc({
     required AppointmentRepository appointmentRepository,
     required TransactionRepository transactionRepository,
+    required HouseholdRepository householdRepository,
     DateTime? initialDate,
   })  : _appointmentRepo = appointmentRepository,
         _transactionRepo = transactionRepository,
+        _householdRepo = householdRepository,
         super(CalendarState(
           selectedDate: _stripTime(initialDate ?? DateTime.now()),
           visibleMonth: DateTime(initialDate?.year ?? DateTime.now().year,
@@ -241,9 +278,18 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     on<CalendarToggleMovimientos>(_onToggleMovimientos);
     on<CalendarMonthChanged>(_onMonthChanged);
     on<CalendarAppointmentAdded>(_onAppointmentAdded);
+    on<CalendarAppointmentUpdated>(_onAppointmentUpdated);
+    on<CalendarDeleteAppointment>(_onDeleteAppointment);
     on<CalendarMarkAllDay>(_onMarkAllDay);
-    on<CalendarToggleOnlyMine>(
-        (e, emit) => emit(state.copyWith(onlyMine: !state.onlyMine)));
+    on<CalendarToggleUser>((e, emit) {
+      final current = state.visibleUserIds ?? {};
+      final next = current.contains(e.userId)
+          ? current.difference({e.userId})
+          : {...current, e.userId};
+      // Always keep at least one user visible.
+      if (next.isEmpty) return;
+      emit(state.copyWith(visibleUserIds: next));
+    });
     on<CalendarRefresh>(_onRefresh);
   }
 
@@ -255,7 +301,27 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       visibleMonth: DateTime(e.month.year, e.month.month),
       clearError: true,
     ));
+    await _fetchOwnerColors(emit);
     await _fetch(emit);
+  }
+
+  Future<void> _fetchOwnerColors(Emitter<CalendarState> emit) async {
+    final userId = _userId;
+    if (userId == null) return;
+    final (household, _) = await _householdRepo.getCurrentHousehold(userId);
+    if (household == null) return;
+    final (profiles, _) = await _householdRepo.getMemberProfiles(household.id);
+    final colors = <String, String>{
+      for (final p in profiles)
+        if (p.calendarColor != null) p.id: p.calendarColor!,
+    };
+    // Default: show only the current user's items.
+    final visible = state.visibleUserIds ?? {userId};
+    emit(state.copyWith(
+      ownerColors: colors,
+      memberProfiles: profiles,
+      visibleUserIds: visible,
+    ));
   }
 
   Future<void> _fetch(Emitter<CalendarState> emit) async {
@@ -310,8 +376,14 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
   Future<void> _onMonthChanged(
       CalendarMonthChanged e, Emitter<CalendarState> emit) async {
+    final newMonth = DateTime(e.month.year, e.month.month);
+    // Keep same day-of-month, clamped to last day of the new month.
+    final lastDay = DateTime(e.month.year, e.month.month + 1, 0).day;
+    final clampedDay = state.selectedDate.day.clamp(1, lastDay);
+    final newSelected = DateTime(e.month.year, e.month.month, clampedDay);
     emit(state.copyWith(
-      visibleMonth: DateTime(e.month.year, e.month.month),
+      visibleMonth: newMonth,
+      selectedDate: newSelected,
       loading: true,
     ));
     await _fetch(emit);
@@ -320,6 +392,20 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
   Future<void> _onAppointmentAdded(
       CalendarAppointmentAdded e, Emitter<CalendarState> emit) async {
     emit(state.copyWith(loading: true));
+    await _fetch(emit);
+  }
+
+  Future<void> _onAppointmentUpdated(
+      CalendarAppointmentUpdated e, Emitter<CalendarState> emit) async {
+    emit(state.copyWith(loading: true));
+    await _appointmentRepo.update(e.appointment);
+    await _fetch(emit);
+  }
+
+  Future<void> _onDeleteAppointment(
+      CalendarDeleteAppointment e, Emitter<CalendarState> emit) async {
+    emit(state.copyWith(loading: true));
+    await _appointmentRepo.delete(e.appointmentId);
     await _fetch(emit);
   }
 

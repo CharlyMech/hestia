@@ -1,16 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:hestia/core/constants/app_constants.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 
-/// Full-screen map: tap to move pin, then Done to return [LatLng].
 class TransactionMapPickerScreen extends StatefulWidget {
-  final LatLng? initialPosition;
+  final double? initialLatitude;
+  final double? initialLongitude;
 
-  const TransactionMapPickerScreen({super.key, this.initialPosition});
+  const TransactionMapPickerScreen({
+    super.key,
+    this.initialLatitude,
+    this.initialLongitude,
+  });
 
   @override
   State<TransactionMapPickerScreen> createState() =>
@@ -18,115 +21,123 @@ class TransactionMapPickerScreen extends StatefulWidget {
 }
 
 class _TransactionMapPickerScreenState
-    extends State<TransactionMapPickerScreen> {
-  late LatLng _pin;
+    extends State<TransactionMapPickerScreen>
+    with TickerProviderStateMixin {
+  late AnimatedMapController _mapCtrl;
+  late double _lat;
+  late double _lng;
+  bool _placed = false;
+
+  static const _kMadrid = LatLng(40.415371, -3.707364);
 
   @override
   void initState() {
     super.initState();
-    _pin = widget.initialPosition ?? const LatLng(40.4168, -3.7038);
+    _lat = widget.initialLatitude ?? _kMadrid.latitude;
+    _lng = widget.initialLongitude ?? _kMadrid.longitude;
+    _placed = widget.initialLatitude != null;
+    _mapCtrl = AnimatedMapController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _mapCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onTap(_, LatLng point) {
+    setState(() {
+      _lat = point.latitude;
+      _lng = point.longitude;
+      _placed = true;
+    });
+    _mapCtrl.animateTo(dest: point);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
-    final l10n = AppLocalizations.of(context);
+    final bg = Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final fg = Color(int.parse(theme.foregroundColor.replaceFirst('#', '0xff')));
+    final accent =
+        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+    final muted =
+        Color(int.parse(theme.mutedColor.replaceFirst('#', '0xff')));
+    final pinCoord = LatLng(_lat, _lng);
 
     return CupertinoPageScaffold(
       backgroundColor: bg,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: bg,
-        border: null,
-        middle: Text(
-          l10n.transactionLocation_mapTitle,
-          style: AppFonts.body(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: fg,
-          ),
-        ),
-        leading: CupertinoNavigationBarBackButton(
-          color: accent,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        backgroundColor: bg.withValues(alpha: 0.85),
+        middle: Text('Pick location',
+            style: AppFonts.body(
+                fontSize: 17, fontWeight: FontWeight.w600, color: fg)),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () => Navigator.of(context).pop(_pin),
-          child: Text(
-            l10n.common_done,
-            style: AppFonts.body(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: accent,
-            ),
-          ),
+          onPressed: () => Navigator.of(context).pop((_lat, _lng)),
+          child: Text('Done',
+              style: AppFonts.body(
+                  fontSize: 15, fontWeight: FontWeight.w600, color: accent)),
         ),
       ),
       child: Stack(
         children: [
-          Positioned.fill(
-            child: FlutterMap(
-              options: MapOptions(
-                initialCenter: _pin,
-                initialZoom: 15,
-                onTap: (_, point) => setState(() => _pin = point),
+          FlutterMap(
+            mapController: _mapCtrl.mapController,
+            options: MapOptions(
+              initialCenter: pinCoord,
+              initialZoom: 15,
+              onTap: _onTap,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.charlymech.hestia',
+                retinaMode: MediaQuery.devicePixelRatioOf(context) > 1,
               ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'dev.hestia.app',
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _pin,
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.bottomCenter,
-                      child: Icon(
-                        CupertinoIcons.location_solid,
-                        size: 40,
-                        color: accent,
-                      ),
+              if (_placed)
+                MarkerLayer(markers: [
+                  Marker(
+                    point: pinCoord,
+                    width: 36,
+                    height: 36,
+                    child: Icon(
+                      CupertinoIcons.location_solid,
+                      color: accent,
+                      size: 36,
                     ),
+                  ),
+                ]),
+            ],
+          ),
+          // Coordinates label
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: bg.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x1F000000), blurRadius: 8),
                   ],
                 ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: 24,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: bg.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(AppRadii.md),
+                child: Text(
+                  _placed
+                      ? '${_lat.toStringAsFixed(5)}, ${_lng.toStringAsFixed(5)}'
+                      : 'Tap to place pin',
+                  style: AppFonts.body(fontSize: 12, color: muted),
+                ),
               ),
-              child: Text(
-                '${_pin.latitude.toStringAsFixed(5)}, ${_pin.longitude.toStringAsFixed(5)}',
-                style: AppFonts.body(fontSize: 13, color: fg),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 12,
-            bottom: 72,
-            child: Text(
-              '© OpenStreetMap',
-              style: AppFonts.body(
-                  fontSize: 10, color: fg.withValues(alpha: 0.55)),
             ),
           ),
         ],
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

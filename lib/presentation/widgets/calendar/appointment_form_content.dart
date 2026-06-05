@@ -8,6 +8,7 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/domain/entities/car.dart' show Car;
 import 'package:hestia/domain/entities/pet.dart' show Pet;
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/appointment_form/appointment_form_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
@@ -36,7 +37,6 @@ class AppointmentFormContent extends StatefulWidget {
 }
 
 class _AppointmentFormContentState extends State<AppointmentFormContent> {
-  bool _allDay = false;
   List<Pet> _pets = const [];
   List<Car> _cars = const [];
 
@@ -71,12 +71,13 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final errorColor = _c(theme.colorRed);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final errorColor = hexToColor(theme.colorRed);
+    final l10n = AppLocalizations.of(context);
 
     return BlocProvider(
       create: (_) => AppointmentFormBloc(
@@ -89,7 +90,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
         listenWhen: (p, n) => !p.saved && n.saved,
         listener: (context, state) {
           Navigator.of(context).pop();
-          widget.onSaved(state.id ?? '', _allDay);
+          widget.onSaved(state.id ?? '', state.isAllDay);
         },
         builder: (context, state) {
           return SingleChildScrollView(
@@ -99,11 +100,11 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
               children: [
                 // Title
                 _LabeledField(
-                  label: 'Title',
+                  label: l10n.appointments_title,
                   muted: muted,
                   child: _Input(
                     initial: state.title,
-                    placeholder: 'Dentist · Gym · Meeting…',
+                    placeholder: l10n.appointments_titlePlaceholder,
                     surface: surface,
                     border: border,
                     fg: fg,
@@ -114,14 +115,33 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                   ),
                 ),
                 const SizedBox(height: 14),
+                // Location
+                _LabeledField(
+                  label: l10n.appointments_location,
+                  muted: muted,
+                  child: _Input(
+                    initial: state.location,
+                    placeholder: l10n.appointments_location,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    onChanged: (v) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormLocationChanged(v)),
+                  ),
+                ),
+                const SizedBox(height: 14),
                 // All day
                 Row(
                   children: [
                     FCheckbox(
-                      value: _allDay,
+                      value: state.isAllDay,
                       onChange: (v) {
-                        setState(() => _allDay = v);
-                        if (_allDay) {
+                        context
+                            .read<AppointmentFormBloc>()
+                            .add(FormAllDayChanged(v));
+                        if (v) {
                           final d = state.startsAt;
                           final midnight = DateTime(d.year, d.month, d.day);
                           context
@@ -134,15 +154,34 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'All day',
+                      l10n.calendar_allDay,
                       style: AppFonts.body(fontSize: 14, color: fg),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                // Share with household
+                Row(
+                  children: [
+                    FCheckbox(
+                      value: state.isShared,
+                      onChange: (v) => context
+                          .read<AppointmentFormBloc>()
+                          .add(FormSharedChanged(v)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.appointments_shareHousehold,
+                        style: AppFonts.body(fontSize: 14, color: fg),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 14),
                 // Date
                 _LabeledField(
-                  label: 'Date',
+                  label: l10n.appointments_date,
                   muted: muted,
                   child: _TappableRow(
                     value: _fmtDate(state.startsAt),
@@ -156,9 +195,9 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                 const SizedBox(height: 14),
                 // Start time
                 Opacity(
-                  opacity: _allDay ? 0.38 : 1.0,
+                  opacity: state.isAllDay ? 0.38 : 1.0,
                   child: _LabeledField(
-                    label: 'Start time',
+                    label: l10n.appointments_startTime,
                     muted: muted,
                     child: _TappableRow(
                       value: _fmtTime(state.startsAt),
@@ -166,7 +205,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                       border: border,
                       fg: fg,
                       muted: muted,
-                      onTap: _allDay
+                      onTap: state.isAllDay
                           ? null
                           : () =>
                               _pickTime(context, state.startsAt, onPicked: (t) {
@@ -180,9 +219,9 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                 const SizedBox(height: 14),
                 // End time
                 Opacity(
-                  opacity: _allDay ? 0.38 : 1.0,
+                  opacity: state.isAllDay ? 0.38 : 1.0,
                   child: _LabeledField(
-                    label: 'End time',
+                    label: l10n.appointments_endTime,
                     muted: muted,
                     child: _TappableRow(
                       value: _fmtTime(state.startsAt.add(state.duration)),
@@ -190,7 +229,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                       border: border,
                       fg: fg,
                       muted: muted,
-                      onTap: _allDay
+                      onTap: state.isAllDay
                           ? null
                           : () => _pickTime(
                                 context,
@@ -211,7 +250,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                 const SizedBox(height: 14),
                 // Category
                 _LabeledField(
-                  label: 'Category',
+                  label: l10n.appointments_category,
                   muted: muted,
                   child: _CategoryPicker(
                     value: state.category,
@@ -226,9 +265,21 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                   ),
                 ),
                 const SizedBox(height: 14),
+                // Color picker
+                const SizedBox(height: 14),
+                _LabeledField(
+                  label: l10n.appointments_color,
+                  muted: muted,
+                  child: _ColorPicker(
+                    selected: state.color,
+                    onChanged: (hex) => context
+                        .read<AppointmentFormBloc>()
+                        .add(FormColorChanged(hex)),
+                  ),
+                ),
                 // Reminders
                 _LabeledField(
-                  label: 'Reminders',
+                  label: l10n.appointments_reminders,
                   muted: muted,
                   child: _Reminders(
                     selected: state.reminderOffsets,
@@ -240,6 +291,9 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                     onToggle: (d) => context
                         .read<AppointmentFormBloc>()
                         .add(FormToggleReminder(d)),
+                    onClear: () => context
+                        .read<AppointmentFormBloc>()
+                        .add(const FormClearReminders()),
                   ),
                 ),
                 if (_pets.isNotEmpty) ...[
@@ -249,7 +303,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                     muted: muted,
                     child: _EntityPicker(
                       items: [
-                        ('', 'None'),
+                        ('', l10n.common_none),
                         for (final p in _pets) (p.id, p.name),
                       ],
                       selected: state.petId ?? '',
@@ -271,7 +325,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                     muted: muted,
                     child: _EntityPicker(
                       items: [
-                        ('', 'None'),
+                        ('', l10n.common_none),
                         for (final c in _cars)
                           (
                             c.id,
@@ -319,7 +373,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                       child: state.submitting
                           ? const CupertinoActivityIndicator()
                           : Text(
-                              'Save',
+                              l10n.appointments_save,
                               style: AppFonts.body(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -340,9 +394,9 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
   Future<void> _pickDate(BuildContext context, DateTime current) async {
     DateTime selected = current;
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
 
     final calStyle = FCalendarStyle.inherit(
       colorScheme: context.theme.colorScheme,
@@ -374,12 +428,12 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                   children: [
                     CupertinoButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      child: Text('Cancel',
+                      child: Text(AppLocalizations.of(ctx).common_cancel,
                           style: AppFonts.body(fontSize: 15, color: fg)),
                     ),
                     CupertinoButton(
                       onPressed: () => Navigator.of(ctx).pop(selected),
-                      child: Text('Done',
+                      child: Text(AppLocalizations.of(ctx).common_done,
                           style: AppFonts.body(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -425,9 +479,9 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
   }) async {
     DateTime selected = current;
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final accent = _c(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
 
     final picked = await showCupertinoModalPopup<DateTime>(
       context: context,
@@ -444,12 +498,12 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                   children: [
                     CupertinoButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      child: Text('Cancel',
+                      child: Text(AppLocalizations.of(ctx).common_cancel,
                           style: AppFonts.body(fontSize: 15, color: fg)),
                     ),
                     CupertinoButton(
                       onPressed: () => Navigator.of(ctx).pop(selected),
-                      child: Text('Done',
+                      child: Text(AppLocalizations.of(ctx).common_done,
                           style: AppFonts.body(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -505,8 +559,6 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
     final period = d.hour < 12 ? 'AM' : 'PM';
     return '$h:$mm $period';
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 // ── Shared sub-widgets ────────────────────────────────────────────────────────
@@ -696,6 +748,7 @@ class _Reminders extends StatelessWidget {
   final Color muted;
   final Color accent;
   final ValueChanged<Duration> onToggle;
+  final VoidCallback onClear;
 
   const _Reminders({
     required this.selected,
@@ -705,6 +758,7 @@ class _Reminders extends StatelessWidget {
     required this.muted,
     required this.accent,
     required this.onToggle,
+    required this.onClear,
   });
 
   static const _options = [
@@ -717,10 +771,32 @@ class _Reminders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final noneOn = selected.isEmpty;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
+        // "None" — clears all reminders (empty list is valid).
+        GestureDetector(
+          onTap: onClear,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: noneOn ? accent.withValues(alpha: 0.14) : surface,
+              border: Border.all(
+                  color: noneOn ? accent : const Color(0x00000000)),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              'None',
+              style: AppFonts.body(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: noneOn ? accent : muted,
+              ),
+            ),
+          ),
+        ),
         for (final d in _options)
           () {
             final isOn = selected.any((s) => s.inMinutes == d.inMinutes);
@@ -755,6 +831,59 @@ class _Reminders extends StatelessWidget {
     if (d.inHours < 24) return '${d.inHours}h';
     final days = d.inDays;
     return days == 1 ? '1 day' : '$days days';
+  }
+}
+
+// ── Color picker ─────────────────────────────────────────────────────────────
+
+class _ColorPicker extends StatelessWidget {
+  final String? selected;
+  final ValueChanged<String?> onChanged;
+
+  const _ColorPicker({required this.selected, required this.onChanged});
+
+  static Color _parse(String hex) =>
+      Color(int.parse(hex.replaceFirst('#', '0xff')));
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        for (final hex in AppointmentColors.palette)
+          GestureDetector(
+            onTap: () => onChanged(selected == hex ? null : hex),
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _parse(hex),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected == hex
+                      ? _parse(hex)
+                      : const Color(0x00000000),
+                  width: 3,
+                ),
+                boxShadow: selected == hex
+                    ? [
+                        BoxShadow(
+                          color: _parse(hex).withValues(alpha: 0.5),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
+              ),
+              child: selected == hex
+                  ? const Icon(CupertinoIcons.checkmark,
+                      size: 14, color: CupertinoColors.white)
+                  : null,
+            ),
+          ),
+      ],
+    );
   }
 }
 

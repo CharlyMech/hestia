@@ -47,7 +47,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
 
   String? _imageUrl;
   FuelType _fuelType = FuelType.gasoline;
-  CarStatus _status = CarStatus.active;
+  bool _isActive = true;
   Car? _existing;
   List<Profile> _household = [];
   final Set<String> _selectedMembers = {};
@@ -86,7 +86,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
         _odo.text = car.currentOdometerKm?.toString() ?? '';
         _imageUrl = car.imageUrl;
         _fuelType = car.fuelType;
-        _status = car.status;
+        _isActive = car.isActive;
         final (members, _) =
             await AppDependencies.instance.carRepository.getMembers(car.id);
         _selectedMembers.addAll(members.map((m) => m.userId));
@@ -132,7 +132,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
       fuelType: _fuelType,
       tankCapacityLiters: double.tryParse(_tank.text.replaceAll(',', '.')),
       currentOdometerKm: double.tryParse(_odo.text.replaceAll(',', '.')),
-      status: _status,
+      isActive: _isActive,
       createdBy: _existing?.createdBy ?? auth.profile.id,
       createdAt: _existing?.createdAt ?? now,
       lastUpdate: now,
@@ -151,13 +151,16 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
     final isEdit = widget.carId != null;
+
+    final authState = context.read<AuthBloc>().state;
+    final uid = authState is AuthAuthenticated ? authState.profile.id : 'anon';
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
@@ -191,7 +194,8 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                 Center(
                   child: ImagePickerField(
                     bucket: ImageBuckets.cars,
-                    path: '${_existing?.id ?? 'new'}/cover.jpg',
+                    // First path segment must be the auth uid for storage RLS.
+                    path: '$uid/car_${_existing?.id ?? 'new'}.jpg',
                     value: _imageUrl,
                     onChanged: (v) => setState(() => _imageUrl = v),
                     size: 120,
@@ -272,15 +276,14 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                     fg: fg,
                     muted: muted),
                 const SizedBox(height: 12),
-                _Segmented<CarStatus>(
+                _Segmented<bool>(
                   label: 'Status',
                   options: const [
-                    (CarStatus.active, 'Active'),
-                    (CarStatus.sold, 'Sold'),
-                    (CarStatus.scrap, 'Scrap'),
+                    (true, 'Active'),
+                    (false, 'Inactive'),
                   ],
-                  value: _status,
-                  onChanged: (v) => setState(() => _status = v),
+                  value: _isActive,
+                  onChanged: (v) => setState(() => _isActive = v),
                   surface: surface,
                   fg: fg,
                   muted: muted,
@@ -351,8 +354,6 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
             ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Field extends StatelessWidget {

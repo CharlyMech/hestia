@@ -38,9 +38,10 @@ class BankAccountsLoading extends BankAccountsState {
 
 class BankAccountsLoaded extends BankAccountsState {
   final List<BankAccount> sources;
-  const BankAccountsLoaded(this.sources);
+  final String userId;
+  const BankAccountsLoaded(this.sources, {required this.userId});
   @override
-  List<Object?> get props => [sources];
+  List<Object?> get props => [sources, userId];
 
   /// Total balance across all loaded sources, in the source's own currency.
   /// Caller is responsible for currency conversion if mixed.
@@ -49,8 +50,18 @@ class BankAccountsLoaded extends BankAccountsState {
 
   List<BankAccount> get shared =>
       sources.where((s) => s.ownerType == OwnerType.shared).toList();
-  List<BankAccount> get personal =>
-      sources.where((s) => s.ownerType == OwnerType.personal).toList();
+
+  /// Personal accounts belonging to [userId].
+  List<BankAccount> get personal => sources
+      .where((s) =>
+          s.ownerType == OwnerType.personal && s.ownerId == userId)
+      .toList();
+
+  /// Personal accounts belonging to other household members.
+  List<BankAccount> get others => sources
+      .where((s) =>
+          s.ownerType == OwnerType.personal && s.ownerId != userId)
+      .toList();
 }
 
 class BankAccountsError extends BankAccountsState {
@@ -95,6 +106,6 @@ class BankAccountsBloc extends Bloc<BankAccountsEvent, BankAccountsState> {
       emit(BankAccountsError(failure.message));
       return;
     }
-    emit(BankAccountsLoaded(sources));
+    emit(BankAccountsLoaded(sources, userId: _userId ?? ''));
   }
 }

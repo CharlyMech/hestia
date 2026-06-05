@@ -10,6 +10,8 @@ import 'package:hestia/domain/entities/fuel_entry.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
+import 'package:hestia/domain/entities/transaction_source.dart';
+import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 
 class AddEditFuelEntryScreen extends StatelessWidget {
@@ -23,7 +25,8 @@ class AddEditFuelEntryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final id = entry?.carId ?? carId!;
     return BlocProvider(
-      create: (_) => FuelBloc(AppDependencies.instance.fuelEntryRepository)
+      create: (_) => FuelBloc(AppDependencies.instance.fuelEntryRepository,
+          AppDependencies.instance.carRepository)
         ..add(FuelLoad(id)),
       child: _AddEditFuelView(entry: entry, carId: id),
     );
@@ -47,6 +50,8 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
   final _notes = TextEditingController();
   bool _isFullTank = true;
   bool _createTransaction = false;
+  TransactionSource? _station;
+  List<TransactionSource> _stations = [];
   bool _totalDirty = false;
 
   @override
@@ -65,6 +70,99 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
     _liters.addListener(_recompute);
     _ppl.addListener(_recompute);
     _total.addListener(() => _totalDirty = true);
+    _loadStations();
+  }
+
+  Future<void> _loadStations() async {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) return;
+    final (household, _) = await AppDependencies.instance.householdRepository
+        .getCurrentHousehold(auth.profile.id);
+    if (household == null || !mounted) return;
+    final (sources, _) = await AppDependencies
+        .instance.transactionSourceRepository
+        .getAll(householdId: household.id);
+    if (!mounted) return;
+    // Only show merchant-kind sources as stations
+    final merchants = sources
+        .where((s) =>
+            s.kind == TransactionSourceKind.merchant ||
+            s.kind == TransactionSourceKind.other)
+        .toList();
+    setState(() {
+      _stations = merchants;
+      // Pre-select station from existing entry
+      if (widget.entry?.stationSourceId != null) {
+        _station = merchants.cast<TransactionSource?>().firstWhere(
+              (s) => s?.id == widget.entry!.stationSourceId,
+              orElse: () => null,
+            );
+      }
+    });
+  }
+
+  void _openStationPicker(
+      Color surface, Color border, Color fg, Color muted, Color accent) {
+    if (_stations.isEmpty) return;
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (_) => Container(
+        color: surface,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() => _station = null);
+                  Navigator.of(context).pop();
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  child: Row(children: [
+                    Text('None',
+                        style: AppFonts.body(fontSize: 15, color: muted)),
+                  ]),
+                ),
+              ),
+              Container(height: 0.5, color: border),
+              for (final src in _stations) ...[
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    setState(() => _station = src);
+                    Navigator.of(context).pop();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
+                    child: Row(children: [
+                      Expanded(
+                        child: Text(
+                          src.name,
+                          style: AppFonts.body(
+                            fontSize: 15,
+                            color: _station?.id == src.id ? accent : fg,
+                            fontWeight: _station?.id == src.id
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      if (_station?.id == src.id)
+                        Icon(CupertinoIcons.checkmark, size: 16, color: accent),
+                    ]),
+                  ),
+                ),
+                Container(height: 0.5, color: border),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _recompute() {
@@ -88,7 +186,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
 
   Future<void> _pickDate() async {
     final theme = context.myTheme;
-    final surface = _c(theme.surfaceColor);
+    final surface = hexToColor(theme.surfaceColor);
     DateTime tmp = _filledAt;
     await showCupertinoModalPopup(
       context: context,
@@ -135,8 +233,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
       pricePerLiter: ppl,
       totalAmount: total,
       isFullTank: _isFullTank,
-      // TODO: add station picker (TransactionSource of kind merchant).
-      stationSourceId: widget.entry?.stationSourceId,
+      stationSourceId: _station?.id,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
       filledAt: _filledAt,
       createdBy: widget.entry?.createdBy ?? auth.profile.id,
@@ -147,8 +244,16 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
       context
           .read<FuelBloc>()
           .add(FuelCreate(entry, createTransaction: _createTransaction));
+      if (mounted) {
+        context.showToast(const AppToastConfig(
+            type: ToastType.success, title: 'Fuel entry added'));
+      }
     } else {
       context.read<FuelBloc>().add(FuelUpdate(entry));
+      if (mounted) {
+        context.showToast(const AppToastConfig(
+            type: ToastType.success, title: 'Fuel entry updated'));
+      }
     }
     if (mounted) context.pop();
   }
@@ -159,12 +264,12 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
     final isEdit = widget.entry != null;
 
     return CupertinoPushedRouteShell(
@@ -236,6 +341,49 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
               fg: fg,
               muted: muted),
           const SizedBox(height: 12),
+          if (_stations.isNotEmpty)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () =>
+                  _openStationPicker(surface, border, fg, muted, accent),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: border, width: 0.8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 2,
+                        children: [
+                          Text('STATION',
+                              style: AppFonts.body(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: muted,
+                                  letterSpacing: 0.5)),
+                          Text(
+                            _station?.name ?? 'None',
+                            style: AppFonts.body(
+                              fontSize: 14,
+                              color: _station != null ? fg : muted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(CupertinoIcons.chevron_up_chevron_down,
+                        size: 14, color: muted),
+                  ],
+                ),
+              ),
+            ),
+          if (_stations.isNotEmpty) const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
@@ -310,8 +458,6 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Field extends StatelessWidget {

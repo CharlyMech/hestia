@@ -1,10 +1,12 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/calendar/calendar_bloc.dart';
 import 'package:hestia/presentation/widgets/calendar/day_event_block.dart';
 import 'package:hestia/presentation/widgets/calendar/day_view_layout.dart';
@@ -77,11 +79,11 @@ class _DayViewState extends State<DayView> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final border = _c(theme.borderColor);
-    final surface = _c(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final border = hexToColor(theme.borderColor);
+    final surface = hexToColor(theme.surfaceColor);
     final tints = theme.categoryTints
         .map((h) => Color(int.parse(h.replaceFirst('#', '0xff'))))
         .toList();
@@ -117,6 +119,7 @@ class _DayViewState extends State<DayView> {
           fg: fg,
           muted: muted,
           onTapAppointment: widget.onTapAppointment,
+          onLongPressAppointment: _confirmDelete,
         ),
         Expanded(
           child: CustomScrollView(
@@ -198,6 +201,9 @@ class _DayViewState extends State<DayView> {
                                             onTap: () =>
                                                 widget.onTapAppointment(
                                                     e.appointment),
+                                            onLongPress: () =>
+                                                _confirmDelete(
+                                                    context, e.appointment),
                                             use24h: widget.use24h,
                                           ),
                                         ),
@@ -233,12 +239,39 @@ class _DayViewState extends State<DayView> {
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   Color _ownerOrCategoryColor(Appointment a, List<Color> tints) {
+    if (a.color != null) return hexToColor(a.color!);
     final ownerHex = widget.ownerColors[a.userId];
-    if (ownerHex != null) return _c(ownerHex);
+    if (ownerHex != null) return hexToColor(ownerHex);
     return categoryColor(a.category, tints);
   }
 
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+  void _confirmDelete(BuildContext context, Appointment appointment) {
+    final l10n = AppLocalizations.of(context);
+    showCupertinoDialog<bool>(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(l10n.calendar_deleteEvent),
+        content: Text(l10n.calendar_deleteEventConfirm),
+        actions: [
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.common_delete),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && context.mounted) {
+        context
+            .read<CalendarBloc>()
+            .add(CalendarDeleteAppointment(appointment.id));
+      }
+    });
+  }
 }
 
 // ── Hour grid ────────────────────────────────────────────────────────────────
@@ -375,6 +408,7 @@ class _AllDayOverlay extends StatelessWidget {
   final Color fg;
   final Color muted;
   final ValueChanged<Appointment> onTapAppointment;
+  final void Function(BuildContext, Appointment) onLongPressAppointment;
 
   const _AllDayOverlay({
     required this.appointments,
@@ -386,6 +420,7 @@ class _AllDayOverlay extends StatelessWidget {
     required this.fg,
     required this.muted,
     required this.onTapAppointment,
+    required this.onLongPressAppointment,
   });
 
   @override
@@ -405,12 +440,20 @@ class _AllDayOverlay extends StatelessWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ...appointments.map((item) => _AllDayChip(
-                        label: item.appointment.title,
-                        color: categoryColor(
-                            item.appointment.category, categoryTints),
-                        onTap: () => onTapAppointment(item.appointment),
-                      )),
+                  ...appointments.map((item) {
+                    final appt = item.appointment;
+                    final chipColor = appt.color != null
+                        ? Color(
+                            int.parse(appt.color!.replaceFirst('#', '0xff')))
+                        : categoryColor(appt.category, categoryTints);
+                    return _AllDayChip(
+                      label: appt.title,
+                      color: chipColor,
+                      onTap: () => onTapAppointment(appt),
+                      onLongPress: () =>
+                          onLongPressAppointment(context, appt),
+                    );
+                  }),
                   ...transactions.map((item) {
                     final t = item.transaction;
                     final sign = t.isExpense ? '-' : '+';
@@ -438,30 +481,46 @@ class _AllDayChip extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
-  const _AllDayChip(
-      {required this.label, required this.color, required this.onTap});
+  const _AllDayChip({
+    required this.label,
+    required this.color,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
+          color: color.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.10),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         child: Text(
           label,
           style: AppFonts.body(
             fontSize: 11,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: color,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

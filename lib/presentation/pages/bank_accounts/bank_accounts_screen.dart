@@ -15,21 +15,21 @@ import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/dotted_border.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 import 'package:skeletonizer/skeletonizer.dart';
 
 class BankAccountsScreen extends StatefulWidget {
-  /// When true (tab inside [MainTabShell]), skips pushed-route top chrome.
   final bool embeddedInTabShell;
 
   const BankAccountsScreen({super.key, this.embeddedInTabShell = false});
 
   @override
-  State<BankAccountsScreen> createState() => _MoneySourcesScreenState();
+  State<BankAccountsScreen> createState() => _BankAccountsScreenState();
 }
 
-class _MoneySourcesScreenState extends State<BankAccountsScreen> {
+class _BankAccountsScreenState extends State<BankAccountsScreen> {
   String? _householdId;
   bool _resolving = true;
 
@@ -57,23 +57,19 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthBloc>().state;
-    if (auth is! AuthAuthenticated) {
-      return const _SignedOut();
-    }
+    if (auth is! AuthAuthenticated) return const _SignedOut();
 
-    // Tab-embedded: bloc is already provided by MainTabShell. Go straight to body.
     if (widget.embeddedInTabShell) {
       return _Body(embeddedInTabShell: true);
     }
 
-    // Pushed-route: needs its own bloc instance.
     if (_resolving || _householdId == null) {
       final theme = context.myTheme;
-      final bg = _c(theme.backgroundColor);
-      final surface = _c(theme.surfaceColor);
-      final border = _c(theme.borderColor);
-      final fg = _c(theme.onBackgroundColor);
-      final muted = _c(theme.onInactiveColor);
+      final bg = hexToColor(theme.backgroundColor);
+      final surface = hexToColor(theme.surfaceColor);
+      final border = hexToColor(theme.borderColor);
+      final fg = hexToColor(theme.onBackgroundColor);
+      final muted = hexToColor(theme.onInactiveColor);
       final l10n = AppLocalizations.of(context);
 
       return CupertinoPushedRouteShell(
@@ -93,19 +89,6 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.bankAccounts_totalNetWorth,
-                        style: AppFonts.body(fontSize: 13, color: muted),
-                      ),
-                      Text(
-                        '9999.99 EUR',
-                        style: AppFonts.numeric(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
                       Text('Placeholder label',
                           style: AppFonts.sectionLabel(color: muted)),
                       const SizedBox(height: 140),
@@ -118,6 +101,7 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
         ),
       );
     }
+
     return BlocProvider(
       create: (_) => BankAccountsBloc(
         AppDependencies.instance.bankAccountRepository,
@@ -128,13 +112,10 @@ class _MoneySourcesScreenState extends State<BankAccountsScreen> {
       child: _Body(embeddedInTabShell: false),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _Body extends StatefulWidget {
   final bool embeddedInTabShell;
-
   const _Body({required this.embeddedInTabShell});
 
   @override
@@ -143,6 +124,7 @@ class _Body extends StatefulWidget {
 
 class _BodyState extends State<_Body> {
   int _skeletonEpoch = 0;
+  bool _showOthers = false;
 
   Widget _wrapPageChrome({
     required Color bg,
@@ -169,12 +151,12 @@ class _BodyState extends State<_Body> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final border = _c(theme.borderColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final border = hexToColor(theme.borderColor);
 
     return _wrapPageChrome(
       bg: bg,
@@ -199,17 +181,11 @@ class _BodyState extends State<_Body> {
                     parent: BouncingScrollPhysics(),
                   ),
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: _Header(
-                        l10n: l10n,
-                        fg: fg,
-                        muted: muted,
-                        accent: accent,
-                        total: 88888.88,
-                        currency: 'EUR',
-                        showLargeTitle: widget.embeddedInTabShell,
+                    if (widget.embeddedInTabShell)
+                      SliverToBoxAdapter(
+                        child: _LargeTitle(
+                            label: l10n.bankAccounts_title, fg: fg),
                       ),
-                    ),
                     const SliverToBoxAdapter(child: SizedBox(height: 20)),
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -236,6 +212,7 @@ class _BodyState extends State<_Body> {
                 ),
               );
             }
+
             if (state is BankAccountsError) {
               return ScreenShell(
                 bg: bg,
@@ -249,7 +226,10 @@ class _BodyState extends State<_Body> {
                 ],
               );
             }
+
             final loaded = state as BankAccountsLoaded;
+            final others = loaded.others;
+
             return ScreenShell(
               bg: bg,
               onRefresh: () async {
@@ -258,30 +238,29 @@ class _BodyState extends State<_Body> {
                 await bloc.stream.firstWhere((s) => s is! BankAccountsLoading);
               },
               slivers: [
-                SliverToBoxAdapter(
-                  child: _Header(
-                    l10n: l10n,
-                    fg: fg,
-                    muted: muted,
-                    accent: accent,
-                    total: loaded.totalBalance,
-                    currency: loaded.sources.firstOrNull?.currency ?? 'EUR',
-                    showLargeTitle: widget.embeddedInTabShell,
+                if (widget.embeddedInTabShell)
+                  SliverToBoxAdapter(
+                    child:
+                        _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
                   ),
-                ),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+                // ── Shared accounts ───────────────────────────────────────
                 if (loaded.shared.isNotEmpty) ...[
                   SliverToBoxAdapter(
-                    child: SectionLabel(l10n.bankAccounts_shared, color: muted),
+                    child: SectionLabel(l10n.bankAccounts_shared,
+                        color: muted),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 10)),
                   _CardList(sources: loaded.shared, indexOffset: 0),
                   const SliverToBoxAdapter(child: SizedBox(height: 24)),
                 ],
+
+                // ── My accounts ───────────────────────────────────────────
                 if (loaded.personal.isNotEmpty) ...[
                   SliverToBoxAdapter(
-                    child:
-                        SectionLabel(l10n.bankAccounts_personal, color: muted),
+                    child: SectionLabel(l10n.bankAccounts_myAccounts,
+                        color: muted),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 10)),
                   _CardList(
@@ -290,14 +269,78 @@ class _BodyState extends State<_Body> {
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 ],
+
+                // ── Add card placeholder ──────────────────────────────────
                 SliverToBoxAdapter(
                   child: _AddCardPlaceholder(
                     border: border,
                     muted: muted,
                     label: l10n.bankAccounts_addCard,
-                    onTap: () => context.push(AppRoutes.addBankAccount),
+                    onTap: () async {
+                      final bloc = context.read<BankAccountsBloc>();
+                      final created =
+                          await context.push<bool>(AppRoutes.addBankAccount);
+                      // Account screen pops `true` on successful create.
+                      if (created == true) {
+                        bloc.add(const BankAccountsRefresh());
+                      }
+                    },
                   ),
                 ),
+
+                // ── Other accounts toggle ─────────────────────────────────
+                if (others.isNotEmpty) ...[
+                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: GestureDetector(
+                        onTap: () =>
+                            setState(() => _showOthers = !_showOthers),
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          spacing: 6,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _showOthers
+                                    ? l10n.bankAccounts_hideOthers
+                                    : '${l10n.bankAccounts_showOthers} (${others.length})',
+                                style: AppFonts.body(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: accent,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              _showOthers
+                                  ? CupertinoIcons.chevron_up
+                                  : CupertinoIcons.chevron_down,
+                              size: 14,
+                              color: accent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (_showOthers) ...[
+                    const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                    SliverToBoxAdapter(
+                      child: SectionLabel(l10n.bankAccounts_others,
+                          color: muted),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 10)),
+                    _CardList(
+                      sources: others,
+                      indexOffset:
+                          loaded.shared.length + loaded.personal.length,
+                    ),
+                  ],
+                ],
+
+                const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             );
           },
@@ -305,59 +348,26 @@ class _BodyState extends State<_Body> {
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
-class _Header extends StatelessWidget {
-  final AppLocalizations l10n;
-  final Color fg;
-  final Color muted;
-  final Color accent;
-  final double total;
-  final String currency;
-  final bool showLargeTitle;
+// ── Sub-widgets ───────────────────────────────────────────────────────────────
 
-  const _Header({
-    required this.l10n,
-    required this.fg,
-    required this.muted,
-    required this.accent,
-    required this.total,
-    required this.currency,
-    this.showLargeTitle = true,
-  });
+class _LargeTitle extends StatelessWidget {
+  final String label;
+  final Color fg;
+  const _LargeTitle({required this.label, required this.fg});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 4,
-        children: [
-          if (showLargeTitle)
-            Text(
-              l10n.bankAccounts_title,
-              style: AppFonts.heading(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                color: fg,
-              ),
-            ),
-          Text(
-            l10n.bankAccounts_totalNetWorth,
-            style: AppFonts.body(fontSize: 13, color: muted),
-          ),
-          Text(
-            '${total.toStringAsFixed(2)} $currency',
-            style: AppFonts.numeric(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: fg,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: AppFonts.heading(
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          color: fg,
+        ),
       ),
     );
   }
@@ -452,7 +462,7 @@ class _SignedOut extends StatelessWidget {
       backgroundColor: bg,
       child: Center(
         child: Text(
-          'Sign in to view accounts',
+          AppLocalizations.of(context).bankAccounts_signInPrompt,
           style: AppFonts.body(fontSize: 14, color: muted),
         ),
       ),

@@ -1,13 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
-import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
-import 'package:hestia/presentation/pages/fuel/fuel_screen.dart';
+import 'package:hestia/presentation/pages/fuel/car_screen.dart';
+import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 
 /// Cars list outside the tab shell (e.g. when the cars tab is hidden).
 class CarsStandaloneScreen extends StatefulWidget {
@@ -53,32 +57,31 @@ class _CarsStandaloneScreenState extends State<CarsStandaloneScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final border = hexToColor(theme.borderColor);
 
     return BlocProvider.value(
       value: _carsBloc,
-      child: CupertinoPageScaffold(
+      child: CupertinoPushedRouteShell(
         backgroundColor: bg,
-        navigationBar: CupertinoNavigationBar(
-          backgroundColor: _c(theme.surfaceColor),
-          border: Border(
-            bottom: BorderSide(color: _c(theme.borderColor)),
-          ),
-          middle: Text(
-            l10n.cars_title,
-            style: AppFonts.heading(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: _c(theme.onBackgroundColor),
-            ),
-          ),
+        navBackground: surface,
+        borderColor: border,
+        foregroundColor: fg,
+        titleText: l10n.cars_title,
+        trailing: AnimatedButton(
+          padding: const EdgeInsets.all(4),
+          onTap: () async {
+            await context.push(AppRoutes.addCar);
+            if (context.mounted) _carsBloc.add(const CarsRefresh());
+          },
+          child: Plus(width: 22, height: 22, color: fg),
         ),
         child: _loading
             ? const Center(child: CupertinoActivityIndicator())
-            : const FuelScreen(),
+            : const CarScreen(),
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }

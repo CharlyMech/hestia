@@ -19,6 +19,7 @@ import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.
 import 'package:hestia/presentation/widgets/shopping/start_shopping_session_content.dart';
 import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus, Trash, Check;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Detail screen for a single [ShoppingList]: items, add row, finish session,
 /// or start a session from a template.
@@ -47,9 +48,28 @@ class _Body extends StatefulWidget {
 
 class _BodyState extends State<_Body> {
   final _newItemCtrl = TextEditingController();
+  RealtimeChannel? _itemsChannel;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscribeToListItems();
+  }
+
+  void _subscribeToListItems() {
+    final rt = AppDependencies.instance.shoppingRealtimeService;
+    _itemsChannel = rt.subscribeToListItems(
+      listId: widget.list.id,
+      onChanged: () {
+        if (!mounted) return;
+        context.read<ShoppingListBloc>().add(const ShoppingListRemoteSync());
+      },
+    );
+  }
 
   @override
   void dispose() {
+    AppDependencies.instance.shoppingRealtimeService.unsubscribe(_itemsChannel);
     _newItemCtrl.dispose();
     super.dispose();
   }
@@ -223,13 +243,13 @@ class _BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
-    final destructive = _c(theme.colorRed);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final destructive = hexToColor(theme.colorRed);
 
     return BlocBuilder<ShoppingListBloc, ShoppingListState>(
       builder: (context, state) {
@@ -392,8 +412,6 @@ class _BodyState extends State<_Body> {
     context.read<ShoppingListBloc>().add(ShoppingListAddItem(name: name));
     _newItemCtrl.clear();
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _ItemRow extends StatelessWidget {
