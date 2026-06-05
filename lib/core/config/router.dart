@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:hestia/presentation/pages/auth/login_screen.dart';
 import 'package:hestia/presentation/pages/fuel/add_edit_car_screen.dart';
 import 'package:hestia/presentation/pages/pets/add_edit_health_record_screen.dart';
 import 'package:hestia/presentation/pages/pets/add_edit_pet_screen.dart';
 import 'package:hestia/presentation/pages/pets/pet_detail_screen.dart';
-import 'package:hestia/presentation/pages/transactions/transaction_location_stats_screen.dart';
 import 'package:hestia/presentation/pages/transactions/transaction_map_picker_screen.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
 import 'package:hestia/presentation/pages/fuel/add_edit_fuel_entry_screen.dart';
@@ -19,6 +17,7 @@ import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
 import 'package:hestia/presentation/pages/goals/goals_screen.dart';
 import 'package:hestia/presentation/pages/main_tab_shell.dart';
+import 'package:hestia/domain/entities/bank_account.dart' show BankAccount;
 import 'package:hestia/presentation/pages/bank_accounts/add_edit_bank_account_screen.dart';
 import 'package:hestia/presentation/pages/bank_accounts/bank_account_detail_screen.dart';
 import 'package:hestia/presentation/pages/bank_accounts/bank_accounts_screen.dart';
@@ -32,6 +31,9 @@ import 'package:hestia/presentation/pages/notifications/notifications_screen.dar
 import 'package:hestia/presentation/pages/profile/profile_screen.dart';
 import 'package:hestia/presentation/pages/settings/settings_screen.dart';
 import 'package:hestia/presentation/pages/settings/data_management_screen.dart';
+import 'package:hestia/presentation/pages/homes/homes_screen.dart';
+import 'package:hestia/presentation/pages/map/global_map_screen.dart';
+import 'package:hestia/presentation/pages/onboarding/onboarding_screen.dart';
 import 'package:hestia/presentation/pages/splash/custom_splash_screen.dart';
 import 'package:hestia/domain/entities/notification.dart';
 import 'package:hestia/domain/entities/transaction.dart';
@@ -45,6 +47,7 @@ import 'package:hestia/presentation/pages/transactions/transactions_screen.dart'
 
 abstract final class AppRoutes {
   static const splash = '/';
+  static const onboarding = '/onboarding';
   static const login = '/login';
 
   /// Persistent tab shell — Home · Accounts · Pets · [Cars] · Shopping.
@@ -112,18 +115,61 @@ abstract final class AppRoutes {
   static const editCarEntry = '/cars/entries/edit';
   static const carAnalytics = '/cars/analytics';
 
-  /// Pick GPS coordinates for a transaction (returns [LatLng] via `pop`).
+  /// Pick GPS coordinates for a transaction (returns (lat,lng) record via `pop`).
   static const transactionMapPicker = '/transactions/map-picker';
-  static const transactionLocationStats = '/transactions/location-stats';
+  static const globalMap = '/map';
+  static const homes = '/homes';
 }
 
+/// Root navigator for [appRouter] — use for push notification routing / toasts.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Drives router redirects on auth changes. AuthBloc updates this via the
+/// BlocListener in app.dart. `null` = unknown (still on splash / checking).
+final authStatusListenable = ValueNotifier<bool?>(null);
+
+/// Whether the user has completed onboarding (set from prefs at startup).
+bool routerOnboardingSeen = false;
+
+const _authRoutes = {AppRoutes.splash, AppRoutes.login, AppRoutes.onboarding};
+
 final appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: AppRoutes.splash,
+  refreshListenable: authStatusListenable,
+  redirect: (context, state) {
+    final isAuth = authStatusListenable.value;
+    final loc = state.matchedLocation;
+
+    // Unknown auth state → let the splash screen resolve it.
+    if (isAuth == null) return null;
+
+    final onAuthRoute = _authRoutes.contains(loc);
+
+    if (!isAuth) {
+      // Signed out → always land on onboarding (its Skip/finish routes to
+      // login). Re-showing onboarding after logout is cheap and intentional.
+      if (onAuthRoute) return null;
+      return AppRoutes.onboarding;
+    }
+
+    // Signed in but sitting on splash/login → go to the app.
+    if (loc == AppRoutes.splash || loc == AppRoutes.login) {
+      return AppRoutes.dashboard;
+    }
+    return null;
+  },
   routes: [
     GoRoute(
       path: AppRoutes.splash,
       pageBuilder: (context, state) => const CupertinoPage(
         child: CustomSplashScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.onboarding,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: OnboardingScreen(),
       ),
     ),
     GoRoute(
@@ -178,9 +224,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.editBankAccount,
       pageBuilder: (context, state) {
-        final sourceId = state.extra as String;
+        final existing = state.extra as BankAccount?;
         return CupertinoPage(
-          child: AddEditBankAccountScreen(sourceId: sourceId),
+          child: AddEditBankAccountScreen(existing: existing),
         );
       },
     ),
@@ -408,16 +454,30 @@ final appRouter = GoRouter(
       path: AppRoutes.transactionMapPicker,
       pageBuilder: (context, state) {
         final extra = state.extra;
-        final initial = extra is LatLng ? extra : null;
+        double? lat;
+        double? lng;
+        if (extra is (double, double)) {
+          lat = extra.$1;
+          lng = extra.$2;
+        }
         return CupertinoPage(
-          child: TransactionMapPickerScreen(initialPosition: initial),
+          child: TransactionMapPickerScreen(
+            initialLatitude: lat,
+            initialLongitude: lng,
+          ),
         );
       },
     ),
     GoRoute(
-      path: AppRoutes.transactionLocationStats,
+      path: AppRoutes.globalMap,
       pageBuilder: (context, state) => const CupertinoPage(
-        child: TransactionLocationStatsScreen(),
+        child: GlobalMapScreen(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.homes,
+      pageBuilder: (context, state) => const CupertinoPage(
+        child: HomesScreen(),
       ),
     ),
     GoRoute(
