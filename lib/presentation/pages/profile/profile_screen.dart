@@ -17,7 +17,7 @@ import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/profile/edit_profile_form.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show EditPencil, Eye, EyeClosed, LogOut, Trash;
+    show EditPencil, LogOut, Trash;
 import 'package:intl/intl.dart';
 
 /// Unified profile screen for the signed-in user.
@@ -91,6 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return SliverPushedRouteShell(
       title: profile?.displayName ?? profile?.email ?? '',
+      isActive: profile?.isActive,
       onRefresh: _onRefresh,
       header: profile == null
           ? null
@@ -108,18 +109,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 label: l10n.profile_edit,
                 onTap: () => _openEdit(context, profile, tints),
               ),
-              AppMenuAction(
-                icon: profile.isActive
-                    ? EyeClosed(width: 18, height: 18, color: fg)
-                    : Eye(width: 18, height: 18, color: accent),
-                label: profile.isActive
-                    ? l10n.pets_setInactive
-                    : l10n.pets_setActive,
-                onTap: () async {
-                  await AppDependencies.instance.authRepository
-                      .updateProfile(
-                          profile.copyWith(isActive: !profile.isActive));
-                },
+              AppMenuAction.toggleActive(
+                isActive: profile.isActive,
+                setActiveLabel: l10n.profile_setActive,
+                setInactiveLabel: l10n.profile_setInactive,
+                fg: fg,
+                onTap: () => context.read<AuthBloc>().add(
+                      AuthUpdateProfile(
+                        profile.copyWith(isActive: !profile.isActive),
+                      ),
+                    ),
               ),
               AppMenuAction(
                 icon: Trash(
