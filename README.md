@@ -1,15 +1,33 @@
+<div align="center">
+
+<img src="assets/images/app_icon.png" alt="Hestia logo" width="120" style="border-radius: 20%;">
+
 # Hestia
 
-A new Flutter project.
+**Personal finance for my household.**
 
-## Getting Started
+A Flutter iOS app my family uses to track money, accounts, transactions, and day-to-day household planning in one place.
 
-This project is a starting point for a Flutter application.
+</div>
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Why this repo is public
 
-For help getting started with Flutter development, view the [online documentation](https://docs.flutter.dev/), which offers tutorials, samples, guidance on mobile development, and a full API reference.
+This project is open source so I can show it in my portfolio and hopefully give others ideas for building their own finance tools. **Only my family uses the deployed app** — it is not a product or a service for the public.
+
+## What it does
+
+- Shared and personal accounts, transactions, and balances
+- Goals, calendar, shopping lists, pets, cars, maps, and notifications
+- Supabase backend, local SQLite (Drift), Firebase for crash reporting and push
+
+## Stack
+
+Flutter · BLoC · Supabase · Drift · Firebase · iOS (TestFlight)
+
+> More detail (architecture, Supabase, releases): [docs/](docs/).
+
+## License
+
+Source-available, all rights reserved. See [LICENSE](LICENSE).

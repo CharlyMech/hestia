@@ -54,9 +54,10 @@ dependencies:
   # --- Charts ---
   fl_chart: ^0.70.2
 
-  # --- Push Notifications ---
-  firebase_core: ^3.8.1
-  firebase_messaging: ^15.1.6
+  # --- Firebase ---
+  firebase_core: ^4.10.0
+  firebase_crashlytics: ^5.2.3
+  firebase_messaging: ^16.3.0
 
   # --- Splash ---
   flutter_native_splash: ^2.4.3
@@ -66,6 +67,7 @@ dependencies:
   uuid: ^4.5.1
   connectivity_plus: ^6.1.1
   logger: ^2.5.0
+  package_info_plus: ^8.1.2
   flutter_dotenv: ^5.2.1
   url_launcher: ^6.3.1
   rxdart: ^0.28.0
@@ -76,10 +78,14 @@ dependencies:
   google_sign_in: ^6.2.2
   http: ^1.2.2
   extension_google_sign_in_as_googleapis_auth: ^2.0.12
-  flutter_map: ^8.3.0
-  latlong2: ^0.9.1
   geolocator: ^14.0.2
   permission_handler: ^12.0.1
+  video_player: ^2.9.2
+  firebase_analytics: ^12.4.2
+  flutter_svg: ^2.3.0
+  flutter_map: ^8.3.0
+  latlong2: ^0.9.1
+  flutter_map_animations: ^0.10.0
 
 dev_dependencies:
   flutter_test:
@@ -95,11 +101,19 @@ dev_dependencies:
   mocktail: ^1.0.4
   flutter_launcher_icons: ^0.14.4
 
+dependency_overrides:
+  # objective_c 9.3.0 crashes on iOS 26 simulator (dylib path changed).
+  # 9.4.1 is within the >=9.0.0 <10.0.0 constraint of sign_in_with_apple 6.x.
+  objective_c: 9.4.1
+
 flutter:
   uses-material-design: true
   generate: true
 
   assets:
+    - .env
     - assets/images/
     - assets/banks/
     - assets/icons/
+    - assets/onboarding/
+    - assets/map_pins/
