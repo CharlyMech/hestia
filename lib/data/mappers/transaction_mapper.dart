@@ -14,6 +14,7 @@ abstract final class TransactionMapper {
       categoryId: dto.categoryId,
       bankAccountId: dto.bankAccountId,
       transactionSourceId: dto.transactionSourceId,
+      paymentCardId: dto.paymentCardId,
       amount: dto.amount.toDouble(),
       type: TransactionType.fromString(dto.type),
       note: dto.note,
@@ -42,6 +43,7 @@ abstract final class TransactionMapper {
       categoryId: entity.categoryId,
       bankAccountId: entity.bankAccountId,
       transactionSourceId: entity.transactionSourceId,
+      paymentCardId: entity.paymentCardId,
       amount: entity.amount,
       type: entity.type.value,
       note: entity.note,
@@ -66,17 +68,17 @@ abstract final class TransactionMapper {
       id: json['id'] as String,
       householdId: json['household_id'] as String,
       userId: json['user_id'] as String,
-      fromSourceId: json['from_source_id'] as String,
-      toSourceId: json['to_source_id'] as String,
+      fromSourceId: json['from_account_id'] as String,
+      toSourceId: json['to_account_id'] as String,
       amount: (json['amount'] as num).toDouble(),
       note: json['note'] as String?,
       date: (json['date'] as int).fromUnix,
       createdAt: (json['created_at'] as int).fromUnix,
       lastUpdate: (json['last_update'] as int).fromUnix,
       fromSourceName:
-          (json['from_source'] as Map<String, dynamic>?)?['name'] as String?,
+          (json['from_account'] as Map<String, dynamic>?)?['name'] as String?,
       toSourceName:
-          (json['to_source'] as Map<String, dynamic>?)?['name'] as String?,
+          (json['to_account'] as Map<String, dynamic>?)?['name'] as String?,
     );
   }
 }

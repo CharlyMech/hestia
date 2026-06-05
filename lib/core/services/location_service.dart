@@ -31,7 +31,20 @@ class LocationService {
     }
   }
 
+  /// Returns true when already granted (whileInUse or always).
+  /// Does NOT request permission — safe to call silently on startup.
+  Future<bool> hasPermission() async {
+    try {
+      final p = await checkPermission();
+      return p == LocationPermission.always ||
+          p == LocationPermission.whileInUse;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Returns true when [LocationPermission.whileInUse] or `.always`.
+  /// Will show the system dialog if status is `denied` (not `deniedForever`).
   Future<bool> ensureWhenInUsePermission() async {
     try {
       var p = await checkPermission();

@@ -1,21 +1,52 @@
+import 'dart:async';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:hestia/app.dart';
+import 'package:hestia/core/config/crashlytics.dart';
 import 'package:hestia/core/config/database.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/env.dart';
+import 'package:hestia/core/config/firebase_options.dart';
 import 'package:hestia/core/config/flavor.dart';
 import 'package:hestia/core/error/error_handler.dart';
+import 'package:hestia/core/utils/app_info.dart';
 import 'package:hestia/presentation/pages/error/global_error_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Boots the app inside a guarded zone so async errors reach Crashlytics.
+/// [WidgetsFlutterBinding.ensureInitialized] and [runApp] must run in the
+/// same zone (see Flutter binding zone checks).
 Future<void> bootstrap() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    await Env.load();
+    await AppInfo.load();
 
-  const flavorRaw = String.fromEnvironment('FLAVOR', defaultValue: 'mock');
+    if (Env.isFirebaseConfigured) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      await configureCrashlytics();
+    } else {
+      logger.w(
+        'Firebase not configured — Crashlytics and native Firebase features disabled. '
+        'Add FIREBASE_* keys to .env (see .env.example).',
+      );
+    }
+
+    await _startApp();
+  }, reportUncaughtAsyncError);
+}
+
+Future<void> _startApp() async {
+  const flavorRaw = String.fromEnvironment('FLAVOR', defaultValue: 'supabase');
   FlavorConfig.current = AppFlavor.fromString(flavorRaw);
   logger.i('Flavor: ${FlavorConfig.current.name}');
-
-  await Env.load();
 
   if (FlavorConfig.isSupabase) {
     if (!Env.isConfigured) {

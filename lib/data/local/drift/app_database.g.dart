@@ -43,6 +43,12 @@ class $LocalTransactionsTable extends LocalTransactions
   late final GeneratedColumn<String> transactionSourceId =
       GeneratedColumn<String>('transaction_source_id', aliasedName, true,
           type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _paymentCardIdMeta =
+      const VerificationMeta('paymentCardId');
+  @override
+  late final GeneratedColumn<String> paymentCardId = GeneratedColumn<String>(
+      'payment_card_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
@@ -119,6 +125,7 @@ class $LocalTransactionsTable extends LocalTransactions
         categoryId,
         bankAccountId,
         transactionSourceId,
+        paymentCardId,
         amount,
         type,
         note,
@@ -180,6 +187,12 @@ class $LocalTransactionsTable extends LocalTransactions
           _transactionSourceIdMeta,
           transactionSourceId.isAcceptableOrUnknown(
               data['transaction_source_id']!, _transactionSourceIdMeta));
+    }
+    if (data.containsKey('payment_card_id')) {
+      context.handle(
+          _paymentCardIdMeta,
+          paymentCardId.isAcceptableOrUnknown(
+              data['payment_card_id']!, _paymentCardIdMeta));
     }
     if (data.containsKey('amount')) {
       context.handle(_amountMeta,
@@ -258,6 +271,8 @@ class $LocalTransactionsTable extends LocalTransactions
           DriftSqlType.string, data['${effectivePrefix}bank_account_id'])!,
       transactionSourceId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}transaction_source_id']),
+      paymentCardId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payment_card_id']),
       amount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}amount'])!,
       type: attachedDatabase.typeMapping
@@ -295,6 +310,7 @@ class LocalTransaction extends DataClass
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
+  final String? paymentCardId;
   final double amount;
   final String type;
   final String? note;
@@ -312,6 +328,7 @@ class LocalTransaction extends DataClass
       required this.categoryId,
       required this.bankAccountId,
       this.transactionSourceId,
+      this.paymentCardId,
       required this.amount,
       required this.type,
       this.note,
@@ -332,6 +349,9 @@ class LocalTransaction extends DataClass
     map['bank_account_id'] = Variable<String>(bankAccountId);
     if (!nullToAbsent || transactionSourceId != null) {
       map['transaction_source_id'] = Variable<String>(transactionSourceId);
+    }
+    if (!nullToAbsent || paymentCardId != null) {
+      map['payment_card_id'] = Variable<String>(paymentCardId);
     }
     map['amount'] = Variable<double>(amount);
     map['type'] = Variable<String>(type);
@@ -360,6 +380,9 @@ class LocalTransaction extends DataClass
       transactionSourceId: transactionSourceId == null && nullToAbsent
           ? const Value.absent()
           : Value(transactionSourceId),
+      paymentCardId: paymentCardId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentCardId),
       amount: Value(amount),
       type: Value(type),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
@@ -386,6 +409,7 @@ class LocalTransaction extends DataClass
       bankAccountId: serializer.fromJson<String>(json['bankAccountId']),
       transactionSourceId:
           serializer.fromJson<String?>(json['transactionSourceId']),
+      paymentCardId: serializer.fromJson<String?>(json['paymentCardId']),
       amount: serializer.fromJson<double>(json['amount']),
       type: serializer.fromJson<String>(json['type']),
       note: serializer.fromJson<String?>(json['note']),
@@ -408,6 +432,7 @@ class LocalTransaction extends DataClass
       'categoryId': serializer.toJson<String>(categoryId),
       'bankAccountId': serializer.toJson<String>(bankAccountId),
       'transactionSourceId': serializer.toJson<String?>(transactionSourceId),
+      'paymentCardId': serializer.toJson<String?>(paymentCardId),
       'amount': serializer.toJson<double>(amount),
       'type': serializer.toJson<String>(type),
       'note': serializer.toJson<String?>(note),
@@ -428,6 +453,7 @@ class LocalTransaction extends DataClass
           String? categoryId,
           String? bankAccountId,
           Value<String?> transactionSourceId = const Value.absent(),
+          Value<String?> paymentCardId = const Value.absent(),
           double? amount,
           String? type,
           Value<String?> note = const Value.absent(),
@@ -447,6 +473,8 @@ class LocalTransaction extends DataClass
         transactionSourceId: transactionSourceId.present
             ? transactionSourceId.value
             : this.transactionSourceId,
+        paymentCardId:
+            paymentCardId.present ? paymentCardId.value : this.paymentCardId,
         amount: amount ?? this.amount,
         type: type ?? this.type,
         note: note.present ? note.value : this.note,
@@ -473,6 +501,9 @@ class LocalTransaction extends DataClass
       transactionSourceId: data.transactionSourceId.present
           ? data.transactionSourceId.value
           : this.transactionSourceId,
+      paymentCardId: data.paymentCardId.present
+          ? data.paymentCardId.value
+          : this.paymentCardId,
       amount: data.amount.present ? data.amount.value : this.amount,
       type: data.type.present ? data.type.value : this.type,
       note: data.note.present ? data.note.value : this.note,
@@ -499,6 +530,7 @@ class LocalTransaction extends DataClass
           ..write('categoryId: $categoryId, ')
           ..write('bankAccountId: $bankAccountId, ')
           ..write('transactionSourceId: $transactionSourceId, ')
+          ..write('paymentCardId: $paymentCardId, ')
           ..write('amount: $amount, ')
           ..write('type: $type, ')
           ..write('note: $note, ')
@@ -521,6 +553,7 @@ class LocalTransaction extends DataClass
       categoryId,
       bankAccountId,
       transactionSourceId,
+      paymentCardId,
       amount,
       type,
       note,
@@ -541,6 +574,7 @@ class LocalTransaction extends DataClass
           other.categoryId == this.categoryId &&
           other.bankAccountId == this.bankAccountId &&
           other.transactionSourceId == this.transactionSourceId &&
+          other.paymentCardId == this.paymentCardId &&
           other.amount == this.amount &&
           other.type == this.type &&
           other.note == this.note &&
@@ -560,6 +594,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
   final Value<String> categoryId;
   final Value<String> bankAccountId;
   final Value<String?> transactionSourceId;
+  final Value<String?> paymentCardId;
   final Value<double> amount;
   final Value<String> type;
   final Value<String?> note;
@@ -578,6 +613,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     this.categoryId = const Value.absent(),
     this.bankAccountId = const Value.absent(),
     this.transactionSourceId = const Value.absent(),
+    this.paymentCardId = const Value.absent(),
     this.amount = const Value.absent(),
     this.type = const Value.absent(),
     this.note = const Value.absent(),
@@ -597,6 +633,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     required String categoryId,
     required String bankAccountId,
     this.transactionSourceId = const Value.absent(),
+    this.paymentCardId = const Value.absent(),
     required double amount,
     required String type,
     this.note = const Value.absent(),
@@ -625,6 +662,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     Expression<String>? categoryId,
     Expression<String>? bankAccountId,
     Expression<String>? transactionSourceId,
+    Expression<String>? paymentCardId,
     Expression<double>? amount,
     Expression<String>? type,
     Expression<String>? note,
@@ -645,6 +683,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       if (bankAccountId != null) 'bank_account_id': bankAccountId,
       if (transactionSourceId != null)
         'transaction_source_id': transactionSourceId,
+      if (paymentCardId != null) 'payment_card_id': paymentCardId,
       if (amount != null) 'amount': amount,
       if (type != null) 'type': type,
       if (note != null) 'note': note,
@@ -666,6 +705,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       Value<String>? categoryId,
       Value<String>? bankAccountId,
       Value<String?>? transactionSourceId,
+      Value<String?>? paymentCardId,
       Value<double>? amount,
       Value<String>? type,
       Value<String?>? note,
@@ -684,6 +724,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
       categoryId: categoryId ?? this.categoryId,
       bankAccountId: bankAccountId ?? this.bankAccountId,
       transactionSourceId: transactionSourceId ?? this.transactionSourceId,
+      paymentCardId: paymentCardId ?? this.paymentCardId,
       amount: amount ?? this.amount,
       type: type ?? this.type,
       note: note ?? this.note,
@@ -719,6 +760,9 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
     if (transactionSourceId.present) {
       map['transaction_source_id'] =
           Variable<String>(transactionSourceId.value);
+    }
+    if (paymentCardId.present) {
+      map['payment_card_id'] = Variable<String>(paymentCardId.value);
     }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
@@ -765,6 +809,7 @@ class LocalTransactionsCompanion extends UpdateCompanion<LocalTransaction> {
           ..write('categoryId: $categoryId, ')
           ..write('bankAccountId: $bankAccountId, ')
           ..write('transactionSourceId: $transactionSourceId, ')
+          ..write('paymentCardId: $paymentCardId, ')
           ..write('amount: $amount, ')
           ..write('type: $type, ')
           ..write('note: $note, ')
@@ -1366,6 +1411,17 @@ class $LocalBankAccountsTable extends LocalBankAccounts
   late final GeneratedColumn<String> institution = GeneratedColumn<String>(
       'institution', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _institutionIdMeta =
+      const VerificationMeta('institutionId');
+  @override
+  late final GeneratedColumn<String> institutionId = GeneratedColumn<String>(
+      'institution_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _ibanMeta = const VerificationMeta('iban');
+  @override
+  late final GeneratedColumn<String> iban = GeneratedColumn<String>(
+      'iban', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _accountTypeMeta =
       const VerificationMeta('accountType');
   @override
@@ -1460,6 +1516,8 @@ class $LocalBankAccountsTable extends LocalBankAccounts
         ownerId,
         name,
         institution,
+        institutionId,
+        iban,
         accountType,
         currency,
         initialBalance,
@@ -1517,6 +1575,16 @@ class $LocalBankAccountsTable extends LocalBankAccounts
           _institutionMeta,
           institution.isAcceptableOrUnknown(
               data['institution']!, _institutionMeta));
+    }
+    if (data.containsKey('institution_id')) {
+      context.handle(
+          _institutionIdMeta,
+          institutionId.isAcceptableOrUnknown(
+              data['institution_id']!, _institutionIdMeta));
+    }
+    if (data.containsKey('iban')) {
+      context.handle(
+          _ibanMeta, iban.isAcceptableOrUnknown(data['iban']!, _ibanMeta));
     }
     if (data.containsKey('account_type')) {
       context.handle(
@@ -1605,6 +1673,10 @@ class $LocalBankAccountsTable extends LocalBankAccounts
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       institution: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}institution']),
+      institutionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}institution_id']),
+      iban: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}iban']),
       accountType: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}account_type'])!,
       currency: attachedDatabase.typeMapping
@@ -1646,6 +1718,8 @@ class LocalBankAccount extends DataClass
   final String? ownerId;
   final String name;
   final String? institution;
+  final String? institutionId;
+  final String? iban;
   final String accountType;
   final String currency;
   final double initialBalance;
@@ -1665,6 +1739,8 @@ class LocalBankAccount extends DataClass
       this.ownerId,
       required this.name,
       this.institution,
+      this.institutionId,
+      this.iban,
       required this.accountType,
       required this.currency,
       required this.initialBalance,
@@ -1689,6 +1765,12 @@ class LocalBankAccount extends DataClass
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || institution != null) {
       map['institution'] = Variable<String>(institution);
+    }
+    if (!nullToAbsent || institutionId != null) {
+      map['institution_id'] = Variable<String>(institutionId);
+    }
+    if (!nullToAbsent || iban != null) {
+      map['iban'] = Variable<String>(iban);
     }
     map['account_type'] = Variable<String>(accountType);
     map['currency'] = Variable<String>(currency);
@@ -1721,6 +1803,10 @@ class LocalBankAccount extends DataClass
       institution: institution == null && nullToAbsent
           ? const Value.absent()
           : Value(institution),
+      institutionId: institutionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(institutionId),
+      iban: iban == null && nullToAbsent ? const Value.absent() : Value(iban),
       accountType: Value(accountType),
       currency: Value(currency),
       initialBalance: Value(initialBalance),
@@ -1747,6 +1833,8 @@ class LocalBankAccount extends DataClass
       ownerId: serializer.fromJson<String?>(json['ownerId']),
       name: serializer.fromJson<String>(json['name']),
       institution: serializer.fromJson<String?>(json['institution']),
+      institutionId: serializer.fromJson<String?>(json['institutionId']),
+      iban: serializer.fromJson<String?>(json['iban']),
       accountType: serializer.fromJson<String>(json['accountType']),
       currency: serializer.fromJson<String>(json['currency']),
       initialBalance: serializer.fromJson<double>(json['initialBalance']),
@@ -1771,6 +1859,8 @@ class LocalBankAccount extends DataClass
       'ownerId': serializer.toJson<String?>(ownerId),
       'name': serializer.toJson<String>(name),
       'institution': serializer.toJson<String?>(institution),
+      'institutionId': serializer.toJson<String?>(institutionId),
+      'iban': serializer.toJson<String?>(iban),
       'accountType': serializer.toJson<String>(accountType),
       'currency': serializer.toJson<String>(currency),
       'initialBalance': serializer.toJson<double>(initialBalance),
@@ -1793,6 +1883,8 @@ class LocalBankAccount extends DataClass
           Value<String?> ownerId = const Value.absent(),
           String? name,
           Value<String?> institution = const Value.absent(),
+          Value<String?> institutionId = const Value.absent(),
+          Value<String?> iban = const Value.absent(),
           String? accountType,
           String? currency,
           double? initialBalance,
@@ -1812,6 +1904,9 @@ class LocalBankAccount extends DataClass
         ownerId: ownerId.present ? ownerId.value : this.ownerId,
         name: name ?? this.name,
         institution: institution.present ? institution.value : this.institution,
+        institutionId:
+            institutionId.present ? institutionId.value : this.institutionId,
+        iban: iban.present ? iban.value : this.iban,
         accountType: accountType ?? this.accountType,
         currency: currency ?? this.currency,
         initialBalance: initialBalance ?? this.initialBalance,
@@ -1835,6 +1930,10 @@ class LocalBankAccount extends DataClass
       name: data.name.present ? data.name.value : this.name,
       institution:
           data.institution.present ? data.institution.value : this.institution,
+      institutionId: data.institutionId.present
+          ? data.institutionId.value
+          : this.institutionId,
+      iban: data.iban.present ? data.iban.value : this.iban,
       accountType:
           data.accountType.present ? data.accountType.value : this.accountType,
       currency: data.currency.present ? data.currency.value : this.currency,
@@ -1865,6 +1964,8 @@ class LocalBankAccount extends DataClass
           ..write('ownerId: $ownerId, ')
           ..write('name: $name, ')
           ..write('institution: $institution, ')
+          ..write('institutionId: $institutionId, ')
+          ..write('iban: $iban, ')
           ..write('accountType: $accountType, ')
           ..write('currency: $currency, ')
           ..write('initialBalance: $initialBalance, ')
@@ -1889,6 +1990,8 @@ class LocalBankAccount extends DataClass
       ownerId,
       name,
       institution,
+      institutionId,
+      iban,
       accountType,
       currency,
       initialBalance,
@@ -1911,6 +2014,8 @@ class LocalBankAccount extends DataClass
           other.ownerId == this.ownerId &&
           other.name == this.name &&
           other.institution == this.institution &&
+          other.institutionId == this.institutionId &&
+          other.iban == this.iban &&
           other.accountType == this.accountType &&
           other.currency == this.currency &&
           other.initialBalance == this.initialBalance &&
@@ -1932,6 +2037,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
   final Value<String?> ownerId;
   final Value<String> name;
   final Value<String?> institution;
+  final Value<String?> institutionId;
+  final Value<String?> iban;
   final Value<String> accountType;
   final Value<String> currency;
   final Value<double> initialBalance;
@@ -1952,6 +2059,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
     this.ownerId = const Value.absent(),
     this.name = const Value.absent(),
     this.institution = const Value.absent(),
+    this.institutionId = const Value.absent(),
+    this.iban = const Value.absent(),
     this.accountType = const Value.absent(),
     this.currency = const Value.absent(),
     this.initialBalance = const Value.absent(),
@@ -1973,6 +2082,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
     this.ownerId = const Value.absent(),
     required String name,
     this.institution = const Value.absent(),
+    this.institutionId = const Value.absent(),
+    this.iban = const Value.absent(),
     required String accountType,
     this.currency = const Value.absent(),
     required double initialBalance,
@@ -2002,6 +2113,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
     Expression<String>? ownerId,
     Expression<String>? name,
     Expression<String>? institution,
+    Expression<String>? institutionId,
+    Expression<String>? iban,
     Expression<String>? accountType,
     Expression<String>? currency,
     Expression<double>? initialBalance,
@@ -2023,6 +2136,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
       if (ownerId != null) 'owner_id': ownerId,
       if (name != null) 'name': name,
       if (institution != null) 'institution': institution,
+      if (institutionId != null) 'institution_id': institutionId,
+      if (iban != null) 'iban': iban,
       if (accountType != null) 'account_type': accountType,
       if (currency != null) 'currency': currency,
       if (initialBalance != null) 'initial_balance': initialBalance,
@@ -2046,6 +2161,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
       Value<String?>? ownerId,
       Value<String>? name,
       Value<String?>? institution,
+      Value<String?>? institutionId,
+      Value<String?>? iban,
       Value<String>? accountType,
       Value<String>? currency,
       Value<double>? initialBalance,
@@ -2066,6 +2183,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
       ownerId: ownerId ?? this.ownerId,
       name: name ?? this.name,
       institution: institution ?? this.institution,
+      institutionId: institutionId ?? this.institutionId,
+      iban: iban ?? this.iban,
       accountType: accountType ?? this.accountType,
       currency: currency ?? this.currency,
       initialBalance: initialBalance ?? this.initialBalance,
@@ -2102,6 +2221,12 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
     }
     if (institution.present) {
       map['institution'] = Variable<String>(institution.value);
+    }
+    if (institutionId.present) {
+      map['institution_id'] = Variable<String>(institutionId.value);
+    }
+    if (iban.present) {
+      map['iban'] = Variable<String>(iban.value);
     }
     if (accountType.present) {
       map['account_type'] = Variable<String>(accountType.value);
@@ -2154,6 +2279,8 @@ class LocalBankAccountsCompanion extends UpdateCompanion<LocalBankAccount> {
           ..write('ownerId: $ownerId, ')
           ..write('name: $name, ')
           ..write('institution: $institution, ')
+          ..write('institutionId: $institutionId, ')
+          ..write('iban: $iban, ')
           ..write('accountType: $accountType, ')
           ..write('currency: $currency, ')
           ..write('initialBalance: $initialBalance, ')
@@ -3521,6 +3648,1561 @@ class LocalNotificationsCompanion extends UpdateCompanion<LocalNotification> {
   }
 }
 
+class $LocalFinancialInstitutionsTable extends LocalFinancialInstitutions
+    with
+        TableInfo<$LocalFinancialInstitutionsTable, LocalFinancialInstitution> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalFinancialInstitutionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _slugMeta = const VerificationMeta('slug');
+  @override
+  late final GeneratedColumn<String> slug = GeneratedColumn<String>(
+      'slug', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  static const VerificationMeta _countryMeta =
+      const VerificationMeta('country');
+  @override
+  late final GeneratedColumn<String> country = GeneratedColumn<String>(
+      'country', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _brandColorMeta =
+      const VerificationMeta('brandColor');
+  @override
+  late final GeneratedColumn<String> brandColor = GeneratedColumn<String>(
+      'brand_color', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _logoAssetMeta =
+      const VerificationMeta('logoAsset');
+  @override
+  late final GeneratedColumn<String> logoAsset = GeneratedColumn<String>(
+      'logo_asset', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _institutionTypeMeta =
+      const VerificationMeta('institutionType');
+  @override
+  late final GeneratedColumn<String> institutionType = GeneratedColumn<String>(
+      'institution_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('bank'));
+  static const VerificationMeta _isCustomMeta =
+      const VerificationMeta('isCustom');
+  @override
+  late final GeneratedColumn<bool> isCustom = GeneratedColumn<bool>(
+      'is_custom', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_custom" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lastUpdateMeta =
+      const VerificationMeta('lastUpdate');
+  @override
+  late final GeneratedColumn<int> lastUpdate = GeneratedColumn<int>(
+      'last_update', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _isSyncedMeta =
+      const VerificationMeta('isSynced');
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+      'is_synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_synced" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        slug,
+        country,
+        brandColor,
+        logoAsset,
+        institutionType,
+        isCustom,
+        createdAt,
+        lastUpdate,
+        isSynced
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_financial_institutions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalFinancialInstitution> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('slug')) {
+      context.handle(
+          _slugMeta, slug.isAcceptableOrUnknown(data['slug']!, _slugMeta));
+    } else if (isInserting) {
+      context.missing(_slugMeta);
+    }
+    if (data.containsKey('country')) {
+      context.handle(_countryMeta,
+          country.isAcceptableOrUnknown(data['country']!, _countryMeta));
+    }
+    if (data.containsKey('brand_color')) {
+      context.handle(
+          _brandColorMeta,
+          brandColor.isAcceptableOrUnknown(
+              data['brand_color']!, _brandColorMeta));
+    } else if (isInserting) {
+      context.missing(_brandColorMeta);
+    }
+    if (data.containsKey('logo_asset')) {
+      context.handle(_logoAssetMeta,
+          logoAsset.isAcceptableOrUnknown(data['logo_asset']!, _logoAssetMeta));
+    }
+    if (data.containsKey('institution_type')) {
+      context.handle(
+          _institutionTypeMeta,
+          institutionType.isAcceptableOrUnknown(
+              data['institution_type']!, _institutionTypeMeta));
+    }
+    if (data.containsKey('is_custom')) {
+      context.handle(_isCustomMeta,
+          isCustom.isAcceptableOrUnknown(data['is_custom']!, _isCustomMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('last_update')) {
+      context.handle(
+          _lastUpdateMeta,
+          lastUpdate.isAcceptableOrUnknown(
+              data['last_update']!, _lastUpdateMeta));
+    } else if (isInserting) {
+      context.missing(_lastUpdateMeta);
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(_isSyncedMeta,
+          isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalFinancialInstitution map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalFinancialInstitution(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      slug: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}slug'])!,
+      country: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}country'])!,
+      brandColor: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}brand_color'])!,
+      logoAsset: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}logo_asset']),
+      institutionType: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}institution_type'])!,
+      isCustom: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_custom'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      lastUpdate: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_update'])!,
+      isSynced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_synced'])!,
+    );
+  }
+
+  @override
+  $LocalFinancialInstitutionsTable createAlias(String alias) {
+    return $LocalFinancialInstitutionsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalFinancialInstitution extends DataClass
+    implements Insertable<LocalFinancialInstitution> {
+  final String id;
+  final String name;
+  final String slug;
+  final String country;
+  final String brandColor;
+  final String? logoAsset;
+  final String institutionType;
+  final bool isCustom;
+  final int createdAt;
+  final int lastUpdate;
+  final bool isSynced;
+  const LocalFinancialInstitution(
+      {required this.id,
+      required this.name,
+      required this.slug,
+      required this.country,
+      required this.brandColor,
+      this.logoAsset,
+      required this.institutionType,
+      required this.isCustom,
+      required this.createdAt,
+      required this.lastUpdate,
+      required this.isSynced});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['slug'] = Variable<String>(slug);
+    map['country'] = Variable<String>(country);
+    map['brand_color'] = Variable<String>(brandColor);
+    if (!nullToAbsent || logoAsset != null) {
+      map['logo_asset'] = Variable<String>(logoAsset);
+    }
+    map['institution_type'] = Variable<String>(institutionType);
+    map['is_custom'] = Variable<bool>(isCustom);
+    map['created_at'] = Variable<int>(createdAt);
+    map['last_update'] = Variable<int>(lastUpdate);
+    map['is_synced'] = Variable<bool>(isSynced);
+    return map;
+  }
+
+  LocalFinancialInstitutionsCompanion toCompanion(bool nullToAbsent) {
+    return LocalFinancialInstitutionsCompanion(
+      id: Value(id),
+      name: Value(name),
+      slug: Value(slug),
+      country: Value(country),
+      brandColor: Value(brandColor),
+      logoAsset: logoAsset == null && nullToAbsent
+          ? const Value.absent()
+          : Value(logoAsset),
+      institutionType: Value(institutionType),
+      isCustom: Value(isCustom),
+      createdAt: Value(createdAt),
+      lastUpdate: Value(lastUpdate),
+      isSynced: Value(isSynced),
+    );
+  }
+
+  factory LocalFinancialInstitution.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalFinancialInstitution(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      slug: serializer.fromJson<String>(json['slug']),
+      country: serializer.fromJson<String>(json['country']),
+      brandColor: serializer.fromJson<String>(json['brandColor']),
+      logoAsset: serializer.fromJson<String?>(json['logoAsset']),
+      institutionType: serializer.fromJson<String>(json['institutionType']),
+      isCustom: serializer.fromJson<bool>(json['isCustom']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      lastUpdate: serializer.fromJson<int>(json['lastUpdate']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'slug': serializer.toJson<String>(slug),
+      'country': serializer.toJson<String>(country),
+      'brandColor': serializer.toJson<String>(brandColor),
+      'logoAsset': serializer.toJson<String?>(logoAsset),
+      'institutionType': serializer.toJson<String>(institutionType),
+      'isCustom': serializer.toJson<bool>(isCustom),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'lastUpdate': serializer.toJson<int>(lastUpdate),
+      'isSynced': serializer.toJson<bool>(isSynced),
+    };
+  }
+
+  LocalFinancialInstitution copyWith(
+          {String? id,
+          String? name,
+          String? slug,
+          String? country,
+          String? brandColor,
+          Value<String?> logoAsset = const Value.absent(),
+          String? institutionType,
+          bool? isCustom,
+          int? createdAt,
+          int? lastUpdate,
+          bool? isSynced}) =>
+      LocalFinancialInstitution(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        slug: slug ?? this.slug,
+        country: country ?? this.country,
+        brandColor: brandColor ?? this.brandColor,
+        logoAsset: logoAsset.present ? logoAsset.value : this.logoAsset,
+        institutionType: institutionType ?? this.institutionType,
+        isCustom: isCustom ?? this.isCustom,
+        createdAt: createdAt ?? this.createdAt,
+        lastUpdate: lastUpdate ?? this.lastUpdate,
+        isSynced: isSynced ?? this.isSynced,
+      );
+  LocalFinancialInstitution copyWithCompanion(
+      LocalFinancialInstitutionsCompanion data) {
+    return LocalFinancialInstitution(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      slug: data.slug.present ? data.slug.value : this.slug,
+      country: data.country.present ? data.country.value : this.country,
+      brandColor:
+          data.brandColor.present ? data.brandColor.value : this.brandColor,
+      logoAsset: data.logoAsset.present ? data.logoAsset.value : this.logoAsset,
+      institutionType: data.institutionType.present
+          ? data.institutionType.value
+          : this.institutionType,
+      isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastUpdate:
+          data.lastUpdate.present ? data.lastUpdate.value : this.lastUpdate,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalFinancialInstitution(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('slug: $slug, ')
+          ..write('country: $country, ')
+          ..write('brandColor: $brandColor, ')
+          ..write('logoAsset: $logoAsset, ')
+          ..write('institutionType: $institutionType, ')
+          ..write('isCustom: $isCustom, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('isSynced: $isSynced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, slug, country, brandColor,
+      logoAsset, institutionType, isCustom, createdAt, lastUpdate, isSynced);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalFinancialInstitution &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.slug == this.slug &&
+          other.country == this.country &&
+          other.brandColor == this.brandColor &&
+          other.logoAsset == this.logoAsset &&
+          other.institutionType == this.institutionType &&
+          other.isCustom == this.isCustom &&
+          other.createdAt == this.createdAt &&
+          other.lastUpdate == this.lastUpdate &&
+          other.isSynced == this.isSynced);
+}
+
+class LocalFinancialInstitutionsCompanion
+    extends UpdateCompanion<LocalFinancialInstitution> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> slug;
+  final Value<String> country;
+  final Value<String> brandColor;
+  final Value<String?> logoAsset;
+  final Value<String> institutionType;
+  final Value<bool> isCustom;
+  final Value<int> createdAt;
+  final Value<int> lastUpdate;
+  final Value<bool> isSynced;
+  final Value<int> rowid;
+  const LocalFinancialInstitutionsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.slug = const Value.absent(),
+    this.country = const Value.absent(),
+    this.brandColor = const Value.absent(),
+    this.logoAsset = const Value.absent(),
+    this.institutionType = const Value.absent(),
+    this.isCustom = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastUpdate = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalFinancialInstitutionsCompanion.insert({
+    required String id,
+    required String name,
+    required String slug,
+    this.country = const Value.absent(),
+    required String brandColor,
+    this.logoAsset = const Value.absent(),
+    this.institutionType = const Value.absent(),
+    this.isCustom = const Value.absent(),
+    required int createdAt,
+    required int lastUpdate,
+    this.isSynced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        slug = Value(slug),
+        brandColor = Value(brandColor),
+        createdAt = Value(createdAt),
+        lastUpdate = Value(lastUpdate);
+  static Insertable<LocalFinancialInstitution> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? slug,
+    Expression<String>? country,
+    Expression<String>? brandColor,
+    Expression<String>? logoAsset,
+    Expression<String>? institutionType,
+    Expression<bool>? isCustom,
+    Expression<int>? createdAt,
+    Expression<int>? lastUpdate,
+    Expression<bool>? isSynced,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (slug != null) 'slug': slug,
+      if (country != null) 'country': country,
+      if (brandColor != null) 'brand_color': brandColor,
+      if (logoAsset != null) 'logo_asset': logoAsset,
+      if (institutionType != null) 'institution_type': institutionType,
+      if (isCustom != null) 'is_custom': isCustom,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastUpdate != null) 'last_update': lastUpdate,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalFinancialInstitutionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? slug,
+      Value<String>? country,
+      Value<String>? brandColor,
+      Value<String?>? logoAsset,
+      Value<String>? institutionType,
+      Value<bool>? isCustom,
+      Value<int>? createdAt,
+      Value<int>? lastUpdate,
+      Value<bool>? isSynced,
+      Value<int>? rowid}) {
+    return LocalFinancialInstitutionsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      slug: slug ?? this.slug,
+      country: country ?? this.country,
+      brandColor: brandColor ?? this.brandColor,
+      logoAsset: logoAsset ?? this.logoAsset,
+      institutionType: institutionType ?? this.institutionType,
+      isCustom: isCustom ?? this.isCustom,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+      isSynced: isSynced ?? this.isSynced,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (slug.present) {
+      map['slug'] = Variable<String>(slug.value);
+    }
+    if (country.present) {
+      map['country'] = Variable<String>(country.value);
+    }
+    if (brandColor.present) {
+      map['brand_color'] = Variable<String>(brandColor.value);
+    }
+    if (logoAsset.present) {
+      map['logo_asset'] = Variable<String>(logoAsset.value);
+    }
+    if (institutionType.present) {
+      map['institution_type'] = Variable<String>(institutionType.value);
+    }
+    if (isCustom.present) {
+      map['is_custom'] = Variable<bool>(isCustom.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (lastUpdate.present) {
+      map['last_update'] = Variable<int>(lastUpdate.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalFinancialInstitutionsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('slug: $slug, ')
+          ..write('country: $country, ')
+          ..write('brandColor: $brandColor, ')
+          ..write('logoAsset: $logoAsset, ')
+          ..write('institutionType: $institutionType, ')
+          ..write('isCustom: $isCustom, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalCardsTable extends LocalCards
+    with TableInfo<$LocalCardsTable, LocalCard> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalCardsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'account_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_bank_accounts (id)'));
+  static const VerificationMeta _networkMeta =
+      const VerificationMeta('network');
+  @override
+  late final GeneratedColumn<String> network = GeneratedColumn<String>(
+      'network', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _last4Meta = const VerificationMeta('last4');
+  @override
+  late final GeneratedColumn<String> last4 = GeneratedColumn<String>(
+      'last4', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _expiryMonthMeta =
+      const VerificationMeta('expiryMonth');
+  @override
+  late final GeneratedColumn<int> expiryMonth = GeneratedColumn<int>(
+      'expiry_month', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _expiryYearMeta =
+      const VerificationMeta('expiryYear');
+  @override
+  late final GeneratedColumn<int> expiryYear = GeneratedColumn<int>(
+      'expiry_year', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _cardholderNameMeta =
+      const VerificationMeta('cardholderName');
+  @override
+  late final GeneratedColumn<String> cardholderName = GeneratedColumn<String>(
+      'cardholder_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isVirtualMeta =
+      const VerificationMeta('isVirtual');
+  @override
+  late final GeneratedColumn<bool> isVirtual = GeneratedColumn<bool>(
+      'is_virtual', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_virtual" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _isActiveMeta =
+      const VerificationMeta('isActive');
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+      'is_active', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_active" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+      'color', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lastUpdateMeta =
+      const VerificationMeta('lastUpdate');
+  @override
+  late final GeneratedColumn<int> lastUpdate = GeneratedColumn<int>(
+      'last_update', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _isSyncedMeta =
+      const VerificationMeta('isSynced');
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+      'is_synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_synced" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        accountId,
+        network,
+        last4,
+        expiryMonth,
+        expiryYear,
+        cardholderName,
+        isVirtual,
+        isActive,
+        color,
+        sortOrder,
+        createdAt,
+        lastUpdate,
+        isSynced
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_cards';
+  @override
+  VerificationContext validateIntegrity(Insertable<LocalCard> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('network')) {
+      context.handle(_networkMeta,
+          network.isAcceptableOrUnknown(data['network']!, _networkMeta));
+    } else if (isInserting) {
+      context.missing(_networkMeta);
+    }
+    if (data.containsKey('last4')) {
+      context.handle(
+          _last4Meta, last4.isAcceptableOrUnknown(data['last4']!, _last4Meta));
+    } else if (isInserting) {
+      context.missing(_last4Meta);
+    }
+    if (data.containsKey('expiry_month')) {
+      context.handle(
+          _expiryMonthMeta,
+          expiryMonth.isAcceptableOrUnknown(
+              data['expiry_month']!, _expiryMonthMeta));
+    } else if (isInserting) {
+      context.missing(_expiryMonthMeta);
+    }
+    if (data.containsKey('expiry_year')) {
+      context.handle(
+          _expiryYearMeta,
+          expiryYear.isAcceptableOrUnknown(
+              data['expiry_year']!, _expiryYearMeta));
+    } else if (isInserting) {
+      context.missing(_expiryYearMeta);
+    }
+    if (data.containsKey('cardholder_name')) {
+      context.handle(
+          _cardholderNameMeta,
+          cardholderName.isAcceptableOrUnknown(
+              data['cardholder_name']!, _cardholderNameMeta));
+    } else if (isInserting) {
+      context.missing(_cardholderNameMeta);
+    }
+    if (data.containsKey('is_virtual')) {
+      context.handle(_isVirtualMeta,
+          isVirtual.isAcceptableOrUnknown(data['is_virtual']!, _isVirtualMeta));
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(_isActiveMeta,
+          isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta));
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('last_update')) {
+      context.handle(
+          _lastUpdateMeta,
+          lastUpdate.isAcceptableOrUnknown(
+              data['last_update']!, _lastUpdateMeta));
+    } else if (isInserting) {
+      context.missing(_lastUpdateMeta);
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(_isSyncedMeta,
+          isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalCard map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalCard(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
+      network: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}network'])!,
+      last4: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}last4'])!,
+      expiryMonth: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expiry_month'])!,
+      expiryYear: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expiry_year'])!,
+      cardholderName: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}cardholder_name'])!,
+      isVirtual: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_virtual'])!,
+      isActive: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_active'])!,
+      color: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}color']),
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      lastUpdate: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_update'])!,
+      isSynced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_synced'])!,
+    );
+  }
+
+  @override
+  $LocalCardsTable createAlias(String alias) {
+    return $LocalCardsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalCard extends DataClass implements Insertable<LocalCard> {
+  final String id;
+  final String accountId;
+  final String network;
+  final String last4;
+  final int expiryMonth;
+  final int expiryYear;
+  final String cardholderName;
+  final bool isVirtual;
+  final bool isActive;
+  final String? color;
+  final int sortOrder;
+  final int createdAt;
+  final int lastUpdate;
+  final bool isSynced;
+  const LocalCard(
+      {required this.id,
+      required this.accountId,
+      required this.network,
+      required this.last4,
+      required this.expiryMonth,
+      required this.expiryYear,
+      required this.cardholderName,
+      required this.isVirtual,
+      required this.isActive,
+      this.color,
+      required this.sortOrder,
+      required this.createdAt,
+      required this.lastUpdate,
+      required this.isSynced});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['account_id'] = Variable<String>(accountId);
+    map['network'] = Variable<String>(network);
+    map['last4'] = Variable<String>(last4);
+    map['expiry_month'] = Variable<int>(expiryMonth);
+    map['expiry_year'] = Variable<int>(expiryYear);
+    map['cardholder_name'] = Variable<String>(cardholderName);
+    map['is_virtual'] = Variable<bool>(isVirtual);
+    map['is_active'] = Variable<bool>(isActive);
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<int>(createdAt);
+    map['last_update'] = Variable<int>(lastUpdate);
+    map['is_synced'] = Variable<bool>(isSynced);
+    return map;
+  }
+
+  LocalCardsCompanion toCompanion(bool nullToAbsent) {
+    return LocalCardsCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      network: Value(network),
+      last4: Value(last4),
+      expiryMonth: Value(expiryMonth),
+      expiryYear: Value(expiryYear),
+      cardholderName: Value(cardholderName),
+      isVirtual: Value(isVirtual),
+      isActive: Value(isActive),
+      color:
+          color == null && nullToAbsent ? const Value.absent() : Value(color),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+      lastUpdate: Value(lastUpdate),
+      isSynced: Value(isSynced),
+    );
+  }
+
+  factory LocalCard.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalCard(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      network: serializer.fromJson<String>(json['network']),
+      last4: serializer.fromJson<String>(json['last4']),
+      expiryMonth: serializer.fromJson<int>(json['expiryMonth']),
+      expiryYear: serializer.fromJson<int>(json['expiryYear']),
+      cardholderName: serializer.fromJson<String>(json['cardholderName']),
+      isVirtual: serializer.fromJson<bool>(json['isVirtual']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      color: serializer.fromJson<String?>(json['color']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      lastUpdate: serializer.fromJson<int>(json['lastUpdate']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'network': serializer.toJson<String>(network),
+      'last4': serializer.toJson<String>(last4),
+      'expiryMonth': serializer.toJson<int>(expiryMonth),
+      'expiryYear': serializer.toJson<int>(expiryYear),
+      'cardholderName': serializer.toJson<String>(cardholderName),
+      'isVirtual': serializer.toJson<bool>(isVirtual),
+      'isActive': serializer.toJson<bool>(isActive),
+      'color': serializer.toJson<String?>(color),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'lastUpdate': serializer.toJson<int>(lastUpdate),
+      'isSynced': serializer.toJson<bool>(isSynced),
+    };
+  }
+
+  LocalCard copyWith(
+          {String? id,
+          String? accountId,
+          String? network,
+          String? last4,
+          int? expiryMonth,
+          int? expiryYear,
+          String? cardholderName,
+          bool? isVirtual,
+          bool? isActive,
+          Value<String?> color = const Value.absent(),
+          int? sortOrder,
+          int? createdAt,
+          int? lastUpdate,
+          bool? isSynced}) =>
+      LocalCard(
+        id: id ?? this.id,
+        accountId: accountId ?? this.accountId,
+        network: network ?? this.network,
+        last4: last4 ?? this.last4,
+        expiryMonth: expiryMonth ?? this.expiryMonth,
+        expiryYear: expiryYear ?? this.expiryYear,
+        cardholderName: cardholderName ?? this.cardholderName,
+        isVirtual: isVirtual ?? this.isVirtual,
+        isActive: isActive ?? this.isActive,
+        color: color.present ? color.value : this.color,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+        lastUpdate: lastUpdate ?? this.lastUpdate,
+        isSynced: isSynced ?? this.isSynced,
+      );
+  LocalCard copyWithCompanion(LocalCardsCompanion data) {
+    return LocalCard(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      network: data.network.present ? data.network.value : this.network,
+      last4: data.last4.present ? data.last4.value : this.last4,
+      expiryMonth:
+          data.expiryMonth.present ? data.expiryMonth.value : this.expiryMonth,
+      expiryYear:
+          data.expiryYear.present ? data.expiryYear.value : this.expiryYear,
+      cardholderName: data.cardholderName.present
+          ? data.cardholderName.value
+          : this.cardholderName,
+      isVirtual: data.isVirtual.present ? data.isVirtual.value : this.isVirtual,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      color: data.color.present ? data.color.value : this.color,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastUpdate:
+          data.lastUpdate.present ? data.lastUpdate.value : this.lastUpdate,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCard(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('network: $network, ')
+          ..write('last4: $last4, ')
+          ..write('expiryMonth: $expiryMonth, ')
+          ..write('expiryYear: $expiryYear, ')
+          ..write('cardholderName: $cardholderName, ')
+          ..write('isVirtual: $isVirtual, ')
+          ..write('isActive: $isActive, ')
+          ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('isSynced: $isSynced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      accountId,
+      network,
+      last4,
+      expiryMonth,
+      expiryYear,
+      cardholderName,
+      isVirtual,
+      isActive,
+      color,
+      sortOrder,
+      createdAt,
+      lastUpdate,
+      isSynced);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalCard &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.network == this.network &&
+          other.last4 == this.last4 &&
+          other.expiryMonth == this.expiryMonth &&
+          other.expiryYear == this.expiryYear &&
+          other.cardholderName == this.cardholderName &&
+          other.isVirtual == this.isVirtual &&
+          other.isActive == this.isActive &&
+          other.color == this.color &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt &&
+          other.lastUpdate == this.lastUpdate &&
+          other.isSynced == this.isSynced);
+}
+
+class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
+  final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> network;
+  final Value<String> last4;
+  final Value<int> expiryMonth;
+  final Value<int> expiryYear;
+  final Value<String> cardholderName;
+  final Value<bool> isVirtual;
+  final Value<bool> isActive;
+  final Value<String?> color;
+  final Value<int> sortOrder;
+  final Value<int> createdAt;
+  final Value<int> lastUpdate;
+  final Value<bool> isSynced;
+  final Value<int> rowid;
+  const LocalCardsCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.network = const Value.absent(),
+    this.last4 = const Value.absent(),
+    this.expiryMonth = const Value.absent(),
+    this.expiryYear = const Value.absent(),
+    this.cardholderName = const Value.absent(),
+    this.isVirtual = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastUpdate = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalCardsCompanion.insert({
+    required String id,
+    required String accountId,
+    required String network,
+    required String last4,
+    required int expiryMonth,
+    required int expiryYear,
+    required String cardholderName,
+    this.isVirtual = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.color = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    required int createdAt,
+    required int lastUpdate,
+    this.isSynced = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        accountId = Value(accountId),
+        network = Value(network),
+        last4 = Value(last4),
+        expiryMonth = Value(expiryMonth),
+        expiryYear = Value(expiryYear),
+        cardholderName = Value(cardholderName),
+        createdAt = Value(createdAt),
+        lastUpdate = Value(lastUpdate);
+  static Insertable<LocalCard> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? network,
+    Expression<String>? last4,
+    Expression<int>? expiryMonth,
+    Expression<int>? expiryYear,
+    Expression<String>? cardholderName,
+    Expression<bool>? isVirtual,
+    Expression<bool>? isActive,
+    Expression<String>? color,
+    Expression<int>? sortOrder,
+    Expression<int>? createdAt,
+    Expression<int>? lastUpdate,
+    Expression<bool>? isSynced,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (network != null) 'network': network,
+      if (last4 != null) 'last4': last4,
+      if (expiryMonth != null) 'expiry_month': expiryMonth,
+      if (expiryYear != null) 'expiry_year': expiryYear,
+      if (cardholderName != null) 'cardholder_name': cardholderName,
+      if (isVirtual != null) 'is_virtual': isVirtual,
+      if (isActive != null) 'is_active': isActive,
+      if (color != null) 'color': color,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastUpdate != null) 'last_update': lastUpdate,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalCardsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? accountId,
+      Value<String>? network,
+      Value<String>? last4,
+      Value<int>? expiryMonth,
+      Value<int>? expiryYear,
+      Value<String>? cardholderName,
+      Value<bool>? isVirtual,
+      Value<bool>? isActive,
+      Value<String?>? color,
+      Value<int>? sortOrder,
+      Value<int>? createdAt,
+      Value<int>? lastUpdate,
+      Value<bool>? isSynced,
+      Value<int>? rowid}) {
+    return LocalCardsCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      network: network ?? this.network,
+      last4: last4 ?? this.last4,
+      expiryMonth: expiryMonth ?? this.expiryMonth,
+      expiryYear: expiryYear ?? this.expiryYear,
+      cardholderName: cardholderName ?? this.cardholderName,
+      isVirtual: isVirtual ?? this.isVirtual,
+      isActive: isActive ?? this.isActive,
+      color: color ?? this.color,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+      isSynced: isSynced ?? this.isSynced,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (network.present) {
+      map['network'] = Variable<String>(network.value);
+    }
+    if (last4.present) {
+      map['last4'] = Variable<String>(last4.value);
+    }
+    if (expiryMonth.present) {
+      map['expiry_month'] = Variable<int>(expiryMonth.value);
+    }
+    if (expiryYear.present) {
+      map['expiry_year'] = Variable<int>(expiryYear.value);
+    }
+    if (cardholderName.present) {
+      map['cardholder_name'] = Variable<String>(cardholderName.value);
+    }
+    if (isVirtual.present) {
+      map['is_virtual'] = Variable<bool>(isVirtual.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (lastUpdate.present) {
+      map['last_update'] = Variable<int>(lastUpdate.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCardsCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('network: $network, ')
+          ..write('last4: $last4, ')
+          ..write('expiryMonth: $expiryMonth, ')
+          ..write('expiryYear: $expiryYear, ')
+          ..write('cardholderName: $cardholderName, ')
+          ..write('isVirtual: $isVirtual, ')
+          ..write('isActive: $isActive, ')
+          ..write('color: $color, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalAccountMembersTable extends LocalAccountMembers
+    with TableInfo<$LocalAccountMembersTable, LocalAccountMember> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAccountMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'account_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_bank_accounts (id)'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+      'role', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('owner'));
+  static const VerificationMeta _joinedAtMeta =
+      const VerificationMeta('joinedAt');
+  @override
+  late final GeneratedColumn<int> joinedAt = GeneratedColumn<int>(
+      'joined_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, accountId, userId, role, joinedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_account_members';
+  @override
+  VerificationContext validateIntegrity(Insertable<LocalAccountMember> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+          _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    }
+    if (data.containsKey('joined_at')) {
+      context.handle(_joinedAtMeta,
+          joinedAt.isAcceptableOrUnknown(data['joined_at']!, _joinedAtMeta));
+    } else if (isInserting) {
+      context.missing(_joinedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAccountMember map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAccountMember(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      role: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}role'])!,
+      joinedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}joined_at'])!,
+    );
+  }
+
+  @override
+  $LocalAccountMembersTable createAlias(String alias) {
+    return $LocalAccountMembersTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAccountMember extends DataClass
+    implements Insertable<LocalAccountMember> {
+  final String id;
+  final String accountId;
+  final String userId;
+  final String role;
+  final int joinedAt;
+  const LocalAccountMember(
+      {required this.id,
+      required this.accountId,
+      required this.userId,
+      required this.role,
+      required this.joinedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['account_id'] = Variable<String>(accountId);
+    map['user_id'] = Variable<String>(userId);
+    map['role'] = Variable<String>(role);
+    map['joined_at'] = Variable<int>(joinedAt);
+    return map;
+  }
+
+  LocalAccountMembersCompanion toCompanion(bool nullToAbsent) {
+    return LocalAccountMembersCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      userId: Value(userId),
+      role: Value(role),
+      joinedAt: Value(joinedAt),
+    );
+  }
+
+  factory LocalAccountMember.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAccountMember(
+      id: serializer.fromJson<String>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      role: serializer.fromJson<String>(json['role']),
+      joinedAt: serializer.fromJson<int>(json['joinedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'userId': serializer.toJson<String>(userId),
+      'role': serializer.toJson<String>(role),
+      'joinedAt': serializer.toJson<int>(joinedAt),
+    };
+  }
+
+  LocalAccountMember copyWith(
+          {String? id,
+          String? accountId,
+          String? userId,
+          String? role,
+          int? joinedAt}) =>
+      LocalAccountMember(
+        id: id ?? this.id,
+        accountId: accountId ?? this.accountId,
+        userId: userId ?? this.userId,
+        role: role ?? this.role,
+        joinedAt: joinedAt ?? this.joinedAt,
+      );
+  LocalAccountMember copyWithCompanion(LocalAccountMembersCompanion data) {
+    return LocalAccountMember(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      role: data.role.present ? data.role.value : this.role,
+      joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAccountMember(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('userId: $userId, ')
+          ..write('role: $role, ')
+          ..write('joinedAt: $joinedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, accountId, userId, role, joinedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAccountMember &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.userId == this.userId &&
+          other.role == this.role &&
+          other.joinedAt == this.joinedAt);
+}
+
+class LocalAccountMembersCompanion extends UpdateCompanion<LocalAccountMember> {
+  final Value<String> id;
+  final Value<String> accountId;
+  final Value<String> userId;
+  final Value<String> role;
+  final Value<int> joinedAt;
+  final Value<int> rowid;
+  const LocalAccountMembersCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.joinedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAccountMembersCompanion.insert({
+    required String id,
+    required String accountId,
+    required String userId,
+    this.role = const Value.absent(),
+    required int joinedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        accountId = Value(accountId),
+        userId = Value(userId),
+        joinedAt = Value(joinedAt);
+  static Insertable<LocalAccountMember> custom({
+    Expression<String>? id,
+    Expression<String>? accountId,
+    Expression<String>? userId,
+    Expression<String>? role,
+    Expression<int>? joinedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (userId != null) 'user_id': userId,
+      if (role != null) 'role': role,
+      if (joinedAt != null) 'joined_at': joinedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAccountMembersCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? accountId,
+      Value<String>? userId,
+      Value<String>? role,
+      Value<int>? joinedAt,
+      Value<int>? rowid}) {
+    return LocalAccountMembersCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      userId: userId ?? this.userId,
+      role: role ?? this.role,
+      joinedAt: joinedAt ?? this.joinedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (joinedAt.present) {
+      map['joined_at'] = Variable<int>(joinedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAccountMembersCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('userId: $userId, ')
+          ..write('role: $role, ')
+          ..write('joinedAt: $joinedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3533,6 +5215,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalGoalsTable localGoals = $LocalGoalsTable(this);
   late final $LocalNotificationsTable localNotifications =
       $LocalNotificationsTable(this);
+  late final $LocalFinancialInstitutionsTable localFinancialInstitutions =
+      $LocalFinancialInstitutionsTable(this);
+  late final $LocalCardsTable localCards = $LocalCardsTable(this);
+  late final $LocalAccountMembersTable localAccountMembers =
+      $LocalAccountMembersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3542,7 +5229,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         localCategories,
         localBankAccounts,
         localGoals,
-        localNotifications
+        localNotifications,
+        localFinancialInstitutions,
+        localCards,
+        localAccountMembers
       ];
 }
 
@@ -3554,6 +5244,7 @@ typedef $$LocalTransactionsTableCreateCompanionBuilder
   required String categoryId,
   required String bankAccountId,
   Value<String?> transactionSourceId,
+  Value<String?> paymentCardId,
   required double amount,
   required String type,
   Value<String?> note,
@@ -3574,6 +5265,7 @@ typedef $$LocalTransactionsTableUpdateCompanionBuilder
   Value<String> categoryId,
   Value<String> bankAccountId,
   Value<String?> transactionSourceId,
+  Value<String?> paymentCardId,
   Value<double> amount,
   Value<String> type,
   Value<String?> note,
@@ -3614,6 +5306,9 @@ class $$LocalTransactionsTableFilterComposer
   ColumnFilters<String> get transactionSourceId => $composableBuilder(
       column: $table.transactionSourceId,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get paymentCardId => $composableBuilder(
+      column: $table.paymentCardId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnFilters(column));
@@ -3675,6 +5370,10 @@ class $$LocalTransactionsTableOrderingComposer
       column: $table.transactionSourceId,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get paymentCardId => $composableBuilder(
+      column: $table.paymentCardId,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<double> get amount => $composableBuilder(
       column: $table.amount, builder: (column) => ColumnOrderings(column));
 
@@ -3733,6 +5432,9 @@ class $$LocalTransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get transactionSourceId => $composableBuilder(
       column: $table.transactionSourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentCardId => $composableBuilder(
+      column: $table.paymentCardId, builder: (column) => column);
 
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
@@ -3799,6 +5501,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             Value<String> categoryId = const Value.absent(),
             Value<String> bankAccountId = const Value.absent(),
             Value<String?> transactionSourceId = const Value.absent(),
+            Value<String?> paymentCardId = const Value.absent(),
             Value<double> amount = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<String?> note = const Value.absent(),
@@ -3818,6 +5521,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             categoryId: categoryId,
             bankAccountId: bankAccountId,
             transactionSourceId: transactionSourceId,
+            paymentCardId: paymentCardId,
             amount: amount,
             type: type,
             note: note,
@@ -3837,6 +5541,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             required String categoryId,
             required String bankAccountId,
             Value<String?> transactionSourceId = const Value.absent(),
+            Value<String?> paymentCardId = const Value.absent(),
             required double amount,
             required String type,
             Value<String?> note = const Value.absent(),
@@ -3856,6 +5561,7 @@ class $$LocalTransactionsTableTableManager extends RootTableManager<
             categoryId: categoryId,
             bankAccountId: bankAccountId,
             transactionSourceId: transactionSourceId,
+            paymentCardId: paymentCardId,
             amount: amount,
             type: type,
             note: note,
@@ -4162,6 +5868,8 @@ typedef $$LocalBankAccountsTableCreateCompanionBuilder
   Value<String?> ownerId,
   required String name,
   Value<String?> institution,
+  Value<String?> institutionId,
+  Value<String?> iban,
   required String accountType,
   Value<String> currency,
   required double initialBalance,
@@ -4184,6 +5892,8 @@ typedef $$LocalBankAccountsTableUpdateCompanionBuilder
   Value<String?> ownerId,
   Value<String> name,
   Value<String?> institution,
+  Value<String?> institutionId,
+  Value<String?> iban,
   Value<String> accountType,
   Value<String> currency,
   Value<double> initialBalance,
@@ -4198,6 +5908,45 @@ typedef $$LocalBankAccountsTableUpdateCompanionBuilder
   Value<bool> isSynced,
   Value<int> rowid,
 });
+
+final class $$LocalBankAccountsTableReferences extends BaseReferences<
+    _$AppDatabase, $LocalBankAccountsTable, LocalBankAccount> {
+  $$LocalBankAccountsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$LocalCardsTable, List<LocalCard>>
+      _localCardsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.localCards,
+              aliasName: $_aliasNameGenerator(
+                  db.localBankAccounts.id, db.localCards.accountId));
+
+  $$LocalCardsTableProcessedTableManager get localCardsRefs {
+    final manager = $$LocalCardsTableTableManager($_db, $_db.localCards)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_localCardsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$LocalAccountMembersTable,
+      List<LocalAccountMember>> _localAccountMembersRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.localAccountMembers,
+          aliasName: $_aliasNameGenerator(
+              db.localBankAccounts.id, db.localAccountMembers.accountId));
+
+  $$LocalAccountMembersTableProcessedTableManager get localAccountMembersRefs {
+    final manager = $$LocalAccountMembersTableTableManager(
+            $_db, $_db.localAccountMembers)
+        .filter((f) => f.accountId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_localAccountMembersRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$LocalBankAccountsTableFilterComposer
     extends Composer<_$AppDatabase, $LocalBankAccountsTable> {
@@ -4225,6 +5974,12 @@ class $$LocalBankAccountsTableFilterComposer
 
   ColumnFilters<String> get institution => $composableBuilder(
       column: $table.institution, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get institutionId => $composableBuilder(
+      column: $table.institutionId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get iban => $composableBuilder(
+      column: $table.iban, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get accountType => $composableBuilder(
       column: $table.accountType, builder: (column) => ColumnFilters(column));
@@ -4263,6 +6018,48 @@ class $$LocalBankAccountsTableFilterComposer
 
   ColumnFilters<bool> get isSynced => $composableBuilder(
       column: $table.isSynced, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> localCardsRefs(
+      Expression<bool> Function($$LocalCardsTableFilterComposer f) f) {
+    final $$LocalCardsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.localCards,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalCardsTableFilterComposer(
+              $db: $db,
+              $table: $db.localCards,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> localAccountMembersRefs(
+      Expression<bool> Function($$LocalAccountMembersTableFilterComposer f) f) {
+    final $$LocalAccountMembersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.localAccountMembers,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalAccountMembersTableFilterComposer(
+              $db: $db,
+              $table: $db.localAccountMembers,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$LocalBankAccountsTableOrderingComposer
@@ -4291,6 +6088,13 @@ class $$LocalBankAccountsTableOrderingComposer
 
   ColumnOrderings<String> get institution => $composableBuilder(
       column: $table.institution, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get institutionId => $composableBuilder(
+      column: $table.institutionId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get iban => $composableBuilder(
+      column: $table.iban, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get accountType => $composableBuilder(
       column: $table.accountType, builder: (column) => ColumnOrderings(column));
@@ -4358,6 +6162,12 @@ class $$LocalBankAccountsTableAnnotationComposer
   GeneratedColumn<String> get institution => $composableBuilder(
       column: $table.institution, builder: (column) => column);
 
+  GeneratedColumn<String> get institutionId => $composableBuilder(
+      column: $table.institutionId, builder: (column) => column);
+
+  GeneratedColumn<String> get iban =>
+      $composableBuilder(column: $table.iban, builder: (column) => column);
+
   GeneratedColumn<String> get accountType => $composableBuilder(
       column: $table.accountType, builder: (column) => column);
 
@@ -4393,6 +6203,50 @@ class $$LocalBankAccountsTableAnnotationComposer
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  Expression<T> localCardsRefs<T extends Object>(
+      Expression<T> Function($$LocalCardsTableAnnotationComposer a) f) {
+    final $$LocalCardsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.localCards,
+        getReferencedColumn: (t) => t.accountId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalCardsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.localCards,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> localAccountMembersRefs<T extends Object>(
+      Expression<T> Function($$LocalAccountMembersTableAnnotationComposer a)
+          f) {
+    final $$LocalAccountMembersTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.localAccountMembers,
+            getReferencedColumn: (t) => t.accountId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalAccountMembersTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localAccountMembers,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$LocalBankAccountsTableTableManager extends RootTableManager<
@@ -4404,12 +6258,10 @@ class $$LocalBankAccountsTableTableManager extends RootTableManager<
     $$LocalBankAccountsTableAnnotationComposer,
     $$LocalBankAccountsTableCreateCompanionBuilder,
     $$LocalBankAccountsTableUpdateCompanionBuilder,
-    (
-      LocalBankAccount,
-      BaseReferences<_$AppDatabase, $LocalBankAccountsTable, LocalBankAccount>
-    ),
+    (LocalBankAccount, $$LocalBankAccountsTableReferences),
     LocalBankAccount,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function(
+        {bool localCardsRefs, bool localAccountMembersRefs})> {
   $$LocalBankAccountsTableTableManager(
       _$AppDatabase db, $LocalBankAccountsTable table)
       : super(TableManagerState(
@@ -4429,6 +6281,8 @@ class $$LocalBankAccountsTableTableManager extends RootTableManager<
             Value<String?> ownerId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String?> institution = const Value.absent(),
+            Value<String?> institutionId = const Value.absent(),
+            Value<String?> iban = const Value.absent(),
             Value<String> accountType = const Value.absent(),
             Value<String> currency = const Value.absent(),
             Value<double> initialBalance = const Value.absent(),
@@ -4450,6 +6304,8 @@ class $$LocalBankAccountsTableTableManager extends RootTableManager<
             ownerId: ownerId,
             name: name,
             institution: institution,
+            institutionId: institutionId,
+            iban: iban,
             accountType: accountType,
             currency: currency,
             initialBalance: initialBalance,
@@ -4471,6 +6327,8 @@ class $$LocalBankAccountsTableTableManager extends RootTableManager<
             Value<String?> ownerId = const Value.absent(),
             required String name,
             Value<String?> institution = const Value.absent(),
+            Value<String?> institutionId = const Value.absent(),
+            Value<String?> iban = const Value.absent(),
             required String accountType,
             Value<String> currency = const Value.absent(),
             required double initialBalance,
@@ -4492,6 +6350,8 @@ class $$LocalBankAccountsTableTableManager extends RootTableManager<
             ownerId: ownerId,
             name: name,
             institution: institution,
+            institutionId: institutionId,
+            iban: iban,
             accountType: accountType,
             currency: currency,
             initialBalance: initialBalance,
@@ -4507,9 +6367,52 @@ class $$LocalBankAccountsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalBankAccountsTableReferences(db, table, e)
+                  ))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: (
+              {localCardsRefs = false, localAccountMembersRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (localCardsRefs) db.localCards,
+                if (localAccountMembersRefs) db.localAccountMembers
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (localCardsRefs)
+                    await $_getPrefetchedData<LocalBankAccount,
+                            $LocalBankAccountsTable, LocalCard>(
+                        currentTable: table,
+                        referencedTable: $$LocalBankAccountsTableReferences
+                            ._localCardsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LocalBankAccountsTableReferences(db, table, p0)
+                                .localCardsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
+                        typedResults: items),
+                  if (localAccountMembersRefs)
+                    await $_getPrefetchedData<LocalBankAccount,
+                            $LocalBankAccountsTable, LocalAccountMember>(
+                        currentTable: table,
+                        referencedTable: $$LocalBankAccountsTableReferences
+                            ._localAccountMembersRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LocalBankAccountsTableReferences(db, table, p0)
+                                .localAccountMembersRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.accountId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -4522,12 +6425,10 @@ typedef $$LocalBankAccountsTableProcessedTableManager = ProcessedTableManager<
     $$LocalBankAccountsTableAnnotationComposer,
     $$LocalBankAccountsTableCreateCompanionBuilder,
     $$LocalBankAccountsTableUpdateCompanionBuilder,
-    (
-      LocalBankAccount,
-      BaseReferences<_$AppDatabase, $LocalBankAccountsTable, LocalBankAccount>
-    ),
+    (LocalBankAccount, $$LocalBankAccountsTableReferences),
     LocalBankAccount,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function(
+        {bool localCardsRefs, bool localAccountMembersRefs})>;
 typedef $$LocalGoalsTableCreateCompanionBuilder = LocalGoalsCompanion Function({
   required String id,
   required String householdId,
@@ -5142,6 +7043,972 @@ typedef $$LocalNotificationsTableProcessedTableManager = ProcessedTableManager<
     ),
     LocalNotification,
     PrefetchHooks Function()>;
+typedef $$LocalFinancialInstitutionsTableCreateCompanionBuilder
+    = LocalFinancialInstitutionsCompanion Function({
+  required String id,
+  required String name,
+  required String slug,
+  Value<String> country,
+  required String brandColor,
+  Value<String?> logoAsset,
+  Value<String> institutionType,
+  Value<bool> isCustom,
+  required int createdAt,
+  required int lastUpdate,
+  Value<bool> isSynced,
+  Value<int> rowid,
+});
+typedef $$LocalFinancialInstitutionsTableUpdateCompanionBuilder
+    = LocalFinancialInstitutionsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> slug,
+  Value<String> country,
+  Value<String> brandColor,
+  Value<String?> logoAsset,
+  Value<String> institutionType,
+  Value<bool> isCustom,
+  Value<int> createdAt,
+  Value<int> lastUpdate,
+  Value<bool> isSynced,
+  Value<int> rowid,
+});
+
+class $$LocalFinancialInstitutionsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalFinancialInstitutionsTable> {
+  $$LocalFinancialInstitutionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get slug => $composableBuilder(
+      column: $table.slug, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get country => $composableBuilder(
+      column: $table.country, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get brandColor => $composableBuilder(
+      column: $table.brandColor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get logoAsset => $composableBuilder(
+      column: $table.logoAsset, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get institutionType => $composableBuilder(
+      column: $table.institutionType,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isCustom => $composableBuilder(
+      column: $table.isCustom, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnFilters(column));
+}
+
+class $$LocalFinancialInstitutionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalFinancialInstitutionsTable> {
+  $$LocalFinancialInstitutionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get slug => $composableBuilder(
+      column: $table.slug, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get country => $composableBuilder(
+      column: $table.country, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get brandColor => $composableBuilder(
+      column: $table.brandColor, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get logoAsset => $composableBuilder(
+      column: $table.logoAsset, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get institutionType => $composableBuilder(
+      column: $table.institutionType,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isCustom => $composableBuilder(
+      column: $table.isCustom, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocalFinancialInstitutionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalFinancialInstitutionsTable> {
+  $$LocalFinancialInstitutionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get slug =>
+      $composableBuilder(column: $table.slug, builder: (column) => column);
+
+  GeneratedColumn<String> get country =>
+      $composableBuilder(column: $table.country, builder: (column) => column);
+
+  GeneratedColumn<String> get brandColor => $composableBuilder(
+      column: $table.brandColor, builder: (column) => column);
+
+  GeneratedColumn<String> get logoAsset =>
+      $composableBuilder(column: $table.logoAsset, builder: (column) => column);
+
+  GeneratedColumn<String> get institutionType => $composableBuilder(
+      column: $table.institutionType, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCustom =>
+      $composableBuilder(column: $table.isCustom, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+}
+
+class $$LocalFinancialInstitutionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalFinancialInstitutionsTable,
+    LocalFinancialInstitution,
+    $$LocalFinancialInstitutionsTableFilterComposer,
+    $$LocalFinancialInstitutionsTableOrderingComposer,
+    $$LocalFinancialInstitutionsTableAnnotationComposer,
+    $$LocalFinancialInstitutionsTableCreateCompanionBuilder,
+    $$LocalFinancialInstitutionsTableUpdateCompanionBuilder,
+    (
+      LocalFinancialInstitution,
+      BaseReferences<_$AppDatabase, $LocalFinancialInstitutionsTable,
+          LocalFinancialInstitution>
+    ),
+    LocalFinancialInstitution,
+    PrefetchHooks Function()> {
+  $$LocalFinancialInstitutionsTableTableManager(
+      _$AppDatabase db, $LocalFinancialInstitutionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalFinancialInstitutionsTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalFinancialInstitutionsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalFinancialInstitutionsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> slug = const Value.absent(),
+            Value<String> country = const Value.absent(),
+            Value<String> brandColor = const Value.absent(),
+            Value<String?> logoAsset = const Value.absent(),
+            Value<String> institutionType = const Value.absent(),
+            Value<bool> isCustom = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> lastUpdate = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalFinancialInstitutionsCompanion(
+            id: id,
+            name: name,
+            slug: slug,
+            country: country,
+            brandColor: brandColor,
+            logoAsset: logoAsset,
+            institutionType: institutionType,
+            isCustom: isCustom,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            isSynced: isSynced,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required String slug,
+            Value<String> country = const Value.absent(),
+            required String brandColor,
+            Value<String?> logoAsset = const Value.absent(),
+            Value<String> institutionType = const Value.absent(),
+            Value<bool> isCustom = const Value.absent(),
+            required int createdAt,
+            required int lastUpdate,
+            Value<bool> isSynced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalFinancialInstitutionsCompanion.insert(
+            id: id,
+            name: name,
+            slug: slug,
+            country: country,
+            brandColor: brandColor,
+            logoAsset: logoAsset,
+            institutionType: institutionType,
+            isCustom: isCustom,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            isSynced: isSynced,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$LocalFinancialInstitutionsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LocalFinancialInstitutionsTable,
+        LocalFinancialInstitution,
+        $$LocalFinancialInstitutionsTableFilterComposer,
+        $$LocalFinancialInstitutionsTableOrderingComposer,
+        $$LocalFinancialInstitutionsTableAnnotationComposer,
+        $$LocalFinancialInstitutionsTableCreateCompanionBuilder,
+        $$LocalFinancialInstitutionsTableUpdateCompanionBuilder,
+        (
+          LocalFinancialInstitution,
+          BaseReferences<_$AppDatabase, $LocalFinancialInstitutionsTable,
+              LocalFinancialInstitution>
+        ),
+        LocalFinancialInstitution,
+        PrefetchHooks Function()>;
+typedef $$LocalCardsTableCreateCompanionBuilder = LocalCardsCompanion Function({
+  required String id,
+  required String accountId,
+  required String network,
+  required String last4,
+  required int expiryMonth,
+  required int expiryYear,
+  required String cardholderName,
+  Value<bool> isVirtual,
+  Value<bool> isActive,
+  Value<String?> color,
+  Value<int> sortOrder,
+  required int createdAt,
+  required int lastUpdate,
+  Value<bool> isSynced,
+  Value<int> rowid,
+});
+typedef $$LocalCardsTableUpdateCompanionBuilder = LocalCardsCompanion Function({
+  Value<String> id,
+  Value<String> accountId,
+  Value<String> network,
+  Value<String> last4,
+  Value<int> expiryMonth,
+  Value<int> expiryYear,
+  Value<String> cardholderName,
+  Value<bool> isVirtual,
+  Value<bool> isActive,
+  Value<String?> color,
+  Value<int> sortOrder,
+  Value<int> createdAt,
+  Value<int> lastUpdate,
+  Value<bool> isSynced,
+  Value<int> rowid,
+});
+
+final class $$LocalCardsTableReferences
+    extends BaseReferences<_$AppDatabase, $LocalCardsTable, LocalCard> {
+  $$LocalCardsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocalBankAccountsTable _accountIdTable(_$AppDatabase db) =>
+      db.localBankAccounts.createAlias($_aliasNameGenerator(
+          db.localCards.accountId, db.localBankAccounts.id));
+
+  $$LocalBankAccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager =
+        $$LocalBankAccountsTableTableManager($_db, $_db.localBankAccounts)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$LocalCardsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalCardsTable> {
+  $$LocalCardsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get network => $composableBuilder(
+      column: $table.network, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get last4 => $composableBuilder(
+      column: $table.last4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get expiryMonth => $composableBuilder(
+      column: $table.expiryMonth, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get expiryYear => $composableBuilder(
+      column: $table.expiryYear, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get cardholderName => $composableBuilder(
+      column: $table.cardholderName,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isVirtual => $composableBuilder(
+      column: $table.isVirtual, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnFilters(column));
+
+  $$LocalBankAccountsTableFilterComposer get accountId {
+    final $$LocalBankAccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.localBankAccounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalBankAccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.localBankAccounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocalCardsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalCardsTable> {
+  $$LocalCardsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get network => $composableBuilder(
+      column: $table.network, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get last4 => $composableBuilder(
+      column: $table.last4, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get expiryMonth => $composableBuilder(
+      column: $table.expiryMonth, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get expiryYear => $composableBuilder(
+      column: $table.expiryYear, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get cardholderName => $composableBuilder(
+      column: $table.cardholderName,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isVirtual => $composableBuilder(
+      column: $table.isVirtual, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnOrderings(column));
+
+  $$LocalBankAccountsTableOrderingComposer get accountId {
+    final $$LocalBankAccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.localBankAccounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalBankAccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.localBankAccounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocalCardsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalCardsTable> {
+  $$LocalCardsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get network =>
+      $composableBuilder(column: $table.network, builder: (column) => column);
+
+  GeneratedColumn<String> get last4 =>
+      $composableBuilder(column: $table.last4, builder: (column) => column);
+
+  GeneratedColumn<int> get expiryMonth => $composableBuilder(
+      column: $table.expiryMonth, builder: (column) => column);
+
+  GeneratedColumn<int> get expiryYear => $composableBuilder(
+      column: $table.expiryYear, builder: (column) => column);
+
+  GeneratedColumn<String> get cardholderName => $composableBuilder(
+      column: $table.cardholderName, builder: (column) => column);
+
+  GeneratedColumn<bool> get isVirtual =>
+      $composableBuilder(column: $table.isVirtual, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  $$LocalBankAccountsTableAnnotationComposer get accountId {
+    final $$LocalBankAccountsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.accountId,
+            referencedTable: $db.localBankAccounts,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalBankAccountsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localBankAccounts,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalCardsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalCardsTable,
+    LocalCard,
+    $$LocalCardsTableFilterComposer,
+    $$LocalCardsTableOrderingComposer,
+    $$LocalCardsTableAnnotationComposer,
+    $$LocalCardsTableCreateCompanionBuilder,
+    $$LocalCardsTableUpdateCompanionBuilder,
+    (LocalCard, $$LocalCardsTableReferences),
+    LocalCard,
+    PrefetchHooks Function({bool accountId})> {
+  $$LocalCardsTableTableManager(_$AppDatabase db, $LocalCardsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalCardsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalCardsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalCardsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
+            Value<String> network = const Value.absent(),
+            Value<String> last4 = const Value.absent(),
+            Value<int> expiryMonth = const Value.absent(),
+            Value<int> expiryYear = const Value.absent(),
+            Value<String> cardholderName = const Value.absent(),
+            Value<bool> isVirtual = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<String?> color = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> lastUpdate = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalCardsCompanion(
+            id: id,
+            accountId: accountId,
+            network: network,
+            last4: last4,
+            expiryMonth: expiryMonth,
+            expiryYear: expiryYear,
+            cardholderName: cardholderName,
+            isVirtual: isVirtual,
+            isActive: isActive,
+            color: color,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            isSynced: isSynced,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String accountId,
+            required String network,
+            required String last4,
+            required int expiryMonth,
+            required int expiryYear,
+            required String cardholderName,
+            Value<bool> isVirtual = const Value.absent(),
+            Value<bool> isActive = const Value.absent(),
+            Value<String?> color = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            required int createdAt,
+            required int lastUpdate,
+            Value<bool> isSynced = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalCardsCompanion.insert(
+            id: id,
+            accountId: accountId,
+            network: network,
+            last4: last4,
+            expiryMonth: expiryMonth,
+            expiryYear: expiryYear,
+            cardholderName: cardholderName,
+            isVirtual: isVirtual,
+            isActive: isActive,
+            color: color,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            isSynced: isSynced,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalCardsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable:
+                        $$LocalCardsTableReferences._accountIdTable(db),
+                    referencedColumn:
+                        $$LocalCardsTableReferences._accountIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocalCardsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LocalCardsTable,
+    LocalCard,
+    $$LocalCardsTableFilterComposer,
+    $$LocalCardsTableOrderingComposer,
+    $$LocalCardsTableAnnotationComposer,
+    $$LocalCardsTableCreateCompanionBuilder,
+    $$LocalCardsTableUpdateCompanionBuilder,
+    (LocalCard, $$LocalCardsTableReferences),
+    LocalCard,
+    PrefetchHooks Function({bool accountId})>;
+typedef $$LocalAccountMembersTableCreateCompanionBuilder
+    = LocalAccountMembersCompanion Function({
+  required String id,
+  required String accountId,
+  required String userId,
+  Value<String> role,
+  required int joinedAt,
+  Value<int> rowid,
+});
+typedef $$LocalAccountMembersTableUpdateCompanionBuilder
+    = LocalAccountMembersCompanion Function({
+  Value<String> id,
+  Value<String> accountId,
+  Value<String> userId,
+  Value<String> role,
+  Value<int> joinedAt,
+  Value<int> rowid,
+});
+
+final class $$LocalAccountMembersTableReferences extends BaseReferences<
+    _$AppDatabase, $LocalAccountMembersTable, LocalAccountMember> {
+  $$LocalAccountMembersTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocalBankAccountsTable _accountIdTable(_$AppDatabase db) =>
+      db.localBankAccounts.createAlias($_aliasNameGenerator(
+          db.localAccountMembers.accountId, db.localBankAccounts.id));
+
+  $$LocalBankAccountsTableProcessedTableManager get accountId {
+    final $_column = $_itemColumn<String>('account_id')!;
+
+    final manager =
+        $$LocalBankAccountsTableTableManager($_db, $_db.localBankAccounts)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$LocalAccountMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAccountMembersTable> {
+  $$LocalAccountMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get joinedAt => $composableBuilder(
+      column: $table.joinedAt, builder: (column) => ColumnFilters(column));
+
+  $$LocalBankAccountsTableFilterComposer get accountId {
+    final $$LocalBankAccountsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.localBankAccounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalBankAccountsTableFilterComposer(
+              $db: $db,
+              $table: $db.localBankAccounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocalAccountMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAccountMembersTable> {
+  $$LocalAccountMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get joinedAt => $composableBuilder(
+      column: $table.joinedAt, builder: (column) => ColumnOrderings(column));
+
+  $$LocalBankAccountsTableOrderingComposer get accountId {
+    final $$LocalBankAccountsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.accountId,
+        referencedTable: $db.localBankAccounts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalBankAccountsTableOrderingComposer(
+              $db: $db,
+              $table: $db.localBankAccounts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocalAccountMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAccountMembersTable> {
+  $$LocalAccountMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<int> get joinedAt =>
+      $composableBuilder(column: $table.joinedAt, builder: (column) => column);
+
+  $$LocalBankAccountsTableAnnotationComposer get accountId {
+    final $$LocalBankAccountsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.accountId,
+            referencedTable: $db.localBankAccounts,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalBankAccountsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localBankAccounts,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalAccountMembersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalAccountMembersTable,
+    LocalAccountMember,
+    $$LocalAccountMembersTableFilterComposer,
+    $$LocalAccountMembersTableOrderingComposer,
+    $$LocalAccountMembersTableAnnotationComposer,
+    $$LocalAccountMembersTableCreateCompanionBuilder,
+    $$LocalAccountMembersTableUpdateCompanionBuilder,
+    (LocalAccountMember, $$LocalAccountMembersTableReferences),
+    LocalAccountMember,
+    PrefetchHooks Function({bool accountId})> {
+  $$LocalAccountMembersTableTableManager(
+      _$AppDatabase db, $LocalAccountMembersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAccountMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalAccountMembersTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalAccountMembersTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> role = const Value.absent(),
+            Value<int> joinedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalAccountMembersCompanion(
+            id: id,
+            accountId: accountId,
+            userId: userId,
+            role: role,
+            joinedAt: joinedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String accountId,
+            required String userId,
+            Value<String> role = const Value.absent(),
+            required int joinedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalAccountMembersCompanion.insert(
+            id: id,
+            accountId: accountId,
+            userId: userId,
+            role: role,
+            joinedAt: joinedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalAccountMembersTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({accountId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (accountId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.accountId,
+                    referencedTable: $$LocalAccountMembersTableReferences
+                        ._accountIdTable(db),
+                    referencedColumn: $$LocalAccountMembersTableReferences
+                        ._accountIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocalAccountMembersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LocalAccountMembersTable,
+    LocalAccountMember,
+    $$LocalAccountMembersTableFilterComposer,
+    $$LocalAccountMembersTableOrderingComposer,
+    $$LocalAccountMembersTableAnnotationComposer,
+    $$LocalAccountMembersTableCreateCompanionBuilder,
+    $$LocalAccountMembersTableUpdateCompanionBuilder,
+    (LocalAccountMember, $$LocalAccountMembersTableReferences),
+    LocalAccountMember,
+    PrefetchHooks Function({bool accountId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5156,4 +8023,12 @@ class $AppDatabaseManager {
       $$LocalGoalsTableTableManager(_db, _db.localGoals);
   $$LocalNotificationsTableTableManager get localNotifications =>
       $$LocalNotificationsTableTableManager(_db, _db.localNotifications);
+  $$LocalFinancialInstitutionsTableTableManager
+      get localFinancialInstitutions =>
+          $$LocalFinancialInstitutionsTableTableManager(
+              _db, _db.localFinancialInstitutions);
+  $$LocalCardsTableTableManager get localCards =>
+      $$LocalCardsTableTableManager(_db, _db.localCards);
+  $$LocalAccountMembersTableTableManager get localAccountMembers =>
+      $$LocalAccountMembersTableTableManager(_db, _db.localAccountMembers);
 }

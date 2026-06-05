@@ -23,6 +23,8 @@ class MyTheme {
   final String successColor;
   final String warningColor;
   final String errorColor;
+  final String infoColor;
+  final String onInfoColor;
   final String onStatusColor;
   final String destructiveColor;
   final String neutralColor;
@@ -35,6 +37,7 @@ class MyTheme {
   final List<String> categoryChartColors;
 
   final MyChartTheme chart;
+  final bool isDark;
 
   const MyTheme({
     required this.primaryColor,
@@ -45,6 +48,8 @@ class MyTheme {
     required this.successColor,
     required this.warningColor,
     required this.errorColor,
+    required this.infoColor,
+    required this.onInfoColor,
     required this.onStatusColor,
     required this.destructiveColor,
     required this.neutralColor,
@@ -53,6 +58,7 @@ class MyTheme {
     required this.shadow,
     required this.categoryChartColors,
     required this.chart,
+    this.isDark = false,
   });
 
   // Backward-compatibility aliases while callers migrate.
@@ -77,7 +83,8 @@ class MyTheme {
 const String _kStatusSuccess = '#22C55E';
 const String _kStatusWarning = '#F59E0B';
 const String _kStatusError = '#EF4444';
-const String _kStatusNeutral = '#94A3B8';
+const String _kStatusInfo = '#60A5FA';
+const String _kStatusNeutral = '#E9ECF0';
 const String _kOnStatusColor = '#FFFFFF';
 const List<String> _kCategoryChartColors = [
   '#0077B6',
@@ -99,6 +106,8 @@ const Map<ThemeType, MyTheme> themes = {
     successColor: _kStatusSuccess,
     warningColor: _kStatusWarning,
     errorColor: _kStatusError,
+    infoColor: _kStatusInfo,
+    onInfoColor: _kOnStatusColor,
     onStatusColor: _kOnStatusColor,
     destructiveColor: '#DC2626',
     neutralColor: _kStatusNeutral,
@@ -111,19 +120,22 @@ const Map<ThemeType, MyTheme> themes = {
     ),
   ),
   ThemeType.dark: MyTheme(
+    isDark: true,
     primaryColor: '#0077B6',
     onPrimaryColor: '#FFFFFF',
-    backgroundColor: '#0F1117',
-    surfaceColor: '#1C1F26',
+    backgroundColor: '#0C0C0D',
+    surfaceColor: '#282829',
     foregroundColor: '#f1f1f1',
     successColor: _kStatusSuccess,
     warningColor: _kStatusWarning,
     errorColor: _kStatusError,
+    infoColor: _kStatusInfo,
+    onInfoColor: _kOnStatusColor,
     onStatusColor: _kOnStatusColor,
     destructiveColor: '#F87171',
-    neutralColor: _kStatusNeutral,
-    mutedColor: '#8A94A3',
-    outlineColor: '#252B36',
+    neutralColor: '#2A313D',
+    mutedColor: '#555558',
+    outlineColor: '#414144',
     shadow: '#000000',
     categoryChartColors: _kCategoryChartColors,
     chart: MyChartTheme(

@@ -2,37 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:hestia/core/constants/themes.dart';
 
+/// Shared hex parser for app theme colors (e.g. '#0077B6').
+Color hexToColor(String hex) =>
+    Color(int.parse(hex.replaceFirst('#', '0xff')));
+
 /// Convert MyTheme → Forui FThemeData
 extension MyThemeToForui on MyTheme {
   FThemeData toFThemeData({required Brightness brightness}) {
     return FThemeData.inherit(
       colorScheme: FColorScheme(
         brightness: brightness,
-        primary: _c(primaryColor),
-        primaryForeground: _c(onPrimaryColor),
-        secondary: _c(surfaceColor),
-        secondaryForeground: _c(foregroundColor),
-        muted: _c(mutedColor),
-        mutedForeground: _c(foregroundColor),
-        background: _c(backgroundColor),
-        foreground: _c(foregroundColor),
-        destructive: _c(destructiveColor),
-        destructiveForeground: _c(onDestructiveColor),
-        error: _c(errorColor),
-        errorForeground: _c(onStatusColor),
-        border: _c(outlineColor),
+        primary: hexToColor(primaryColor),
+        primaryForeground: hexToColor(onPrimaryColor),
+        secondary: hexToColor(surfaceColor),
+        secondaryForeground: hexToColor(foregroundColor),
+        muted: hexToColor(mutedColor),
+        mutedForeground: hexToColor(foregroundColor),
+        background: hexToColor(backgroundColor),
+        foreground: hexToColor(foregroundColor),
+        destructive: hexToColor(destructiveColor),
+        destructiveForeground: hexToColor(onDestructiveColor),
+        error: hexToColor(errorColor),
+        errorForeground: hexToColor(onStatusColor),
+        border: hexToColor(outlineColor),
       ),
     );
   }
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 /// Chart helpers
 extension MyChartThemeParser on MyChartTheme {
-  List<Color> get seriesColors => series.map((c) => _c(c)).toList();
-
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+  List<Color> get seriesColors => series.map(hexToColor).toList();
 }
 
 /// InheritedWidget that carries MyTheme alongside FTheme.

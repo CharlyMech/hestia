@@ -26,6 +26,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     int limit = 50,
     int offset = 0,
   }) async {
+    if (householdId.isEmpty) return (const <Transaction>[], null);
     try {
       final effectiveUserId = viewMode == ViewMode.personal ? userId : null;
 
@@ -88,6 +89,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
+    if (householdId.isEmpty) return (const <Transfer>[], null);
     try {
       final data = await _service.getTransfers(
         householdId: householdId,
@@ -107,8 +109,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
       final data = await _service.createTransfer({
         'household_id': transfer.householdId,
         'user_id': transfer.userId,
-        'from_source_id': transfer.fromSourceId,
-        'to_source_id': transfer.toSourceId,
+        'from_account_id': transfer.fromSourceId,
+        'to_account_id': transfer.toSourceId,
         'amount': transfer.amount,
         'note': transfer.note,
         'date': transfer.date.toUnix,

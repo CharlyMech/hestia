@@ -24,7 +24,11 @@ abstract class AppointmentRepository {
   Future<Failure?> delete(String id);
 
   /// Sync local state with Google Calendar. No-op on mock flavor.
-  Future<Failure?> syncWithGoogle({required String userId});
+  /// [defaultColor] is applied to newly-imported events (e.g. profile calendarColor).
+  Future<Failure?> syncWithGoogle({
+    required String userId,
+    String? defaultColor,
+  });
 
   /// Whether Google Calendar is currently linked (mock returns false).
   Future<bool> isGoogleLinked();

@@ -37,8 +37,10 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
         id: data['id'] as String,
         name: data['name'] as String,
         createdBy: data['created_by'] as String?,
-        createdAt: (data['created_at'] as int).fromUnix,
-        lastUpdate: (data['last_update'] as int).fromUnix,
+        createdAt:
+            parseSupabaseTimestamp(data['created_at'], orElse: DateTime.now()),
+        lastUpdate:
+            parseSupabaseTimestamp(data['last_update'], orElse: DateTime.now()),
       );
 
       return (household, null);
@@ -62,7 +64,8 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
           userId: json['user_id'] as String,
           householdId: json['household_id'] as String,
           role: json['role'] as String,
-          createdAt: (json['created_at'] as int).fromUnix,
+          createdAt: parseSupabaseTimestamp(json['created_at'],
+              orElse: DateTime.now()),
         );
       }).toList();
 
@@ -102,8 +105,10 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
               ? DateTime.tryParse(json['birth_date'] as String)
               : null,
           isSuperuser: json['is_superuser'] as bool? ?? false,
-          createdAt: (json['created_at'] as int).fromUnix,
-          lastUpdate: (json['last_update'] as int).fromUnix,
+          createdAt: parseSupabaseTimestamp(json['created_at'],
+              orElse: DateTime.now()),
+          lastUpdate: parseSupabaseTimestamp(json['last_update'],
+              orElse: DateTime.now()),
         );
       }).toList();
       return (profiles, null);

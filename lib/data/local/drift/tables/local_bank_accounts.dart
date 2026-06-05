@@ -7,6 +7,8 @@ class LocalBankAccounts extends Table {
   TextColumn get ownerId => text().nullable()();
   TextColumn get name => text()();
   TextColumn get institution => text().nullable()();
+  TextColumn get institutionId => text().nullable()();
+  TextColumn get iban => text().nullable()();
   TextColumn get accountType => text()();
   TextColumn get currency => text().withDefault(const Constant('EUR'))();
   RealColumn get initialBalance => real()();

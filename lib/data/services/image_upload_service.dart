@@ -1,4 +1,5 @@
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Bucket names — kept as constants so call sites don't drift.
 abstract final class ImageBuckets {
@@ -80,24 +81,20 @@ class SupabaseImageUploadService implements ImageUploadService {
       imageQuality: 85,
     );
     if (picked == null) return null;
-    // TODO(supabase): real upload
-    // final bytes = await picked.readAsBytes();
-    // await Supabase.instance.client.storage.from(bucket).uploadBinary(
-    //   path, bytes,
-    //   fileOptions: const FileOptions(upsert: true, contentType: 'image/jpeg'),
-    // );
-    // final url =
-    //     Supabase.instance.client.storage.from(bucket).getPublicUrl(path);
-    // return ImageUploadResult(url: url, isLocal: false);
-    throw UnimplementedError(
-      'SupabaseImageUploadService not wired — using MockImageUploadService.',
-    );
+    final bytes = await picked.readAsBytes();
+    await Supabase.instance.client.storage.from(bucket).uploadBinary(
+          path,
+          bytes,
+          fileOptions:
+              const FileOptions(upsert: true, contentType: 'image/jpeg'),
+        );
+    final url =
+        Supabase.instance.client.storage.from(bucket).getPublicUrl(path);
+    return ImageUploadResult(url: url, isLocal: false);
   }
 
   @override
   Future<void> remove({required String bucket, required String path}) async {
-    // TODO(supabase): real delete
-    // await Supabase.instance.client.storage.from(bucket).remove([path]);
-    throw UnimplementedError();
+    await Supabase.instance.client.storage.from(bucket).remove([path]);
   }
 }

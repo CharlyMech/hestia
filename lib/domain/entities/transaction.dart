@@ -8,6 +8,7 @@ class Transaction extends Equatable {
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
+  final String? paymentCardId;
   final double amount;
   final TransactionType type;
   final String? note;
@@ -20,6 +21,12 @@ class Transaction extends Equatable {
   /// Optional GPS coordinates when the user attaches a location.
   final double? latitude;
   final double? longitude;
+
+  /// Optional actor associations — the entity this transaction is "for".
+  /// At most one should be set at a time.
+  final String? petId;
+  final String? carId;
+  final String? homeId;
 
   // Joined fields (populated by repository when needed)
   final String? categoryName;
@@ -35,6 +42,7 @@ class Transaction extends Equatable {
     required this.categoryId,
     required this.bankAccountId,
     this.transactionSourceId,
+    this.paymentCardId,
     required this.amount,
     required this.type,
     this.note,
@@ -45,6 +53,9 @@ class Transaction extends Equatable {
     required this.lastUpdate,
     this.latitude,
     this.longitude,
+    this.petId,
+    this.carId,
+    this.homeId,
     this.categoryName,
     this.categoryColor,
     this.bankAccountName,
@@ -54,6 +65,7 @@ class Transaction extends Equatable {
 
   bool get isExpense => type == TransactionType.expense;
   bool get isIncome => type == TransactionType.income;
+  bool get isAdjustment => type == TransactionType.adjustment;
 
   bool get hasLocation => latitude != null && longitude != null;
 
@@ -65,6 +77,8 @@ class Transaction extends Equatable {
     String? bankAccountId,
     String? transactionSourceId,
     bool clearTransactionSource = false,
+    String? paymentCardId,
+    bool clearPaymentCard = false,
     double? amount,
     TransactionType? type,
     String? note,
@@ -78,6 +92,12 @@ class Transaction extends Equatable {
     double? latitude,
     double? longitude,
     bool clearLocation = false,
+    String? petId,
+    bool clearPetId = false,
+    String? carId,
+    bool clearCarId = false,
+    String? homeId,
+    bool clearHomeId = false,
     String? categoryName,
     String? categoryColor,
     String? bankAccountName,
@@ -93,6 +113,8 @@ class Transaction extends Equatable {
       transactionSourceId: clearTransactionSource
           ? null
           : (transactionSourceId ?? this.transactionSourceId),
+      paymentCardId:
+          clearPaymentCard ? null : (paymentCardId ?? this.paymentCardId),
       amount: amount ?? this.amount,
       type: type ?? this.type,
       note: clearNote ? null : (note ?? this.note),
@@ -104,6 +126,9 @@ class Transaction extends Equatable {
       lastUpdate: lastUpdate ?? this.lastUpdate,
       latitude: clearLocation ? null : (latitude ?? this.latitude),
       longitude: clearLocation ? null : (longitude ?? this.longitude),
+      petId: clearPetId ? null : (petId ?? this.petId),
+      carId: clearCarId ? null : (carId ?? this.carId),
+      homeId: clearHomeId ? null : (homeId ?? this.homeId),
       categoryName: categoryName ?? this.categoryName,
       categoryColor: categoryColor ?? this.categoryColor,
       bankAccountName: bankAccountName ?? this.bankAccountName,
@@ -114,6 +139,15 @@ class Transaction extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, amount, type, date, categoryId, bankAccountId, latitude, longitude];
+  List<Object?> get props => [
+        id,
+        amount,
+        type,
+        date,
+        categoryId,
+        bankAccountId,
+        paymentCardId,
+        latitude,
+        longitude,
+      ];
 }

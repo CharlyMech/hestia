@@ -5,6 +5,8 @@ class BankAccountDto {
   final String? ownerId;
   final String name;
   final String? institution;
+  final String? institutionId;
+  final String? iban;
   final String accountType;
   final String currency;
   final num initialBalance;
@@ -24,6 +26,8 @@ class BankAccountDto {
     this.ownerId,
     required this.name,
     this.institution,
+    this.institutionId,
+    this.iban,
     required this.accountType,
     this.currency = 'EUR',
     required this.initialBalance,
@@ -45,6 +49,8 @@ class BankAccountDto {
       ownerId: json['owner_id'] as String?,
       name: json['name'] as String,
       institution: json['institution'] as String?,
+      institutionId: json['institution_id'] as String?,
+      iban: json['iban'] as String?,
       accountType: json['account_type'] as String,
       currency: json['currency'] as String? ?? 'EUR',
       initialBalance: json['initial_balance'] as num,
@@ -65,6 +71,8 @@ class BankAccountDto {
         'owner_id': ownerId,
         'name': name,
         'institution': institution,
+        'institution_id': institutionId,
+        'iban': iban,
         'account_type': accountType,
         'currency': currency,
         'initial_balance': initialBalance,
@@ -79,6 +87,8 @@ class BankAccountDto {
   Map<String, dynamic> toUpdateJson() => {
         'name': name,
         'institution': institution,
+        'institution_id': institutionId,
+        'iban': iban,
         'is_primary': isPrimary,
         'is_active': isActive,
         'color': color,

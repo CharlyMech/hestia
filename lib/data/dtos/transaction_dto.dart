@@ -5,6 +5,7 @@ class TransactionDto {
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
+  final String? paymentCardId;
   final num amount;
   final String type;
   final String? note;
@@ -29,6 +30,7 @@ class TransactionDto {
     required this.categoryId,
     required this.bankAccountId,
     this.transactionSourceId,
+    this.paymentCardId,
     required this.amount,
     required this.type,
     this.note,
@@ -51,8 +53,9 @@ class TransactionDto {
       householdId: json['household_id'] as String,
       userId: json['user_id'] as String,
       categoryId: json['category_id'] as String,
-      bankAccountId: json['money_source_id'] as String,
+      bankAccountId: json['bank_account_id'] as String,
       transactionSourceId: json['transaction_source_id'] as String?,
+      paymentCardId: json['payment_card_id'] as String?,
       amount: json['amount'] as num,
       type: json['type'] as String,
       note: json['note'] as String?,
@@ -64,7 +67,7 @@ class TransactionDto {
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       categories: json['categories'] as Map<String, dynamic>?,
-      bankAccounts: json['money_sources'] as Map<String, dynamic>?,
+      bankAccounts: json['bank_accounts'] as Map<String, dynamic>?,
       transactionSources: json['transaction_sources'] as Map<String, dynamic>?,
       profiles: json['profiles'] as Map<String, dynamic>?,
     );
@@ -75,8 +78,9 @@ class TransactionDto {
       'household_id': householdId,
       'user_id': userId,
       'category_id': categoryId,
-      'money_source_id': bankAccountId,
+      'bank_account_id': bankAccountId,
       'transaction_source_id': transactionSourceId,
+      'payment_card_id': paymentCardId,
       'amount': amount,
       'type': type,
       'note': note,
@@ -92,8 +96,9 @@ class TransactionDto {
   Map<String, dynamic> toUpdateJson() {
     return {
       'category_id': categoryId,
-      'money_source_id': bankAccountId,
+      'bank_account_id': bankAccountId,
       'transaction_source_id': transactionSourceId,
+      'payment_card_id': paymentCardId,
       'amount': amount,
       'type': type,
       'note': note,

@@ -9,6 +9,7 @@ class Profile extends Equatable {
   final String? calendarColor;
   final DateTime? birthDate;
   final bool isSuperuser;
+  final bool isActive;
   final DateTime createdAt;
   final DateTime lastUpdate;
 
@@ -21,6 +22,7 @@ class Profile extends Equatable {
     this.calendarColor,
     this.birthDate,
     this.isSuperuser = false,
+    this.isActive = true,
     required this.createdAt,
     required this.lastUpdate,
   });
@@ -36,6 +38,7 @@ class Profile extends Equatable {
     DateTime? birthDate,
     bool clearBirthDate = false,
     bool? isSuperuser,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? lastUpdate,
   }) =>
@@ -48,6 +51,7 @@ class Profile extends Equatable {
         calendarColor: calendarColor ?? this.calendarColor,
         birthDate: clearBirthDate ? null : (birthDate ?? this.birthDate),
         isSuperuser: isSuperuser ?? this.isSuperuser,
+        isActive: isActive ?? this.isActive,
         createdAt: createdAt ?? this.createdAt,
         lastUpdate: lastUpdate ?? this.lastUpdate,
       );
@@ -62,5 +66,6 @@ class Profile extends Equatable {
         calendarColor,
         birthDate,
         isSuperuser,
+        isActive,
       ];
 }

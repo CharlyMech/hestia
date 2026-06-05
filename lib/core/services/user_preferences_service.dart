@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _kStartDay = 'pref_start_day';
@@ -14,9 +16,31 @@ class UserPreferencesService {
 
   UserPreferencesService(this._prefs);
 
+  static const _kOnboardingSeen = 'pref_onboarding_seen';
+  static const _supportedLocales = ['en', 'es'];
+
   static Future<UserPreferencesService> create() async {
     final prefs = await SharedPreferences.getInstance();
-    return UserPreferencesService(prefs);
+    final svc = UserPreferencesService(prefs);
+    await svc._applyFirstRunDefaults();
+    return svc;
+  }
+
+  Future<void> _applyFirstRunDefaults() async {
+    if (!_prefs.containsKey(_kThemeType)) {
+      await _prefs.setString(_kThemeType, 'system');
+    }
+    if (!_prefs.containsKey(_kLanguageCode)) {
+      final locale = Platform.localeName.split('_').first.toLowerCase();
+      final code = _supportedLocales.contains(locale) ? locale : 'en';
+      await _prefs.setString(_kLanguageCode, code);
+    }
+  }
+
+  bool get onboardingSeen => _prefs.getBool(_kOnboardingSeen) ?? false;
+
+  Future<void> setOnboardingSeen(bool value) async {
+    await _prefs.setBool(_kOnboardingSeen, value);
   }
 
   /// First day of week: DateTime.monday (1) … DateTime.sunday (7). Default: Monday.
@@ -61,8 +85,7 @@ class UserPreferencesService {
     await _prefs.setString(_kDateFormat, value);
   }
 
-  bool get allowNotifications =>
-      _prefs.getBool(_kAllowNotifications) ?? false;
+  bool get allowNotifications => _prefs.getBool(_kAllowNotifications) ?? false;
 
   Future<void> setAllowNotifications(bool value) async {
     await _prefs.setBool(_kAllowNotifications, value);

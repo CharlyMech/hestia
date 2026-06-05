@@ -1,7 +1,8 @@
 /// Transaction type
 enum TransactionType {
   income,
-  expense;
+  expense,
+  adjustment;
 
   String get value => name;
 
@@ -118,11 +119,59 @@ enum ViewMode {
   household,
 }
 
-/// Audit action
-enum AuditAction {
-  create,
-  update,
-  delete;
+/// Payment card network
+enum CardNetwork {
+  visa,
+  mastercard,
+  amex,
+  maestro,
+  unionpay,
+  discover;
 
-  String get value => name.toUpperCase();
+  String get value => name;
+
+  static CardNetwork fromString(String value) {
+    return CardNetwork.values.firstWhere((e) => e.name == value);
+  }
+}
+
+/// Financial institution type
+enum InstitutionType {
+  bank,
+  fintech,
+  creditUnion,
+  exchange,
+  other;
+
+  String get value {
+    switch (this) {
+      case InstitutionType.creditUnion:
+        return 'credit_union';
+      default:
+        return name;
+    }
+  }
+
+  static InstitutionType fromString(String value) {
+    switch (value) {
+      case 'credit_union':
+        return InstitutionType.creditUnion;
+      default:
+        return InstitutionType.values.firstWhere((e) => e.name == value,
+            orElse: () => InstitutionType.other);
+    }
+  }
+}
+
+/// Account membership role
+enum AccountMemberRole {
+  owner,
+  authorized;
+
+  String get value => name;
+
+  static AccountMemberRole fromString(String value) {
+    return AccountMemberRole.values.firstWhere((e) => e.name == value,
+        orElse: () => AccountMemberRole.authorized);
+  }
 }

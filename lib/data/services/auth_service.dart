@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:local_auth/local_auth.dart';
@@ -18,14 +22,32 @@ class AuthService extends SupabaseService {
   })  : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
         _localAuth = localAuth ?? LocalAuthentication();
 
+  String _generateNonce([int length = 32]) {
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    final rng = Random.secure();
+    return List.generate(length, (_) => chars[rng.nextInt(chars.length)])
+        .join();
+  }
+
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   /// Sign in with Apple via Supabase
   Future<AuthResponse> signInWithApple() async {
     try {
+      final rawNonce = _generateNonce();
+      final hashedNonce = _sha256ofString(rawNonce);
+
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        nonce: hashedNonce,
       );
 
       final idToken = credential.identityToken;
@@ -36,6 +58,7 @@ class AuthService extends SupabaseService {
       final response = await auth.signInWithIdToken(
         provider: OAuthProvider.apple,
         idToken: idToken,
+        nonce: rawNonce,
       );
 
       if (response.session != null) {

@@ -19,6 +19,12 @@ class GoogleCalendarService {
   /// Returns true if a Google account is currently linked.
   Future<bool> isLinked() async => _signIn.currentUser != null;
 
+  /// Email of the linked Google account (after a silent or interactive sign-in).
+  Future<String?> linkedEmail() async {
+    final account = _signIn.currentUser ?? await _signIn.signInSilently();
+    return account?.email;
+  }
+
   /// Starts the OAuth flow. Idempotent — does nothing if already linked.
   Future<bool> link() async {
     final account = await _signIn.signIn();

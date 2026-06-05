@@ -1,29 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
 
 /// Builds the Forui theme from a [MyTheme] instance.
 FThemeData buildForuiTheme(MyTheme theme, {required Brightness brightness}) {
-  final fg = _c(theme.foregroundColor);
-  final muted = _c(theme.mutedColor);
+  final fg = hexToColor(theme.foregroundColor);
+  final muted = hexToColor(theme.mutedColor);
 
   final colorScheme = FColorScheme(
     brightness: brightness,
-    primary: _c(theme.primaryColor),
-    primaryForeground: _c(theme.onPrimaryColor),
-    secondary: _c(theme.surfaceColor),
-    secondaryForeground: _c(theme.foregroundColor),
-    muted: _c(theme.mutedColor),
-    mutedForeground: _c(theme.foregroundColor),
-    background: _c(theme.backgroundColor),
-    foreground: _c(theme.foregroundColor),
-    destructive: _c(theme.destructiveColor),
-    destructiveForeground: _c(theme.onDestructiveColor),
-    error: _c(theme.errorColor),
-    errorForeground: _c(theme.onStatusColor),
-    border: _c(theme.outlineColor),
+    primary: hexToColor(theme.primaryColor),
+    primaryForeground: hexToColor(theme.onPrimaryColor),
+    secondary: hexToColor(theme.surfaceColor),
+    secondaryForeground: hexToColor(theme.foregroundColor),
+    muted: hexToColor(theme.mutedColor),
+    mutedForeground: hexToColor(theme.foregroundColor),
+    background: hexToColor(theme.backgroundColor),
+    foreground: hexToColor(theme.foregroundColor),
+    destructive: hexToColor(theme.destructiveColor),
+    destructiveForeground: hexToColor(theme.onDestructiveColor),
+    error: hexToColor(theme.errorColor),
+    errorForeground: hexToColor(theme.onStatusColor),
+    border: hexToColor(theme.outlineColor),
   );
 
   // Space Mono drives Forui widget typography; Space Grotesk applied directly
@@ -41,9 +43,71 @@ FThemeData buildForuiTheme(MyTheme theme, {required Brightness brightness}) {
     xs: AppFonts.body(fontSize: 12, color: muted),
   );
 
-  return FThemeData.inherit(
+  final base = FThemeData.inherit(
     colorScheme: colorScheme,
     typography: typography,
+  );
+
+  final surface = hexToColor(theme.surfaceColor);
+
+  final popoverDecoration = BoxDecoration(
+    color: surface,
+    borderRadius: BorderRadius.circular(AppRadii.lg),
+    border: Border.all(color: hexToColor(theme.borderColor), width: 0.8),
+    boxShadow: const [
+      BoxShadow(
+        color: Color(0x1A000000),
+        blurRadius: 16,
+        offset: Offset(0, 4),
+      ),
+    ],
+  );
+
+  // Forui buttons wrap child icons with FIconStyle, so icon colors come from
+  // button styles (not the icon widget color). Keep these explicit and aligned
+  // with app foreground for reliable contrast in custom surfaces.
+  return base.copyWith(
+    popoverMenuStyle: base.popoverMenuStyle.copyWith(
+      decoration: popoverDecoration,
+    ),
+    buttonStyles: base.buttonStyles.copyWith(
+      ghost: base.buttonStyles.ghost.copyWith(
+        contentStyle: base.buttonStyles.ghost.contentStyle.copyWith(
+          enabledTextStyle:
+              base.buttonStyles.ghost.contentStyle.enabledTextStyle.copyWith(
+            color: fg,
+          ),
+          disabledTextStyle:
+              base.buttonStyles.ghost.contentStyle.disabledTextStyle.copyWith(
+            color: muted,
+          ),
+          enabledIconColor: fg,
+          disabledIconColor: muted,
+        ),
+        iconContentStyle: base.buttonStyles.ghost.iconContentStyle.copyWith(
+          enabledColor: fg,
+          disabledColor: muted,
+        ),
+      ),
+      outline: base.buttonStyles.outline.copyWith(
+        contentStyle: base.buttonStyles.outline.contentStyle.copyWith(
+          enabledTextStyle:
+              base.buttonStyles.outline.contentStyle.enabledTextStyle.copyWith(
+            color: fg,
+          ),
+          disabledTextStyle:
+              base.buttonStyles.outline.contentStyle.disabledTextStyle.copyWith(
+            color: muted,
+          ),
+          enabledIconColor: fg,
+          disabledIconColor: muted,
+        ),
+        iconContentStyle: base.buttonStyles.outline.iconContentStyle.copyWith(
+          enabledColor: fg,
+          disabledColor: muted,
+        ),
+      ),
+    ),
   );
 }
 
@@ -52,10 +116,10 @@ CupertinoThemeData buildCupertinoTheme(
   MyTheme theme, {
   required Brightness brightness,
 }) {
-  final bg = _c(theme.backgroundColor);
-  final surface = _c(theme.surfaceColor);
-  final fg = _c(theme.foregroundColor);
-  final primary = _c(theme.primaryColor);
+  final bg = hexToColor(theme.backgroundColor);
+  final surface = hexToColor(theme.surfaceColor);
+  final fg = hexToColor(theme.foregroundColor);
+  final primary = hexToColor(theme.primaryColor);
 
   return CupertinoThemeData(
     brightness: brightness,
@@ -78,5 +142,3 @@ CupertinoThemeData buildCupertinoTheme(
     ),
   );
 }
-
-Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));

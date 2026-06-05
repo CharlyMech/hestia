@@ -21,3 +21,26 @@ extension UnixExt on int {
   /// From UNIX seconds to DateTime
   DateTime get fromUnix => DateTime.fromMillisecondsSinceEpoch(this * 1000);
 }
+
+/// Parses Supabase timestamp columns (unix int, ISO string, or numeric).
+/// Uses [orElse] when the column is null or empty (legacy rows).
+DateTime parseSupabaseTimestamp(
+  dynamic value, {
+  DateTime? orElse,
+}) {
+  if (value == null) {
+    return orElse ?? (throw FormatException('Timestamp value is null'));
+  }
+  if (value is int) return value.fromUnix;
+  if (value is num) return value.toInt().fromUnix;
+  if (value is String) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return orElse ?? (throw FormatException('Timestamp value is empty'));
+    }
+    final asInt = int.tryParse(trimmed);
+    if (asInt != null) return asInt.fromUnix;
+    return DateTime.parse(trimmed);
+  }
+  throw FormatException('Unsupported timestamp type: ${value.runtimeType}');
+}

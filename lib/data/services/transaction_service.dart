@@ -21,7 +21,7 @@ class TransactionService extends SupabaseService {
       var query = from(SupabaseTables.transactions).select('''
             *,
             categories:category_id(name, color),
-            money_sources:money_source_id(name),
+            bank_accounts:bank_account_id(name),
             profiles:user_id(display_name, email)
           ''').eq('household_id', householdId);
 
@@ -30,7 +30,7 @@ class TransactionService extends SupabaseService {
       if (endDate != null) query = query.lte('date', endDate);
       if (categoryId != null) query = query.eq('category_id', categoryId);
       if (bankAccountId != null) {
-        query = query.eq('money_source_id', bankAccountId);
+        query = query.eq('bank_account_id', bankAccountId);
       }
       if (type != null) query = query.eq('type', type);
 
@@ -81,8 +81,8 @@ class TransactionService extends SupabaseService {
     try {
       var query = from(SupabaseTables.transfers).select('''
             *,
-            from_source:from_source_id(name),
-            to_source:to_source_id(name)
+            from_account:from_account_id(name),
+            to_account:to_account_id(name)
           ''').eq('household_id', householdId);
 
       if (startDate != null) query = query.gte('date', startDate);

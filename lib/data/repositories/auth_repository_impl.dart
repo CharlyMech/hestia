@@ -157,6 +157,12 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
 
+    final fallbackNow = DateTime.now();
+    final createdAt =
+        parseSupabaseTimestamp(response['created_at'], orElse: fallbackNow);
+    final lastUpdate =
+        parseSupabaseTimestamp(response['last_update'], orElse: createdAt);
+
     return Profile(
       id: response['id'] as String,
       email: response['email'] as String,
@@ -168,8 +174,9 @@ class AuthRepositoryImpl implements AuthRepository {
           ? DateTime.tryParse(response['birth_date'] as String)
           : null,
       isSuperuser: (response['is_superuser'] as bool?) ?? false,
-      createdAt: (response['created_at'] as int).fromUnix,
-      lastUpdate: (response['last_update'] as int).fromUnix,
+      isActive: (response['is_active'] as bool?) ?? true,
+      createdAt: createdAt,
+      lastUpdate: lastUpdate,
     );
   }
 
@@ -183,6 +190,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'preferred_currency': profile.preferredCurrency,
         'calendar_color': profile.calendarColor,
         'birth_date': profile.birthDate?.toIso8601String().substring(0, 10),
+        'is_active': profile.isActive,
         'last_update': now,
       }).eq('id', profile.id);
       return (profile.copyWith(lastUpdate: DateTime.now()), null);

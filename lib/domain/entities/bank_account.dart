@@ -8,6 +8,8 @@ class BankAccount extends Equatable {
   final String? ownerId;
   final String name;
   final String? institution;
+  final String? institutionId;
+  final String? iban;
   final AccountType accountType;
   final String currency;
   final double initialBalance;
@@ -27,6 +29,8 @@ class BankAccount extends Equatable {
     this.ownerId,
     required this.name,
     this.institution,
+    this.institutionId,
+    this.iban,
     required this.accountType,
     this.currency = 'EUR',
     required this.initialBalance,

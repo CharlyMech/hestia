@@ -17,6 +17,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     TransactionType? type,
     bool activeOnly = true,
   }) async {
+    if (householdId.isEmpty) return (const <Category>[], null);
     try {
       final data = await _service.getCategories(
         householdId: householdId,

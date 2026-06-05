@@ -18,6 +18,7 @@ class BankAccountRepositoryImpl implements BankAccountRepository {
     String? userId,
     bool activeOnly = true,
   }) async {
+    if (householdId.isEmpty) return (const <BankAccount>[], null);
     try {
       final data = await _service.getBankAccounts(
         householdId: householdId,

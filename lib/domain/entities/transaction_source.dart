@@ -15,6 +15,12 @@ class TransactionSource extends Equatable {
   final String? icon;
   final String? imageUrl;
   final bool isActive;
+
+  /// Optional physical location of this vendor/source.
+  final double? latitude;
+  final double? longitude;
+  final String? address;
+
   final String createdBy;
   final DateTime createdAt;
   final DateTime lastUpdate;
@@ -28,6 +34,9 @@ class TransactionSource extends Equatable {
     this.icon,
     this.imageUrl,
     this.isActive = true,
+    this.latitude,
+    this.longitude,
+    this.address,
     required this.createdBy,
     required this.createdAt,
     required this.lastUpdate,
@@ -45,6 +54,11 @@ class TransactionSource extends Equatable {
     String? imageUrl,
     bool clearImageUrl = false,
     bool? isActive,
+    double? latitude,
+    double? longitude,
+    bool clearLocation = false,
+    String? address,
+    bool clearAddress = false,
     String? createdBy,
     DateTime? createdAt,
     DateTime? lastUpdate,
@@ -58,6 +72,9 @@ class TransactionSource extends Equatable {
         icon: clearIcon ? null : (icon ?? this.icon),
         imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
         isActive: isActive ?? this.isActive,
+        latitude: clearLocation ? null : (latitude ?? this.latitude),
+        longitude: clearLocation ? null : (longitude ?? this.longitude),
+        address: clearAddress ? null : (address ?? this.address),
         createdBy: createdBy ?? this.createdBy,
         createdAt: createdAt ?? this.createdAt,
         lastUpdate: lastUpdate ?? this.lastUpdate,

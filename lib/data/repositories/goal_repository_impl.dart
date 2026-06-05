@@ -20,6 +20,7 @@ class GoalRepositoryImpl implements GoalRepository {
     String? userId,
     bool activeOnly = true,
   }) async {
+    if (householdId.isEmpty) return (const <FinancialGoal>[], null);
     try {
       final data = await _service.getGoals(
         householdId: householdId,

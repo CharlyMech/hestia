@@ -90,9 +90,14 @@ class AppointmentService extends SupabaseService {
       'starts_at': a.startsAt.toIso8601String(),
       'duration_minutes': a.duration.inMinutes,
       'category': a.category.name,
+      'is_all_day': a.isAllDay,
+      'is_shared': a.isShared,
       'reminder_offsets_minutes':
           a.reminderOffsets.map((d) => d.inMinutes).toList(),
       'google_event_id': a.googleEventId,
+      'pet_id': a.petId,
+      'car_id': a.carId,
+      'color': a.color,
     };
     if (isCreate) {
       row['id'] = a.id.isEmpty ? null : a.id;
@@ -122,6 +127,11 @@ extension AppointmentRowMapper on Map<String, dynamic> {
           .map((m) => Duration(minutes: (m as num).toInt()))
           .toList(),
       googleEventId: this['google_event_id'] as String?,
+      petId: this['pet_id'] as String?,
+      carId: this['car_id'] as String?,
+      isAllDay: this['is_all_day'] as bool? ?? false,
+      isShared: this['is_shared'] as bool? ?? true,
+      color: this['color'] as String?,
       createdAt: DateTime.parse(this['created_at'] as String),
       lastUpdate: this['last_update'] == null
           ? null

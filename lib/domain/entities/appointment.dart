@@ -23,6 +23,17 @@ class Appointment extends Equatable {
   final String? petId;
   final String? carId;
 
+  /// All-day events are shown at the top of the day view.
+  final bool isAllDay;
+
+  /// When true, other household members can see this event. When false it
+  /// stays private to [userId]. Lets housemates know each other's plans.
+  final bool isShared;
+
+  /// Optional hex color string (e.g. '#42A5F5'). When null the UI falls back
+  /// to the owner's calendarColor, then the category tint.
+  final String? color;
+
   final DateTime createdAt;
   final DateTime? lastUpdate;
 
@@ -40,6 +51,9 @@ class Appointment extends Equatable {
     this.googleEventId,
     this.petId,
     this.carId,
+    this.isAllDay = false,
+    this.isShared = true,
+    this.color,
     required this.createdAt,
     this.lastUpdate,
   });
@@ -60,6 +74,10 @@ class Appointment extends Equatable {
     String? googleEventId,
     String? petId,
     String? carId,
+    bool? isAllDay,
+    bool? isShared,
+    String? color,
+    bool clearColor = false,
     DateTime? createdAt,
     DateTime? lastUpdate,
   }) =>
@@ -77,6 +95,9 @@ class Appointment extends Equatable {
         googleEventId: googleEventId ?? this.googleEventId,
         petId: petId ?? this.petId,
         carId: carId ?? this.carId,
+        isAllDay: isAllDay ?? this.isAllDay,
+        isShared: isShared ?? this.isShared,
+        color: clearColor ? null : (color ?? this.color),
         createdAt: createdAt ?? this.createdAt,
         lastUpdate: lastUpdate ?? this.lastUpdate,
       );
@@ -96,6 +117,9 @@ class Appointment extends Equatable {
         googleEventId,
         petId,
         carId,
+        isAllDay,
+        isShared,
+        color,
         createdAt,
         lastUpdate,
       ];

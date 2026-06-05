@@ -2,8 +2,6 @@ import 'package:equatable/equatable.dart';
 
 enum FuelType { gasoline, diesel, electric, hybrid }
 
-enum CarStatus { active, sold, scrap }
-
 class Car extends Equatable {
   final String id;
   final String householdId;
@@ -16,7 +14,7 @@ class Car extends Equatable {
   final FuelType fuelType;
   final double? tankCapacityLiters;
   final double? currentOdometerKm;
-  final CarStatus status;
+  final bool isActive;
   final String createdBy;
   final DateTime createdAt;
   final DateTime lastUpdate;
@@ -33,7 +31,7 @@ class Car extends Equatable {
     this.fuelType = FuelType.gasoline,
     this.tankCapacityLiters,
     this.currentOdometerKm,
-    this.status = CarStatus.active,
+    this.isActive = true,
     required this.createdBy,
     required this.createdAt,
     required this.lastUpdate,
@@ -53,7 +51,7 @@ class Car extends Equatable {
     double? tankCapacityLiters,
     double? currentOdometerKm,
     bool clearOdometer = false,
-    CarStatus? status,
+    bool? isActive,
     String? createdBy,
     DateTime? createdAt,
     DateTime? lastUpdate,
@@ -71,7 +69,7 @@ class Car extends Equatable {
       tankCapacityLiters: tankCapacityLiters ?? this.tankCapacityLiters,
       currentOdometerKm:
           clearOdometer ? null : (currentOdometerKm ?? this.currentOdometerKm),
-      status: status ?? this.status,
+      isActive: isActive ?? this.isActive,
       createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       lastUpdate: lastUpdate ?? this.lastUpdate,
@@ -79,5 +77,5 @@ class Car extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, householdId, name, status, fuelType];
+  List<Object?> get props => [id, householdId, name, isActive, fuelType];
 }

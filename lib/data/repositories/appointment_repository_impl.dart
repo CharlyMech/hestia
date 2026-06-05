@@ -66,8 +66,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   Future<(Appointment?, Failure?)> getById(String id) async {
     try {
       final row = await _service.getById(id);
-      if (row == null)
+      if (row == null) {
         return (null, const ServerFailure('Appointment not found'));
+      }
       return (row.toAppointment(), null);
     } on ServerException catch (e) {
       return (null, ServerFailure(e.message));
@@ -138,7 +139,10 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<Failure?> syncWithGoogle({required String userId}) async {
+  Future<Failure?> syncWithGoogle({
+    required String userId,
+    String? defaultColor,
+  }) async {
     if (!await _gcal.isLinked()) return null;
     final now = DateTime.now();
     final from = now.subtract(const Duration(days: 30));
@@ -173,6 +177,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
           reminderOffsets:
               existing?.reminderOffsets ?? const [Duration(hours: 1)],
           googleEventId: ev.id,
+          color: existing?.color ?? defaultColor,
           createdAt: existing?.createdAt ?? DateTime.now(),
         );
         if (existing == null) {
