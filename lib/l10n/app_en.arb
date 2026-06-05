@@ -45,6 +45,8 @@
   "settings_faceIdUnlock": "Face ID unlock",
   "settings_viewCarsData": "View cars data",
   "profile_edit": "Edit",
+  "profile_setInactive": "Set inactive",
+  "profile_setActive": "Set active",
   "notifications_unread": "Unread",
   "notifications_read": "Read",
   "notifications_showRead": "Show read",
@@ -77,6 +79,8 @@
     }
   },
   "cars_statusInactive": "Inactive",
+  "cars_setInactive": "Set inactive",
+  "cars_setActive": "Set active",
   "cars_addFillUp": "Add fill-up",
   "cars_recentFillUps": "Recent fill-ups",
   "cars_seeAnalytics": "See analytics",

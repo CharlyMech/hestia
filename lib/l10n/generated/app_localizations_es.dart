@@ -135,6 +135,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profile_edit => 'Editar';
 
   @override
+  String get profile_setInactive => 'Marcar inactivo';
+
+  @override
+  String get profile_setActive => 'Marcar activo';
+
+  @override
   String get notifications_unread => 'No leídas';
 
   @override
@@ -191,6 +197,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cars_statusInactive => 'Inactivo';
+
+  @override
+  String get cars_setInactive => 'Marcar inactivo';
+
+  @override
+  String get cars_setActive => 'Marcar activo';
 
   @override
   String get cars_addFillUp => 'Añadir repostaje';

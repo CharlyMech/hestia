@@ -350,6 +350,18 @@ abstract class AppLocalizations {
   /// **'Edit'**
   String get profile_edit;
 
+  /// No description provided for @profile_setInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Set inactive'**
+  String get profile_setInactive;
+
+  /// No description provided for @profile_setActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Set active'**
+  String get profile_setActive;
+
   /// No description provided for @notifications_unread.
   ///
   /// In en, this message translates to:
@@ -457,6 +469,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Inactive'**
   String get cars_statusInactive;
+
+  /// No description provided for @cars_setInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Set inactive'**
+  String get cars_setInactive;
+
+  /// No description provided for @cars_setActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Set active'**
+  String get cars_setActive;
 
   /// No description provided for @cars_addFillUp.
   ///

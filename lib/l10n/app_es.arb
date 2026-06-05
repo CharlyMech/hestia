@@ -42,6 +42,8 @@
   "settings_faceIdUnlock": "Desbloqueo con Face ID",
   "settings_viewCarsData": "Ver datos de coches",
   "profile_edit": "Editar",
+  "profile_setInactive": "Marcar inactivo",
+  "profile_setActive": "Marcar activo",
   "notifications_unread": "No leídas",
   "notifications_read": "Leídas",
   "notifications_showRead": "Mostrar leídas",
@@ -74,6 +76,8 @@
     }
   },
   "cars_statusInactive": "Inactivo",
+  "cars_setInactive": "Marcar inactivo",
+  "cars_setActive": "Marcar activo",
   "cars_addFillUp": "Añadir repostaje",
   "cars_recentFillUps": "Repostajes recientes",
   "cars_seeAnalytics": "Ver análisis",
