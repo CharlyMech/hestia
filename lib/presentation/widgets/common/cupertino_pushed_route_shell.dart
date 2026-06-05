@@ -96,8 +96,8 @@ class CupertinoPushedRouteShell extends StatelessWidget {
                         minimumSize: const Size(40, 40),
                         onPressed: goBack,
                         child: NavArrowLeft(
-                          width: 20,
-                          height: 20,
+                          width: 28,
+                          height: 28,
                           color: foregroundColor,
                         ),
                       ),
