@@ -11,54 +11,60 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/car.dart';
 import 'package:hestia/domain/entities/fuel_entry.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/blocs/cars/car_detail_bloc.dart';
+import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
 import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' as iconoir;
 import 'package:skeletonizer/skeletonizer.dart';
 
-class CarDetailScreen extends StatefulWidget {
+class CarDetailScreen extends StatelessWidget {
   final String carId;
   const CarDetailScreen({super.key, required this.carId});
 
   @override
-  State<CarDetailScreen> createState() => _CarDetailScreenState();
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => CarDetailBloc(AppDependencies.instance.carRepository)
+            ..add(CarDetailLoad(carId)),
+        ),
+        BlocProvider(
+          create: (_) => FuelBloc(
+              AppDependencies.instance.fuelEntryRepository,
+              AppDependencies.instance.carRepository)
+            ..add(FuelLoad(carId)),
+        ),
+      ],
+      child: _CarDetailBody(carId: carId),
+    );
+  }
 }
 
-class _CarDetailScreenState extends State<CarDetailScreen> {
-  Car? _car;
-  bool _loading = true;
+class _CarDetailBody extends StatelessWidget {
+  final String carId;
+  const _CarDetailBody({required this.carId});
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
+  void _syncListBloc(BuildContext context) {
+    try {
+      context.read<CarsBloc>().add(const CarsRefresh());
+    } catch (_) {}
   }
 
-  Future<void> _load() async {
-    final (c, _) =
-        await AppDependencies.instance.carRepository.getCar(widget.carId);
-    if (!mounted) return;
-    setState(() {
-      _car = c;
-      _loading = false;
-    });
-  }
-
-  void _confirmDelete(BuildContext ctx) {
+  void _confirmDelete(BuildContext ctx, Car car) {
     final l10n = AppLocalizations.of(ctx);
     showCupertinoDialog(
       context: ctx,
       builder: (_) => CupertinoAlertDialog(
         title: Text(l10n.cars_deleteCarTitle),
-        content: Text(l10n.cars_deleteCarConfirm(_car!.name)),
+        content: Text(l10n.cars_deleteCarConfirm(car.name)),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(ctx);
-              await AppDependencies.instance.carRepository
-                  .deleteCar(widget.carId);
-              if (ctx.mounted) ctx.pop();
+              ctx.read<CarDetailBloc>().add(const CarDetailDelete());
             },
             child: Text(l10n.common_delete),
           ),
@@ -73,22 +79,36 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => FuelBloc(AppDependencies.instance.fuelEntryRepository,
-          AppDependencies.instance.carRepository)
-        ..add(FuelLoad(widget.carId)),
-      child: Builder(builder: (context) {
-        final l10n = AppLocalizations.of(context);
-        final theme = context.myTheme;
-        final surface = hexToColor(theme.surfaceColor);
-        final border = hexToColor(theme.borderColor);
-        final fg = hexToColor(theme.onBackgroundColor);
-        final muted = hexToColor(theme.onInactiveColor);
-        final accent = hexToColor(theme.primaryColor);
+    final l10n = AppLocalizations.of(context);
+    final theme = context.myTheme;
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
-        final car = _car;
+    return BlocConsumer<CarDetailBloc, CarDetailState>(
+      listenWhen: (prev, curr) =>
+          curr is CarDetailDeleted ||
+          (prev is CarDetailLoaded &&
+              curr is CarDetailLoaded &&
+              prev.car.isActive != curr.car.isActive),
+      listener: (context, state) {
+        if (state is CarDetailDeleted) {
+          _syncListBloc(context);
+          context.pop();
+          return;
+        }
+        if (state is CarDetailLoaded) {
+          _syncListBloc(context);
+        }
+      },
+      builder: (context, state) {
+        final bloc = context.read<CarDetailBloc>();
+        final loading =
+            state is CarDetailInitial || state is CarDetailLoading;
 
-        if (!_loading && car == null) {
+        if (state is CarDetailNotFound) {
           return SliverPushedRouteShell(
             title: l10n.cars_carTitle,
             content: Center(
@@ -99,10 +119,13 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
           );
         }
 
+        final car = state is CarDetailLoaded ? state.car : null;
+
         return SliverPushedRouteShell(
           title: car?.name ?? '',
+          isActive: car?.isActive,
           header: car != null ? _CarHeader(car: car, accent: accent) : null,
-          onRefresh: _load,
+          onRefresh: () async => bloc.add(const CarDetailRefresh()),
           actions: car == null
               ? null
               : [
@@ -110,22 +133,19 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                     icon: iconoir.EditPencil(
                         width: 18, height: 18, color: accent),
                     label: l10n.common_edit,
-                    onTap: () => context
-                        .push(AppRoutes.editCar, extra: car.id)
-                        .then((_) => _load()),
-                  ),
-                  AppMenuAction(
-                    icon: car.isActive
-                        ? iconoir.EyeClosed(width: 18, height: 18, color: fg)
-                        : iconoir.Eye(width: 18, height: 18, color: accent),
-                    label: car.isActive
-                        ? l10n.pets_setInactive
-                        : l10n.pets_setActive,
                     onTap: () async {
-                      await AppDependencies.instance.carRepository
-                          .updateCar(car.copyWith(isActive: !car.isActive));
-                      await _load();
+                      await context.push(AppRoutes.editCar, extra: car.id);
+                      if (context.mounted) {
+                        bloc.add(const CarDetailRefresh());
+                      }
                     },
+                  ),
+                  AppMenuAction.toggleActive(
+                    isActive: car.isActive,
+                    setActiveLabel: l10n.cars_setActive,
+                    setInactiveLabel: l10n.cars_setInactive,
+                    fg: fg,
+                    onTap: () => bloc.add(const CarDetailToggleActive()),
                   ),
                   AppMenuAction(
                     icon: iconoir.Trash(
@@ -134,14 +154,14 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                         color: CupertinoColors.destructiveRed),
                     label: l10n.common_delete,
                     isDestructive: true,
-                    onTap: () => _confirmDelete(context),
+                    onTap: () => _confirmDelete(context, car),
                   ),
                 ],
           content: Skeletonizer(
-            enabled: _loading,
+            enabled: loading,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
-              child: _loading
+              child: loading
                   ? _CarSkeleton(surface: surface)
                   : _CarBody(
                       l10n: l10n,
@@ -161,7 +181,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
             ),
           ),
         );
-      }),
+      },
     );
   }
 }
