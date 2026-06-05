@@ -7,7 +7,7 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/status_bar_blur_overlay.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show MoreHoriz, NavArrowLeft;
+    show Eye, EyeClosed, MoreHoriz, NavArrowLeft;
 
 /// A single item in the actions dropdown menu.
 class AppMenuAction {
@@ -22,6 +22,57 @@ class AppMenuAction {
     required this.onTap,
     this.isDestructive = false,
   });
+
+  /// Toggle active/inactive menu item — shows the opposite action label/icon.
+  factory AppMenuAction.toggleActive({
+    required bool isActive,
+    required String setActiveLabel,
+    required String setInactiveLabel,
+    required VoidCallback onTap,
+    required Color fg,
+  }) =>
+      AppMenuAction(
+        icon: isActive
+            ? EyeClosed(width: 18, height: 18, color: fg)
+            : Eye(width: 18, height: 18, color: fg),
+        label: isActive ? setInactiveLabel : setActiveLabel,
+        onTap: onTap,
+      );
+}
+
+/// Simple active/inactive status dot shown beside the title in the header.
+class ActiveStatusDot extends StatelessWidget {
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
+  final double size;
+
+  const ActiveStatusDot({
+    super.key,
+    required this.isActive,
+    required this.activeColor,
+    required this.inactiveColor,
+    this.size = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isActive ? activeColor : inactiveColor.withValues(alpha: 0.7),
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.black.withValues(alpha: 0.18),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// iOS-style sliver pushed route shell for entity detail pages
@@ -43,6 +94,7 @@ class SliverPushedRouteShell extends StatelessWidget {
     this.backgroundColor,
     this.headerColor,
     this.onRefresh,
+    this.isActive,
   });
 
   final String title;
@@ -55,6 +107,9 @@ class SliverPushedRouteShell extends StatelessWidget {
   final Color? headerColor;
   final Future<void> Function()? onRefresh;
 
+  /// When set, shows a coloured dot beside the title (green = active, muted = inactive).
+  final bool? isActive;
+
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
@@ -63,6 +118,8 @@ class SliverPushedRouteShell extends StatelessWidget {
     final headerBg = headerColor ?? surface;
     final fg = hexToColor(theme.foregroundColor);
     final border = hexToColor(theme.borderColor);
+    final statusActive = hexToColor(theme.colorGreen);
+    final statusInactive = hexToColor(theme.onInactiveColor);
     const top = 44.0;
     const collapsedH = top;
 
@@ -99,6 +156,9 @@ class SliverPushedRouteShell extends StatelessWidget {
                   top: top,
                   collapsedHeight: collapsedH,
                   expandedHeight: headerHeight,
+                  isActive: isActive,
+                  statusActiveColor: statusActive,
+                  statusInactiveColor: statusInactive,
                 ),
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 12),
@@ -193,6 +253,9 @@ class _SliverHeader extends StatelessWidget {
   final double top;
   final double collapsedHeight;
   final double expandedHeight;
+  final bool? isActive;
+  final Color statusActiveColor;
+  final Color statusInactiveColor;
 
   const _SliverHeader({
     required this.title,
@@ -204,7 +267,45 @@ class _SliverHeader extends StatelessWidget {
     required this.top,
     required this.collapsedHeight,
     required this.expandedHeight,
+    required this.isActive,
+    required this.statusActiveColor,
+    required this.statusInactiveColor,
   });
+
+  Widget _titleRow({
+    required String text,
+    required Color color,
+    required double fontSize,
+    required FontWeight fontWeight,
+  }) {
+    final statusDot = isActive == null
+        ? null
+        : ActiveStatusDot(
+            isActive: isActive!,
+            activeColor: statusActiveColor,
+            inactiveColor: statusInactiveColor,
+          );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 8,
+      children: [
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppFonts.heading(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: color,
+            ),
+          ),
+        ),
+        if (statusDot != null) statusDot,
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,15 +351,11 @@ class _SliverHeader extends StatelessWidget {
               right: 80,
               child: Opacity(
                 opacity: titleOpacityExpanded,
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppFonts.heading(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: expandedTitleColor,
-                  ),
+                child: _titleRow(
+                  text: title,
+                  color: expandedTitleColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -270,15 +367,11 @@ class _SliverHeader extends StatelessWidget {
               child: Opacity(
                 opacity: titleOpacityCollapsed,
                 child: Center(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppFonts.heading(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: fg,
-                    ),
+                  child: _titleRow(
+                    text: title,
+                    color: fg,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -499,8 +592,7 @@ class _DropdownMenuState extends State<_DropdownMenu>
                     decoration: BoxDecoration(
                       color: widget.surface,
                       borderRadius: BorderRadius.circular(AppRadii.lg),
-                      border:
-                          Border.all(color: widget.border, width: 0.8),
+                      border: Border.all(color: widget.border, width: 0.8),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x28000000),
@@ -528,8 +620,7 @@ class _DropdownMenuState extends State<_DropdownMenu>
                               Divider(
                                 height: 1,
                                 thickness: 0.8,
-                                color: widget.border
-                                    .withValues(alpha: 0.6),
+                                color: widget.border.withValues(alpha: 0.6),
                               ),
                           ],
                         ],
@@ -572,6 +663,13 @@ class _MenuItemState extends State<_MenuItem> {
         ? CupertinoColors.destructiveRed
         : widget.fg;
 
+    final icon = widget.action.isDestructive
+        ? widget.action.icon
+        : ColorFiltered(
+            colorFilter: ColorFilter.mode(widget.fg, BlendMode.srcIn),
+            child: widget.action.icon,
+          );
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) {
@@ -592,7 +690,7 @@ class _MenuItemState extends State<_MenuItem> {
             SizedBox(
               width: 20,
               height: 20,
-              child: widget.action.icon,
+              child: icon,
             ),
             Expanded(
               child: Text(
