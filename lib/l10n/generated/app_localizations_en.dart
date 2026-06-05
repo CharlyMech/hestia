@@ -42,6 +42,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_signOut => 'Sign out';
 
   @override
+  String get auth_signInFailed => 'Sign-in failed';
+
+  @override
+  String get auth_tagline => 'Manage your household finances together';
+
+  @override
+  String get auth_email => 'Email';
+
+  @override
+  String get auth_password => 'Password';
+
+  @override
+  String get auth_showPassword => 'Show password';
+
+  @override
+  String get auth_signIn => 'Sign in';
+
+  @override
+  String get auth_or => 'or';
+
+  @override
+  String get auth_signInWithApple => 'Sign in with Apple';
+
+  @override
   String get nav_dashboard => 'Home';
 
   @override
@@ -132,6 +156,192 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cars_fuelType => 'Fuel type';
 
   @override
+  String get cars_noVehiclesYet => 'No vehicles yet';
+
+  @override
+  String get cars_tapToAdd => 'Tap + to add one';
+
+  @override
+  String get cars_statusActive => 'Active';
+
+  @override
+  String get cars_statusSold => 'Sold';
+
+  @override
+  String get cars_statusScrap => 'Scrap';
+
+  @override
+  String cars_odometerKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get cars_carTitle => 'Car';
+
+  @override
+  String get cars_notFound => 'Not found';
+
+  @override
+  String get cars_deleteCarTitle => 'Delete car';
+
+  @override
+  String cars_deleteCarConfirm(String name) {
+    return 'Remove $name? This cannot be undone.';
+  }
+
+  @override
+  String get cars_statusInactive => 'Inactive';
+
+  @override
+  String get cars_addFillUp => 'Add fill-up';
+
+  @override
+  String get cars_recentFillUps => 'Recent fill-ups';
+
+  @override
+  String get cars_seeAnalytics => 'See analytics';
+
+  @override
+  String get cars_noFillUpsYet => 'No fill-ups yet';
+
+  @override
+  String get cars_fillUpFullSuffix => ' · full';
+
+  @override
+  String cars_fillUpLine(
+      String liters, String pricePerLiter, String fullSuffix) {
+    return '$liters L · $pricePerLiter €/L$fullSuffix';
+  }
+
+  @override
+  String cars_fillUpMeta(String date, String odometer) {
+    return '$date · $odometer km';
+  }
+
+  @override
+  String cars_amountEuro(String amount) {
+    return '$amount €';
+  }
+
+  @override
+  String get pets_noPetsYet => 'No pets yet';
+
+  @override
+  String get pets_tapToAdd => 'Tap + to add one';
+
+  @override
+  String get pets_speciesDog => 'Dog';
+
+  @override
+  String get pets_speciesCat => 'Cat';
+
+  @override
+  String get pets_speciesBird => 'Bird';
+
+  @override
+  String get pets_speciesRabbit => 'Rabbit';
+
+  @override
+  String get pets_speciesFish => 'Fish';
+
+  @override
+  String get pets_speciesReptile => 'Reptile';
+
+  @override
+  String get pets_speciesOther => 'Other';
+
+  @override
+  String pets_ageYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count yrs',
+      one: '1 yr',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pets_genderMale => 'M';
+
+  @override
+  String get pets_genderFemale => 'F';
+
+  @override
+  String get pets_title => 'Pet';
+
+  @override
+  String get pets_notFound => 'Not found';
+
+  @override
+  String get pets_deletePetTitle => 'Delete pet';
+
+  @override
+  String pets_deletePetConfirm(String name) {
+    return 'Remove $name? This cannot be undone.';
+  }
+
+  @override
+  String get pets_deleteRecordTitle => 'Delete record';
+
+  @override
+  String pets_deleteRecordConfirm(String title) {
+    return 'Remove \"$title\"?';
+  }
+
+  @override
+  String get pets_setInactive => 'Set inactive';
+
+  @override
+  String get pets_setActive => 'Set active';
+
+  @override
+  String get pets_healthRecords => 'Health records';
+
+  @override
+  String get pets_noHealthRecordsYet => 'No health records yet';
+
+  @override
+  String get pets_genderMaleFull => 'Male';
+
+  @override
+  String get pets_genderFemaleFull => 'Female';
+
+  @override
+  String get pets_genderUnknown => 'Unknown';
+
+  @override
+  String pets_weightKg(String weight) {
+    return '$weight kg';
+  }
+
+  @override
+  String get pets_recordNextDue => ' · Next: ';
+
+  @override
+  String pets_costEuro(String amount) {
+    return '€$amount';
+  }
+
+  @override
+  String get pets_healthTypeVaccine => 'Vaccine';
+
+  @override
+  String get pets_healthTypeVet => 'Vet visit';
+
+  @override
+  String get pets_healthTypeMedication => 'Medication';
+
+  @override
+  String get pets_healthTypeGrooming => 'Grooming';
+
+  @override
+  String get pets_healthTypeDeworming => 'Deworming';
+
+  @override
+  String get pets_healthTypeOther => 'Other';
+
+  @override
   String get settings_title => 'Settings';
 
   @override
@@ -186,16 +396,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_spending => 'Spending';
 
   @override
+  String get dashboard_noExpensesInWindow => 'No expenses in this window';
+
+  @override
   String get dashboard_activeGoals => 'Active goals';
 
   @override
   String get dashboard_recent => 'Recent';
 
   @override
+  String get dashboard_map => 'Map';
+
+  @override
   String get dashboard_balanceTrend => 'Balance trend';
 
   @override
   String get dashboard_monthlyNet => 'Monthly net';
+
+  @override
+  String get dashboard_noTransactionsYet => 'No transactions yet';
+
+  @override
+  String get dashboard_activeShoppingSession => 'Active shopping session';
+
+  @override
+  String dashboard_activeShoppingSessions(int count) {
+    return '$count active sessions';
+  }
 
   @override
   String get bankAccounts_title => 'Sources';
@@ -235,6 +462,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendar_appointment => 'Appointment';
+
+  @override
+  String get calendar_allDay => 'All day';
 
   @override
   String get calendar_filterAll => 'Show all members';
@@ -280,6 +510,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'The list will be archived as cancelled and cannot be edited.';
 
   @override
+  String get shopping_startSession => 'Start shopping';
+
+  @override
+  String get shopping_startFromTemplate => 'Start from template';
+
+  @override
+  String get shopping_newTemplate => 'New template';
+
+  @override
+  String get shopping_noActiveSessions =>
+      'No active sessions — tap play to start';
+
+  @override
+  String get shopping_noFinishedSessions => 'No finished sessions yet';
+
+  @override
+  String get shopping_sharedCollaboration =>
+      'Shared · anyone in the household can collaborate';
+
+  @override
+  String get shopping_createTemplate => 'Create new template';
+
+  @override
+  String get shopping_kindTemplate => 'Template';
+
+  @override
+  String get shopping_kindSession => 'Session';
+
+  @override
+  String get shopping_statusPaid => 'Paid';
+
+  @override
+  String get shopping_statusCancelled => 'Cancelled';
+
+  @override
   String get notifications_title => 'Notifications';
 
   @override
@@ -299,6 +564,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_new => 'New transaction';
+
+  @override
+  String get transaction_fallbackTitle => 'Transaction';
+
+  @override
+  String get transaction_fallbackAccount => 'Account';
 
   @override
   String get transactionLocation_mapTitle => 'Pick location';
@@ -343,4 +614,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_locationPermSvcOff => 'Location services are turned off';
+
+  @override
+  String get common_none => 'None';
+
+  @override
+  String get common_notSet => 'Not set';
+
+  @override
+  String get appointments_title => 'Title';
+
+  @override
+  String get appointments_titlePlaceholder => 'Dentist · Gym · Meeting…';
+
+  @override
+  String get appointments_shareHousehold => 'Share with household';
+
+  @override
+  String get appointments_allDay => 'All day';
+
+  @override
+  String get appointments_date => 'Date';
+
+  @override
+  String get appointments_startTime => 'Start time';
+
+  @override
+  String get appointments_endTime => 'End time';
+
+  @override
+  String get appointments_category => 'Category';
+
+  @override
+  String get appointments_reminders => 'Reminders';
+
+  @override
+  String get appointments_color => 'Color';
+
+  @override
+  String get appointments_location => 'Location';
+
+  @override
+  String get appointments_notes => 'Notes';
+
+  @override
+  String get appointments_save => 'Save';
+
+  @override
+  String get calendar_noEvents => 'No events';
+
+  @override
+  String get calendar_deleteEvent => 'Delete event';
+
+  @override
+  String get calendar_deleteEventConfirm => 'This action cannot be undone.';
+
+  @override
+  String get bankAccounts_myAccounts => 'My accounts';
+
+  @override
+  String get bankAccounts_others => 'Other accounts';
+
+  @override
+  String get bankAccounts_showOthers => 'Show other accounts';
+
+  @override
+  String get bankAccounts_hideOthers => 'Hide other accounts';
+
+  @override
+  String get bankAccounts_signInPrompt => 'Sign in to view accounts';
+
+  @override
+  String get profile_title => 'Profile';
+
+  @override
+  String get profile_signInPrompt => 'Sign in to view profile';
+
+  @override
+  String get profile_editProfile => 'Edit profile';
+
+  @override
+  String get profile_displayName => 'Display name';
+
+  @override
+  String get profile_preferredCurrency => 'Preferred currency';
+
+  @override
+  String get profile_calendarColor => 'Calendar color';
+
+  @override
+  String get profile_birthDate => 'Birth date';
+
+  @override
+  String get profile_deleteAccountTitle => 'Delete account';
+
+  @override
+  String get profile_deleteAccountConfirm =>
+      'This will deactivate your account. This cannot be undone.';
+
+  @override
+  String get profile_detailsSection => 'Details';
+
+  @override
+  String get profile_memberSince => 'Member since';
+
+  @override
+  String get profile_lastUpdate => 'Last update';
+
+  @override
+  String get profile_roleSuperuser => 'SUPERUSER';
+
+  @override
+  String get profile_roleMember => 'MEMBER';
+
+  @override
+  String get profile_appUpdate => 'App update';
+
+  @override
+  String get profile_updateAvailable => 'Update available';
+
+  @override
+  String get profile_upToDate => 'You\'re up to date';
+
+  @override
+  String get update_title => 'Update available';
+
+  @override
+  String update_message(String version) {
+    return 'Version $version is available. Update to get the latest features and fixes.';
+  }
+
+  @override
+  String get update_action => 'Update';
+
+  @override
+  String get update_later => 'Later';
+
+  @override
+  String get map_toggleTransactions => 'Expenses';
+
+  @override
+  String get map_toggleHomes => 'Homes';
+
+  @override
+  String get map_toggleVendors => 'Vendors';
 }

@@ -12,6 +12,14 @@
   "common_viewAll": "View all",
   "common_seeAll": "See all",
   "common_signOut": "Sign out",
+  "auth_signInFailed": "Sign-in failed",
+  "auth_tagline": "Manage your household finances together",
+  "auth_email": "Email",
+  "auth_password": "Password",
+  "auth_showPassword": "Show password",
+  "auth_signIn": "Sign in",
+  "auth_or": "or",
+  "auth_signInWithApple": "Sign in with Apple",
 
   "nav_dashboard": "Home",
   "nav_calendar": "Calendar",
@@ -44,6 +52,139 @@
   "cars_title": "Cars",
   "cars_analyticsTitle": "Car analytics",
   "cars_fuelType": "Fuel type",
+  "cars_noVehiclesYet": "No vehicles yet",
+  "cars_tapToAdd": "Tap + to add one",
+  "cars_statusActive": "Active",
+  "cars_statusSold": "Sold",
+  "cars_statusScrap": "Scrap",
+  "cars_odometerKm": "{km} km",
+  "@cars_odometerKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_carTitle": "Car",
+  "cars_notFound": "Not found",
+  "cars_deleteCarTitle": "Delete car",
+  "cars_deleteCarConfirm": "Remove {name}? This cannot be undone.",
+  "@cars_deleteCarConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_statusInactive": "Inactive",
+  "cars_addFillUp": "Add fill-up",
+  "cars_recentFillUps": "Recent fill-ups",
+  "cars_seeAnalytics": "See analytics",
+  "cars_noFillUpsYet": "No fill-ups yet",
+  "cars_fillUpFullSuffix": " · full",
+  "cars_fillUpLine": "{liters} L · {pricePerLiter} €/L{fullSuffix}",
+  "@cars_fillUpLine": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      },
+      "pricePerLiter": {
+        "type": "String"
+      },
+      "fullSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_fillUpMeta": "{date} · {odometer} km",
+  "@cars_fillUpMeta": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "odometer": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_amountEuro": "{amount} €",
+  "@cars_amountEuro": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+
+  "pets_noPetsYet": "No pets yet",
+  "pets_tapToAdd": "Tap + to add one",
+  "pets_speciesDog": "Dog",
+  "pets_speciesCat": "Cat",
+  "pets_speciesBird": "Bird",
+  "pets_speciesRabbit": "Rabbit",
+  "pets_speciesFish": "Fish",
+  "pets_speciesReptile": "Reptile",
+  "pets_speciesOther": "Other",
+  "pets_ageYears": "{count, plural, =1{1 yr} other{{count} yrs}}",
+  "@pets_ageYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pets_genderMale": "M",
+  "pets_genderFemale": "F",
+  "pets_title": "Pet",
+  "pets_notFound": "Not found",
+  "pets_deletePetTitle": "Delete pet",
+  "pets_deletePetConfirm": "Remove {name}? This cannot be undone.",
+  "@pets_deletePetConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_deleteRecordTitle": "Delete record",
+  "pets_deleteRecordConfirm": "Remove \"{title}\"?",
+  "@pets_deleteRecordConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_setInactive": "Set inactive",
+  "pets_setActive": "Set active",
+  "pets_healthRecords": "Health records",
+  "pets_noHealthRecordsYet": "No health records yet",
+  "pets_genderMaleFull": "Male",
+  "pets_genderFemaleFull": "Female",
+  "pets_genderUnknown": "Unknown",
+  "pets_weightKg": "{weight} kg",
+  "@pets_weightKg": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_recordNextDue": " · Next: ",
+  "pets_costEuro": "€{amount}",
+  "@pets_costEuro": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_healthTypeVaccine": "Vaccine",
+  "pets_healthTypeVet": "Vet visit",
+  "pets_healthTypeMedication": "Medication",
+  "pets_healthTypeGrooming": "Grooming",
+  "pets_healthTypeDeworming": "Deworming",
+  "pets_healthTypeOther": "Other",
 
   "settings_title": "Settings",
   "settings_appearance": "Appearance",
@@ -64,10 +205,22 @@
   "dashboard_greetingEvening": "Good evening",
   "dashboard_accounts": "Accounts",
   "dashboard_spending": "Spending",
+  "dashboard_noExpensesInWindow": "No expenses in this window",
   "dashboard_activeGoals": "Active goals",
   "dashboard_recent": "Recent",
+  "dashboard_map": "Map",
   "dashboard_balanceTrend": "Balance trend",
   "dashboard_monthlyNet": "Monthly net",
+  "dashboard_noTransactionsYet": "No transactions yet",
+  "dashboard_activeShoppingSession": "Active shopping session",
+  "dashboard_activeShoppingSessions": "{count} active sessions",
+  "@dashboard_activeShoppingSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "bankAccounts_title": "Sources",
   "bankAccounts_totalNetWorth": "Total net worth",
@@ -84,6 +237,7 @@
   "calendar_title": "Calendar",
   "calendar_newAppointment": "New appointment",
   "calendar_appointment": "Appointment",
+  "calendar_allDay": "All day",
   "calendar_filterAll": "Show all members",
   "calendar_filterMine": "Only mine",
   "calendar_eventos": "Eventos",
@@ -99,6 +253,17 @@
   "shopping_cancelList": "Cancel list",
   "shopping_cancelConfirmTitle": "Cancel this shopping list?",
   "shopping_cancelConfirmBody": "The list will be archived as cancelled and cannot be edited.",
+  "shopping_startSession": "Start shopping",
+  "shopping_startFromTemplate": "Start from template",
+  "shopping_newTemplate": "New template",
+  "shopping_noActiveSessions": "No active sessions — tap play to start",
+  "shopping_noFinishedSessions": "No finished sessions yet",
+  "shopping_sharedCollaboration": "Shared · anyone in the household can collaborate",
+  "shopping_createTemplate": "Create new template",
+  "shopping_kindTemplate": "Template",
+  "shopping_kindSession": "Session",
+  "shopping_statusPaid": "Paid",
+  "shopping_statusCancelled": "Cancelled",
 
   "notifications_title": "Notifications",
   "notifications_markAllRead": "Mark all as read",
@@ -108,6 +273,8 @@
   "notifications_markUnread": "Mark as unread",
 
   "transaction_new": "New transaction",
+  "transaction_fallbackTitle": "Transaction",
+  "transaction_fallbackAccount": "Account",
 
   "transactionLocation_mapTitle": "Pick location",
   "transactionLocation_statsTitle": "Location insights",
@@ -123,5 +290,68 @@
   "settings_locationPermGranted": "Allowed while using the app",
   "settings_locationPermDenied": "Denied — tap Request access",
   "settings_locationPermForever": "Blocked — enable in system Settings",
-  "settings_locationPermSvcOff": "Location services are turned off"
+  "settings_locationPermSvcOff": "Location services are turned off",
+
+  "common_none": "None",
+  "common_notSet": "Not set",
+
+  "appointments_title": "Title",
+  "appointments_titlePlaceholder": "Dentist · Gym · Meeting…",
+  "appointments_shareHousehold": "Share with household",
+  "appointments_allDay": "All day",
+  "appointments_date": "Date",
+  "appointments_startTime": "Start time",
+  "appointments_endTime": "End time",
+  "appointments_category": "Category",
+  "appointments_reminders": "Reminders",
+  "appointments_color": "Color",
+  "appointments_location": "Location",
+  "appointments_notes": "Notes",
+  "appointments_save": "Save",
+
+  "calendar_noEvents": "No events",
+  "calendar_deleteEvent": "Delete event",
+  "calendar_deleteEventConfirm": "This action cannot be undone.",
+
+  "bankAccounts_myAccounts": "My accounts",
+  "bankAccounts_others": "Other accounts",
+  "bankAccounts_showOthers": "Show other accounts",
+  "bankAccounts_hideOthers": "Hide other accounts",
+  "bankAccounts_signInPrompt": "Sign in to view accounts",
+
+  "profile_title": "Profile",
+  "profile_signInPrompt": "Sign in to view profile",
+  "profile_editProfile": "Edit profile",
+  "profile_displayName": "Display name",
+  "profile_preferredCurrency": "Preferred currency",
+  "profile_calendarColor": "Calendar color",
+  "profile_birthDate": "Birth date",
+
+  "profile_deleteAccountTitle": "Delete account",
+  "profile_deleteAccountConfirm": "This will deactivate your account. This cannot be undone.",
+  "profile_detailsSection": "Details",
+  "profile_memberSince": "Member since",
+  "profile_lastUpdate": "Last update",
+  "profile_roleSuperuser": "SUPERUSER",
+  "profile_roleMember": "MEMBER",
+
+  "profile_appUpdate": "App update",
+  "profile_updateAvailable": "Update available",
+  "profile_upToDate": "You're up to date",
+
+  "update_title": "Update available",
+  "update_message": "Version {version} is available. Update to get the latest features and fixes.",
+  "@update_message": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "update_action": "Update",
+  "update_later": "Later",
+
+  "map_toggleTransactions": "Expenses",
+  "map_toggleHomes": "Homes",
+  "map_toggleVendors": "Vendors"
 }

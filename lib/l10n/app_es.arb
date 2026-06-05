@@ -1,6 +1,5 @@
 {
   "@@locale": "es",
-
   "common_save": "Guardar",
   "common_cancel": "Cancelar",
   "common_done": "Hecho",
@@ -12,14 +11,20 @@
   "common_viewAll": "Ver todo",
   "common_seeAll": "Ver todo",
   "common_signOut": "Cerrar sesión",
-
+  "auth_signInFailed": "Error al iniciar sesión",
+  "auth_tagline": "Gestiona las finanzas del hogar en familia",
+  "auth_email": "Correo electrónico",
+  "auth_password": "Contraseña",
+  "auth_showPassword": "Mostrar contraseña",
+  "auth_signIn": "Iniciar sesión",
+  "auth_or": "o",
+  "auth_signInWithApple": "Iniciar sesión con Apple",
   "nav_dashboard": "Inicio",
   "nav_calendar": "Calendario",
   "nav_shopping": "Compras",
   "nav_accounts": "Cuentas",
   "nav_pets": "Mascotas",
   "nav_cars": "Coches",
-
   "settings_carsModule": "Seguimiento de coches",
   "settings_carsTitle": "Coches",
   "settings_carsSub": "Coches y repostajes",
@@ -44,7 +49,139 @@
   "cars_title": "Coches",
   "cars_analyticsTitle": "Análisis del coche",
   "cars_fuelType": "Tipo de combustible",
+  "cars_noVehiclesYet": "Aún no hay vehículos",
+  "cars_tapToAdd": "Toca + para añadir uno",
+  "cars_statusActive": "Activo",
+  "cars_statusSold": "Vendido",
+  "cars_statusScrap": "Desguace",
+  "cars_odometerKm": "{km} km",
+  "@cars_odometerKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_carTitle": "Coche",
+  "cars_notFound": "No encontrado",
+  "cars_deleteCarTitle": "Eliminar coche",
+  "cars_deleteCarConfirm": "¿Eliminar {name}? Esta acción no se puede deshacer.",
+  "@cars_deleteCarConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_statusInactive": "Inactivo",
+  "cars_addFillUp": "Añadir repostaje",
+  "cars_recentFillUps": "Repostajes recientes",
+  "cars_seeAnalytics": "Ver análisis",
+  "cars_noFillUpsYet": "Aún no hay repostajes",
+  "cars_fillUpFullSuffix": " · lleno",
+  "cars_fillUpLine": "{liters} L · {pricePerLiter} €/L{fullSuffix}",
+  "@cars_fillUpLine": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      },
+      "pricePerLiter": {
+        "type": "String"
+      },
+      "fullSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_fillUpMeta": "{date} · {odometer} km",
+  "@cars_fillUpMeta": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "odometer": {
+        "type": "String"
+      }
+    }
+  },
+  "cars_amountEuro": "{amount} €",
+  "@cars_amountEuro": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
 
+  "pets_noPetsYet": "Aún no hay mascotas",
+  "pets_tapToAdd": "Toca + para añadir una",
+  "pets_speciesDog": "Perro",
+  "pets_speciesCat": "Gato",
+  "pets_speciesBird": "Pájaro",
+  "pets_speciesRabbit": "Conejo",
+  "pets_speciesFish": "Pez",
+  "pets_speciesReptile": "Reptil",
+  "pets_speciesOther": "Otro",
+  "pets_ageYears": "{count, plural, =1{1 año} other{{count} años}}",
+  "@pets_ageYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pets_genderMale": "M",
+  "pets_genderFemale": "F",
+  "pets_title": "Mascota",
+  "pets_notFound": "No encontrado",
+  "pets_deletePetTitle": "Eliminar mascota",
+  "pets_deletePetConfirm": "¿Eliminar {name}? Esta acción no se puede deshacer.",
+  "@pets_deletePetConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_deleteRecordTitle": "Eliminar registro",
+  "pets_deleteRecordConfirm": "¿Eliminar \"{title}\"?",
+  "@pets_deleteRecordConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_setInactive": "Marcar inactiva",
+  "pets_setActive": "Marcar activa",
+  "pets_healthRecords": "Registros de salud",
+  "pets_noHealthRecordsYet": "Aún no hay registros de salud",
+  "pets_genderMaleFull": "Macho",
+  "pets_genderFemaleFull": "Hembra",
+  "pets_genderUnknown": "Desconocido",
+  "pets_weightKg": "{weight} kg",
+  "@pets_weightKg": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_recordNextDue": " · Próximo: ",
+  "pets_costEuro": "€{amount}",
+  "@pets_costEuro": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pets_healthTypeVaccine": "Vacuna",
+  "pets_healthTypeVet": "Visita veterinaria",
+  "pets_healthTypeMedication": "Medicación",
+  "pets_healthTypeGrooming": "Peluquería",
+  "pets_healthTypeDeworming": "Desparasitación",
+  "pets_healthTypeOther": "Otro",
   "settings_title": "Ajustes",
   "settings_appearance": "Apariencia",
   "settings_theme": "Tema",
@@ -57,38 +194,46 @@
   "settings_startDay": "Primer día de la semana",
   "settings_use24h": "Reloj 24 horas",
   "settings_biometric": "Face ID",
-
   "dashboard_overview": "Resumen",
   "dashboard_greetingMorning": "Buenos días",
   "dashboard_greetingAfternoon": "Buenas tardes",
   "dashboard_greetingEvening": "Buenas noches",
   "dashboard_accounts": "Cuentas",
   "dashboard_spending": "Gastos",
+  "dashboard_noExpensesInWindow": "Sin gastos en este periodo",
   "dashboard_activeGoals": "Objetivos activos",
   "dashboard_recent": "Reciente",
+  "dashboard_map": "Mapa",
   "dashboard_balanceTrend": "Evolución del saldo",
   "dashboard_monthlyNet": "Neto mensual",
-
+  "dashboard_noTransactionsYet": "Aún no hay transacciones",
+  "dashboard_activeShoppingSession": "Sesión de compras activa",
+  "dashboard_activeShoppingSessions": "{count} sesiones activas",
+  "@dashboard_activeShoppingSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "bankAccounts_title": "Cuentas",
   "bankAccounts_totalNetWorth": "Patrimonio total",
   "bankAccounts_addCard": "Añadir cuenta",
   "bankAccounts_shared": "Compartida",
   "bankAccounts_personal": "Personal",
   "bankAccounts_noInstitution": "Sin entidad",
-
   "goals_title": "Objetivos",
   "goals_addGoal": "Añadir objetivo",
   "goals_global": "Todos los objetivos",
   "goals_perAccount": "Objetivos de esta cuenta",
-
   "calendar_title": "Calendario",
   "calendar_newAppointment": "Nueva cita",
   "calendar_appointment": "Cita",
+  "calendar_allDay": "Todo el día",
   "calendar_filterAll": "Ver de todos",
   "calendar_filterMine": "Solo míos",
   "calendar_eventos": "Eventos",
   "calendar_movimientos": "Movimientos",
-
   "shopping_title": "Compras",
   "shopping_sessionsTab": "Sesiones",
   "shopping_active": "Activa",
@@ -99,21 +244,30 @@
   "shopping_cancelList": "Cancelar lista",
   "shopping_cancelConfirmTitle": "¿Cancelar esta lista de compras?",
   "shopping_cancelConfirmBody": "La lista se archivará como cancelada y no podrá editarse.",
-
+  "shopping_startSession": "Empezar compra",
+  "shopping_startFromTemplate": "Empezar desde plantilla",
+  "shopping_newTemplate": "Nueva plantilla",
+  "shopping_noActiveSessions": "Sin sesiones activas — pulsa play para empezar",
+  "shopping_noFinishedSessions": "Aún no hay sesiones finalizadas",
+  "shopping_sharedCollaboration": "Compartida · cualquiera del hogar puede colaborar",
+  "shopping_createTemplate": "Crear nueva plantilla",
+  "shopping_kindTemplate": "Plantilla",
+  "shopping_kindSession": "Sesión",
+  "shopping_statusPaid": "Pagada",
+  "shopping_statusCancelled": "Cancelada",
   "notifications_title": "Notificaciones",
   "notifications_markAllRead": "Marcar todo como leído",
   "notifications_showAll": "Ver todas",
   "notifications_empty": "Sin notificaciones",
   "notifications_markRead": "Marcar como leída",
   "notifications_markUnread": "Marcar como no leída",
-
   "transaction_new": "Nueva transacción",
-
+  "transaction_fallbackTitle": "Transacción",
+  "transaction_fallbackAccount": "Cuenta",
   "transactionLocation_mapTitle": "Elegir ubicación",
   "transactionLocation_statsTitle": "Resumen de ubicaciones",
   "transactionLocation_statsCount": "marcadores geolocalizados",
   "transactionLocation_empty": "Aún no hay transacciones con ubicación.",
-
   "settings_locationSection": "Ubicación",
   "settings_locationStats": "Mapa y marcadores",
   "settings_locationStatsSub": "Transacciones recientes guardadas con GPS",
@@ -123,5 +277,52 @@
   "settings_locationPermGranted": "Permitido mientras usas la app",
   "settings_locationPermDenied": "Denegado — pulsa Solicitar acceso",
   "settings_locationPermForever": "Bloqueado — actívalo en Ajustes del sistema",
-  "settings_locationPermSvcOff": "Los servicios de ubicación están desactivados"
+  "settings_locationPermSvcOff": "Los servicios de ubicación están desactivados",
+  "common_none": "Ninguno",
+  "common_notSet": "Sin definir",
+  "appointments_title": "Título",
+  "appointments_titlePlaceholder": "Dentista · Gym · Reunión…",
+  "appointments_shareHousehold": "Compartir con el hogar",
+  "appointments_allDay": "Todo el día",
+  "appointments_date": "Fecha",
+  "appointments_startTime": "Hora de inicio",
+  "appointments_endTime": "Hora de fin",
+  "appointments_category": "Categoría",
+  "appointments_reminders": "Recordatorios",
+  "appointments_color": "Color",
+  "appointments_location": "Ubicación",
+  "appointments_notes": "Notas",
+  "appointments_save": "Guardar",
+  "calendar_noEvents": "Sin eventos",
+  "calendar_deleteEvent": "Eliminar evento",
+  "calendar_deleteEventConfirm": "Esta acción no se puede deshacer.",
+  "bankAccounts_myAccounts": "Mis cuentas",
+  "bankAccounts_others": "Otras cuentas",
+  "bankAccounts_showOthers": "Ver otras cuentas",
+  "bankAccounts_hideOthers": "Ocultar otras cuentas",
+  "bankAccounts_signInPrompt": "Inicia sesión para ver las cuentas",
+  "profile_title": "Perfil",
+  "profile_signInPrompt": "Inicia sesión para ver el perfil",
+  "profile_editProfile": "Editar perfil",
+  "profile_displayName": "Nombre de usuario",
+  "profile_preferredCurrency": "Moneda preferida",
+  "profile_calendarColor": "Color de calendario",
+  "profile_birthDate": "Fecha de nacimiento",
+  "profile_deleteAccountTitle": "Eliminar cuenta",
+  "profile_deleteAccountConfirm": "Esto desactivará tu cuenta. Esta acción no se puede deshacer.",
+  "profile_detailsSection": "Detalles",
+  "profile_memberSince": "Miembro desde",
+  "profile_lastUpdate": "Última actualización",
+  "profile_roleSuperuser": "SUPERUSUARIO",
+  "profile_roleMember": "MIEMBRO",
+  "profile_appUpdate": "Actualización",
+  "profile_updateAvailable": "Actualización disponible",
+  "profile_upToDate": "Estás al día",
+  "update_title": "Actualización disponible",
+  "update_message": "La versión {version} está disponible. Actualiza para obtener las últimas funciones y correcciones.",
+  "update_action": "Actualizar",
+  "update_later": "Más tarde",
+  "map_toggleTransactions": "Gastos",
+  "map_toggleHomes": "Casas",
+  "map_toggleVendors": "Locales"
 }

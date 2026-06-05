@@ -164,6 +164,54 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get common_signOut;
 
+  /// No description provided for @auth_signInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed'**
+  String get auth_signInFailed;
+
+  /// No description provided for @auth_tagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your household finances together'**
+  String get auth_tagline;
+
+  /// No description provided for @auth_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get auth_email;
+
+  /// No description provided for @auth_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get auth_password;
+
+  /// No description provided for @auth_showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get auth_showPassword;
+
+  /// No description provided for @auth_signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get auth_signIn;
+
+  /// No description provided for @auth_or.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get auth_or;
+
+  /// No description provided for @auth_signInWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple'**
+  String get auth_signInWithApple;
+
   /// No description provided for @nav_dashboard.
   ///
   /// In en, this message translates to:
@@ -344,6 +392,325 @@ abstract class AppLocalizations {
   /// **'Fuel type'**
   String get cars_fuelType;
 
+  /// No description provided for @cars_noVehiclesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicles yet'**
+  String get cars_noVehiclesYet;
+
+  /// No description provided for @cars_tapToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add one'**
+  String get cars_tapToAdd;
+
+  /// No description provided for @cars_statusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get cars_statusActive;
+
+  /// No description provided for @cars_statusSold.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold'**
+  String get cars_statusSold;
+
+  /// No description provided for @cars_statusScrap.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrap'**
+  String get cars_statusScrap;
+
+  /// No description provided for @cars_odometerKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String cars_odometerKm(String km);
+
+  /// No description provided for @cars_carTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get cars_carTitle;
+
+  /// No description provided for @cars_notFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found'**
+  String get cars_notFound;
+
+  /// No description provided for @cars_deleteCarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete car'**
+  String get cars_deleteCarTitle;
+
+  /// No description provided for @cars_deleteCarConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}? This cannot be undone.'**
+  String cars_deleteCarConfirm(String name);
+
+  /// No description provided for @cars_statusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get cars_statusInactive;
+
+  /// No description provided for @cars_addFillUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add fill-up'**
+  String get cars_addFillUp;
+
+  /// No description provided for @cars_recentFillUps.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent fill-ups'**
+  String get cars_recentFillUps;
+
+  /// No description provided for @cars_seeAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'See analytics'**
+  String get cars_seeAnalytics;
+
+  /// No description provided for @cars_noFillUpsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No fill-ups yet'**
+  String get cars_noFillUpsYet;
+
+  /// No description provided for @cars_fillUpFullSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · full'**
+  String get cars_fillUpFullSuffix;
+
+  /// No description provided for @cars_fillUpLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{liters} L · {pricePerLiter} €/L{fullSuffix}'**
+  String cars_fillUpLine(
+      String liters, String pricePerLiter, String fullSuffix);
+
+  /// No description provided for @cars_fillUpMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {odometer} km'**
+  String cars_fillUpMeta(String date, String odometer);
+
+  /// No description provided for @cars_amountEuro.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} €'**
+  String cars_amountEuro(String amount);
+
+  /// No description provided for @pets_noPetsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No pets yet'**
+  String get pets_noPetsYet;
+
+  /// No description provided for @pets_tapToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add one'**
+  String get pets_tapToAdd;
+
+  /// No description provided for @pets_speciesDog.
+  ///
+  /// In en, this message translates to:
+  /// **'Dog'**
+  String get pets_speciesDog;
+
+  /// No description provided for @pets_speciesCat.
+  ///
+  /// In en, this message translates to:
+  /// **'Cat'**
+  String get pets_speciesCat;
+
+  /// No description provided for @pets_speciesBird.
+  ///
+  /// In en, this message translates to:
+  /// **'Bird'**
+  String get pets_speciesBird;
+
+  /// No description provided for @pets_speciesRabbit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rabbit'**
+  String get pets_speciesRabbit;
+
+  /// No description provided for @pets_speciesFish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get pets_speciesFish;
+
+  /// No description provided for @pets_speciesReptile.
+  ///
+  /// In en, this message translates to:
+  /// **'Reptile'**
+  String get pets_speciesReptile;
+
+  /// No description provided for @pets_speciesOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pets_speciesOther;
+
+  /// No description provided for @pets_ageYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 yr} other{{count} yrs}}'**
+  String pets_ageYears(int count);
+
+  /// No description provided for @pets_genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get pets_genderMale;
+
+  /// No description provided for @pets_genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get pets_genderFemale;
+
+  /// No description provided for @pets_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get pets_title;
+
+  /// No description provided for @pets_notFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found'**
+  String get pets_notFound;
+
+  /// No description provided for @pets_deletePetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete pet'**
+  String get pets_deletePetTitle;
+
+  /// No description provided for @pets_deletePetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}? This cannot be undone.'**
+  String pets_deletePetConfirm(String name);
+
+  /// No description provided for @pets_deleteRecordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete record'**
+  String get pets_deleteRecordTitle;
+
+  /// No description provided for @pets_deleteRecordConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{title}\"?'**
+  String pets_deleteRecordConfirm(String title);
+
+  /// No description provided for @pets_setInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Set inactive'**
+  String get pets_setInactive;
+
+  /// No description provided for @pets_setActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Set active'**
+  String get pets_setActive;
+
+  /// No description provided for @pets_healthRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Health records'**
+  String get pets_healthRecords;
+
+  /// No description provided for @pets_noHealthRecordsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No health records yet'**
+  String get pets_noHealthRecordsYet;
+
+  /// No description provided for @pets_genderMaleFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get pets_genderMaleFull;
+
+  /// No description provided for @pets_genderFemaleFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get pets_genderFemaleFull;
+
+  /// No description provided for @pets_genderUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get pets_genderUnknown;
+
+  /// No description provided for @pets_weightKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{weight} kg'**
+  String pets_weightKg(String weight);
+
+  /// No description provided for @pets_recordNextDue.
+  ///
+  /// In en, this message translates to:
+  /// **' · Next: '**
+  String get pets_recordNextDue;
+
+  /// No description provided for @pets_costEuro.
+  ///
+  /// In en, this message translates to:
+  /// **'€{amount}'**
+  String pets_costEuro(String amount);
+
+  /// No description provided for @pets_healthTypeVaccine.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine'**
+  String get pets_healthTypeVaccine;
+
+  /// No description provided for @pets_healthTypeVet.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet visit'**
+  String get pets_healthTypeVet;
+
+  /// No description provided for @pets_healthTypeMedication.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication'**
+  String get pets_healthTypeMedication;
+
+  /// No description provided for @pets_healthTypeGrooming.
+  ///
+  /// In en, this message translates to:
+  /// **'Grooming'**
+  String get pets_healthTypeGrooming;
+
+  /// No description provided for @pets_healthTypeDeworming.
+  ///
+  /// In en, this message translates to:
+  /// **'Deworming'**
+  String get pets_healthTypeDeworming;
+
+  /// No description provided for @pets_healthTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pets_healthTypeOther;
+
   /// No description provided for @settings_title.
   ///
   /// In en, this message translates to:
@@ -452,6 +819,12 @@ abstract class AppLocalizations {
   /// **'Spending'**
   String get dashboard_spending;
 
+  /// No description provided for @dashboard_noExpensesInWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses in this window'**
+  String get dashboard_noExpensesInWindow;
+
   /// No description provided for @dashboard_activeGoals.
   ///
   /// In en, this message translates to:
@@ -464,6 +837,12 @@ abstract class AppLocalizations {
   /// **'Recent'**
   String get dashboard_recent;
 
+  /// No description provided for @dashboard_map.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get dashboard_map;
+
   /// No description provided for @dashboard_balanceTrend.
   ///
   /// In en, this message translates to:
@@ -475,6 +854,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monthly net'**
   String get dashboard_monthlyNet;
+
+  /// No description provided for @dashboard_noTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get dashboard_noTransactionsYet;
+
+  /// No description provided for @dashboard_activeShoppingSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Active shopping session'**
+  String get dashboard_activeShoppingSession;
+
+  /// No description provided for @dashboard_activeShoppingSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active sessions'**
+  String dashboard_activeShoppingSessions(int count);
 
   /// No description provided for @bankAccounts_title.
   ///
@@ -553,6 +950,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Appointment'**
   String get calendar_appointment;
+
+  /// No description provided for @calendar_allDay.
+  ///
+  /// In en, this message translates to:
+  /// **'All day'**
+  String get calendar_allDay;
 
   /// No description provided for @calendar_filterAll.
   ///
@@ -638,6 +1041,72 @@ abstract class AppLocalizations {
   /// **'The list will be archived as cancelled and cannot be edited.'**
   String get shopping_cancelConfirmBody;
 
+  /// No description provided for @shopping_startSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start shopping'**
+  String get shopping_startSession;
+
+  /// No description provided for @shopping_startFromTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from template'**
+  String get shopping_startFromTemplate;
+
+  /// No description provided for @shopping_newTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'New template'**
+  String get shopping_newTemplate;
+
+  /// No description provided for @shopping_noActiveSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No active sessions — tap play to start'**
+  String get shopping_noActiveSessions;
+
+  /// No description provided for @shopping_noFinishedSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No finished sessions yet'**
+  String get shopping_noFinishedSessions;
+
+  /// No description provided for @shopping_sharedCollaboration.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared · anyone in the household can collaborate'**
+  String get shopping_sharedCollaboration;
+
+  /// No description provided for @shopping_createTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new template'**
+  String get shopping_createTemplate;
+
+  /// No description provided for @shopping_kindTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Template'**
+  String get shopping_kindTemplate;
+
+  /// No description provided for @shopping_kindSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get shopping_kindSession;
+
+  /// No description provided for @shopping_statusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get shopping_statusPaid;
+
+  /// No description provided for @shopping_statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get shopping_statusCancelled;
+
   /// No description provided for @notifications_title.
   ///
   /// In en, this message translates to:
@@ -679,6 +1148,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New transaction'**
   String get transaction_new;
+
+  /// No description provided for @transaction_fallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transaction_fallbackTitle;
+
+  /// No description provided for @transaction_fallbackAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get transaction_fallbackAccount;
 
   /// No description provided for @transactionLocation_mapTitle.
   ///
@@ -763,6 +1244,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location services are turned off'**
   String get settings_locationPermSvcOff;
+
+  /// No description provided for @common_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get common_none;
+
+  /// No description provided for @common_notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get common_notSet;
+
+  /// No description provided for @appointments_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get appointments_title;
+
+  /// No description provided for @appointments_titlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Dentist · Gym · Meeting…'**
+  String get appointments_titlePlaceholder;
+
+  /// No description provided for @appointments_shareHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with household'**
+  String get appointments_shareHousehold;
+
+  /// No description provided for @appointments_allDay.
+  ///
+  /// In en, this message translates to:
+  /// **'All day'**
+  String get appointments_allDay;
+
+  /// No description provided for @appointments_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get appointments_date;
+
+  /// No description provided for @appointments_startTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time'**
+  String get appointments_startTime;
+
+  /// No description provided for @appointments_endTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End time'**
+  String get appointments_endTime;
+
+  /// No description provided for @appointments_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get appointments_category;
+
+  /// No description provided for @appointments_reminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get appointments_reminders;
+
+  /// No description provided for @appointments_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get appointments_color;
+
+  /// No description provided for @appointments_location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get appointments_location;
+
+  /// No description provided for @appointments_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get appointments_notes;
+
+  /// No description provided for @appointments_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get appointments_save;
+
+  /// No description provided for @calendar_noEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No events'**
+  String get calendar_noEvents;
+
+  /// No description provided for @calendar_deleteEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete event'**
+  String get calendar_deleteEvent;
+
+  /// No description provided for @calendar_deleteEventConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get calendar_deleteEventConfirm;
+
+  /// No description provided for @bankAccounts_myAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'My accounts'**
+  String get bankAccounts_myAccounts;
+
+  /// No description provided for @bankAccounts_others.
+  ///
+  /// In en, this message translates to:
+  /// **'Other accounts'**
+  String get bankAccounts_others;
+
+  /// No description provided for @bankAccounts_showOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show other accounts'**
+  String get bankAccounts_showOthers;
+
+  /// No description provided for @bankAccounts_hideOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide other accounts'**
+  String get bankAccounts_hideOthers;
+
+  /// No description provided for @bankAccounts_signInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to view accounts'**
+  String get bankAccounts_signInPrompt;
+
+  /// No description provided for @profile_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile_title;
+
+  /// No description provided for @profile_signInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to view profile'**
+  String get profile_signInPrompt;
+
+  /// No description provided for @profile_editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profile_editProfile;
+
+  /// No description provided for @profile_displayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get profile_displayName;
+
+  /// No description provided for @profile_preferredCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred currency'**
+  String get profile_preferredCurrency;
+
+  /// No description provided for @profile_calendarColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar color'**
+  String get profile_calendarColor;
+
+  /// No description provided for @profile_birthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth date'**
+  String get profile_birthDate;
+
+  /// No description provided for @profile_deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get profile_deleteAccountTitle;
+
+  /// No description provided for @profile_deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will deactivate your account. This cannot be undone.'**
+  String get profile_deleteAccountConfirm;
+
+  /// No description provided for @profile_detailsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get profile_detailsSection;
+
+  /// No description provided for @profile_memberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since'**
+  String get profile_memberSince;
+
+  /// No description provided for @profile_lastUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update'**
+  String get profile_lastUpdate;
+
+  /// No description provided for @profile_roleSuperuser.
+  ///
+  /// In en, this message translates to:
+  /// **'SUPERUSER'**
+  String get profile_roleSuperuser;
+
+  /// No description provided for @profile_roleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'MEMBER'**
+  String get profile_roleMember;
+
+  /// No description provided for @profile_appUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'App update'**
+  String get profile_appUpdate;
+
+  /// No description provided for @profile_updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get profile_updateAvailable;
+
+  /// No description provided for @profile_upToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re up to date'**
+  String get profile_upToDate;
+
+  /// No description provided for @update_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get update_title;
+
+  /// No description provided for @update_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available. Update to get the latest features and fixes.'**
+  String update_message(String version);
+
+  /// No description provided for @update_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update_action;
+
+  /// No description provided for @update_later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get update_later;
+
+  /// No description provided for @map_toggleTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get map_toggleTransactions;
+
+  /// No description provided for @map_toggleHomes.
+  ///
+  /// In en, this message translates to:
+  /// **'Homes'**
+  String get map_toggleHomes;
+
+  /// No description provided for @map_toggleVendors.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendors'**
+  String get map_toggleVendors;
 }
 
 class _AppLocalizationsDelegate

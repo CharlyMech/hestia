@@ -42,6 +42,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get common_signOut => 'Cerrar sesión';
 
   @override
+  String get auth_signInFailed => 'Error al iniciar sesión';
+
+  @override
+  String get auth_tagline => 'Gestiona las finanzas del hogar en familia';
+
+  @override
+  String get auth_email => 'Correo electrónico';
+
+  @override
+  String get auth_password => 'Contraseña';
+
+  @override
+  String get auth_showPassword => 'Mostrar contraseña';
+
+  @override
+  String get auth_signIn => 'Iniciar sesión';
+
+  @override
+  String get auth_or => 'o';
+
+  @override
+  String get auth_signInWithApple => 'Iniciar sesión con Apple';
+
+  @override
   String get nav_dashboard => 'Inicio';
 
   @override
@@ -132,6 +156,192 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cars_fuelType => 'Tipo de combustible';
 
   @override
+  String get cars_noVehiclesYet => 'Aún no hay vehículos';
+
+  @override
+  String get cars_tapToAdd => 'Toca + para añadir uno';
+
+  @override
+  String get cars_statusActive => 'Activo';
+
+  @override
+  String get cars_statusSold => 'Vendido';
+
+  @override
+  String get cars_statusScrap => 'Desguace';
+
+  @override
+  String cars_odometerKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String get cars_carTitle => 'Coche';
+
+  @override
+  String get cars_notFound => 'No encontrado';
+
+  @override
+  String get cars_deleteCarTitle => 'Eliminar coche';
+
+  @override
+  String cars_deleteCarConfirm(String name) {
+    return '¿Eliminar $name? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String get cars_statusInactive => 'Inactivo';
+
+  @override
+  String get cars_addFillUp => 'Añadir repostaje';
+
+  @override
+  String get cars_recentFillUps => 'Repostajes recientes';
+
+  @override
+  String get cars_seeAnalytics => 'Ver análisis';
+
+  @override
+  String get cars_noFillUpsYet => 'Aún no hay repostajes';
+
+  @override
+  String get cars_fillUpFullSuffix => ' · lleno';
+
+  @override
+  String cars_fillUpLine(
+      String liters, String pricePerLiter, String fullSuffix) {
+    return '$liters L · $pricePerLiter €/L$fullSuffix';
+  }
+
+  @override
+  String cars_fillUpMeta(String date, String odometer) {
+    return '$date · $odometer km';
+  }
+
+  @override
+  String cars_amountEuro(String amount) {
+    return '$amount €';
+  }
+
+  @override
+  String get pets_noPetsYet => 'Aún no hay mascotas';
+
+  @override
+  String get pets_tapToAdd => 'Toca + para añadir una';
+
+  @override
+  String get pets_speciesDog => 'Perro';
+
+  @override
+  String get pets_speciesCat => 'Gato';
+
+  @override
+  String get pets_speciesBird => 'Pájaro';
+
+  @override
+  String get pets_speciesRabbit => 'Conejo';
+
+  @override
+  String get pets_speciesFish => 'Pez';
+
+  @override
+  String get pets_speciesReptile => 'Reptil';
+
+  @override
+  String get pets_speciesOther => 'Otro';
+
+  @override
+  String pets_ageYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count años',
+      one: '1 año',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pets_genderMale => 'M';
+
+  @override
+  String get pets_genderFemale => 'F';
+
+  @override
+  String get pets_title => 'Mascota';
+
+  @override
+  String get pets_notFound => 'No encontrado';
+
+  @override
+  String get pets_deletePetTitle => 'Eliminar mascota';
+
+  @override
+  String pets_deletePetConfirm(String name) {
+    return '¿Eliminar $name? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String get pets_deleteRecordTitle => 'Eliminar registro';
+
+  @override
+  String pets_deleteRecordConfirm(String title) {
+    return '¿Eliminar \"$title\"?';
+  }
+
+  @override
+  String get pets_setInactive => 'Marcar inactiva';
+
+  @override
+  String get pets_setActive => 'Marcar activa';
+
+  @override
+  String get pets_healthRecords => 'Registros de salud';
+
+  @override
+  String get pets_noHealthRecordsYet => 'Aún no hay registros de salud';
+
+  @override
+  String get pets_genderMaleFull => 'Macho';
+
+  @override
+  String get pets_genderFemaleFull => 'Hembra';
+
+  @override
+  String get pets_genderUnknown => 'Desconocido';
+
+  @override
+  String pets_weightKg(String weight) {
+    return '$weight kg';
+  }
+
+  @override
+  String get pets_recordNextDue => ' · Próximo: ';
+
+  @override
+  String pets_costEuro(String amount) {
+    return '€$amount';
+  }
+
+  @override
+  String get pets_healthTypeVaccine => 'Vacuna';
+
+  @override
+  String get pets_healthTypeVet => 'Visita veterinaria';
+
+  @override
+  String get pets_healthTypeMedication => 'Medicación';
+
+  @override
+  String get pets_healthTypeGrooming => 'Peluquería';
+
+  @override
+  String get pets_healthTypeDeworming => 'Desparasitación';
+
+  @override
+  String get pets_healthTypeOther => 'Otro';
+
+  @override
   String get settings_title => 'Ajustes';
 
   @override
@@ -186,16 +396,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboard_spending => 'Gastos';
 
   @override
+  String get dashboard_noExpensesInWindow => 'Sin gastos en este periodo';
+
+  @override
   String get dashboard_activeGoals => 'Objetivos activos';
 
   @override
   String get dashboard_recent => 'Reciente';
 
   @override
+  String get dashboard_map => 'Mapa';
+
+  @override
   String get dashboard_balanceTrend => 'Evolución del saldo';
 
   @override
   String get dashboard_monthlyNet => 'Neto mensual';
+
+  @override
+  String get dashboard_noTransactionsYet => 'Aún no hay transacciones';
+
+  @override
+  String get dashboard_activeShoppingSession => 'Sesión de compras activa';
+
+  @override
+  String dashboard_activeShoppingSessions(int count) {
+    return '$count sesiones activas';
+  }
 
   @override
   String get bankAccounts_title => 'Cuentas';
@@ -235,6 +462,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get calendar_appointment => 'Cita';
+
+  @override
+  String get calendar_allDay => 'Todo el día';
 
   @override
   String get calendar_filterAll => 'Ver de todos';
@@ -280,6 +510,41 @@ class AppLocalizationsEs extends AppLocalizations {
       'La lista se archivará como cancelada y no podrá editarse.';
 
   @override
+  String get shopping_startSession => 'Empezar compra';
+
+  @override
+  String get shopping_startFromTemplate => 'Empezar desde plantilla';
+
+  @override
+  String get shopping_newTemplate => 'Nueva plantilla';
+
+  @override
+  String get shopping_noActiveSessions =>
+      'Sin sesiones activas — pulsa play para empezar';
+
+  @override
+  String get shopping_noFinishedSessions => 'Aún no hay sesiones finalizadas';
+
+  @override
+  String get shopping_sharedCollaboration =>
+      'Compartida · cualquiera del hogar puede colaborar';
+
+  @override
+  String get shopping_createTemplate => 'Crear nueva plantilla';
+
+  @override
+  String get shopping_kindTemplate => 'Plantilla';
+
+  @override
+  String get shopping_kindSession => 'Sesión';
+
+  @override
+  String get shopping_statusPaid => 'Pagada';
+
+  @override
+  String get shopping_statusCancelled => 'Cancelada';
+
+  @override
   String get notifications_title => 'Notificaciones';
 
   @override
@@ -299,6 +564,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get transaction_new => 'Nueva transacción';
+
+  @override
+  String get transaction_fallbackTitle => 'Transacción';
+
+  @override
+  String get transaction_fallbackAccount => 'Cuenta';
 
   @override
   String get transactionLocation_mapTitle => 'Elegir ubicación';
@@ -345,4 +616,148 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_locationPermSvcOff =>
       'Los servicios de ubicación están desactivados';
+
+  @override
+  String get common_none => 'Ninguno';
+
+  @override
+  String get common_notSet => 'Sin definir';
+
+  @override
+  String get appointments_title => 'Título';
+
+  @override
+  String get appointments_titlePlaceholder => 'Dentista · Gym · Reunión…';
+
+  @override
+  String get appointments_shareHousehold => 'Compartir con el hogar';
+
+  @override
+  String get appointments_allDay => 'Todo el día';
+
+  @override
+  String get appointments_date => 'Fecha';
+
+  @override
+  String get appointments_startTime => 'Hora de inicio';
+
+  @override
+  String get appointments_endTime => 'Hora de fin';
+
+  @override
+  String get appointments_category => 'Categoría';
+
+  @override
+  String get appointments_reminders => 'Recordatorios';
+
+  @override
+  String get appointments_color => 'Color';
+
+  @override
+  String get appointments_location => 'Ubicación';
+
+  @override
+  String get appointments_notes => 'Notas';
+
+  @override
+  String get appointments_save => 'Guardar';
+
+  @override
+  String get calendar_noEvents => 'Sin eventos';
+
+  @override
+  String get calendar_deleteEvent => 'Eliminar evento';
+
+  @override
+  String get calendar_deleteEventConfirm => 'Esta acción no se puede deshacer.';
+
+  @override
+  String get bankAccounts_myAccounts => 'Mis cuentas';
+
+  @override
+  String get bankAccounts_others => 'Otras cuentas';
+
+  @override
+  String get bankAccounts_showOthers => 'Ver otras cuentas';
+
+  @override
+  String get bankAccounts_hideOthers => 'Ocultar otras cuentas';
+
+  @override
+  String get bankAccounts_signInPrompt => 'Inicia sesión para ver las cuentas';
+
+  @override
+  String get profile_title => 'Perfil';
+
+  @override
+  String get profile_signInPrompt => 'Inicia sesión para ver el perfil';
+
+  @override
+  String get profile_editProfile => 'Editar perfil';
+
+  @override
+  String get profile_displayName => 'Nombre de usuario';
+
+  @override
+  String get profile_preferredCurrency => 'Moneda preferida';
+
+  @override
+  String get profile_calendarColor => 'Color de calendario';
+
+  @override
+  String get profile_birthDate => 'Fecha de nacimiento';
+
+  @override
+  String get profile_deleteAccountTitle => 'Eliminar cuenta';
+
+  @override
+  String get profile_deleteAccountConfirm =>
+      'Esto desactivará tu cuenta. Esta acción no se puede deshacer.';
+
+  @override
+  String get profile_detailsSection => 'Detalles';
+
+  @override
+  String get profile_memberSince => 'Miembro desde';
+
+  @override
+  String get profile_lastUpdate => 'Última actualización';
+
+  @override
+  String get profile_roleSuperuser => 'SUPERUSUARIO';
+
+  @override
+  String get profile_roleMember => 'MIEMBRO';
+
+  @override
+  String get profile_appUpdate => 'Actualización';
+
+  @override
+  String get profile_updateAvailable => 'Actualización disponible';
+
+  @override
+  String get profile_upToDate => 'Estás al día';
+
+  @override
+  String get update_title => 'Actualización disponible';
+
+  @override
+  String update_message(String version) {
+    return 'La versión $version está disponible. Actualiza para obtener las últimas funciones y correcciones.';
+  }
+
+  @override
+  String get update_action => 'Actualizar';
+
+  @override
+  String get update_later => 'Más tarde';
+
+  @override
+  String get map_toggleTransactions => 'Gastos';
+
+  @override
+  String get map_toggleHomes => 'Casas';
+
+  @override
+  String get map_toggleVendors => 'Locales';
 }
