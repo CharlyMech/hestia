@@ -6,12 +6,16 @@ import 'supabase_service.dart';
 class HomeService extends SupabaseService {
   HomeService({super.client});
 
-  Future<List<Map<String, dynamic>>> getHomes(String householdId) async {
+  Future<List<Map<String, dynamic>>> getHomes(
+    String householdId, {
+    bool activeOnly = true,
+  }) async {
     try {
-      final res = await from(SupabaseTables.homes)
+      var query = from(SupabaseTables.homes)
           .select()
-          .eq('household_id', householdId)
-          .order('name');
+          .eq('household_id', householdId);
+      if (activeOnly) query = query.eq('is_active', true);
+      final res = await query.order('name');
       return List<Map<String, dynamic>>.from(res);
     } catch (e) {
       throw ServerException('Failed to fetch homes: $e');

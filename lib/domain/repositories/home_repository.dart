@@ -2,7 +2,10 @@ import 'package:hestia/core/error/failures.dart';
 import 'package:hestia/domain/entities/home.dart';
 
 abstract class HomeRepository {
-  Future<(List<Home>, Failure?)> getHomes(String householdId);
+  Future<(List<Home>, Failure?)> getHomes(
+    String householdId, {
+    bool activeOnly = true,
+  });
 
   Future<(Home?, Failure?)> getHome(String id);
 

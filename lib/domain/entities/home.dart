@@ -14,6 +14,7 @@ class Home extends Equatable {
 
   final String? description;
   final String? imageUrl;
+  final bool isActive;
   final DateTime createdAt;
 
   const Home({
@@ -25,6 +26,7 @@ class Home extends Equatable {
     required this.longitude,
     this.description,
     this.imageUrl,
+    this.isActive = true,
     required this.createdAt,
   });
 
@@ -39,6 +41,7 @@ class Home extends Equatable {
     bool clearDescription = false,
     String? imageUrl,
     bool clearImageUrl = false,
+    bool? isActive,
     DateTime? createdAt,
   }) =>
       Home(
@@ -51,10 +54,11 @@ class Home extends Equatable {
         description:
             clearDescription ? null : (description ?? this.description),
         imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
+        isActive: isActive ?? this.isActive,
         createdAt: createdAt ?? this.createdAt,
       );
 
   @override
   List<Object?> get props =>
-      [id, householdId, name, address, latitude, longitude];
+      [id, householdId, name, address, latitude, longitude, isActive];
 }

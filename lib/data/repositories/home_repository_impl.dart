@@ -18,6 +18,7 @@ class HomeRepositoryImpl implements HomeRepository {
         longitude: (j['longitude'] as num).toDouble(),
         description: j['description'] as String?,
         imageUrl: j['image_url'] as String?,
+        isActive: j['is_active'] as bool? ?? true,
         createdAt:
             parseSupabaseTimestamp(j['created_at'], orElse: DateTime.now()),
       );
@@ -30,12 +31,16 @@ class HomeRepositoryImpl implements HomeRepository {
         'longitude': h.longitude,
         'description': h.description,
         'image_url': h.imageUrl,
+        'is_active': h.isActive,
       };
 
   @override
-  Future<(List<Home>, Failure?)> getHomes(String householdId) async {
+  Future<(List<Home>, Failure?)> getHomes(
+    String householdId, {
+    bool activeOnly = true,
+  }) async {
     try {
-      final data = await _service.getHomes(householdId);
+      final data = await _service.getHomes(householdId, activeOnly: activeOnly);
       return (data.map(_fromJson).toList(), null);
     } catch (e, st) {
       return (<Home>[], reportError(e, st, reason: 'getHomes'));
