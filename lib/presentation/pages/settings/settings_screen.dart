@@ -109,8 +109,8 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
       );
       if (action == 'sync' && userId != null) {
-        await deps.appointmentRepository.syncWithGoogle(
-            userId: userId, defaultColor: calendarColor);
+        await deps.appointmentRepository
+            .syncWithGoogle(userId: userId, defaultColor: calendarColor);
         if (mounted) {
           context.showToast(const AppToastConfig(
               type: ToastType.success, title: 'Calendar synced'));
@@ -124,8 +124,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (ok) {
         await _refreshGcal();
         if (userId != null) {
-          await deps.appointmentRepository.syncWithGoogle(
-              userId: userId, defaultColor: calendarColor);
+          await deps.appointmentRepository
+              .syncWithGoogle(userId: userId, defaultColor: calendarColor);
         }
         if (mounted) {
           context.showToast(const AppToastConfig(
@@ -526,21 +526,6 @@ class _SettingsScreenState extends State<SettingsScreen>
           onChanged: (v) => _setFaceIdUnlock(context, v),
         ),
       ]),
-      // if (profile?.isSuperuser == true)
-      //   _Section('Admin', [
-      //     _Tile.chevron(
-      //       icon: UserPlus(width: 16, height: 16, color: accent),
-      //       color: accent,
-      //       label: 'Create user',
-      //       sub: 'Add a new household member',
-      //       onTap: () => showAppBottomSheet<void>(
-      //         context: context,
-      //         title: 'Create user',
-      //         heightFactor: 0.7,
-      //         child: const CreateUserForm(),
-      //       ),
-      //     ),
-      //   ]),
     ];
 
     Widget tileWidget(_Tile t, {required bool last}) => GestureDetector(
