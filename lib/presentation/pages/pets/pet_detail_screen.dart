@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
@@ -10,6 +11,9 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/pet.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/blocs/pets/pet_detail_bloc.dart';
+import 'package:hestia/presentation/blocs/pets/pets_bloc.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/pets/paw_icon.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' as iconoir;
@@ -21,61 +25,37 @@ class PetDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PetDetailView(petId: petId);
+    return BlocProvider(
+      create: (_) => PetDetailBloc(AppDependencies.instance.petRepository)
+        ..add(PetDetailLoad(petId)),
+      child: _PetDetailBody(petId: petId),
+    );
   }
 }
 
-class _PetDetailView extends StatefulWidget {
+class _PetDetailBody extends StatelessWidget {
   final String petId;
-  const _PetDetailView({required this.petId});
-  @override
-  State<_PetDetailView> createState() => _PetDetailViewState();
-}
+  const _PetDetailBody({required this.petId});
 
-class _PetDetailViewState extends State<_PetDetailView> {
-  Pet? _pet;
-  List<PetHealthRecord> _records = const [];
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
+  void _syncListBloc(BuildContext context) {
+    try {
+      context.read<PetsBloc>().add(const PetsRefresh());
+    } catch (_) {}
   }
 
-  Future<void> _load() async {
-    final repo = AppDependencies.instance.petRepository;
-    final (pet, _) = await repo.getPet(widget.petId);
-    if (!mounted) return;
-    setState(() {
-      _pet = pet;
-      _loading = false;
-    });
-    if (pet != null) await _loadRecords();
-  }
-
-  Future<void> _loadRecords() async {
-    final (records, _) = await AppDependencies.instance.petRepository
-        .getHealthRecords(widget.petId);
-    if (!mounted) return;
-    setState(() => _records = records);
-  }
-
-  void _confirmDelete(BuildContext ctx, Color accent) {
+  void _confirmDelete(BuildContext ctx, Pet pet) {
     final l10n = AppLocalizations.of(ctx);
     showCupertinoDialog(
       context: ctx,
       builder: (_) => CupertinoAlertDialog(
         title: Text(l10n.pets_deletePetTitle),
-        content: Text(l10n.pets_deletePetConfirm(_pet!.name)),
+        content: Text(l10n.pets_deletePetConfirm(pet.name)),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(ctx);
-              await AppDependencies.instance.petRepository
-                  .deletePet(widget.petId);
-              if (ctx.mounted) ctx.pop();
+              ctx.read<PetDetailBloc>().add(const PetDetailDelete());
             },
             child: Text(l10n.common_delete),
           ),
@@ -88,7 +68,8 @@ class _PetDetailViewState extends State<_PetDetailView> {
     );
   }
 
-  void _confirmDeleteRecord(BuildContext ctx, PetHealthRecord record) {
+  void _confirmDeleteRecord(
+      BuildContext ctx, PetHealthRecord record, PetDetailBloc bloc) {
     final l10n = AppLocalizations.of(ctx);
     showCupertinoDialog(
       context: ctx,
@@ -102,7 +83,7 @@ class _PetDetailViewState extends State<_PetDetailView> {
               Navigator.pop(ctx);
               await AppDependencies.instance.petRepository
                   .deleteHealthRecord(record.id);
-              if (ctx.mounted) await _loadRecords();
+              if (ctx.mounted) bloc.add(const PetDetailReloadRecords());
             },
             child: Text(l10n.common_delete),
           ),
@@ -124,85 +105,113 @@ class _PetDetailViewState extends State<_PetDetailView> {
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
 
-    // Not-found state — no data after load finished.
-    if (!_loading && _pet == null) {
-      return SliverPushedRouteShell(
-        title: l10n.pets_title,
-        content: Center(
-          heightFactor: 1,
-          child: Text(l10n.pets_notFound,
-              style: AppFonts.body(fontSize: 14, color: muted)),
-        ),
-      );
-    }
+    return BlocConsumer<PetDetailBloc, PetDetailState>(
+      listenWhen: (prev, curr) =>
+          curr is PetDetailDeleted ||
+          (prev is PetDetailLoaded &&
+              curr is PetDetailLoaded &&
+              prev.pet.isActive != curr.pet.isActive),
+      listener: (context, state) {
+        if (state is PetDetailDeleted) {
+          _syncListBloc(context);
+          context.pop();
+          return;
+        }
+        if (state is PetDetailLoaded) {
+          _syncListBloc(context);
+        }
+      },
+      builder: (context, state) {
+        final bloc = context.read<PetDetailBloc>();
+        final loading = state is PetDetailInitial || state is PetDetailLoading;
 
-    final pet = _pet;
+        if (state is PetDetailNotFound) {
+          return SliverPushedRouteShell(
+            title: l10n.pets_title,
+            content: Center(
+              heightFactor: 1,
+              child: Text(l10n.pets_notFound,
+                  style: AppFonts.body(fontSize: 14, color: muted)),
+            ),
+          );
+        }
 
-    return SliverPushedRouteShell(
-      title: pet?.name ?? '',
-      header: pet != null ? _PetHeader(pet: pet) : null,
-      onRefresh: _load,
-      actions: pet == null
-          ? null
-          : [
-              AppMenuAction(
-                icon: iconoir.EditPencil(width: 18, height: 18, color: accent),
-                label: l10n.common_edit,
-                onTap: () async {
-                  await context.push(AppRoutes.editPet, extra: pet.id);
-                  if (mounted) await _load();
-                },
-              ),
-              AppMenuAction(
-                icon: pet.isActive
-                    ? iconoir.EyeClosed(width: 18, height: 18, color: fg)
-                    : iconoir.Eye(width: 18, height: 18, color: accent),
-                label: pet.isActive
-                    ? l10n.pets_setInactive
-                    : l10n.pets_setActive,
-                onTap: () async {
-                  await AppDependencies.instance.petRepository
-                      .updatePet(pet.copyWith(isActive: !pet.isActive));
-                  if (mounted) await _load();
-                },
-              ),
-              AppMenuAction(
-                icon: iconoir.Trash(
-                    width: 18,
-                    height: 18,
-                    color: CupertinoColors.destructiveRed),
-                label: l10n.common_delete,
-                isDestructive: true,
-                onTap: () => _confirmDelete(context, accent),
-              ),
-            ],
-      content: Skeletonizer(
-        enabled: _loading,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
-          child: _loading
-              ? _PetSkeleton(surface: surface, muted: muted)
-              : _PetBody(
-                  l10n: l10n,
-                  pet: pet!,
-                  records: _records,
-                  surface: surface,
-                  fg: fg,
-                  muted: muted,
-                  accent: accent,
-                  onAddRecord: () async {
-                    await context.push(AppRoutes.addHealthRecord,
-                        extra: pet.id);
-                    if (mounted) await _loadRecords();
-                  },
-                  onEditRecord: (r) async {
-                    await context.push(AppRoutes.editHealthRecord, extra: r);
-                    if (mounted) await _loadRecords();
-                  },
-                  onDeleteRecord: (r) => _confirmDeleteRecord(context, r),
-                ),
-        ),
-      ),
+        final pet = state is PetDetailLoaded ? state.pet : null;
+        final records = state is PetDetailLoaded
+            ? state.records
+            : const <PetHealthRecord>[];
+
+        return SliverPushedRouteShell(
+          title: pet?.name ?? '',
+          isActive: pet?.isActive,
+          header: pet != null ? _PetHeader(pet: pet) : null,
+          onRefresh: () async => bloc.add(const PetDetailRefresh()),
+          actions: pet == null
+              ? null
+              : [
+                  AppMenuAction(
+                    icon: iconoir.EditPencil(
+                        width: 18, height: 18, color: accent),
+                    label: l10n.common_edit,
+                    onTap: () async {
+                      await context.push(AppRoutes.editPet, extra: pet.id);
+                      if (context.mounted) {
+                        bloc.add(const PetDetailRefresh());
+                      }
+                    },
+                  ),
+                  AppMenuAction.toggleActive(
+                    isActive: pet.isActive,
+                    setActiveLabel: l10n.pets_setActive,
+                    setInactiveLabel: l10n.pets_setInactive,
+                    fg: fg,
+                    onTap: () => bloc.add(const PetDetailToggleActive()),
+                  ),
+                  AppMenuAction(
+                    icon: iconoir.Trash(
+                        width: 18,
+                        height: 18,
+                        color: CupertinoColors.destructiveRed),
+                    label: l10n.common_delete,
+                    isDestructive: true,
+                    onTap: () => _confirmDelete(context, pet),
+                  ),
+                ],
+          content: Skeletonizer(
+            enabled: loading,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
+              child: loading
+                  ? _PetSkeleton(surface: surface, muted: muted)
+                  : _PetBody(
+                      l10n: l10n,
+                      pet: pet!,
+                      records: records,
+                      surface: surface,
+                      fg: fg,
+                      muted: muted,
+                      accent: accent,
+                      onAddRecord: () async {
+                        await context.push(AppRoutes.addHealthRecord,
+                            extra: pet.id);
+                        if (context.mounted) {
+                          bloc.add(const PetDetailReloadRecords());
+                        }
+                      },
+                      onEditRecord: (r) async {
+                        await context.push(AppRoutes.editHealthRecord,
+                            extra: r);
+                        if (context.mounted) {
+                          bloc.add(const PetDetailReloadRecords());
+                        }
+                      },
+                      onDeleteRecord: (r) =>
+                          _confirmDeleteRecord(context, r, bloc),
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -219,7 +228,6 @@ class _PetSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Hero card shape
         Container(
           height: 112,
           decoration: BoxDecoration(
@@ -228,7 +236,6 @@ class _PetSkeleton extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        // Section title
         Container(
           height: 16,
           width: 140,
@@ -238,7 +245,6 @@ class _PetSkeleton extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // Record card shapes
         for (var i = 0; i < 3; i++) ...[
           Container(
             height: 72,
@@ -280,6 +286,7 @@ class _PetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fg = hexToColor(context.myTheme.foregroundColor);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -298,16 +305,10 @@ class _PetBody extends StatelessWidget {
                   style: AppFonts.body(
                       fontSize: 15, fontWeight: FontWeight.w600, color: fg)),
             ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onAddRecord,
-              child: Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                child: iconoir.Plus(width: 18, height: 18, color: accent),
-              ),
-            ),
+            AnimatedButton(
+                onTap: onAddRecord,
+                padding: const EdgeInsets.all(4),
+                child: iconoir.Plus(width: 16, height: 16, color: fg))
           ],
         ),
         const SizedBox(height: 10),
@@ -659,7 +660,6 @@ class _RecordCard extends StatelessWidget {
       };
 }
 
-// Full-bleed sliver header: pet photo if available, else colour + initial.
 class _PetHeader extends StatelessWidget {
   final Pet pet;
 
