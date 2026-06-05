@@ -1,0 +1,8 @@
+app_identifier("com.charlymech.hestia")
+
+# Apple ID / team are supplied via App Store Connect API key in CI, so the
+# interactive Apple ID is optional. Set APPLE_ID / ITC_TEAM_ID / TEAM_ID as
+# env vars for local runs if you prefer.
+apple_id(ENV["APPLE_ID"]) if ENV["APPLE_ID"]
+itc_team_id(ENV["ITC_TEAM_ID"]) if ENV["ITC_TEAM_ID"]
+team_id(ENV["TEAM_ID"]) if ENV["TEAM_ID"]

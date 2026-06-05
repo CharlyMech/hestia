@@ -1,0 +1,131 @@
+name: Release (TestFlight)
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Prepare version and changelog
+        id: release
+        env:
+          RELEASE_EVENT_NAME: ${{ github.event_name }}
+          RELEASE_BEFORE_SHA: ${{ github.event.before }}
+        run: python3 scripts/prepare_release.py --build-number "${{ github.run_number }}"
+
+      - name: Write .env
+        run: |
+          cat > .env <<EOF
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
+          APPLE_REDIRECT_URI=${{ secrets.APPLE_REDIRECT_URI }}
+          MAGICLANE_API_KEY=${{ secrets.MAGICLANE_API_KEY }}
+          FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_IOS_BUNDLE_ID=com.charlymech.hestia
+          EOF
+
+      - name: Set up signing
+        env:
+          BUILD_CERT_BASE64: ${{ secrets.IOS_DIST_CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERT_PATH=$RUNNER_TEMP/cert.p12
+          PROFILE_PATH=$RUNNER_TEMP/profile.mobileprovision
+          KEYCHAIN=$RUNNER_TEMP/app.keychain-db
+
+          echo "$BUILD_CERT_BASE64" | base64 --decode > "$CERT_PATH"
+          echo "$PROVISION_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT_PATH" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN" login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build IPA
+        run: |
+          flutter build ipa --release \
+            --dart-define=FLAVOR=supabase \
+            --build-name=${{ steps.release.outputs.version }} \
+            --build-number=${{ steps.release.outputs.build }} \
+            --export-options-plist=ios/ExportOptions.plist
+
+      - name: Upload to TestFlight
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          TESTFLIGHT_CHANGELOG_PATH: ${{ github.workspace }}/build/release-notes.md
+          TESTFLIGHT_GROUPS: ${{ secrets.TESTFLIGHT_GROUPS }}
+          TESTFLIGHT_DISTRIBUTE_EXTERNAL: ${{ secrets.TESTFLIGHT_DISTRIBUTE_EXTERNAL }}
+          TESTFLIGHT_NOTIFY_EXTERNAL_TESTERS: ${{ secrets.TESTFLIGHT_NOTIFY_EXTERNAL_TESTERS }}
+        run: |
+          gem install bundler --no-document || true
+          fastlane beta
+
+      - name: Publish latest app version
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TESTFLIGHT_APP_URL: ${{ secrets.TESTFLIGHT_APP_URL }}
+        run: |
+          python3 scripts/publish_app_version.py \
+            --version "${{ steps.release.outputs.version }}" \
+            --build "${{ steps.release.outputs.build }}" \
+            --tag "${{ steps.release.outputs.tag }}" \
+            --release-notes "${{ steps.release.outputs.release_notes_file }}"
+
+      - name: Commit version and changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml CHANGELOG.md
+          git commit -m "chore(release): ${{ steps.release.outputs.tag }} [skip ci]" || echo "nothing to commit"
+          git push origin HEAD:main
+
+      - name: Push release tag
+        run: |
+          git tag "${{ steps.release.outputs.tag }}"
+          git push origin "${{ steps.release.outputs.tag }}"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: ${{ steps.release.outputs.tag }}
+          body_path: ${{ steps.release.outputs.release_notes_file }}
+          token: ${{ secrets.GITHUB_TOKEN }}

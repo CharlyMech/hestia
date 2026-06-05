@@ -1,0 +1,63 @@
+default_platform(:ios)
+
+# App Store Connect API key auth - non-interactive, for CI.
+# Reads APP_STORE_CONNECT_API_KEY_ID / _ISSUER_ID / _KEY (PEM contents of the .p8).
+def app_store_api_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+    key_content: ENV.fetch("APP_STORE_CONNECT_API_KEY"),
+    is_key_content_base64: true,
+    in_house: false,
+  )
+end
+
+def truthy_env?(name)
+  value = ENV[name].to_s.strip.downcase
+  ["1", "true", "yes", "y"].include?(value)
+end
+
+def csv_env(name)
+  ENV[name].to_s.split(",").map(&:strip).reject(&:empty?)
+end
+
+platform :ios do
+  desc "Upload the already-built IPA to TestFlight"
+  lane :beta do
+    api_key = app_store_api_key
+
+    # The Flutter step (CI) produces the signed IPA at build/ios/ipa/*.ipa.
+    ipa_path = Dir["#{ENV['IPA_OUTPUT_PATH'] || '../build/ios/ipa'}/*.ipa"].first
+    UI.user_error!("No IPA found - run `flutter build ipa` first") unless ipa_path
+
+    changelog = nil
+    if ENV["TESTFLIGHT_CHANGELOG_PATH"] && File.exist?(ENV["TESTFLIGHT_CHANGELOG_PATH"])
+      changelog = File.read(ENV["TESTFLIGHT_CHANGELOG_PATH"]).strip
+    elsif ENV["TESTFLIGHT_CHANGELOG"]
+      changelog = ENV["TESTFLIGHT_CHANGELOG"].strip
+    end
+
+    groups = csv_env("TESTFLIGHT_GROUPS")
+    distribute_external = truthy_env?("TESTFLIGHT_DISTRIBUTE_EXTERNAL") && !groups.empty?
+
+    options = {
+      api_key: api_key,
+      ipa: ipa_path,
+      changelog: changelog,
+      skip_waiting_for_build_processing: !distribute_external && changelog.to_s.empty?,
+      skip_submission: !distribute_external,
+    }
+
+    if distribute_external
+      options[:distribute_external] = true
+      options[:groups] = groups
+    end
+
+    if ENV.key?("TESTFLIGHT_NOTIFY_EXTERNAL_TESTERS")
+      options[:notify_external_testers] =
+        truthy_env?("TESTFLIGHT_NOTIFY_EXTERNAL_TESTERS")
+    end
+
+    upload_to_testflight(options)
+  end
+end
