@@ -50,8 +50,8 @@ class _HomesScreenState extends State<HomesScreen> {
       });
       return;
     }
-    final (homes, _) =
-        await AppDependencies.instance.homeRepository.getHomes(household.id);
+    final (homes, _) = await AppDependencies.instance.homeRepository
+        .getHomes(household.id, activeOnly: false);
     if (!mounted) return;
     setState(() {
       _homes = homes;
@@ -359,6 +359,7 @@ class _HomeFormSheetState extends State<_HomeFormSheet> {
       longitude: _lng,
       description: widget.existing?.description,
       imageUrl: widget.existing?.imageUrl,
+      isActive: widget.existing?.isActive ?? true,
       createdAt: widget.existing?.createdAt ?? DateTime.now(),
     );
 
