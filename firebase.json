@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"ios":{"default":{"projectId":"hestia-e4ef5","appId":"1:189322972991:ios:99ccebce26e5cc62becd8a","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/core/config/firebase_options.dart":{"projectId":"hestia-e4ef5","configurations":{"ios":"1:189322972991:ios:99ccebce26e5cc62becd8a"}}}}}}
