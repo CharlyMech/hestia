@@ -46,6 +46,53 @@ class ShoppingSessionService extends SupabaseService {
     }
   }
 
+  /// Start a shared shopping session via `start-shopping-session` edge fn.
+  /// Pushes FCM notification to other household members server-side.
+  Future<Map<String, dynamic>> startSession({
+    required String listId,
+    required String userId,
+  }) async {
+    try {
+      final res = await client.functions.invoke(
+        'start-shopping-session',
+        body: {'list_id': listId, 'user_id': userId},
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException('Failed to start session: ${body['error']}');
+      }
+      return Map<String, dynamic>.from(body['list'] as Map);
+    } catch (e) {
+      throw ServerException('Failed to start session: $e');
+    }
+  }
+
+  /// Complete (or cancel) a session via `complete-shopping-session` edge fn.
+  /// Pass [transaction] to atomically create the expense.
+  Future<Map<String, dynamic>> completeSession({
+    required String listId,
+    Map<String, dynamic>? transaction,
+    bool cancelled = false,
+  }) async {
+    try {
+      final res = await client.functions.invoke(
+        'complete-shopping-session',
+        body: {
+          'list_id': listId,
+          if (transaction != null) 'transaction': transaction,
+          if (cancelled) 'cancelled': true,
+        },
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException('Failed to complete session: ${body['error']}');
+      }
+      return Map<String, dynamic>.from(body['list'] as Map);
+    } catch (e) {
+      throw ServerException('Failed to complete session: $e');
+    }
+  }
+
   Future<void> update(String id, Map<String, dynamic> data) async {
     try {
       await from(SupabaseTables.shoppingSessions).update(data).eq('id', id);

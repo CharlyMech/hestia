@@ -157,7 +157,7 @@ class PetRepositoryImpl implements PetRepository {
   Future<(PetHealthRecord?, Failure?)> createHealthRecord(
       PetHealthRecord record) async {
     try {
-      final data = await _service.createHealthRecord(_recordToJson(record));
+      final data = await _service.createHealthRecord(record: _recordToJson(record));
       return (_recordFromJson(data), null);
     } catch (e, st) {
       return (null, reportError(e, st, reason: 'createHealthRecord'));

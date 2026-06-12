@@ -38,52 +38,48 @@ class AppointmentService extends SupabaseService {
     }
   }
 
-  Future<Map<String, dynamic>> create(Appointment a) async {
+  /// CUD via `upsert-appointment` edge function (mirrors to GCal server-side).
+  Future<Map<String, dynamic>> upsert(Appointment a) async {
     try {
-      final inserted = await from(SupabaseTables.appointments)
-          .insert(_toRow(a, isCreate: true))
-          .select()
-          .single();
-      await _syncPets(inserted['id'] as String, a.petIds);
-      inserted['appointment_pets'] =
+      final res = await client.functions.invoke(
+        'upsert-appointment',
+        body: {
+          'appointment': _toRow(a, isCreate: a.id.isEmpty),
+          'pet_ids': a.petIds,
+          if (a.id.isNotEmpty) 'id': a.id,
+        },
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException('Failed to upsert appointment: ${body['error']}');
+      }
+      final saved =
+          Map<String, dynamic>.from(body['appointment'] as Map);
+      saved['appointment_pets'] =
           a.petIds.map((id) => {'pet_id': id}).toList();
-      return inserted;
+      return saved;
     } catch (e) {
-      throw ServerException('Failed to create appointment: $e');
+      throw ServerException('Failed to upsert appointment: $e');
     }
   }
 
-  Future<Map<String, dynamic>> update(Appointment a) async {
-    try {
-      final updated = await from(SupabaseTables.appointments)
-          .update(_toRow(a, isCreate: false))
-          .eq('id', a.id)
-          .select()
-          .single();
-      await _syncPets(a.id, a.petIds);
-      updated['appointment_pets'] =
-          a.petIds.map((id) => {'pet_id': id}).toList();
-      return updated;
-    } catch (e) {
-      throw ServerException('Failed to update appointment: $e');
-    }
-  }
+  // Keep legacy aliases so callers migrate incrementally.
+  Future<Map<String, dynamic>> create(Appointment a) => upsert(a);
+  Future<Map<String, dynamic>> update(Appointment a) => upsert(a);
 
-  /// Replaces the `appointment_pets` rows for an appointment.
-  Future<void> _syncPets(String appointmentId, List<String> petIds) async {
-    await from(SupabaseTables.appointmentPets)
-        .delete()
-        .eq('appointment_id', appointmentId);
-    if (petIds.isEmpty) return;
-    await from(SupabaseTables.appointmentPets).insert([
-      for (final id in petIds)
-        {'appointment_id': appointmentId, 'pet_id': id},
-    ]);
-  }
-
+  /// Delete via `delete-appointment` edge function (removes GCal event +
+  /// pending reminders server-side).
   Future<void> delete(String id) async {
     try {
-      await from(SupabaseTables.appointments).delete().eq('id', id);
+      final res = await client.functions.invoke(
+        'delete-appointment',
+        body: {'id': id},
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException(
+            'Failed to delete appointment: ${body['error']}');
+      }
     } catch (e) {
       throw ServerException('Failed to delete appointment: $e');
     }
@@ -118,6 +114,7 @@ class AppointmentService extends SupabaseService {
       'pet_id': a.petId,
       'car_id': a.carId,
       'color': a.color,
+      'source': a.source,
     };
     if (isCreate) {
       row['id'] = a.id.isEmpty ? null : a.id;
@@ -154,6 +151,7 @@ extension AppointmentRowMapper on Map<String, dynamic> {
       isAllDay: this['is_all_day'] as bool? ?? false,
       isShared: this['is_shared'] as bool? ?? true,
       color: this['color'] as String?,
+      source: this['source'] as String? ?? 'hestia',
       createdAt: DateTime.parse(this['created_at'] as String),
       lastUpdate: this['last_update'] == null
           ? null

@@ -22,12 +22,27 @@ class FuelEntryService extends SupabaseService {
     }
   }
 
-  Future<Map<String, dynamic>> create(Map<String, dynamic> data) async {
+  /// Create via `create-fuel-entry` edge function.
+  /// Pass [transaction] map to atomically create an expense transaction.
+  Future<Map<String, dynamic>> create({
+    required Map<String, dynamic> entry,
+    Map<String, dynamic>? transaction,
+    String? id,
+  }) async {
     try {
-      return await from(SupabaseTables.fuelEntries)
-          .insert(data)
-          .select()
-          .single();
+      final res = await client.functions.invoke(
+        'create-fuel-entry',
+        body: {
+          'entry': entry,
+          if (transaction != null) 'transaction': transaction,
+          if (id != null) 'id': id,
+        },
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException('Failed to create fuel entry: ${body['error']}');
+      }
+      return Map<String, dynamic>.from(body['entry'] as Map);
     } catch (e) {
       throw ServerException('Failed to create fuel entry: $e');
     }

@@ -42,6 +42,10 @@ class Appointment extends Equatable {
   /// to the owner's calendarColor, then the category tint.
   final String? color;
 
+  /// Origin of the appointment: 'hestia' (created in-app) or 'google'
+  /// (imported from Google Calendar via the sync edge function).
+  final String source;
+
   final DateTime createdAt;
   final DateTime? lastUpdate;
 
@@ -64,6 +68,7 @@ class Appointment extends Equatable {
     this.isAllDay = false,
     this.isShared = true,
     this.color,
+    this.source = 'hestia',
     required this.createdAt,
     this.lastUpdate,
   });
@@ -91,6 +96,7 @@ class Appointment extends Equatable {
     bool? isShared,
     String? color,
     bool clearColor = false,
+    String? source,
     DateTime? createdAt,
     DateTime? lastUpdate,
   }) =>
@@ -113,6 +119,7 @@ class Appointment extends Equatable {
         isAllDay: isAllDay ?? this.isAllDay,
         isShared: isShared ?? this.isShared,
         color: clearColor ? null : (color ?? this.color),
+        source: source ?? this.source,
         createdAt: createdAt ?? this.createdAt,
         lastUpdate: lastUpdate ?? this.lastUpdate,
       );
@@ -137,6 +144,7 @@ class Appointment extends Equatable {
         isAllDay,
         isShared,
         color,
+        source,
         createdAt,
         lastUpdate,
       ];

@@ -68,13 +68,28 @@ class PetService extends SupabaseService {
     }
   }
 
-  Future<Map<String, dynamic>> createHealthRecord(
-      Map<String, dynamic> data) async {
+  /// Create via `create-health-record` edge function.
+  /// Pass [transaction] map to atomically create an expense transaction.
+  Future<Map<String, dynamic>> createHealthRecord({
+    required Map<String, dynamic> record,
+    Map<String, dynamic>? transaction,
+    String? id,
+  }) async {
     try {
-      return await from(SupabaseTables.petHealthRecords)
-          .insert(data)
-          .select()
-          .single();
+      final res = await client.functions.invoke(
+        'create-health-record',
+        body: {
+          'record': record,
+          if (transaction != null) 'transaction': transaction,
+          if (id != null) 'id': id,
+        },
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException(
+            'Failed to create health record: ${body['error']}');
+      }
+      return Map<String, dynamic>.from(body['record'] as Map);
     } catch (e) {
       throw ServerException('Failed to create health record: $e');
     }

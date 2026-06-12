@@ -78,20 +78,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   @override
   Future<(Appointment?, Failure?)> create(Appointment appointment) async {
     try {
+      // upsert-appointment edge fn mirrors to GCal server-side.
       final row = await _service.create(appointment);
-      var saved = row.toAppointment();
-
-      // Push to Google Calendar if linked.
-      if (await _gcal.isLinked()) {
-        try {
-          final eventId = await _gcal.createEvent(saved);
-          if (eventId != null) {
-            await _service.upsertGoogleEventId(saved.id, eventId);
-            saved = saved.copyWith(googleEventId: eventId);
-          }
-        } catch (_) {/* GCal failure shouldn't block local create */}
-      }
-
+      final saved = row.toAppointment();
       _subject.add([..._subject.value, saved]);
       return (saved, null);
     } on ServerException catch (e) {
@@ -104,11 +93,6 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     try {
       final row = await _service.update(appointment);
       final saved = row.toAppointment();
-      if (saved.googleEventId != null && await _gcal.isLinked()) {
-        try {
-          await _gcal.updateEvent(saved);
-        } catch (_) {}
-      }
       final list =
           _subject.value.map((a) => a.id == saved.id ? saved : a).toList();
       _subject.add(list);
@@ -121,16 +105,8 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   @override
   Future<Failure?> delete(String id) async {
     try {
-      final existing = _subject.value
-          .where((a) => a.id == id)
-          .cast<Appointment?>()
-          .firstOrNull;
+      // delete-appointment edge fn removes GCal event + reminders server-side.
       await _service.delete(id);
-      if (existing?.googleEventId != null && await _gcal.isLinked()) {
-        try {
-          await _gcal.deleteEvent(existing!.googleEventId!);
-        } catch (_) {}
-      }
       _subject.add(_subject.value.where((a) => a.id != id).toList());
       return null;
     } on ServerException catch (e) {
@@ -143,53 +119,23 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     required String userId,
     String? defaultColor,
   }) async {
-    if (!await _gcal.isLinked()) return null;
-    final now = DateTime.now();
-    final from = now.subtract(const Duration(days: 30));
-    final to = now.add(const Duration(days: 365));
-
+    // google-calendar-sync edge fn handles pull server-side (also called by
+    // pg_cron every 15 min). On-demand trigger; result reflected on next
+    // watchRange emission after refresh.
     try {
-      final remote = await _gcal.listRange(from, to);
-      final (local, _) = await getRange(userId: userId, from: from, to: to);
-      final localByGoogle = {
-        for (final a in local)
-          if (a.googleEventId != null) a.googleEventId!: a
-      };
-
-      // Pull side: insert/update local from remote.
-      for (final ev in remote) {
-        if (ev.id == null ||
-            ev.start?.dateTime == null ||
-            ev.end?.dateTime == null) {
-          continue;
-        }
-        final existing = localByGoogle[ev.id];
-        final data = Appointment(
-          id: existing?.id ?? '',
-          userId: userId,
-          householdId: existing?.householdId,
-          title: ev.summary ?? '(untitled)',
-          notes: ev.description,
-          location: ev.location,
-          startsAt: ev.start!.dateTime!.toLocal(),
-          duration: ev.end!.dateTime!.difference(ev.start!.dateTime!),
-          category: existing?.category ?? AppointmentCategory.other,
-          reminderOffsets:
-              existing?.reminderOffsets ?? const [Duration(hours: 1)],
-          googleEventId: ev.id,
-          color: existing?.color ?? defaultColor,
-          createdAt: existing?.createdAt ?? DateTime.now(),
-        );
-        if (existing == null) {
-          await _service.create(data);
-        } else {
-          await _service.update(data);
-        }
-      }
-      await _refresh(userId: userId, from: from, to: to);
+      await _service.client.functions.invoke(
+        'google-calendar-sync',
+        body: {'user_id': userId},
+      );
+      final now = DateTime.now();
+      await _refresh(
+        userId: userId,
+        from: now.subtract(const Duration(days: 30)),
+        to: now.add(const Duration(days: 365)),
+      );
       return null;
-    } on ServerException catch (e) {
-      return ServerFailure(e.message);
+    } catch (e) {
+      return ServerFailure('Google Calendar sync failed: $e');
     }
   }
 
@@ -209,9 +155,3 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 }
 
-extension _ListExt<T> on Iterable<T> {
-  T? get firstOrNull {
-    final it = iterator;
-    return it.moveNext() ? it.current : null;
-  }
-}

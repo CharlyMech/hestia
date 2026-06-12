@@ -57,7 +57,7 @@ class FuelEntryRepositoryImpl implements FuelEntryRepository {
   @override
   Future<(FuelEntry?, Failure?)> create(FuelEntry e) async {
     try {
-      final data = await _service.create(_toJson(e));
+      final data = await _service.create(entry: _toJson(e));
       return (_fromJson(data), null);
     } catch (err, st) {
       return (null, reportError(err, st, reason: 'createFuelEntry'));
