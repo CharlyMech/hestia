@@ -5,7 +5,6 @@ This script is intentionally dependency-free because it runs inside GitHub
 Actions before the signed iOS build. It updates:
 
 - pubspec.yaml version
-- CHANGELOG.md
 - build/release-notes.md
 
 Version bump policy:
@@ -229,29 +228,6 @@ def update_pubspec(pubspec: Path, version: str, build: int) -> None:
     pubspec.write_text(updated)
 
 
-def changelog_insert_index(text: str) -> int:
-    lines = text.splitlines(keepends=True)
-    for index, line in enumerate(lines):
-        if index > 0 and line.startswith("## "):
-            return sum(len(part) for part in lines[:index])
-    return len(text.rstrip()) + 1
-
-
-def update_changelog(changelog: Path, entry: str) -> None:
-    if changelog.exists():
-        text = changelog.read_text()
-    else:
-        text = (
-            "# Changelog\n\n"
-            "All notable changes to Hestia are recorded here. This file is "
-            "updated automatically by the TestFlight release workflow.\n"
-        )
-
-    insert_at = changelog_insert_index(text)
-    prefix = text[:insert_at].rstrip() + "\n\n"
-    suffix = text[insert_at:].lstrip("\n")
-    changelog.write_text(prefix + entry.rstrip() + "\n\n" + suffix)
-
 
 def write_outputs(outputs: dict[str, str]) -> None:
     output_path = os.environ.get("GITHUB_OUTPUT")
@@ -265,7 +241,6 @@ def write_outputs(outputs: dict[str, str]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pubspec", default="pubspec.yaml")
-    parser.add_argument("--changelog", default="CHANGELOG.md")
     parser.add_argument("--release-notes", default="build/release-notes.md")
     parser.add_argument("--build-number", default=os.environ.get("GITHUB_RUN_NUMBER"))
     parser.add_argument("--date", default=dt.date.today().isoformat())
@@ -274,7 +249,6 @@ def main() -> None:
     args = parser.parse_args()
 
     pubspec = Path(args.pubspec)
-    changelog = Path(args.changelog)
     release_notes = Path(args.release_notes)
     current = parse_current_version(pubspec)
 
@@ -295,7 +269,6 @@ def main() -> None:
 
     if not args.dry_run:
         update_pubspec(pubspec, version, build)
-        update_changelog(changelog, entry)
         release_notes.parent.mkdir(parents=True, exist_ok=True)
         release_notes.write_text(entry)
 
