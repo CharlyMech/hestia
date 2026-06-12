@@ -30,6 +30,9 @@ jobs:
           mkdir -p build/ios/SourcePackages
           flutter pub get
 
+      - name: Check ARB lockstep
+        run: python3 scripts/check_arb_lockstep.py
+
       - name: Prepare version and changelog
         id: release
         env:
