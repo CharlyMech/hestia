@@ -18,13 +18,14 @@ declare t text;
 begin
   foreach t in array array[
     'profiles','households','household_members','financial_institutions',
-    'bank_accounts','account_members','categories','transaction_sources',
-    'transactions','transfers','financial_goals','goal_contributions',
-    'cars','car_members','fuel_entries','pets','pet_health_records',
+    'bank_accounts','account_members','payment_cards','categories',
+    'transaction_sources','transactions','transfers','financial_goals',
+    'goal_contributions','cars','car_members','car_maintenance_records',
+    'fuel_entries','pets','pet_health_records',
     'pet_measurements','homes','shopping_lists','shopping_list_items',
     'shopping_sessions','appointments','appointment_pets','notifications',
     'notification_settings','device_tokens','scheduled_notifications',
-    'app_versions'
+    'google_credentials','app_versions'
   ] loop
     execute format('alter table %1$s enable row level security;', t);
   end loop;
@@ -98,6 +99,11 @@ create policy p_account_members on account_members for all
   using (exists (select 1 from bank_accounts b where b.id = account_id and is_household_member(b.household_id)))
   with check (exists (select 1 from bank_accounts b where b.id = account_id and is_household_member(b.household_id)));
 
+drop policy if exists p_payment_cards on payment_cards;
+create policy p_payment_cards on payment_cards for all
+  using (exists (select 1 from bank_accounts b where b.id = account_id and is_household_member(b.household_id)))
+  with check (exists (select 1 from bank_accounts b where b.id = account_id and is_household_member(b.household_id)));
+
 drop policy if exists p_goal_contributions on goal_contributions;
 create policy p_goal_contributions on goal_contributions for all
   using (exists (select 1 from financial_goals g where g.id = goal_id and is_household_member(g.household_id)))
@@ -105,6 +111,11 @@ create policy p_goal_contributions on goal_contributions for all
 
 drop policy if exists p_car_members on car_members;
 create policy p_car_members on car_members for all
+  using (exists (select 1 from cars c where c.id = car_id and is_household_member(c.household_id)))
+  with check (exists (select 1 from cars c where c.id = car_id and is_household_member(c.household_id)));
+
+drop policy if exists p_car_maintenance on car_maintenance_records;
+create policy p_car_maintenance on car_maintenance_records for all
   using (exists (select 1 from cars c where c.id = car_id and is_household_member(c.household_id)))
   with check (exists (select 1 from cars c where c.id = car_id and is_household_member(c.household_id)));
 
@@ -156,6 +167,12 @@ drop policy if exists p_sched_notif on scheduled_notifications;
 create policy p_sched_notif on scheduled_notifications for select
   using (user_id = auth.uid());
 -- inserts/sends happen via triggers + service role (edge fn), not the client.
+
+-- ── google_credentials: service-role only ──────────────────────────────────
+-- RLS enabled with NO policies = deny-all for authenticated users. Only the
+-- google-oauth-exchange / google-calendar-sync / upsert-appointment edge
+-- functions (service role) touch this table. Clients check link state via
+-- the google-oauth-exchange function's status endpoint, never directly.
 
 -- ── app_versions: read-only for clients ────────────────────────────────────
 drop policy if exists p_app_versions on app_versions;

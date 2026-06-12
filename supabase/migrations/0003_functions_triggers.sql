@@ -16,10 +16,11 @@ declare t text;
 begin
   foreach t in array array[
     'profiles','households','financial_institutions','bank_accounts',
-    'categories','transaction_sources','transactions','transfers',
-    'financial_goals','cars','fuel_entries','pets','pet_health_records',
+    'payment_cards','categories','transaction_sources','transactions',
+    'transfers','financial_goals','cars','car_maintenance_records',
+    'fuel_entries','pets','pet_health_records',
     'homes','shopping_lists','shopping_list_items',
-    'notification_settings','device_tokens'
+    'notification_settings','device_tokens','google_credentials'
   ] loop
     execute format(
       'drop trigger if exists trg_touch_%1$s on %1$s;
@@ -58,6 +59,48 @@ drop trigger if exists trg_auth_user_created on auth.users;
 create trigger trg_auth_user_created
   after insert on auth.users
   for each row execute function handle_new_auth_user();
+
+-- ── payment cards: first card of an account becomes primary ──────────────
+-- The partial unique index uq_payment_cards_primary enforces AT MOST one
+-- primary per account; this trigger guarantees AT LEAST one once any exists.
+-- "Set primary" from the client is a clear-then-set two-statement flow.
+create or replace function ensure_primary_card()
+returns trigger language plpgsql as $$
+begin
+  if not exists (
+    select 1 from payment_cards
+     where account_id = new.account_id and is_primary
+  ) then
+    new.is_primary := true;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_ensure_primary_card on payment_cards;
+create trigger trg_ensure_primary_card
+  before insert on payment_cards
+  for each row execute function ensure_primary_card();
+
+-- ── transactions: the card must belong to the transaction's account ───────
+create or replace function check_card_account()
+returns trigger language plpgsql as $$
+begin
+  if new.payment_card_id is not null and not exists (
+    select 1 from payment_cards
+     where id = new.payment_card_id and account_id = new.bank_account_id
+  ) then
+    raise exception 'payment_card % does not belong to bank_account %',
+      new.payment_card_id, new.bank_account_id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_check_card_account on transactions;
+create trigger trg_check_card_account
+  before insert or update of payment_card_id, bank_account_id on transactions
+  for each row execute function check_card_account();
 
 -- ── balance recompute SAFETY NET ─────────────────────────────────────────
 -- AUTHORITATIVE path is the create-transaction / delete-transaction /

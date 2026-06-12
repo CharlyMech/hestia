@@ -26,6 +26,47 @@ export function json(body: unknown, status = 200): Response {
 
 export const nowUnix = () => Math.floor(Date.now() / 1000);
 
+/**
+ * Insert a transaction row and recompute its account balance. Shared by the
+ * composite-write functions (create-fuel-entry, create-health-record,
+ * create-maintenance-record, complete-shopping-session) so a record and its
+ * expense are created in one round-trip from the app.
+ */
+export async function insertTransaction(
+  db: SupabaseClient,
+  row: Record<string, unknown>,
+): Promise<{ transaction?: Record<string, unknown>; error?: string }> {
+  if (!row.bank_account_id) return { error: "Missing transaction.bank_account_id" };
+  const ts = nowUnix();
+  const { data, error } = await db
+    .from("transactions")
+    .insert({ ...row, created_at: ts, last_update: ts })
+    .select()
+    .single();
+  if (error) return { error: error.message };
+  await recomputeBalance(db, data.bank_account_id as string);
+  return { transaction: data };
+}
+
+/** Fire-and-forget call to the notify edge function (inbox + FCM push). */
+export async function invokeNotify(payload: {
+  type: string;
+  household_id?: string | null;
+  user_ids: string[];
+  title: string;
+  body: string;
+  payload?: Record<string, unknown>;
+}): Promise<void> {
+  await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/notify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+    },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
 /** Recompute a bank account's current_balance from transactions + transfers. */
 export async function recomputeBalance(
   db: SupabaseClient,

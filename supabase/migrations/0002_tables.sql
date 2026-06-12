@@ -1,6 +1,6 @@
 -- 0002_tables.sql
 -- Hestia schema. Source of truth — derived from lib/data/dtos/* and the
--- repository/service column literals. NO payment_cards (removed).
+-- repository/service column literals.
 --
 -- Convention: timestamps are stored as unix seconds (bigint) to match the
 -- Flutter DTOs (.toUnix / .fromUnix). gen_random_uuid() for ids.
@@ -89,6 +89,34 @@ create table if not exists account_members (
   unique (account_id, user_id)
 );
 
+-- ── payment_cards ────────────────────────────────────────────────────────
+-- An account has 0..N cards. On shared accounts each card may belong to a
+-- specific household member (owner_profile_id). At most one primary per
+-- account (partial unique index); the first card is auto-marked primary by
+-- the ensure_primary_card trigger in 0003.
+create table if not exists payment_cards (
+  id               uuid primary key default gen_random_uuid(),
+  account_id       uuid not null references bank_accounts (id) on delete cascade,
+  owner_profile_id uuid references profiles (id) on delete set null,
+  network          text not null default 'other',  -- visa|mastercard|amex|maestro|unionpay|discover|other
+  last4            text not null,
+  expiry_month     int not null,
+  expiry_year      int not null,
+  cardholder_name  text not null,
+  is_virtual       boolean not null default false,
+  is_primary       boolean not null default false, -- the account's primary card
+  is_active        boolean not null default true,
+  color            text,
+  sort_order       int not null default 0,
+  created_at       bigint not null default (extract(epoch from now())::bigint),
+  last_update      bigint not null default (extract(epoch from now())::bigint)
+);
+
+create unique index if not exists uq_payment_cards_primary
+  on payment_cards (account_id) where is_primary;
+
+create index if not exists idx_payment_cards_account on payment_cards (account_id);
+
 -- ── categories ───────────────────────────────────────────────────────────
 create table if not exists categories (
   id           uuid primary key default gen_random_uuid(),
@@ -122,13 +150,16 @@ create table if not exists transaction_sources (
   last_update  bigint not null default (extract(epoch from now())::bigint)
 );
 
--- ── transactions (NO payment_card_id; has currency + lat/lng + actors) ────
+-- ── transactions (currency + lat/lng + actors; optional payment card) ─────
+-- payment_card_id must belong to bank_account_id — enforced by the
+-- check_card_account constraint trigger in 0003.
 create table if not exists transactions (
   id                    uuid primary key default gen_random_uuid(),
   household_id          uuid not null references households (id) on delete cascade,
   user_id               uuid not null references profiles (id) on delete cascade,
   category_id           uuid references categories (id) on delete set null,
   bank_account_id       uuid not null references bank_accounts (id) on delete cascade,
+  payment_card_id       uuid references payment_cards (id) on delete set null,
   transaction_source_id uuid references transaction_sources (id) on delete set null,
   amount                numeric not null,
   currency              text not null default 'EUR',
@@ -222,6 +253,28 @@ create table if not exists car_members (
   unique (car_id, user_id)
 );
 
+-- Maintenance records (mechanic|itv|tires|oil|insurance|other) mirroring the
+-- pet_health_records pattern: optional cost transaction + calendar appointment.
+create table if not exists car_maintenance_records (
+  id             uuid primary key default gen_random_uuid(),
+  car_id         uuid not null references cars (id) on delete cascade,
+  type           text not null,
+  title          text not null,
+  workshop       text,
+  cost           numeric,
+  transaction_id uuid references transactions (id) on delete set null,
+  appointment_id uuid,   -- FK added after appointments table below
+  odometer_km    numeric,
+  notes          text,
+  recorded_at    bigint not null,
+  next_due_at    bigint,
+  created_by     uuid references profiles (id) on delete set null,
+  created_at     bigint not null default (extract(epoch from now())::bigint),
+  last_update    bigint not null default (extract(epoch from now())::bigint)
+);
+
+create index if not exists idx_car_maintenance_car on car_maintenance_records (car_id);
+
 create table if not exists fuel_entries (
   id                uuid primary key default gen_random_uuid(),
   car_id            uuid not null references cars (id) on delete cascade,
@@ -257,19 +310,25 @@ create table if not exists pets (
   last_update  bigint not null default (extract(epoch from now())::bigint)
 );
 
+-- Health-only records (vet|vaccine|medicine|deworming|surgery|other).
+-- Weight/size tracking lives in pet_measurements; pet purchases (food, toys)
+-- are plain transactions with pet_id. Vet costs may link a transaction and
+-- the calendar appointment of the visit.
 create table if not exists pet_health_records (
-  id          uuid primary key default gen_random_uuid(),
-  pet_id      uuid not null references pets (id) on delete cascade,
-  type        text not null,
-  title       text not null,
-  vet_name    text,
-  cost        numeric,
-  notes       text,
-  recorded_at bigint not null,
-  next_due_at bigint,
-  created_by  uuid references profiles (id) on delete set null,
-  created_at  bigint not null default (extract(epoch from now())::bigint),
-  last_update bigint not null default (extract(epoch from now())::bigint)
+  id             uuid primary key default gen_random_uuid(),
+  pet_id         uuid not null references pets (id) on delete cascade,
+  type           text not null,
+  title          text not null,
+  vet_name       text,
+  cost           numeric,
+  transaction_id uuid references transactions (id) on delete set null,
+  appointment_id uuid,   -- FK added after appointments table below
+  notes          text,
+  recorded_at    bigint not null,
+  next_due_at    bigint,
+  created_by     uuid references profiles (id) on delete set null,
+  created_at     bigint not null default (extract(epoch from now())::bigint),
+  last_update    bigint not null default (extract(epoch from now())::bigint)
 );
 
 create table if not exists pet_measurements (
@@ -354,6 +413,8 @@ create table if not exists appointments (
   category                 text not null default 'other',
   reminder_offsets_minutes int[] not null default '{60}',
   google_event_id          text,
+  source                   text not null default 'hestia'
+                           check (source in ('hestia', 'google')),
   pet_id                   uuid references pets (id) on delete set null,
   car_id                   uuid references cars (id) on delete set null,
   is_all_day               boolean not null default false,
@@ -362,6 +423,15 @@ create table if not exists appointments (
   created_at               timestamptz not null default now(),
   last_update              timestamptz not null default now()
 );
+
+-- Deferred FKs from records to appointments (appointments is created later).
+alter table pet_health_records
+  add constraint fk_pet_health_appointment
+  foreign key (appointment_id) references appointments (id) on delete set null;
+
+alter table car_maintenance_records
+  add constraint fk_car_maintenance_appointment
+  foreign key (appointment_id) references appointments (id) on delete set null;
 
 -- Multi-pet links for an appointment (bug #10: pets are multi-select).
 create table if not exists appointment_pets (
@@ -422,6 +492,19 @@ create table if not exists scheduled_notifications (
 create index if not exists idx_sched_notif_due
   on scheduled_notifications (deliver_at)
   where sent_at is null;
+
+-- ── google_credentials (server-side Google Calendar sync) ──────────────────
+-- Stores the OAuth refresh token obtained by the google-oauth-exchange edge
+-- function. RLS: deny-all for authenticated — only service-role reads it.
+create table if not exists google_credentials (
+  user_id        uuid primary key references profiles (id) on delete cascade,
+  refresh_token  text not null,
+  calendar_id    text not null default 'primary',
+  sync_enabled   boolean not null default true,
+  last_synced_at bigint,
+  created_at     bigint not null default (extract(epoch from now())::bigint),
+  last_update    bigint not null default (extract(epoch from now())::bigint)
+);
 
 -- ── app_versions ────────────────────────────────────────────────────────────
 create table if not exists app_versions (
