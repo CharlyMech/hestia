@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
 
@@ -47,9 +48,9 @@ class BankAccountPicker extends StatelessWidget {
       itemBuilder: (context, i) {
         final s = visible[i];
         final selected = s.id == selectedId;
-        return CupertinoButton(
+        return AnimatedButton(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          onPressed: () {
+          onTap: () {
             onSelected(s);
             Navigator.of(context).pop();
           },

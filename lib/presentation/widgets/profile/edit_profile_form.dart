@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/data/services/image_upload_service.dart';
@@ -76,14 +76,14 @@ class _EditProfileFormState extends State<EditProfileForm> {
             children: [
               Row(
                 children: [
-                  CupertinoButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
+                  AnimatedButton(
+                    onTap: () => Navigator.of(ctx).pop(),
                     child: Text(AppLocalizations.of(ctx).common_cancel,
                         style: AppFonts.body(fontSize: 14, color: fg)),
                   ),
                   const Spacer(),
-                  CupertinoButton(
-                    onPressed: () {
+                  AnimatedButton(
+                    onTap: () {
                       setState(() => _birthDate = tmp);
                       Navigator.of(ctx).pop();
                     },
@@ -309,11 +309,9 @@ class _EditProfileFormState extends State<EditProfileForm> {
           SizedBox(
             width: double.infinity,
             height: 50,
-            child: CupertinoButton(
-              color: accent,
-              borderRadius: BorderRadius.circular(AppRadii.xl),
+            child: AnimatedButton(
               padding: EdgeInsets.zero,
-              onPressed: _saving ? null : _save,
+              onTap: _saving ? null : _save,
               child: _saving
                   ? const CupertinoActivityIndicator()
                   : Text(

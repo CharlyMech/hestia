@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:latlong2/latlong.dart';
@@ -64,9 +65,9 @@ class _TransactionMapPickerScreenState
       titleText: 'Pick location',
       trailing: Padding(
         padding: const EdgeInsets.only(right: 12),
-        child: CupertinoButton(
+        child: AnimatedButton(
           padding: EdgeInsets.zero,
-          onPressed: () =>
+          onTap: () =>
               Navigator.of(context).pop((_center.latitude, _center.longitude)),
           child: Text(
             'Done',

@@ -9,6 +9,7 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 
@@ -216,10 +217,8 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
             const SizedBox(height: 28),
             SizedBox(
               width: double.infinity,
-              child: CupertinoButton(
-                color: accent,
-                borderRadius: BorderRadius.circular(AppRadii.xl),
-                onPressed: _save,
+              child: AnimatedButton(
+                onTap: _save,
                 child: Text(
                   widget.existing == null ? 'Add Record' : 'Save Changes',
                   style: AppFonts.body(
@@ -298,9 +297,9 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
           borderRadius: BorderRadius.circular(AppRadii.md),
           border: Border.all(color: border),
         ),
-        child: CupertinoButton(
+        child: AnimatedButton(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          onPressed: () => _pickType(fg, surface),
+          onTap: () => _pickType(fg, surface),
           child: Row(
             children: [
               Expanded(
@@ -409,9 +408,9 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (onClear != null)
-                    CupertinoButton(
+                    AnimatedButton(
                       padding: EdgeInsets.zero,
-                      onPressed: () {
+                      onTap: () {
                         onClear();
                         Navigator.pop(context);
                       },
@@ -420,9 +419,9 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
                     )
                   else
                     const SizedBox(width: 60),
-                  CupertinoButton(
+                  AnimatedButton(
                     padding: EdgeInsets.zero,
-                    onPressed: () {
+                    onTap: () {
                       setState(() => onChanged(temp));
                       Navigator.pop(context);
                     },

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
@@ -45,9 +46,9 @@ class _AddEditShoppingListScreenState extends State<AddEditShoppingListScreen> {
       foregroundColor: fg,
       titleText:
           widget.existing != null ? 'Edit shopping list' : 'New shopping list',
-      trailing: CupertinoButton(
+      trailing: AnimatedButton(
         padding: EdgeInsets.zero,
-        onPressed: () => _formKey.currentState?.submit(),
+        onTap: () => _formKey.currentState?.submit(),
         child: Padding(
           padding: const EdgeInsets.only(right: 12),
           child: Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/constants/themes.dart';
@@ -243,9 +244,8 @@ class _CategoryFormContentState extends State<CategoryFormContent> {
             children: [
               if (isEdit)
                 Expanded(
-                  child: CupertinoButton(
-                    color: surface,
-                    onPressed: _saving ? null : _confirmDelete,
+                  child: AnimatedButton(
+                    onTap: _saving ? null : _confirmDelete,
                     child: Text(
                       'Delete',
                       style: AppFonts.body(

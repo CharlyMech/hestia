@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
@@ -42,10 +43,9 @@ class GoalDetailScreen extends StatelessWidget {
       titleText: 'Goal',
       trailing: Padding(
         padding: const EdgeInsets.only(right: 4),
-        child: CupertinoButton(
+        child: AnimatedButton(
           padding: EdgeInsets.zero,
-          minimumSize: const Size(44, 36),
-          onPressed: () {},
+          onTap: () {},
           child: MoreVert(width: 20, height: 20, color: fg),
         ),
       ),
@@ -279,11 +279,9 @@ class GoalDetailScreen extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: CupertinoButton(
-                    color: accent,
-                    borderRadius: BorderRadius.circular(AppRadii.xl),
+                  child: AnimatedButton(
                     padding: EdgeInsets.zero,
-                    onPressed: () {},
+                    onTap: () {},
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

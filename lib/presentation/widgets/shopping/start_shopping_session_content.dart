@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/config/dependencies.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -107,8 +108,8 @@ class _StartShoppingSessionContentState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CupertinoButton(
-                onPressed: () {
+              AnimatedButton(
+                onTap: () {
                   setState(() => _sourceId = null);
                   Navigator.of(context).pop();
                 },
@@ -116,8 +117,8 @@ class _StartShoppingSessionContentState
                     Text('None', style: AppFonts.body(fontSize: 15, color: fg)),
               ),
               for (final s in _sources)
-                CupertinoButton(
-                  onPressed: () {
+                AnimatedButton(
+                  onTap: () {
                     setState(() => _sourceId = s.id);
                     Navigator.of(context).pop();
                   },
@@ -153,8 +154,8 @@ class _StartShoppingSessionContentState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CupertinoButton(
-                onPressed: () {
+              AnimatedButton(
+                onTap: () {
                   setState(() => _bankAccountId = null);
                   Navigator.of(context).pop();
                 },
@@ -162,8 +163,8 @@ class _StartShoppingSessionContentState
                     Text('None', style: AppFonts.body(fontSize: 15, color: fg)),
               ),
               for (final a in _accounts)
-                CupertinoButton(
-                  onPressed: () {
+                AnimatedButton(
+                  onTap: () {
                     setState(() => _bankAccountId = a.id);
                     Navigator.of(context).pop();
                   },

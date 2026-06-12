@@ -376,11 +376,9 @@ class _MonthGridState extends State<_MonthGrid> {
               child: Row(
                 spacing: 4,
                 children: [
-                  CupertinoButton(
+                  AnimatedButton(
                     padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(AppRadii.lg),
-                    onPressed: state.loading ? null : () => _shiftMonth(-1),
-                    color: widget.surface,
+                    onTap: state.loading ? null : () => _shiftMonth(-1),
                     child: Icon(
                       CupertinoIcons.chevron_back,
                       size: 20,
@@ -405,22 +403,18 @@ class _MonthGridState extends State<_MonthGrid> {
                       ),
                     ),
                   ),
-                  CupertinoButton(
+                  AnimatedButton(
                     padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(AppRadii.lg),
-                    onPressed: state.loading ? null : () => _shiftMonth(1),
-                    color: widget.surface,
+                    onTap: state.loading ? null : () => _shiftMonth(1),
                     child: Icon(
                       CupertinoIcons.chevron_forward,
                       size: 20,
                       color: state.loading ? widget.muted : widget.fg,
                     ),
                   ),
-                  CupertinoButton(
+                  AnimatedButton(
                     padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(AppRadii.lg),
-                    onPressed: () => setState(() => _expanded = !_expanded),
-                    color: widget.surface,
+                    onTap: () => setState(() => _expanded = !_expanded),
                     child: Icon(
                       _expanded
                           ? CupertinoIcons.chevron_up

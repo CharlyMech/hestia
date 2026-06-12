@@ -12,6 +12,7 @@ import 'package:hestia/presentation/blocs/appointment_form/appointment_form_bloc
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
@@ -350,12 +351,12 @@ class _Form extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CupertinoButton(
-                onPressed: () => Navigator.of(context).pop(),
+              AnimatedButton(
+                onTap: () => Navigator.of(context).pop(),
                 child: Text(l10n.common_cancel),
               ),
-              CupertinoButton(
-                onPressed: () => Navigator.of(context).pop(selected),
+              AnimatedButton(
+                onTap: () => Navigator.of(context).pop(selected),
                 child: Text(l10n.common_done),
               ),
             ],

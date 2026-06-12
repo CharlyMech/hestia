@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 
 class GlobalErrorScreen extends StatelessWidget {
   final String title;
@@ -22,7 +23,6 @@ class GlobalErrorScreen extends StatelessWidget {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final orange = hexToColor(theme.colorOrange);
-    final primary = hexToColor(theme.primaryColor);
 
     return CupertinoPageScaffold(
       backgroundColor: bg,
@@ -63,10 +63,8 @@ class GlobalErrorScreen extends StatelessWidget {
                     ),
                     if (onRetry != null) ...[
                       const SizedBox(height: 24),
-                      CupertinoButton(
-                        color: primary,
-                        borderRadius: BorderRadius.circular(12),
-                        onPressed: onRetry,
+                      AnimatedButton(
+                        onTap: onRetry,
                         child: Text(
                           'Retry',
                           style: AppFonts.body(

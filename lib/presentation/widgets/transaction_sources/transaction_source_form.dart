@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -205,9 +206,8 @@ class _TransactionSourceFormState extends State<TransactionSourceForm> {
             children: [
               if (isEdit)
                 Expanded(
-                  child: CupertinoButton(
-                    color: surface,
-                    onPressed: _confirmDelete,
+                  child: AnimatedButton(
+                    onTap: _confirmDelete,
                     child: Text(
                       'Delete',
                       style: AppFonts.body(

@@ -18,6 +18,7 @@ import 'package:hestia/presentation/blocs/transaction_form/transaction_form_bloc
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_event.dart';
 import 'package:hestia/presentation/blocs/transaction_form/transaction_form_state.dart';
 import 'package:hestia/presentation/blocs/transaction_sources/transaction_sources_bloc.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
@@ -524,10 +525,9 @@ class _FormBody extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: CupertinoButton(
+                          child: AnimatedButton(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            color: surface,
-                            onPressed: state.locationLoading
+                            onTap: state.locationLoading
                                 ? null
                                 : () => bloc.add(
                                       const TransactionFormLocationFetchRequested(),
@@ -545,10 +545,9 @@ class _FormBody extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: CupertinoButton(
+                          child: AnimatedButton(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            color: surface,
-                            onPressed: state.locationLoading
+                            onTap: state.locationLoading
                                 ? null
                                 : () => _openLocationMap(context, bloc, state),
                             child: Text(
@@ -577,9 +576,9 @@ class _FormBody extends StatelessWidget {
                 _ErrorLine(text: state.errors['location']!, color: expense),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: CupertinoButton(
+                  child: AnimatedButton(
                     padding: const EdgeInsets.only(top: 4, bottom: 4),
-                    onPressed: () => AppDependencies.instance.locationService
+                    onTap: () => AppDependencies.instance.locationService
                         .openSystemAppSettings(),
                     child: Text(
                       l10n.settings_locationOpenSettings,
@@ -619,11 +618,9 @@ class _FormBody extends StatelessWidget {
                       child: SizedBox(
                         height: 50,
                         width: 50,
-                        child: CupertinoButton(
-                          color: surface,
+                        child: AnimatedButton(
                           padding: EdgeInsets.zero,
-                          borderRadius: BorderRadius.circular(AppRadii.xl),
-                          onPressed: state.status ==
+                          onTap: state.status ==
                                   TransactionFormStatus.submitting
                               ? null
                               : () => bloc.add(const TransactionFormDelete()),
@@ -634,11 +631,9 @@ class _FormBody extends StatelessWidget {
                   Expanded(
                     child: SizedBox(
                       height: 50,
-                      child: CupertinoButton(
-                        color: accent,
-                        borderRadius: BorderRadius.circular(AppRadii.xl),
+                      child: AnimatedButton(
                         padding: EdgeInsets.zero,
-                        onPressed:
+                        onTap:
                             state.status == TransactionFormStatus.submitting
                                 ? null
                                 : () => bloc.add(const TransactionFormSubmit()),
@@ -938,8 +933,8 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
           itemBuilder: (_, i) {
             if (i == 0) {
               final selected = selectedId == null;
-              return CupertinoButton(
-                onPressed: () => onSelected(null),
+              return AnimatedButton(
+                onTap: () => onSelected(null),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -959,9 +954,9 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
             }
             final s = sources[i - 1];
             final selected = s.id == selectedId;
-            return CupertinoButton(
+            return AnimatedButton(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              onPressed: () => onSelected(s.id),
+              onTap: () => onSelected(s.id),
               child: Row(
                 children: [
                   Expanded(
@@ -980,10 +975,9 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
                     style: AppFonts.body(fontSize: 11, color: muted),
                   ),
                   const SizedBox(width: 8),
-                  CupertinoButton(
+                  AnimatedButton(
                     padding: EdgeInsets.zero,
-                    minimumSize: const Size(36, 36),
-                    onPressed: () => _openEditor(context, existing: s),
+                    onTap: () => _openEditor(context, existing: s),
                     child: EditPencil(width: 16, height: 16, color: muted),
                   ),
                 ],

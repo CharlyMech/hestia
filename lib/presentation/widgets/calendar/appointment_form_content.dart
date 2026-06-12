@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -426,13 +427,13 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
+                    AnimatedButton(
+                      onTap: () => Navigator.of(ctx).pop(),
                       child: Text(AppLocalizations.of(ctx).common_cancel,
                           style: AppFonts.body(fontSize: 15, color: fg)),
                     ),
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(selected),
+                    AnimatedButton(
+                      onTap: () => Navigator.of(ctx).pop(selected),
                       child: Text(AppLocalizations.of(ctx).common_done,
                           style: AppFonts.body(
                               fontSize: 15,
@@ -496,13 +497,13 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
+                    AnimatedButton(
+                      onTap: () => Navigator.of(ctx).pop(),
                       child: Text(AppLocalizations.of(ctx).common_cancel,
                           style: AppFonts.body(fontSize: 15, color: fg)),
                     ),
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(selected),
+                    AnimatedButton(
+                      onTap: () => Navigator.of(ctx).pop(selected),
                       child: Text(AppLocalizations.of(ctx).common_done,
                           style: AppFonts.body(
                               fontSize: 15,

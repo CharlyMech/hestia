@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 
 class CreateUserForm extends StatefulWidget {
   const CreateUserForm({super.key});
@@ -53,7 +53,6 @@ class _CreateUserFormState extends State<CreateUserForm> {
     final theme = context.myTheme;
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
-    final accent = hexToColor(theme.primaryColor);
     final onPrimary = hexToColor(theme.onPrimaryColor);
     final surface = hexToColor(theme.surfaceColor);
     final border = hexToColor(theme.borderColor);
@@ -113,11 +112,9 @@ class _CreateUserFormState extends State<CreateUserForm> {
           SizedBox(
             width: double.infinity,
             height: 50,
-            child: CupertinoButton(
-              color: accent,
-              borderRadius: BorderRadius.circular(AppRadii.xl),
+            child: AnimatedButton(
               padding: EdgeInsets.zero,
-              onPressed: _submitting ? null : _submit,
+              onTap: _submitting ? null : _submit,
               child: _submitting
                   ? const CupertinoActivityIndicator()
                   : Text(

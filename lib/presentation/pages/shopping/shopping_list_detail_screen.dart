@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/category.dart';
@@ -270,10 +271,9 @@ class _BodyState extends State<_Body> {
               ? null
               : Padding(
                   padding: const EdgeInsets.only(right: 4),
-                  child: CupertinoButton(
+                  child: AnimatedButton(
                     padding: EdgeInsets.zero,
-                    minimumSize: const Size(44, 36),
-                    onPressed: () => _confirmCancel(context, list),
+                    onTap: () => _confirmCancel(context, list),
                     child: Trash(
                       width: 20,
                       height: 20,
@@ -345,12 +345,9 @@ class _BodyState extends State<_Body> {
                               ),
                             ),
                           ),
-                          CupertinoButton(
+                          AnimatedButton(
                             padding: EdgeInsets.zero,
-                            minimumSize: const Size.square(44),
-                            borderRadius: BorderRadius.circular(AppRadii.lg),
-                            color: accent,
-                            onPressed: () => _submitNewItem(_newItemCtrl.text),
+                            onTap: () => _submitNewItem(_newItemCtrl.text),
                             child: Plus(
                               width: 18,
                               height: 18,
@@ -362,11 +359,9 @@ class _BodyState extends State<_Body> {
                       if (isTemplate)
                         SizedBox(
                           height: 50,
-                          child: CupertinoButton(
-                            color: accent,
-                            borderRadius: BorderRadius.circular(AppRadii.xl),
+                          child: AnimatedButton(
                             padding: EdgeInsets.zero,
-                            onPressed: () =>
+                            onTap: () =>
                                 _openStartFromTemplate(context, list),
                             child: Text(
                               'Start shopping session',
@@ -381,11 +376,9 @@ class _BodyState extends State<_Body> {
                       else
                         SizedBox(
                           height: 50,
-                          child: CupertinoButton(
-                            color: accent,
-                            borderRadius: BorderRadius.circular(AppRadii.xl),
+                          child: AnimatedButton(
                             padding: EdgeInsets.zero,
-                            onPressed: items.isEmpty
+                            onTap: items.isEmpty
                                 ? null
                                 : () => _openFinishSession(context, list),
                             child: Text(

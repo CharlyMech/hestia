@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 
 class TransactionDatePicker extends StatefulWidget {
@@ -29,7 +30,6 @@ class _TransactionDatePickerState extends State<TransactionDatePicker> {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final fg = hexToColor(theme.onBackgroundColor);
-    final accent = hexToColor(theme.primaryColor);
     final onPrimary = hexToColor(theme.onPrimaryColor);
 
     return SizedBox(
@@ -58,10 +58,8 @@ class _TransactionDatePickerState extends State<TransactionDatePicker> {
             child: SizedBox(
               width: double.infinity,
               height: 48,
-              child: CupertinoButton(
-                color: accent,
-                borderRadius: BorderRadius.circular(12),
-                onPressed: () {
+              child: AnimatedButton(
+                onTap: () {
                   widget.onConfirm(_date);
                   Navigator.of(context).pop();
                 },

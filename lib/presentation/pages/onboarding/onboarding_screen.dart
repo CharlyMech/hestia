@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
@@ -206,8 +207,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Positioned(
             top: viewPadding.top + 4,
             right: 8,
-            child: CupertinoButton(
-              onPressed: _busy ? null : _complete,
+            child: AnimatedButton(
+              onTap: _busy ? null : _complete,
               child: Text('Skip',
                   style: AppFonts.body(
                       fontSize: 14, fontWeight: FontWeight.w600, color: muted)),
@@ -283,9 +284,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         children: [
                           Opacity(
                             opacity: _page == 0 ? 0 : 1,
-                            child: CupertinoButton(
+                            child: AnimatedButton(
                               padding: EdgeInsets.zero,
-                              onPressed: _page == 0 ? null : _prev,
+                              onTap: _page == 0 ? null : _prev,
                               child: Text('Previous',
                                   style: AppFonts.body(
                                       fontSize: 14, color: muted)),

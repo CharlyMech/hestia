@@ -11,6 +11,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 
@@ -203,8 +204,8 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
                 onDateTimeChanged: (d) => tmp = d,
               ),
             ),
-            CupertinoButton(
-              onPressed: () => Navigator.of(context).pop(),
+            AnimatedButton(
+              onTap: () => Navigator.of(context).pop(),
               child: const Text('Done'),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/category.dart';
 
@@ -41,9 +42,9 @@ class CategoryPicker extends StatelessWidget {
       itemBuilder: (context, i) {
         final c = categories[i];
         final selected = c.id == selectedId;
-        return CupertinoButton(
+        return AnimatedButton(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          onPressed: () {
+          onTap: () {
             onSelected(c);
             Navigator.of(context).pop();
           },

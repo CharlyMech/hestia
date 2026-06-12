@@ -12,6 +12,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Apple;
 
@@ -228,10 +229,8 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
             SizedBox(
               width: double.infinity,
               height: 52,
-              child: CupertinoButton(
-                color: widget.primary,
-                borderRadius: BorderRadius.circular(AppRadii.lg),
-                onPressed: isLoading
+              child: AnimatedButton(
+                onTap: isLoading
                     ? null
                     : () => context.read<AuthBloc>().add(
                           AuthSignInWithEmail(
@@ -269,10 +268,8 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
             SizedBox(
               width: double.infinity,
               height: 52,
-              child: CupertinoButton(
-                color: hexToColor('#1a1a1a'),
-                borderRadius: BorderRadius.circular(AppRadii.lg),
-                onPressed: isLoading
+              child: AnimatedButton(
+                onTap: isLoading
                     ? null
                     : () => context
                         .read<AuthBloc>()

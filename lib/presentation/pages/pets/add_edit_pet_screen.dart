@@ -10,6 +10,7 @@ import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/pet.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
@@ -277,9 +278,9 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
           borderRadius: BorderRadius.circular(AppRadii.md),
           border: Border.all(color: border),
         ),
-        child: CupertinoButton(
+        child: AnimatedButton(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          onPressed: () => _pickSpecies(fg, surface),
+          onTap: () => _pickSpecies(fg, surface),
           child: Row(
             children: [
               Expanded(
@@ -364,18 +365,18 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CupertinoButton(
+                AnimatedButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () {
+                  onTap: () {
                     setState(() => _birthDate = null);
                     Navigator.pop(context);
                   },
                   child: Text('Clear',
                       style: AppFonts.body(fontSize: 15, color: fg)),
                 ),
-                CupertinoButton(
+                AnimatedButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () {
+                  onTap: () {
                     setState(() => _birthDate = temp);
                     Navigator.pop(context);
                   },

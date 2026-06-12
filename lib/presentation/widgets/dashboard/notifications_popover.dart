@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -98,8 +99,8 @@ class NotificationsPopover extends StatelessWidget {
                     ],
                   ),
                 Container(height: 1, color: border),
-                CupertinoButton(
-                  onPressed: () {
+                AnimatedButton(
+                  onTap: () {
                     Navigator.of(context).maybePop();
                     context.push(AppRoutes.notifications);
                   },
@@ -163,8 +164,8 @@ class _Header extends StatelessWidget {
             ),
           ),
           if (unreadCount > 0)
-            CupertinoButton(
-              onPressed: onMarkAll,
+            AnimatedButton(
+              onTap: onMarkAll,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 'Mark all read',

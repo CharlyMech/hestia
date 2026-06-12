@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/constants/themes.dart';
@@ -101,8 +102,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  CupertinoButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                  AnimatedButton(
+                    onTap: () => Navigator.of(context).pop(),
                     child: const Text('Done'),
                   ),
                 ],
@@ -142,8 +143,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
             mainAxisSize: MainAxisSize.min,
             children: [
               for (final ms in widget.bankAccounts)
-                CupertinoButton(
-                  onPressed: () {
+                AnimatedButton(
+                  onTap: () {
                     setState(() => _moneySourceId = ms.id);
                     Navigator.of(context).pop();
                   },
@@ -391,9 +392,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
             children: [
               if (isEdit)
                 Expanded(
-                  child: CupertinoButton(
-                    color: surface,
-                    onPressed: _confirmDelete,
+                  child: AnimatedButton(
+                    onTap: _confirmDelete,
                     child: Text(
                       'Delete',
                       style: AppFonts.body(

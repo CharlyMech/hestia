@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show NavArrowLeft;
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -137,10 +138,9 @@ class CupertinoPushedRouteShell extends StatelessWidget {
                     ),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: CupertinoButton(
+                      child: AnimatedButton(
                         padding: EdgeInsets.zero,
-                        minimumSize: const Size(40, 40),
-                        onPressed: goBack,
+                        onTap: goBack,
                         child: NavArrowLeft(
                           width: 28,
                           height: 28,
