@@ -6,16 +6,20 @@ import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:hestia/domain/entities/account_member.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/domain/entities/payment_card.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/bank_accounts/bank_accounts_bloc.dart';
+import 'package:hestia/presentation/blocs/cards/cards_bloc.dart';
+import 'package:hestia/presentation/widgets/cards/payment_card_widget.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/dotted_border.dart';
 import 'package:hestia/presentation/widgets/common/screen_shell.dart';
-
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 import 'package:skeletonizer/skeletonizer.dart';
@@ -113,6 +117,8 @@ class _BankAccountsScreenState extends State<BankAccountsScreen> {
     );
   }
 }
+
+// ── Body ──────────────────────────────────────────────────────────────────────
 
 class _Body extends StatefulWidget {
   final bool embeddedInTabShell;
@@ -252,7 +258,13 @@ class _BodyState extends State<_Body> {
                         color: muted),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                  _CardList(sources: loaded.shared, indexOffset: 0),
+                  _AccountSectionList(
+                    accounts: loaded.shared,
+                    muted: muted,
+                    accent: accent,
+                    border: border,
+                    indexOffset: 0,
+                  ),
                   const SliverToBoxAdapter(child: SizedBox(height: 24)),
                 ],
 
@@ -263,16 +275,19 @@ class _BodyState extends State<_Body> {
                         color: muted),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                  _CardList(
-                    sources: loaded.personal,
+                  _AccountSectionList(
+                    accounts: loaded.personal,
+                    muted: muted,
+                    accent: accent,
+                    border: border,
                     indexOffset: loaded.shared.length,
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 ],
 
-                // ── Add card placeholder ──────────────────────────────────
+                // ── Add account placeholder ───────────────────────────────
                 SliverToBoxAdapter(
-                  child: _AddCardPlaceholder(
+                  child: _AddAccountPlaceholder(
                     border: border,
                     muted: muted,
                     label: l10n.bankAccounts_addCard,
@@ -280,7 +295,6 @@ class _BodyState extends State<_Body> {
                       final bloc = context.read<BankAccountsBloc>();
                       final created =
                           await context.push<bool>(AppRoutes.addBankAccount);
-                      // Account screen pops `true` on successful create.
                       if (created == true) {
                         bloc.add(const BankAccountsRefresh());
                       }
@@ -332,8 +346,11 @@ class _BodyState extends State<_Body> {
                           color: muted),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                    _CardList(
-                      sources: others,
+                    _AccountSectionList(
+                      accounts: others,
+                      muted: muted,
+                      accent: accent,
+                      border: border,
                       indexOffset:
                           loaded.shared.length + loaded.personal.length,
                     ),
@@ -344,6 +361,314 @@ class _BodyState extends State<_Body> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+// ── Per-account section (WalletCard + card carousel) ─────────────────────────
+
+/// Sliver list of account sections. Each section owns a [CardsBloc].
+class _AccountSectionList extends StatefulWidget {
+  final List<BankAccount> accounts;
+  final Color muted;
+  final Color accent;
+  final Color border;
+  final int indexOffset;
+
+  const _AccountSectionList({
+    required this.accounts,
+    required this.muted,
+    required this.accent,
+    required this.border,
+    required this.indexOffset,
+  });
+
+  @override
+  State<_AccountSectionList> createState() => _AccountSectionListState();
+}
+
+class _AccountSectionListState extends State<_AccountSectionList> {
+  final _blocs = <String, CardsBloc>{};
+
+  CardsBloc _blocFor(BankAccount account) {
+    return _blocs.putIfAbsent(account.id, () {
+      final bloc = CardsBloc(AppDependencies.instance.cardRepository);
+      bloc.add(CardsLoad(account.id));
+      return bloc;
+    });
+  }
+
+  @override
+  void dispose() {
+    for (final b in _blocs.values) {
+      b.close();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverList.separated(
+        itemCount: widget.accounts.length,
+        itemBuilder: (_, i) {
+          final account = widget.accounts[i];
+          return BlocProvider.value(
+            value: _blocFor(account),
+            child: _AccountSection(
+              account: account,
+              index: widget.indexOffset + i,
+              muted: widget.muted,
+              accent: widget.accent,
+              border: widget.border,
+            ),
+          );
+        },
+        separatorBuilder: (_, __) => const SizedBox(height: 20),
+      ),
+    );
+  }
+}
+
+class _AccountSection extends StatefulWidget {
+  final BankAccount account;
+  final int index;
+  final Color muted;
+  final Color accent;
+  final Color border;
+
+  const _AccountSection({
+    required this.account,
+    required this.index,
+    required this.muted,
+    required this.accent,
+    required this.border,
+  });
+
+  @override
+  State<_AccountSection> createState() => _AccountSectionState();
+}
+
+class _AccountSectionState extends State<_AccountSection> {
+  List<AccountMember> _members = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMembers();
+  }
+
+  Future<void> _loadMembers() async {
+    final (members, _) = await AppDependencies.instance.accountMemberRepository
+        .getMembers(widget.account.id);
+    if (mounted) setState(() => _members = members);
+  }
+
+  void _openAddCard(BuildContext context, CardsBloc cardsBloc) {
+    context.push(AppRoutes.addCard, extra: (
+      account: widget.account,
+      accountMembers: _members,
+      cardsBloc: cardsBloc,
+    ));
+  }
+
+  void _openEditCard(
+      BuildContext context, PaymentCard card, CardsBloc cardsBloc) {
+    context.push(AppRoutes.editCard, extra: (
+      account: widget.account,
+      accountMembers: _members,
+      card: card,
+      cardsBloc: cardsBloc,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cardsBloc = context.read<CardsBloc>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 12,
+      children: [
+        WalletCard(
+          source: widget.account,
+          index: widget.index,
+          onTap: () => context.push(
+            AppRoutes.bankAccountDetail,
+            extra: widget.account.id,
+          ),
+        ),
+        BlocBuilder<CardsBloc, CardsState>(
+          builder: (context, state) {
+            if (state is CardsLoading) {
+              return const SizedBox(height: 4);
+            }
+            if (state is! CardsLoaded || state.cards.isEmpty) {
+              return _AddCardPill(
+                muted: widget.muted,
+                accent: widget.accent,
+                border: widget.border,
+                onTap: () => _openAddCard(context, cardsBloc),
+              );
+            }
+            final cards = state.cards;
+            return SizedBox(
+              height: _cardHeight(context),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: cards.length + 1,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (_, i) {
+                  if (i == cards.length) {
+                    return _AddCardPill(
+                      muted: widget.muted,
+                      accent: widget.accent,
+                      border: widget.border,
+                      onTap: () => _openAddCard(context, cardsBloc),
+                      compact: true,
+                    );
+                  }
+                  final card = cards[i];
+                  return SizedBox(
+                    width: _cardWidth(context),
+                    child: _CardTile(
+                      card: card,
+                      accent: widget.accent,
+                      muted: widget.muted,
+                      onTap: () => _openEditCard(context, card, cardsBloc),
+                      onSetPrimary: card.isPrimary
+                          ? null
+                          : () => cardsBloc.add(CardsSetPrimary(
+                                cardId: card.id,
+                                accountId: widget.account.id,
+                              )),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  double _cardWidth(BuildContext context) {
+    final sw = MediaQuery.sizeOf(context).width - 40; // 20px padding each side
+    // Show ~1.2 cards so user knows to scroll.
+    return (sw * 0.82).clamp(240, 320);
+  }
+
+  double _cardHeight(BuildContext context) =>
+      _cardWidth(context) / 1.586 + 32; // card + owner row
+}
+
+class _CardTile extends StatelessWidget {
+  final PaymentCard card;
+  final Color accent;
+  final Color muted;
+  final VoidCallback onTap;
+  final VoidCallback? onSetPrimary;
+
+  const _CardTile({
+    required this.card,
+    required this.accent,
+    required this.muted,
+    required this.onTap,
+    this.onSetPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      spacing: 6,
+      children: [
+        PaymentCardWidget(card: card, onTap: onTap),
+        if (onSetPrimary != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: AnimatedButton(
+              onTap: onSetPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Text(
+                'Set as primary',
+                style: AppFonts.label(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: accent,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _AddCardPill extends StatelessWidget {
+  final Color muted;
+  final Color accent;
+  final Color border;
+  final VoidCallback onTap;
+  final bool compact;
+
+  const _AddCardPill({
+    required this.muted,
+    required this.accent,
+    required this.border,
+    required this.onTap,
+    this.compact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (compact) {
+      return AspectRatio(
+        aspectRatio: 0.6,
+        child: AnimatedButton(
+          onTap: onTap,
+          borderRadius: AppRadii.xl,
+          child: DottedBorder(
+            color: border,
+            radius: AppRadii.xl,
+            child: Center(
+              child: Plus(width: 20, height: 20, color: muted),
+            ),
+          ),
+        ),
+      );
+    }
+    return AnimatedButton(
+      onTap: onTap,
+      borderRadius: AppRadii.xl,
+      child: AspectRatio(
+        aspectRatio: 1.586,
+        child: DottedBorder(
+          color: border,
+          radius: AppRadii.xl,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                Plus(width: 22, height: 22, color: muted),
+                Text(
+                  'Add card',
+                  style: AppFonts.body(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -373,39 +698,13 @@ class _LargeTitle extends StatelessWidget {
   }
 }
 
-class _CardList extends StatelessWidget {
-  final List<BankAccount> sources;
-  final int indexOffset;
-
-  const _CardList({required this.sources, required this.indexOffset});
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      sliver: SliverList.separated(
-        itemCount: sources.length,
-        itemBuilder: (_, i) => WalletCard(
-          source: sources[i],
-          index: indexOffset + i,
-          onTap: () => context.push(
-            AppRoutes.bankAccountDetail,
-            extra: sources[i].id,
-          ),
-        ),
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-      ),
-    );
-  }
-}
-
-class _AddCardPlaceholder extends StatelessWidget {
+class _AddAccountPlaceholder extends StatelessWidget {
   final Color border;
   final Color muted;
   final String label;
   final VoidCallback onTap;
 
-  const _AddCardPlaceholder({
+  const _AddAccountPlaceholder({
     required this.border,
     required this.muted,
     required this.label,
@@ -416,9 +715,9 @@ class _AddCardPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GestureDetector(
+      child: AnimatedButton(
         onTap: onTap,
-        behavior: HitTestBehavior.opaque,
+        borderRadius: AppRadii.xl,
         child: AspectRatio(
           aspectRatio: 1.586,
           child: DottedBorder(
@@ -454,10 +753,8 @@ class _SignedOut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg =
-        hexToColor(theme.backgroundColor);
-    final muted =
-        hexToColor(theme.onInactiveColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
     return CupertinoPageScaffold(
       backgroundColor: bg,
       child: Center(

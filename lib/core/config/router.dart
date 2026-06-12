@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/presentation/pages/auth/login_screen.dart';
 import 'package:hestia/presentation/pages/fuel/add_edit_car_screen.dart';
@@ -17,7 +18,11 @@ import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
 import 'package:hestia/presentation/pages/goals/goals_screen.dart';
 import 'package:hestia/presentation/pages/main_tab_shell.dart';
+import 'package:hestia/domain/entities/account_member.dart';
 import 'package:hestia/domain/entities/bank_account.dart' show BankAccount;
+import 'package:hestia/domain/entities/payment_card.dart';
+import 'package:hestia/presentation/blocs/cards/cards_bloc.dart';
+import 'package:hestia/presentation/pages/cards/add_edit_card_screen.dart';
 import 'package:hestia/presentation/pages/bank_accounts/add_edit_bank_account_screen.dart';
 import 'package:hestia/presentation/pages/bank_accounts/bank_account_detail_screen.dart';
 import 'package:hestia/presentation/pages/bank_accounts/bank_accounts_screen.dart';
@@ -83,6 +88,8 @@ abstract final class AppRoutes {
   static const editBankAccount = '/bank-accounts/edit';
   static const bankAccountDetail = '/bank-accounts/detail';
   static const recurringTransactions = '/bank-accounts/recurring';
+  static const addCard = '/bank-accounts/cards/add';
+  static const editCard = '/bank-accounts/cards/edit';
   static const addGoal = '/goals/add';
   static const editGoal = '/goals/edit';
   static const goalDetail = '/goals/detail';
@@ -492,6 +499,46 @@ final appRouter = GoRouter(
         final appointment = state.extra as Appointment;
         return CupertinoPage(
           child: AppointmentDetailScreen(appointment: appointment),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.addCard,
+      pageBuilder: (context, state) {
+        final extra = state.extra as ({
+          BankAccount account,
+          List<AccountMember> accountMembers,
+          CardsBloc cardsBloc,
+        });
+        return CupertinoPage(
+          child: BlocProvider.value(
+            value: extra.cardsBloc,
+            child: AddEditCardScreen(
+              account: extra.account,
+              accountMembers: extra.accountMembers,
+            ),
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.editCard,
+      pageBuilder: (context, state) {
+        final extra = state.extra as ({
+          BankAccount account,
+          List<AccountMember> accountMembers,
+          PaymentCard card,
+          CardsBloc cardsBloc,
+        });
+        return CupertinoPage(
+          child: BlocProvider.value(
+            value: extra.cardsBloc,
+            child: AddEditCardScreen(
+              account: extra.account,
+              accountMembers: extra.accountMembers,
+              existing: extra.card,
+            ),
+          ),
         );
       },
     ),
