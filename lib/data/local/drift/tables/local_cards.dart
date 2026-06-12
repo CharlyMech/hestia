@@ -12,7 +12,9 @@ class LocalCards extends Table {
   IntColumn get expiryYear => integer()();
   TextColumn get cardholderName => text()();
   BoolColumn get isVirtual => boolean().withDefault(const Constant(false))();
+  BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  TextColumn get ownerProfileId => text().nullable()();
   TextColumn get color => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   IntColumn get createdAt => integer()();

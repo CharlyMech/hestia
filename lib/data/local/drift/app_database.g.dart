@@ -4267,6 +4267,16 @@ class $LocalCardsTable extends LocalCards
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_virtual" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _isPrimaryMeta =
+      const VerificationMeta('isPrimary');
+  @override
+  late final GeneratedColumn<bool> isPrimary = GeneratedColumn<bool>(
+      'is_primary', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_primary" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _isActiveMeta =
       const VerificationMeta('isActive');
   @override
@@ -4277,6 +4287,12 @@ class $LocalCardsTable extends LocalCards
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_active" IN (0, 1))'),
       defaultValue: const Constant(true));
+  static const VerificationMeta _ownerProfileIdMeta =
+      const VerificationMeta('ownerProfileId');
+  @override
+  late final GeneratedColumn<String> ownerProfileId = GeneratedColumn<String>(
+      'owner_profile_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _colorMeta = const VerificationMeta('color');
   @override
   late final GeneratedColumn<String> color = GeneratedColumn<String>(
@@ -4322,7 +4338,9 @@ class $LocalCardsTable extends LocalCards
         expiryYear,
         cardholderName,
         isVirtual,
+        isPrimary,
         isActive,
+        ownerProfileId,
         color,
         sortOrder,
         createdAt,
@@ -4390,9 +4408,19 @@ class $LocalCardsTable extends LocalCards
       context.handle(_isVirtualMeta,
           isVirtual.isAcceptableOrUnknown(data['is_virtual']!, _isVirtualMeta));
     }
+    if (data.containsKey('is_primary')) {
+      context.handle(_isPrimaryMeta,
+          isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta));
+    }
     if (data.containsKey('is_active')) {
       context.handle(_isActiveMeta,
           isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta));
+    }
+    if (data.containsKey('owner_profile_id')) {
+      context.handle(
+          _ownerProfileIdMeta,
+          ownerProfileId.isAcceptableOrUnknown(
+              data['owner_profile_id']!, _ownerProfileIdMeta));
     }
     if (data.containsKey('color')) {
       context.handle(
@@ -4445,8 +4473,12 @@ class $LocalCardsTable extends LocalCards
           DriftSqlType.string, data['${effectivePrefix}cardholder_name'])!,
       isVirtual: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_virtual'])!,
+      isPrimary: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_primary'])!,
       isActive: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_active'])!,
+      ownerProfileId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}owner_profile_id']),
       color: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}color']),
       sortOrder: attachedDatabase.typeMapping
@@ -4475,7 +4507,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
   final int expiryYear;
   final String cardholderName;
   final bool isVirtual;
+  final bool isPrimary;
   final bool isActive;
+  final String? ownerProfileId;
   final String? color;
   final int sortOrder;
   final int createdAt;
@@ -4490,7 +4524,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
       required this.expiryYear,
       required this.cardholderName,
       required this.isVirtual,
+      required this.isPrimary,
       required this.isActive,
+      this.ownerProfileId,
       this.color,
       required this.sortOrder,
       required this.createdAt,
@@ -4507,7 +4543,11 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
     map['expiry_year'] = Variable<int>(expiryYear);
     map['cardholder_name'] = Variable<String>(cardholderName);
     map['is_virtual'] = Variable<bool>(isVirtual);
+    map['is_primary'] = Variable<bool>(isPrimary);
     map['is_active'] = Variable<bool>(isActive);
+    if (!nullToAbsent || ownerProfileId != null) {
+      map['owner_profile_id'] = Variable<String>(ownerProfileId);
+    }
     if (!nullToAbsent || color != null) {
       map['color'] = Variable<String>(color);
     }
@@ -4528,7 +4568,11 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
       expiryYear: Value(expiryYear),
       cardholderName: Value(cardholderName),
       isVirtual: Value(isVirtual),
+      isPrimary: Value(isPrimary),
       isActive: Value(isActive),
+      ownerProfileId: ownerProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerProfileId),
       color:
           color == null && nullToAbsent ? const Value.absent() : Value(color),
       sortOrder: Value(sortOrder),
@@ -4550,7 +4594,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
       expiryYear: serializer.fromJson<int>(json['expiryYear']),
       cardholderName: serializer.fromJson<String>(json['cardholderName']),
       isVirtual: serializer.fromJson<bool>(json['isVirtual']),
+      isPrimary: serializer.fromJson<bool>(json['isPrimary']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      ownerProfileId: serializer.fromJson<String?>(json['ownerProfileId']),
       color: serializer.fromJson<String?>(json['color']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
@@ -4570,7 +4616,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
       'expiryYear': serializer.toJson<int>(expiryYear),
       'cardholderName': serializer.toJson<String>(cardholderName),
       'isVirtual': serializer.toJson<bool>(isVirtual),
+      'isPrimary': serializer.toJson<bool>(isPrimary),
       'isActive': serializer.toJson<bool>(isActive),
+      'ownerProfileId': serializer.toJson<String?>(ownerProfileId),
       'color': serializer.toJson<String?>(color),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'createdAt': serializer.toJson<int>(createdAt),
@@ -4588,7 +4636,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
           int? expiryYear,
           String? cardholderName,
           bool? isVirtual,
+          bool? isPrimary,
           bool? isActive,
+          Value<String?> ownerProfileId = const Value.absent(),
           Value<String?> color = const Value.absent(),
           int? sortOrder,
           int? createdAt,
@@ -4603,7 +4653,10 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
         expiryYear: expiryYear ?? this.expiryYear,
         cardholderName: cardholderName ?? this.cardholderName,
         isVirtual: isVirtual ?? this.isVirtual,
+        isPrimary: isPrimary ?? this.isPrimary,
         isActive: isActive ?? this.isActive,
+        ownerProfileId:
+            ownerProfileId.present ? ownerProfileId.value : this.ownerProfileId,
         color: color.present ? color.value : this.color,
         sortOrder: sortOrder ?? this.sortOrder,
         createdAt: createdAt ?? this.createdAt,
@@ -4624,7 +4677,11 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
           ? data.cardholderName.value
           : this.cardholderName,
       isVirtual: data.isVirtual.present ? data.isVirtual.value : this.isVirtual,
+      isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      ownerProfileId: data.ownerProfileId.present
+          ? data.ownerProfileId.value
+          : this.ownerProfileId,
       color: data.color.present ? data.color.value : this.color,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -4645,7 +4702,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
           ..write('expiryYear: $expiryYear, ')
           ..write('cardholderName: $cardholderName, ')
           ..write('isVirtual: $isVirtual, ')
+          ..write('isPrimary: $isPrimary, ')
           ..write('isActive: $isActive, ')
+          ..write('ownerProfileId: $ownerProfileId, ')
           ..write('color: $color, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
@@ -4665,7 +4724,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
       expiryYear,
       cardholderName,
       isVirtual,
+      isPrimary,
       isActive,
+      ownerProfileId,
       color,
       sortOrder,
       createdAt,
@@ -4683,7 +4744,9 @@ class LocalCard extends DataClass implements Insertable<LocalCard> {
           other.expiryYear == this.expiryYear &&
           other.cardholderName == this.cardholderName &&
           other.isVirtual == this.isVirtual &&
+          other.isPrimary == this.isPrimary &&
           other.isActive == this.isActive &&
+          other.ownerProfileId == this.ownerProfileId &&
           other.color == this.color &&
           other.sortOrder == this.sortOrder &&
           other.createdAt == this.createdAt &&
@@ -4700,7 +4763,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
   final Value<int> expiryYear;
   final Value<String> cardholderName;
   final Value<bool> isVirtual;
+  final Value<bool> isPrimary;
   final Value<bool> isActive;
+  final Value<String?> ownerProfileId;
   final Value<String?> color;
   final Value<int> sortOrder;
   final Value<int> createdAt;
@@ -4716,7 +4781,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
     this.expiryYear = const Value.absent(),
     this.cardholderName = const Value.absent(),
     this.isVirtual = const Value.absent(),
+    this.isPrimary = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.ownerProfileId = const Value.absent(),
     this.color = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -4733,7 +4800,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
     required int expiryYear,
     required String cardholderName,
     this.isVirtual = const Value.absent(),
+    this.isPrimary = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.ownerProfileId = const Value.absent(),
     this.color = const Value.absent(),
     this.sortOrder = const Value.absent(),
     required int createdAt,
@@ -4758,7 +4827,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
     Expression<int>? expiryYear,
     Expression<String>? cardholderName,
     Expression<bool>? isVirtual,
+    Expression<bool>? isPrimary,
     Expression<bool>? isActive,
+    Expression<String>? ownerProfileId,
     Expression<String>? color,
     Expression<int>? sortOrder,
     Expression<int>? createdAt,
@@ -4775,7 +4846,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
       if (expiryYear != null) 'expiry_year': expiryYear,
       if (cardholderName != null) 'cardholder_name': cardholderName,
       if (isVirtual != null) 'is_virtual': isVirtual,
+      if (isPrimary != null) 'is_primary': isPrimary,
       if (isActive != null) 'is_active': isActive,
+      if (ownerProfileId != null) 'owner_profile_id': ownerProfileId,
       if (color != null) 'color': color,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (createdAt != null) 'created_at': createdAt,
@@ -4794,7 +4867,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
       Value<int>? expiryYear,
       Value<String>? cardholderName,
       Value<bool>? isVirtual,
+      Value<bool>? isPrimary,
       Value<bool>? isActive,
+      Value<String?>? ownerProfileId,
       Value<String?>? color,
       Value<int>? sortOrder,
       Value<int>? createdAt,
@@ -4810,7 +4885,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
       expiryYear: expiryYear ?? this.expiryYear,
       cardholderName: cardholderName ?? this.cardholderName,
       isVirtual: isVirtual ?? this.isVirtual,
+      isPrimary: isPrimary ?? this.isPrimary,
       isActive: isActive ?? this.isActive,
+      ownerProfileId: ownerProfileId ?? this.ownerProfileId,
       color: color ?? this.color,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
@@ -4847,8 +4924,14 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
     if (isVirtual.present) {
       map['is_virtual'] = Variable<bool>(isVirtual.value);
     }
+    if (isPrimary.present) {
+      map['is_primary'] = Variable<bool>(isPrimary.value);
+    }
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (ownerProfileId.present) {
+      map['owner_profile_id'] = Variable<String>(ownerProfileId.value);
     }
     if (color.present) {
       map['color'] = Variable<String>(color.value);
@@ -4882,7 +4965,9 @@ class LocalCardsCompanion extends UpdateCompanion<LocalCard> {
           ..write('expiryYear: $expiryYear, ')
           ..write('cardholderName: $cardholderName, ')
           ..write('isVirtual: $isVirtual, ')
+          ..write('isPrimary: $isPrimary, ')
           ..write('isActive: $isActive, ')
+          ..write('ownerProfileId: $ownerProfileId, ')
           ..write('color: $color, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
@@ -7324,7 +7409,9 @@ typedef $$LocalCardsTableCreateCompanionBuilder = LocalCardsCompanion Function({
   required int expiryYear,
   required String cardholderName,
   Value<bool> isVirtual,
+  Value<bool> isPrimary,
   Value<bool> isActive,
+  Value<String?> ownerProfileId,
   Value<String?> color,
   Value<int> sortOrder,
   required int createdAt,
@@ -7341,7 +7428,9 @@ typedef $$LocalCardsTableUpdateCompanionBuilder = LocalCardsCompanion Function({
   Value<int> expiryYear,
   Value<String> cardholderName,
   Value<bool> isVirtual,
+  Value<bool> isPrimary,
   Value<bool> isActive,
+  Value<String?> ownerProfileId,
   Value<String?> color,
   Value<int> sortOrder,
   Value<int> createdAt,
@@ -7402,8 +7491,15 @@ class $$LocalCardsTableFilterComposer
   ColumnFilters<bool> get isVirtual => $composableBuilder(
       column: $table.isVirtual, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get isPrimary => $composableBuilder(
+      column: $table.isPrimary, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<bool> get isActive => $composableBuilder(
       column: $table.isActive, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ownerProfileId => $composableBuilder(
+      column: $table.ownerProfileId,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get color => $composableBuilder(
       column: $table.color, builder: (column) => ColumnFilters(column));
@@ -7472,8 +7568,15 @@ class $$LocalCardsTableOrderingComposer
   ColumnOrderings<bool> get isVirtual => $composableBuilder(
       column: $table.isVirtual, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isPrimary => $composableBuilder(
+      column: $table.isPrimary, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get isActive => $composableBuilder(
       column: $table.isActive, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ownerProfileId => $composableBuilder(
+      column: $table.ownerProfileId,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get color => $composableBuilder(
       column: $table.color, builder: (column) => ColumnOrderings(column));
@@ -7541,8 +7644,14 @@ class $$LocalCardsTableAnnotationComposer
   GeneratedColumn<bool> get isVirtual =>
       $composableBuilder(column: $table.isVirtual, builder: (column) => column);
 
+  GeneratedColumn<bool> get isPrimary =>
+      $composableBuilder(column: $table.isPrimary, builder: (column) => column);
+
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerProfileId => $composableBuilder(
+      column: $table.ownerProfileId, builder: (column) => column);
 
   GeneratedColumn<String> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
@@ -7612,7 +7721,9 @@ class $$LocalCardsTableTableManager extends RootTableManager<
             Value<int> expiryYear = const Value.absent(),
             Value<String> cardholderName = const Value.absent(),
             Value<bool> isVirtual = const Value.absent(),
+            Value<bool> isPrimary = const Value.absent(),
             Value<bool> isActive = const Value.absent(),
+            Value<String?> ownerProfileId = const Value.absent(),
             Value<String?> color = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             Value<int> createdAt = const Value.absent(),
@@ -7629,7 +7740,9 @@ class $$LocalCardsTableTableManager extends RootTableManager<
             expiryYear: expiryYear,
             cardholderName: cardholderName,
             isVirtual: isVirtual,
+            isPrimary: isPrimary,
             isActive: isActive,
+            ownerProfileId: ownerProfileId,
             color: color,
             sortOrder: sortOrder,
             createdAt: createdAt,
@@ -7646,7 +7759,9 @@ class $$LocalCardsTableTableManager extends RootTableManager<
             required int expiryYear,
             required String cardholderName,
             Value<bool> isVirtual = const Value.absent(),
+            Value<bool> isPrimary = const Value.absent(),
             Value<bool> isActive = const Value.absent(),
+            Value<String?> ownerProfileId = const Value.absent(),
             Value<String?> color = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             required int createdAt,
@@ -7663,7 +7778,9 @@ class $$LocalCardsTableTableManager extends RootTableManager<
             expiryYear: expiryYear,
             cardholderName: cardholderName,
             isVirtual: isVirtual,
+            isPrimary: isPrimary,
             isActive: isActive,
+            ownerProfileId: ownerProfileId,
             color: color,
             sortOrder: sortOrder,
             createdAt: createdAt,

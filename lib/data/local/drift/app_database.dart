@@ -26,7 +26,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -100,6 +100,15 @@ class AppDatabase extends _$AppDatabase {
           // v3 → v4: add optional IBAN on bank accounts.
           await customStatement(
             'ALTER TABLE local_bank_accounts ADD COLUMN iban TEXT',
+          );
+        }
+        if (from < 5) {
+          // v4 → v5: add is_primary + owner_profile_id to local_cards.
+          await customStatement(
+            'ALTER TABLE local_cards ADD COLUMN is_primary INTEGER NOT NULL DEFAULT 0',
+          );
+          await customStatement(
+            'ALTER TABLE local_cards ADD COLUMN owner_profile_id TEXT',
           );
         }
       },
