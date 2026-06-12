@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
-import 'package:hestia/core/utils/spring_physics.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
@@ -19,6 +18,7 @@ import 'package:hestia/presentation/pages/fuel/car_screen.dart';
 import 'package:hestia/presentation/pages/pets/pets_screen.dart';
 import 'package:hestia/presentation/pages/shopping/shopping_screen.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
+import 'package:hestia/presentation/widgets/common/glass_fab.dart';
 import 'package:hestia/presentation/navigation/main_tab_scope.dart';
 import 'package:hestia/presentation/widgets/common/status_bar_blur_overlay.dart';
 import 'package:hestia/presentation/widgets/dashboard/floating_nav_bar.dart';
@@ -244,9 +244,14 @@ class _MainTabShellState extends State<MainTabShell> {
                 Positioned(
                   right: 20,
                   bottom: 108,
-                  child: _TransactionFab(
-                    accent: accent,
+                  child: GlassFab(
+                    accentColor: accent,
                     onTap: _openTransactionSheet,
+                    child: CoinsSwap(
+                      width: 24,
+                      height: 24,
+                      color: CupertinoColors.white,
+                    ),
                   ),
                 ),
                 // Nav bar
@@ -275,60 +280,3 @@ class _MainTabShellState extends State<MainTabShell> {
 
 // ── FAB ───────────────────────────────────────────────────────────────────────
 
-class _TransactionFab extends StatefulWidget {
-  final Color accent;
-  final VoidCallback onTap;
-
-  const _TransactionFab({required this.accent, required this.onTap});
-
-  @override
-  State<_TransactionFab> createState() => _TransactionFabState();
-}
-
-class _TransactionFabState extends State<_TransactionFab>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = SpringPhysics.tapScaleController(this);
-    _scale = SpringPhysics.tapScaleAnimation(_ctrl, minScale: 0.88);
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _ctrl.forward(),
-      onTapUp: (_) {
-        _ctrl.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _ctrl.reverse(),
-      child: ScaleTransition(
-        scale: _scale,
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: widget.accent,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: CoinsSwap(
-            width: 24,
-            height: 24,
-            color: CupertinoColors.white,
-          ),
-        ),
-      ),
-    );
-  }
-}

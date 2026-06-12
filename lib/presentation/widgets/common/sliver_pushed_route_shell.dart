@@ -8,6 +8,7 @@ import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/status_bar_blur_overlay.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Eye, EyeClosed, MoreHoriz, NavArrowLeft;
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// A single item in the actions dropdown menu.
 class AppMenuAction {
@@ -94,6 +95,7 @@ class SliverPushedRouteShell extends StatelessWidget {
     this.backgroundColor,
     this.headerColor,
     this.onRefresh,
+    this.isLoading = false,
     this.isActive,
   });
 
@@ -106,6 +108,9 @@ class SliverPushedRouteShell extends StatelessWidget {
   final Color? backgroundColor;
   final Color? headerColor;
   final Future<void> Function()? onRefresh;
+
+  /// When true, wraps [content] in a Skeletonizer shimmer.
+  final bool isLoading;
 
   /// When set, shows a coloured dot beside the title (green = active, muted = inactive).
   final bool? isActive;
@@ -134,6 +139,10 @@ class SliverPushedRouteShell extends StatelessWidget {
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
+              // Refresh control must be the first sliver so the indicator
+              // appears above the pinned SliverAppBar on over-scroll.
+              if (onRefresh != null)
+                CupertinoSliverRefreshControl(onRefresh: onRefresh),
               SliverAppBar(
                 pinned: true,
                 snap: false,
@@ -222,10 +231,11 @@ class SliverPushedRouteShell extends StatelessWidget {
                   ),
                 ),
               ),
-              if (onRefresh != null)
-                CupertinoSliverRefreshControl(onRefresh: onRefresh),
               SliverToBoxAdapter(
-                child: Container(color: bg, child: content),
+                child: Container(
+                  color: bg,
+                  child: isLoading ? Skeletonizer(child: content) : content,
+                ),
               ),
               SliverFillRemaining(
                 hasScrollBody: false,

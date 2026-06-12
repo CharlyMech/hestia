@@ -1,14 +1,22 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show RefreshIndicator;
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show NavArrowLeft;
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// Fixed iOS-style top row for pushed stack routes: plain back chevron (no
 /// bordered button), bottom hairline on [navBackground]; body scrolls underneath.
 ///
-/// When [onRefresh] is set, the body is wrapped in a [RefreshIndicator] so any
-/// scrollable [child] (e.g. a ListView) gets pull-to-refresh.
+/// Refresh behaviour:
+/// - [childIsScrollable] = false (default): the shell wraps [child] in a
+///   [CustomScrollView] with a [CupertinoSliverRefreshControl] as the first
+///   sliver. The child itself does NOT need to be scrollable.
+/// - [childIsScrollable] = true: the caller owns the scroll view and embeds
+///   [CupertinoSliverRefreshControl] as its first sliver. [onRefresh] is
+///   unused in this mode.
+///
+/// When [isLoading] is true, [child] is wrapped in [Skeletonizer] so the
+/// skeleton shimmer is shown while content loads.
 class CupertinoPushedRouteShell extends StatelessWidget {
   const CupertinoPushedRouteShell({
     super.key,
@@ -22,6 +30,8 @@ class CupertinoPushedRouteShell extends StatelessWidget {
     this.trailing,
     this.onBack,
     this.onRefresh,
+    this.isLoading = false,
+    this.childIsScrollable = false,
     this.topPadding = const EdgeInsets.fromLTRB(2, 2, 12, 10),
   }) : assert(
           title == null || titleText == null,
@@ -29,8 +39,6 @@ class CupertinoPushedRouteShell extends StatelessWidget {
         );
 
   final Color backgroundColor;
-
-  /// Top chrome row (uses surface; body uses [backgroundColor]).
   final Color navBackground;
   final Color borderColor;
   final Color foregroundColor;
@@ -40,9 +48,16 @@ class CupertinoPushedRouteShell extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onBack;
 
-  /// Optional pull-to-refresh. Wraps the scrollable [child] in a
-  /// [RefreshIndicator]. No-op when null.
+  /// Pull-to-refresh callback. Used only when [childIsScrollable] is false.
   final Future<void> Function()? onRefresh;
+
+  /// When true, shows a Skeletonizer shimmer over [child].
+  final bool isLoading;
+
+  /// When true, the caller's child already contains a scrollable with its own
+  /// [CupertinoSliverRefreshControl]. The shell does not add another scroll view.
+  final bool childIsScrollable;
+
   final EdgeInsets topPadding;
 
   @override
@@ -69,6 +84,30 @@ class CupertinoPushedRouteShell extends StatelessWidget {
               )
             : const SizedBox.shrink());
 
+    Widget body;
+    if (childIsScrollable) {
+      // Caller owns the scroll; just apply skeleton if needed.
+      body = isLoading ? Skeletonizer(child: child) : child;
+    } else {
+      // Wrap in a CustomScrollView so CupertinoSliverRefreshControl works.
+      body = CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          if (onRefresh != null)
+            CupertinoSliverRefreshControl(onRefresh: onRefresh),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: ColoredBox(
+              color: backgroundColor,
+              child: isLoading ? Skeletonizer(child: child) : child,
+            ),
+          ),
+        ],
+      );
+    }
+
     return ColoredBox(
       color: navBackground,
       child: SafeArea(
@@ -88,7 +127,6 @@ class CupertinoPushedRouteShell extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Centre title — unaffected by button widths.
                     Positioned.fill(
                       child: Center(
                         child: Padding(
@@ -97,7 +135,6 @@ class CupertinoPushedRouteShell extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Back button pinned left.
                     Align(
                       alignment: Alignment.centerLeft,
                       child: CupertinoButton(
@@ -111,7 +148,6 @@ class CupertinoPushedRouteShell extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Trailing pinned right.
                     if (trailing != null)
                       Align(
                         alignment: Alignment.centerRight,
@@ -124,14 +160,7 @@ class CupertinoPushedRouteShell extends StatelessWidget {
             Expanded(
               child: ColoredBox(
                 color: backgroundColor,
-                child: onRefresh == null
-                    ? child
-                    : RefreshIndicator(
-                        onRefresh: onRefresh!,
-                        color: foregroundColor,
-                        backgroundColor: navBackground,
-                        child: child,
-                      ),
+                child: body,
               ),
             ),
           ],
