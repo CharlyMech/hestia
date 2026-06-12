@@ -140,18 +140,60 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<bool> isGoogleLinked() => _gcal.isLinked();
+  Future<bool> isGoogleLinked() async {
+    try {
+      final res = await _service.client.functions.invoke(
+        'google-oauth-exchange',
+        body: {'action': 'status'},
+      );
+      final body = res.data as Map<String, dynamic>?;
+      return body?['linked'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<Failure?> linkGoogle() async {
-    final ok = await _gcal.link();
-    return ok ? null : const AuthFailure('Google sign-in cancelled');
+    // 1. Get serverAuthCode from Google sign-in (client-side).
+    final serverAuthCode = await _gcal.signInForServerAuthCode();
+    if (serverAuthCode == null) {
+      return const AuthFailure('Google sign-in cancelled');
+    }
+    // 2. Exchange server-side: stores refresh_token in google_credentials.
+    try {
+      final res = await _service.client.functions.invoke(
+        'google-oauth-exchange',
+        body: {'action': 'link', 'server_auth_code': serverAuthCode},
+      );
+      final body = res.data as Map<String, dynamic>?;
+      if (body?['error'] != null) {
+        return ServerFailure('Google link failed: ${body!['error']}');
+      }
+      return null;
+    } catch (e) {
+      return ServerFailure('Google link failed: $e');
+    }
   }
 
   @override
   Future<Failure?> unlinkGoogle() async {
-    await _gcal.unlink();
-    return null;
+    try {
+      // Sign out device first.
+      await _gcal.signOut();
+      // Revoke server-side credentials.
+      final res = await _service.client.functions.invoke(
+        'google-oauth-exchange',
+        body: {'action': 'unlink'},
+      );
+      final body = res.data as Map<String, dynamic>?;
+      if (body?['error'] != null) {
+        return ServerFailure('Google unlink failed: ${body!['error']}');
+      }
+      return null;
+    } catch (e) {
+      return ServerFailure('Google unlink failed: $e');
+    }
   }
 }
 

@@ -14,6 +14,7 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/blocs/google_sync/google_sync_cubit.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
@@ -46,51 +47,47 @@ class _SettingsScreenState extends State<SettingsScreen>
     with WidgetsBindingObserver {
   bool _locationServiceEnabled = true;
   LocationPermission? _locationPermission;
-  String? _gcalEmail;
+  late final GoogleSyncCubit _googleSyncCubit;
 
   @override
   void initState() {
     super.initState();
+    final deps = AppDependencies.instance;
+    _googleSyncCubit = GoogleSyncCubit(
+      gcal: deps.googleCalendarService,
+      appointmentRepo: deps.appointmentRepository,
+    );
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshPermissions();
-      _refreshGcal();
+      final auth = context.read<AuthBloc>().state;
+      if (auth is AuthAuthenticated) {
+        _googleSyncCubit.checkStatus(auth.profile.id);
+      }
     });
   }
 
-  Future<void> _refreshGcal() async {
-    final gcal = AppDependencies.instance.googleCalendarService;
-    if (gcal == null) return;
-    try {
-      final email = await gcal.linkedEmail();
-      if (mounted) setState(() => _gcalEmail = email);
-    } catch (_) {/* not linked */}
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _googleSyncCubit.close();
+    super.dispose();
   }
 
   Future<void> _manageGoogleCalendar() async {
-    final deps = AppDependencies.instance;
-    final gcal = deps.googleCalendarService;
-    if (gcal == null) {
-      context.showToast(const AppToastConfig(
-        type: ToastType.error,
-        title: 'Calendar sync needs the Supabase build',
-      ));
-      return;
-    }
     final auth = context.read<AuthBloc>().state;
     final userId = auth is AuthAuthenticated ? auth.profile.id : null;
-    final calendarColor =
-        auth is AuthAuthenticated ? auth.profile.calendarColor : null;
+    if (userId == null) return;
 
-    final linked = await gcal.isLinked();
-    if (!mounted) return;
+    final syncState = _googleSyncCubit.state;
 
-    if (linked) {
-      // Offer sync now / unlink.
+    if (syncState is GoogleSyncLinked) {
       final action = await showCupertinoModalPopup<String>(
         context: context,
         builder: (ctx) => CupertinoActionSheet(
-          title: Text(_gcalEmail ?? 'Google Calendar'),
+          title: Text(syncState.email.isNotEmpty
+              ? syncState.email
+              : 'Google Calendar'),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () => Navigator.pop(ctx, 'sync'),
@@ -108,37 +105,32 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         ),
       );
-      if (action == 'sync' && userId != null) {
-        await deps.appointmentRepository
-            .syncWithGoogle(userId: userId, defaultColor: calendarColor);
+      if (!mounted) return;
+      if (action == 'sync') {
+        await _googleSyncCubit.syncNow(userId);
         if (mounted) {
           context.showToast(const AppToastConfig(
               type: ToastType.success, title: 'Calendar synced'));
         }
       } else if (action == 'unlink') {
-        await gcal.unlink();
-        if (mounted) setState(() => _gcalEmail = null);
-      }
-    } else {
-      final ok = await gcal.link();
-      if (ok) {
-        await _refreshGcal();
-        if (userId != null) {
-          await deps.appointmentRepository
-              .syncWithGoogle(userId: userId, defaultColor: calendarColor);
-        }
+        await _googleSyncCubit.unlink(userId);
         if (mounted) {
           context.showToast(const AppToastConfig(
-              type: ToastType.success, title: 'Google Calendar connected'));
+              type: ToastType.success, title: 'Google Calendar disconnected'));
         }
       }
+    } else {
+      await _googleSyncCubit.link(userId);
+      if (!mounted) return;
+      final next = _googleSyncCubit.state;
+      if (next is GoogleSyncLinked) {
+        context.showToast(const AppToastConfig(
+            type: ToastType.success, title: 'Google Calendar connected'));
+      } else if (next is GoogleSyncError) {
+        context.showToast(AppToastConfig(
+            type: ToastType.error, title: next.message));
+      }
     }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 
   @override
@@ -411,6 +403,15 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _googleSyncCubit,
+      child: BlocBuilder<GoogleSyncCubit, GoogleSyncState>(
+        builder: (context, gcalState) => _buildBody(context, gcalState),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, GoogleSyncState gcalState) {
     final l10n = AppLocalizations.of(context);
     final prefs = context.watch<UserPrefsBloc>().state;
     final theme = context.myTheme;
@@ -460,7 +461,9 @@ class _SettingsScreenState extends State<SettingsScreen>
           icon: CalendarPlus(width: 16, height: 16, color: tints[1]),
           color: tints[1],
           label: 'Google Calendar',
-          sub: _gcalEmail ?? 'Connect a Google account to sync events',
+          sub: gcalState is GoogleSyncLinked
+              ? gcalState.email
+              : 'Connect a Google account to sync events',
           onTap: _manageGoogleCalendar,
         ),
       ]),

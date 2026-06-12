@@ -110,6 +110,14 @@ class CalendarMarkAllDay extends CalendarEvent {
   List<Object?> get props => [appointmentId];
 }
 
+/// Triggers an on-demand pull from Google Calendar then refreshes the range.
+class CalendarGoogleSyncRequested extends CalendarEvent {
+  final String userId;
+  const CalendarGoogleSyncRequested(this.userId);
+  @override
+  List<Object?> get props => [userId];
+}
+
 /// Toggles a specific user's events in/out of the visible set.
 /// When [userId] is already in [CalendarState.visibleUserIds] it is removed;
 /// otherwise it is added. At least one user always stays visible.
@@ -291,6 +299,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       emit(state.copyWith(visibleUserIds: next));
     });
     on<CalendarRefresh>(_onRefresh);
+    on<CalendarGoogleSyncRequested>(_onGoogleSyncRequested);
   }
 
   Future<void> _onLoad(CalendarLoad e, Emitter<CalendarState> emit) async {
@@ -420,6 +429,13 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     emit(state.copyWith(
       allDayAppointmentIds: {...state.allDayAppointmentIds, e.appointmentId},
     ));
+  }
+
+  Future<void> _onGoogleSyncRequested(
+      CalendarGoogleSyncRequested e, Emitter<CalendarState> emit) async {
+    emit(state.copyWith(loading: true));
+    await _appointmentRepo.syncWithGoogle(userId: e.userId);
+    await _fetch(emit);
   }
 
   static DateTime _stripTime(DateTime d) => DateTime(d.year, d.month, d.day);

@@ -1,98 +1,50 @@
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/calendar/v3.dart' as gcal;
-import 'package:hestia/domain/entities/appointment.dart';
 
-/// Bidirectional Google Calendar sync. Used by the prod appointment
-/// repository. Mock flavor never instantiates this.
-///
-/// Auth flow uses google_sign_in (silent on subsequent launches) with the
-/// `https://www.googleapis.com/auth/calendar.events` scope. The calendar
-/// API client is built via the
-/// `extension_google_sign_in_as_googleapis_auth` extension.
+/// Handles Google sign-in for Calendar OAuth.
+/// GCal write operations (create/update/delete events) and read sync
+/// are handled server-side by edge functions (upsert-appointment,
+/// delete-appointment, google-calendar-sync). This service only covers
+/// the client-side sign-in needed to obtain a serverAuthCode that is
+/// exchanged server-side via google-oauth-exchange.
 class GoogleCalendarService {
-  GoogleCalendarService();
+  // calendar.events scope needed so the resulting refresh_token can
+  // manage calendar events server-side.
+  static const _scopes = ['https://www.googleapis.com/auth/calendar.events'];
 
-  static const _scopes = [gcal.CalendarApi.calendarEventsScope];
-  final GoogleSignIn _signIn = GoogleSignIn(scopes: _scopes);
+  final GoogleSignIn _signIn;
 
-  /// Returns true if a Google account is currently linked.
-  Future<bool> isLinked() async => _signIn.currentUser != null;
+  /// [serverClientId] must be the Web OAuth client ID (not the iOS client ID).
+  /// Defaults to the --dart-define GOOGLE_WEB_CLIENT_ID build variable.
+  /// The serverAuthCode returned by signIn() is exchanged server-side for
+  /// a refresh_token via the google-oauth-exchange edge function.
+  GoogleCalendarService({
+    String? serverClientId,
+  }) : _signIn = GoogleSignIn(
+          scopes: _scopes,
+          serverClientId: serverClientId ??
+              const String.fromEnvironment('GOOGLE_WEB_CLIENT_ID'),
+        );
 
-  /// Email of the linked Google account (after a silent or interactive sign-in).
-  Future<String?> linkedEmail() async {
-    final account = _signIn.currentUser ?? await _signIn.signInSilently();
-    return account?.email;
-  }
-
-  /// Starts the OAuth flow. Idempotent — does nothing if already linked.
-  Future<bool> link() async {
+  /// Signs in interactively and returns the serverAuthCode to be exchanged
+  /// server-side. Returns null if the user cancelled or serverClientId unset.
+  Future<String?> signInForServerAuthCode() async {
     final account = await _signIn.signIn();
-    return account != null;
+    return account?.serverAuthCode;
   }
 
-  /// Sign out (does NOT revoke the OAuth grant — call [revoke] for that).
-  Future<void> unlink() => _signIn.signOut();
-
-  Future<void> revoke() => _signIn.disconnect();
-
-  Future<gcal.CalendarApi?> _api() async {
-    final account = _signIn.currentUser ?? await _signIn.signInSilently();
-    if (account == null) return null;
-    final client = await _signIn.authenticatedClient();
-    if (client == null) return null;
-    return gcal.CalendarApi(client);
+  /// Signs in silently (re-auth after app restart).
+  Future<String?> signInSilentlyForServerAuthCode() async {
+    final account = await _signIn.signInSilently();
+    return account?.serverAuthCode;
   }
 
-  /// Pushes an appointment as a calendar event. Returns the created
-  /// google event id.
-  Future<String?> createEvent(Appointment a) async {
-    final api = await _api();
-    if (api == null) return null;
-    final event = _toEvent(a);
-    final created = await api.events.insert(event, 'primary');
-    return created.id;
-  }
+  /// Returns the signed-in Google account email, or null if not signed in.
+  Future<String?> currentEmail() async => _signIn.currentUser?.email;
 
-  Future<void> updateEvent(Appointment a) async {
-    final api = await _api();
-    if (api == null || a.googleEventId == null) return;
-    await api.events.update(_toEvent(a), 'primary', a.googleEventId!);
-  }
+  /// Signs out from Google on this device (does NOT revoke server-side token —
+  /// that is done via the google-oauth-exchange edge fn with action='unlink').
+  Future<void> signOut() => _signIn.signOut();
 
-  Future<void> deleteEvent(String googleEventId) async {
-    final api = await _api();
-    if (api == null) return;
-    await api.events.delete('primary', googleEventId);
-  }
-
-  /// Pulls events overlapping [from, to] from primary calendar.
-  Future<List<gcal.Event>> listRange(DateTime from, DateTime to) async {
-    final api = await _api();
-    if (api == null) return const [];
-    final events = await api.events.list(
-      'primary',
-      timeMin: from.toUtc(),
-      timeMax: to.toUtc(),
-      singleEvents: true,
-      orderBy: 'startTime',
-    );
-    return events.items ?? const [];
-  }
-
-  gcal.Event _toEvent(Appointment a) {
-    return gcal.Event()
-      ..summary = a.title
-      ..description = a.notes
-      ..location = a.location
-      ..start = gcal.EventDateTime(dateTime: a.startsAt.toUtc())
-      ..end = gcal.EventDateTime(dateTime: a.endsAt.toUtc())
-      ..reminders = gcal.EventReminders(
-        useDefault: false,
-        overrides: a.reminderOffsets
-            .map((d) =>
-                gcal.EventReminder(method: 'popup', minutes: d.inMinutes))
-            .toList(),
-      );
-  }
+  /// Revokes the OAuth grant on the device (also triggers server-side cleanup).
+  Future<void> disconnect() => _signIn.disconnect();
 }

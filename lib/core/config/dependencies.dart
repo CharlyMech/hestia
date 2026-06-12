@@ -84,7 +84,7 @@ class AppDependencies {
   late final NotificationRealtimeService notificationRealtimeService;
   AppVersionService? appVersionService;
   AppointmentService? appointmentService;
-  GoogleCalendarService? googleCalendarService;
+  late final GoogleCalendarService googleCalendarService;
   FinancialInstitutionService? financialInstitutionService;
   AccountMemberService? accountMemberService;
   late final PushNotificationService pushNotificationService;
@@ -171,7 +171,7 @@ class AppDependencies {
         NotificationRepositoryImpl(deps.notificationService!);
     deps.appointmentRepository = AppointmentRepositoryImpl(
       deps.appointmentService!,
-      deps.googleCalendarService!,
+      deps.googleCalendarService,
     );
     deps.appVersionRepository =
         AppVersionRepositoryImpl(deps.appVersionService!);
