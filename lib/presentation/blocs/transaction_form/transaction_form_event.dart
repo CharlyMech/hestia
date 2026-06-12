@@ -122,6 +122,14 @@ class TransactionFormLocationFetchRequested extends TransactionFormEvent {
   const TransactionFormLocationFetchRequested();
 }
 
+/// Pass null to clear the card selection.
+class TransactionFormCardChanged extends TransactionFormEvent {
+  final String? paymentCardId;
+  const TransactionFormCardChanged(this.paymentCardId);
+  @override
+  List<Object?> get props => [paymentCardId];
+}
+
 /// Set the optional actor association — exactly one of [petId], [carId],
 /// [homeId] should be non-null; passing all null clears the actor.
 class TransactionFormActorChanged extends TransactionFormEvent {

@@ -3,6 +3,7 @@ import 'package:hestia/core/services/location_service.dart';
 import 'package:hestia/core/services/user_preferences_service.dart';
 import 'package:hestia/data/repositories/account_member_repository_impl.dart';
 import 'package:hestia/data/repositories/app_version_repository_impl.dart';
+import 'package:hestia/data/repositories/card_repository_impl.dart';
 import 'package:hestia/data/repositories/appointment_repository_impl.dart';
 import 'package:hestia/data/repositories/auth_repository_impl.dart';
 import 'package:hestia/data/repositories/category_repository_impl.dart';
@@ -22,6 +23,7 @@ import 'package:hestia/data/repositories/notification_repository_impl.dart';
 import 'package:hestia/data/repositories/transaction_repository_impl.dart';
 
 import 'package:hestia/data/services/account_member_service.dart';
+import 'package:hestia/data/services/card_service.dart';
 import 'package:hestia/data/services/app_version_service.dart';
 import 'package:hestia/data/services/appointment_service.dart';
 import 'package:hestia/data/services/auth_service.dart';
@@ -48,6 +50,7 @@ import 'package:hestia/data/services/transaction_service.dart';
 
 import 'package:hestia/domain/repositories/account_member_repository.dart';
 import 'package:hestia/domain/repositories/app_version_repository.dart';
+import 'package:hestia/domain/repositories/card_repository.dart';
 import 'package:hestia/domain/repositories/appointment_repository.dart';
 import 'package:hestia/domain/repositories/auth_repository.dart';
 import 'package:hestia/domain/repositories/category_repository.dart';
@@ -112,6 +115,7 @@ class AppDependencies {
   late final NotificationRepository notificationRepository;
   late final AppointmentRepository appointmentRepository;
   late final AppVersionRepository appVersionRepository;
+  late final CardRepository cardRepository;
 
   AppDependencies._();
 
@@ -171,6 +175,7 @@ class AppDependencies {
     );
     deps.appVersionRepository =
         AppVersionRepositoryImpl(deps.appVersionService!);
+    deps.cardRepository = CardRepositoryImpl(CardService());
 
     instance = deps;
   }

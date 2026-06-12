@@ -14,6 +14,7 @@ abstract final class TransactionMapper {
       categoryId: dto.categoryId,
       bankAccountId: dto.bankAccountId,
       transactionSourceId: dto.transactionSourceId,
+      paymentCardId: dto.paymentCardId,
       amount: dto.amount.toDouble(),
       currency: dto.currency,
       type: TransactionType.fromString(dto.type),
@@ -25,6 +26,9 @@ abstract final class TransactionMapper {
       lastUpdate: dto.lastUpdate.fromUnix,
       latitude: dto.latitude,
       longitude: dto.longitude,
+      petId: dto.petId,
+      carId: dto.carId,
+      homeId: dto.homeId,
       categoryName: dto.categories?['name'] as String?,
       categoryColor: dto.categories?['color'] as String?,
       bankAccountName: dto.bankAccounts?['name'] as String?,
@@ -43,6 +47,7 @@ abstract final class TransactionMapper {
       categoryId: entity.categoryId,
       bankAccountId: entity.bankAccountId,
       transactionSourceId: entity.transactionSourceId,
+      paymentCardId: entity.paymentCardId,
       amount: entity.amount,
       currency: entity.currency,
       type: entity.type.value,
@@ -54,6 +59,9 @@ abstract final class TransactionMapper {
       lastUpdate: entity.lastUpdate.toUnix,
       latitude: entity.latitude,
       longitude: entity.longitude,
+      petId: entity.petId,
+      carId: entity.carId,
+      homeId: entity.homeId,
     );
   }
 

@@ -59,6 +59,8 @@ class TransactionFormBloc
       ));
     });
     on<TransactionFormLocationFetchRequested>(_onLocationFetch);
+    on<TransactionFormCardChanged>((e, emit) =>
+        emit(state.copyWith(paymentCardId: e.paymentCardId)));
     on<TransactionFormActorChanged>((e, emit) => emit(state.copyWith(
           petId: e.petId,
           carId: e.carId,
@@ -80,6 +82,7 @@ class TransactionFormBloc
       categoryId: t.categoryId,
       bankAccountId: t.bankAccountId,
       transactionSourceId: t.transactionSourceId,
+      paymentCardId: t.paymentCardId,
       date: t.date,
       isRecurring: t.isRecurring,
       note: t.note ?? '',
@@ -253,6 +256,7 @@ class TransactionFormBloc
       categoryId: state.categoryId!,
       bankAccountId: state.bankAccountId!,
       transactionSourceId: state.transactionSourceId,
+      paymentCardId: state.paymentCardId,
       amount: amount,
       currency: state.currency,
       type: type,

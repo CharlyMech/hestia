@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
-import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/presentation/widgets/common/pressable_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
@@ -35,7 +34,7 @@ class PersonCard extends StatelessWidget {
     final name = profile.displayName ?? profile.email;
     final initials = _initials(name);
     final avatarColor = profile.calendarColor != null
-        ? hexToColor(profile.calendarColor!)
+        ? Color(int.parse(profile.calendarColor!.replaceFirst('#', '0xff')))
         : accent;
 
     return PressableCard(
@@ -102,34 +101,27 @@ class PersonCard extends StatelessWidget {
   }
 
   Widget _avatar(Color color, String initials) {
-    Widget letter() => Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.18),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            initials,
-            style: AppFonts.heading(
-                fontSize: 16, fontWeight: FontWeight.w700, color: color),
-          ),
-        );
-
-    if (profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty) {
+    if (profile.avatarUrl != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(22),
-        child: Image.network(
-          profile.avatarUrl!,
-          width: 44,
-          height: 44,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => letter(),
-        ),
+        child: Image.network(profile.avatarUrl!,
+            width: 44, height: 44, fit: BoxFit.cover),
       );
     }
-    return letter();
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.18),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initials,
+        style: AppFonts.heading(
+            fontSize: 16, fontWeight: FontWeight.w700, color: color),
+      ),
+    );
   }
 
   String _initials(String name) {

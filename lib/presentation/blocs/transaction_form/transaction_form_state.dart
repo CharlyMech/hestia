@@ -32,6 +32,9 @@ class TransactionFormState extends Equatable {
   final double? longitude;
   final bool locationLoading;
 
+  /// Optional payment card used for this transaction.
+  final String? paymentCardId;
+
   /// Optional actor — at most one should be set at a time.
   final String? petId;
   final String? carId;
@@ -57,6 +60,7 @@ class TransactionFormState extends Equatable {
     this.latitude,
     this.longitude,
     this.locationLoading = false,
+    this.paymentCardId,
     this.petId,
     this.carId,
     this.homeId,
@@ -95,6 +99,7 @@ class TransactionFormState extends Equatable {
     Object? latitude = _unset,
     Object? longitude = _unset,
     bool? locationLoading,
+    Object? paymentCardId = _unset,
     Object? petId = _unset,
     Object? carId = _unset,
     Object? homeId = _unset,
@@ -128,6 +133,8 @@ class TransactionFormState extends Equatable {
       latitude: latitude == _unset ? this.latitude : latitude as double?,
       longitude: longitude == _unset ? this.longitude : longitude as double?,
       locationLoading: locationLoading ?? this.locationLoading,
+      paymentCardId:
+          paymentCardId == _unset ? this.paymentCardId : paymentCardId as String?,
       petId: petId == _unset ? this.petId : petId as String?,
       carId: carId == _unset ? this.carId : carId as String?,
       homeId: homeId == _unset ? this.homeId : homeId as String?,
@@ -155,6 +162,7 @@ class TransactionFormState extends Equatable {
         latitude,
         longitude,
         locationLoading,
+        paymentCardId,
         petId,
         carId,
         homeId,

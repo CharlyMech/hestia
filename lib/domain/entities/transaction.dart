@@ -8,6 +8,7 @@ class Transaction extends Equatable {
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
+  final String? paymentCardId;
   final double amount;
   final String currency;
   final TransactionType type;
@@ -42,6 +43,7 @@ class Transaction extends Equatable {
     required this.categoryId,
     required this.bankAccountId,
     this.transactionSourceId,
+    this.paymentCardId,
     required this.amount,
     this.currency = 'EUR',
     required this.type,
@@ -77,6 +79,8 @@ class Transaction extends Equatable {
     String? bankAccountId,
     String? transactionSourceId,
     bool clearTransactionSource = false,
+    String? paymentCardId,
+    bool clearPaymentCardId = false,
     double? amount,
     String? currency,
     TransactionType? type,
@@ -112,6 +116,9 @@ class Transaction extends Equatable {
       transactionSourceId: clearTransactionSource
           ? null
           : (transactionSourceId ?? this.transactionSourceId),
+      paymentCardId: clearPaymentCardId
+          ? null
+          : (paymentCardId ?? this.paymentCardId),
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,
       type: type ?? this.type,

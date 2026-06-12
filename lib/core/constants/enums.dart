@@ -167,3 +167,21 @@ enum AccountMemberRole {
         orElse: () => AccountMemberRole.authorized);
   }
 }
+
+/// Payment card network
+enum CardNetwork {
+  visa,
+  mastercard,
+  amex,
+  maestro,
+  unionpay,
+  discover,
+  other;
+
+  String get value => name;
+
+  static CardNetwork fromString(String value) {
+    return CardNetwork.values.firstWhere((e) => e.name == value,
+        orElse: () => CardNetwork.other);
+  }
+}

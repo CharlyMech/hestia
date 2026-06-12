@@ -27,6 +27,7 @@ import 'package:hestia/presentation/widgets/transaction_sources/transaction_sour
 import 'package:hestia/presentation/widgets/transactions/pickers/bank_account_picker.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/category_picker.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/date_picker.dart';
+import 'package:hestia/domain/entities/payment_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Cart, CreditCard, Calendar, Refresh, EditPencil, Trash, Shop, Plus;
 import 'package:intl/intl.dart';
@@ -58,6 +59,7 @@ class _TransactionFormState extends State<TransactionForm> {
   List<Category> _categories = const [];
   List<BankAccount> _bankAccounts = const [];
   List<TransactionSource> _txSources = const [];
+  List<PaymentCard> _cards = const [];
   bool _loadingLookups = true;
 
   @override
@@ -102,6 +104,13 @@ class _TransactionFormState extends State<TransactionForm> {
     setState(() => _txSources = txSrcs);
   }
 
+  Future<void> _loadCardsForAccount(String accountId) async {
+    final (cards, _) = await AppDependencies.instance.cardRepository
+        .getCardsByAccount(accountId: accountId);
+    if (!mounted) return;
+    setState(() => _cards = cards);
+  }
+
   @override
   void dispose() {
     _amountCtrl.dispose();
@@ -125,6 +134,7 @@ class _TransactionFormState extends State<TransactionForm> {
         categories: _categories,
         bankAccounts: _bankAccounts,
         txSources: _txSources,
+        cards: _cards,
         loadingLookups: _loadingLookups,
         isEditing: widget.initialTransaction != null &&
             widget.initialTransaction!.id.isNotEmpty,
@@ -133,6 +143,7 @@ class _TransactionFormState extends State<TransactionForm> {
         householdId: widget.householdId,
         userId: widget.userId,
         onReloadTransactionSources: _reloadTransactionSources,
+        onAccountSelected: _loadCardsForAccount,
       ),
     );
   }
@@ -144,6 +155,7 @@ class _FormBody extends StatelessWidget {
   final List<Category> categories;
   final List<BankAccount> bankAccounts;
   final List<TransactionSource> txSources;
+  final List<PaymentCard> cards;
   final bool loadingLookups;
   final bool isEditing;
   final VoidCallback? onClose;
@@ -151,6 +163,7 @@ class _FormBody extends StatelessWidget {
   final String householdId;
   final String userId;
   final Future<void> Function() onReloadTransactionSources;
+  final Future<void> Function(String accountId) onAccountSelected;
 
   const _FormBody({
     required this.amountCtrl,
@@ -158,6 +171,7 @@ class _FormBody extends StatelessWidget {
     required this.categories,
     required this.bankAccounts,
     required this.txSources,
+    required this.cards,
     required this.loadingLookups,
     required this.isEditing,
     required this.onClose,
@@ -165,6 +179,7 @@ class _FormBody extends StatelessWidget {
     required this.householdId,
     required this.userId,
     required this.onReloadTransactionSources,
+    required this.onAccountSelected,
   });
 
   @override
@@ -345,6 +360,34 @@ class _FormBody extends StatelessWidget {
                   onTap: () =>
                       _openBankAccountPicker(context, bloc, state, false),
                 ),
+                // Card picker — shown when account has cards and not a transfer
+                if (!isTransfer && cards.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _PickerTile(
+                    icon: CreditCard(
+                        width: 18,
+                        height: 18,
+                        color: tints[6 % tints.length]),
+                    iconColor: tints[6 % tints.length],
+                    label: 'Card',
+                    value: () {
+                      final c = cards
+                          .where((c) => c.id == state.paymentCardId)
+                          .firstOrNull;
+                      return c != null ? '•••• ${c.last4}' : 'Optional';
+                    }(),
+                    sub: cards
+                        .where((c) => c.id == state.paymentCardId)
+                        .firstOrNull
+                        ?.cardholderName,
+                    errorColor: expense,
+                    surface: surface,
+                    border: border,
+                    fg: fg,
+                    muted: muted,
+                    onTap: () => _openCardPicker(context, bloc, state),
+                  ),
+                ],
                 if (isTransfer) ...[
                   const SizedBox(height: 8),
                   _PickerTile(
@@ -679,9 +722,45 @@ class _FormBody extends StatelessWidget {
                 ? TransactionFormToBankAccountChanged(s.id)
                 : TransactionFormSourceChanged(s.id),
           );
-          // Default the transaction currency to the source account's.
-          if (!isTo) bloc.add(TransactionFormCurrencyChanged(s.currency));
+          if (!isTo) {
+            bloc.add(TransactionFormCurrencyChanged(s.currency));
+            // Clear card selection and reload cards for the new account.
+            bloc.add(const TransactionFormCardChanged(null));
+            onAccountSelected(s.id);
+          }
         },
+      ),
+    );
+  }
+
+  void _openCardPicker(BuildContext context, TransactionFormBloc bloc,
+      TransactionFormState state) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Select card',
+      heightFactor: 0.5,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          _CardPickerRow(
+            label: 'None',
+            sub: 'No card',
+            selected: state.paymentCardId == null,
+            onTap: () {
+              bloc.add(const TransactionFormCardChanged(null));
+              Navigator.of(context).maybePop();
+            },
+          ),
+          ...cards.map((c) => _CardPickerRow(
+                label: '•••• ${c.last4}',
+                sub: c.cardholderName,
+                selected: c.id == state.paymentCardId,
+                onTap: () {
+                  bloc.add(TransactionFormCardChanged(c.id));
+                  Navigator.of(context).maybePop();
+                },
+              )),
+        ],
       ),
     );
   }
@@ -1347,6 +1426,70 @@ class _ActorPickerState extends State<_ActorPicker> {
                   color: widget.muted,
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CardPickerRow extends StatelessWidget {
+  final String label;
+  final String? sub;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CardPickerRow({
+    required this.label,
+    this.sub,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.myTheme;
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? accent.withValues(alpha: 0.12) : surface,
+          border: Border.all(color: selected ? accent : border),
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+        ),
+        child: Row(
+          spacing: 12,
+          children: [
+            Icon(
+              selected
+                  ? CupertinoIcons.checkmark_circle_fill
+                  : CupertinoIcons.circle,
+              size: 20,
+              color: selected ? accent : muted,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: AppFonts.body(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: fg)),
+                  if (sub != null)
+                    Text(sub!,
+                        style: AppFonts.body(fontSize: 12, color: muted)),
+                ],
+              ),
+            ),
           ],
         ),
       ),

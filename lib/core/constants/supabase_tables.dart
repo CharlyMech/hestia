@@ -32,4 +32,6 @@ abstract final class SupabaseTables {
   static const shoppingListItems = 'shopping_list_items';
   static const shoppingSessions = 'shopping_sessions';
   static const homes = 'homes';
+  static const paymentCards = 'payment_cards';
+  static const carMaintenanceRecords = 'car_maintenance_records';
 }

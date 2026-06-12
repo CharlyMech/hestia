@@ -5,6 +5,7 @@ class TransactionDto {
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
+  final String? paymentCardId;
   final num amount;
   final String currency;
   final String type;
@@ -16,6 +17,9 @@ class TransactionDto {
   final int lastUpdate;
   final double? latitude;
   final double? longitude;
+  final String? petId;
+  final String? carId;
+  final String? homeId;
 
   // Joined relations (nullable — only present on select with joins)
   final Map<String, dynamic>? categories;
@@ -30,6 +34,7 @@ class TransactionDto {
     required this.categoryId,
     required this.bankAccountId,
     this.transactionSourceId,
+    this.paymentCardId,
     required this.amount,
     this.currency = 'EUR',
     required this.type,
@@ -41,6 +46,9 @@ class TransactionDto {
     required this.lastUpdate,
     this.latitude,
     this.longitude,
+    this.petId,
+    this.carId,
+    this.homeId,
     this.categories,
     this.bankAccounts,
     this.transactionSources,
@@ -55,6 +63,7 @@ class TransactionDto {
       categoryId: json['category_id'] as String,
       bankAccountId: json['bank_account_id'] as String,
       transactionSourceId: json['transaction_source_id'] as String?,
+      paymentCardId: json['payment_card_id'] as String?,
       amount: json['amount'] as num,
       currency: json['currency'] as String? ?? 'EUR',
       type: json['type'] as String,
@@ -66,6 +75,9 @@ class TransactionDto {
       lastUpdate: json['last_update'] as int,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      petId: json['pet_id'] as String?,
+      carId: json['car_id'] as String?,
+      homeId: json['home_id'] as String?,
       categories: json['categories'] as Map<String, dynamic>?,
       bankAccounts: json['bank_accounts'] as Map<String, dynamic>?,
       transactionSources: json['transaction_sources'] as Map<String, dynamic>?,
@@ -80,6 +92,7 @@ class TransactionDto {
       'category_id': categoryId,
       'bank_account_id': bankAccountId,
       'transaction_source_id': transactionSourceId,
+      if (paymentCardId != null) 'payment_card_id': paymentCardId,
       'amount': amount,
       'currency': currency,
       'type': type,
@@ -87,6 +100,9 @@ class TransactionDto {
       'date': date,
       'is_recurring': isRecurring,
       'recurring_rule': recurringRule,
+      if (petId != null) 'pet_id': petId,
+      if (carId != null) 'car_id': carId,
+      if (homeId != null) 'home_id': homeId,
     };
     if (latitude != null) m['latitude'] = latitude;
     if (longitude != null) m['longitude'] = longitude;
@@ -98,6 +114,7 @@ class TransactionDto {
       'category_id': categoryId,
       'bank_account_id': bankAccountId,
       'transaction_source_id': transactionSourceId,
+      'payment_card_id': paymentCardId,
       'amount': amount,
       'currency': currency,
       'type': type,
@@ -108,6 +125,9 @@ class TransactionDto {
       'last_update': DateTime.now().millisecondsSinceEpoch ~/ 1000,
       'latitude': latitude,
       'longitude': longitude,
+      'pet_id': petId,
+      'car_id': carId,
+      'home_id': homeId,
     };
   }
 }
