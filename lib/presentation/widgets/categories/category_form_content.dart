@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
-import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/constants/themes.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -49,13 +49,13 @@ class _CategoryFormContentState extends State<CategoryFormContent> {
 
   List<Color> _swatches(MyTheme theme) {
     final tints = theme.categoryTints
-        .map((h) => Color(int.parse(h.replaceFirst('#', '0xff'))))
+        .map((h) => hexToColor(h))
         .toList();
     return [
-      Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff'))),
-      Color(int.parse(theme.colorGreen.replaceFirst('#', '0xff'))),
+      hexToColor(theme.primaryColor),
+      hexToColor(theme.colorGreen),
       ...tints,
-      Color(int.parse(theme.colorRed.replaceFirst('#', '0xff'))),
+      hexToColor(theme.colorRed),
     ];
   }
 
@@ -189,16 +189,16 @@ class _CategoryFormContentState extends State<CategoryFormContent> {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.surfaceColor);
     final border =
-        Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.borderColor);
     final fg =
-        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.onBackgroundColor);
     final muted =
-        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.onInactiveColor);
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
-    final expense = Color(int.parse(theme.colorRed.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
+    final expense = hexToColor(theme.colorRed);
     final swatches = _swatches(theme);
     final isEdit = widget.existing != null;
 
@@ -210,20 +210,10 @@ class _CategoryFormContentState extends State<CategoryFormContent> {
         spacing: 14,
         children: [
           _label('Name', muted),
-          Container(
-            decoration: BoxDecoration(
-              color: surface,
-              border: Border.all(color: border, width: 1),
-              borderRadius: BorderRadius.circular(AppRadii.lg),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: CupertinoTextField(
-              controller: _name,
-              placeholder: 'e.g. Groceries',
-              decoration: const BoxDecoration(),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              style: AppFonts.body(fontSize: 14, color: fg),
-            ),
+          FTextField(
+            controller: _name,
+            hint: 'e.g. Groceries',
+            textCapitalization: TextCapitalization.sentences,
           ),
           if (!isEdit) ...[
             _label('Type', muted),

@@ -8,7 +8,6 @@ abstract final class SupabaseTables {
   static const transfers = 'transfers';
   static const bankAccounts = 'bank_accounts';
   static const financialInstitutions = 'financial_institutions';
-  static const paymentCards = 'payment_cards';
   static const accountMembers = 'account_members';
   static const transactionSources = 'transaction_sources';
   static const financialGoals = 'financial_goals';
@@ -20,6 +19,7 @@ abstract final class SupabaseTables {
   static const appVersions = 'app_versions';
   static const appointments = 'appointments';
   static const appointmentReminders = 'appointment_reminders';
+  static const appointmentPets = 'appointment_pets';
 
   // ── Newly wired in supabase flavor (Part B) ──────────────────────────────
   static const cars = 'cars';

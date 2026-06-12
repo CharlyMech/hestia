@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
@@ -73,20 +74,20 @@ class _GoalFormContentState extends State<GoalFormContent> {
 
   List<Color> _swatches(MyTheme theme) {
     final tints = theme.categoryTints
-        .map((h) => Color(int.parse(h.replaceFirst('#', '0xff'))))
+        .map((h) => hexToColor(h))
         .toList();
     return [
-      Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff'))),
-      Color(int.parse(theme.colorGreen.replaceFirst('#', '0xff'))),
+      hexToColor(theme.primaryColor),
+      hexToColor(theme.colorGreen),
       ...tints,
-      Color(int.parse(theme.colorRed.replaceFirst('#', '0xff'))),
+      hexToColor(theme.colorRed),
     ];
   }
 
   Future<void> _pickDeadline(BuildContext context) async {
     final theme = context.myTheme;
     final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.surfaceColor);
     DateTime tmp = _deadline ?? DateTime.now().add(const Duration(days: 90));
     await showCupertinoModalPopup<void>(
       context: context,
@@ -125,11 +126,11 @@ class _GoalFormContentState extends State<GoalFormContent> {
   Future<void> _pickMoneySource(BuildContext context) async {
     final theme = context.myTheme;
     final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.surfaceColor);
     final fg =
-        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.onBackgroundColor);
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => Container(
@@ -250,15 +251,15 @@ class _GoalFormContentState extends State<GoalFormContent> {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.surfaceColor);
     final border =
-        Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.borderColor);
     final fg =
-        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.onBackgroundColor);
     final muted =
-        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.onInactiveColor);
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
     final swatches = _swatches(theme);
 
     final selectedSource =
@@ -398,8 +399,8 @@ class _GoalFormContentState extends State<GoalFormContent> {
                       style: AppFonts.body(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(int.parse(
-                            theme.colorRed.replaceFirst('#', '0xff'))),
+                        color: hexToColor(
+                            theme.colorRed),
                       ),
                     ),
                   ),
@@ -431,32 +432,17 @@ class _GoalFormContentState extends State<GoalFormContent> {
     String? trailing,
     TextInputType? keyboardType,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: surface,
-        border: Border.all(color: border, width: 1),
-        borderRadius: BorderRadius.circular(AppRadii.lg),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: CupertinoTextField(
-              controller: controller,
-              placeholder: placeholder,
-              keyboardType: keyboardType,
-              decoration: const BoxDecoration(),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              style: AppFonts.body(fontSize: 14, color: fg),
-            ),
-          ),
-          if (trailing != null && muted != null)
-            Text(
-              trailing,
-              style: AppFonts.body(fontSize: 12, color: muted),
-            ),
-        ],
-      ),
+    return FTextField(
+      controller: controller,
+      hint: placeholder,
+      keyboardType: keyboardType,
+      textCapitalization:
+          (keyboardType == null || keyboardType == TextInputType.text)
+              ? TextCapitalization.sentences
+              : TextCapitalization.none,
+      suffix: (trailing != null && muted != null)
+          ? Text(trailing, style: AppFonts.body(fontSize: 12, color: muted))
+          : null,
     );
   }
 

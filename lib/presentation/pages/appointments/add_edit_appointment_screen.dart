@@ -9,10 +9,13 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/appointment_form/appointment_form_bloc.dart';
+import 'package:hestia/core/config/router.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/presentation/widgets/appointments/appointment_related_picker.dart';
 
 class AddEditAppointmentScreen extends StatelessWidget {
   final Appointment? existing;
@@ -96,7 +99,8 @@ class _Form extends StatelessWidget {
                   ),
                 ),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+            padding: EdgeInsets.fromLTRB(
+                20, 12, 20, 40 + MediaQuery.viewInsetsOf(context).bottom),
             children: [
               // All day toggle
               Row(
@@ -172,6 +176,49 @@ class _Form extends StatelessWidget {
                       .read<AppointmentFormBloc>()
                       .add(FormLocationChanged(v)),
                 ),
+              ),
+              const SizedBox(height: 10),
+              // Map coordinates (bug #12): reuse the fixed-pin picker.
+              _MapField(
+                latitude: state.latitude,
+                longitude: state.longitude,
+                surface: surface,
+                border: border,
+                fg: fg,
+                muted: muted,
+                accent: accent,
+                onPick: () async {
+                  final result = await context.push<(double, double)>(
+                    AppRoutes.transactionMapPicker,
+                    extra: (state.latitude ?? 40.4168, state.longitude ?? -3.7038),
+                  );
+                  if (result != null && context.mounted) {
+                    context
+                        .read<AppointmentFormBloc>()
+                        .add(FormLocationCoordsChanged(result.$1, result.$2));
+                  }
+                },
+                onClear: () => context
+                    .read<AppointmentFormBloc>()
+                    .add(const FormLocationCoordsChanged(null, null)),
+              ),
+              const SizedBox(height: 16),
+              // Related pet / car (bug #10).
+              AppointmentRelatedPicker(
+                householdId: state.householdId,
+                petIds: state.petIds,
+                carId: state.carId,
+                surface: surface,
+                border: border,
+                fg: fg,
+                muted: muted,
+                accent: accent,
+                onPetsChanged: (ids) => context
+                    .read<AppointmentFormBloc>()
+                    .add(FormPetsChanged(ids)),
+                onCarChanged: (id) => context
+                    .read<AppointmentFormBloc>()
+                    .add(FormCarChanged(id)),
               ),
               const SizedBox(height: 16),
               _LabeledField(
@@ -293,45 +340,40 @@ class _Form extends StatelessWidget {
       BuildContext context, DateTime initial, bool dateOnly) async {
     DateTime selected = initial;
     final l10n = AppLocalizations.of(context);
-    final picked = await showCupertinoModalPopup<DateTime>(
+    final picked = await showAppBottomSheet<DateTime>(
       context: context,
-      builder: (ctx) {
-        return Container(
-          height: 320,
-          color: CupertinoColors.systemBackground.resolveFrom(ctx),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: Text(l10n.common_cancel),
-                    ),
-                    CupertinoButton(
-                      onPressed: () => Navigator.of(ctx).pop(selected),
-                      child: Text(l10n.common_done),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: CupertinoDatePicker(
-                    mode: dateOnly
-                        ? CupertinoDatePickerMode.date
-                        : CupertinoDatePickerMode.dateAndTime,
-                    initialDateTime: initial,
-                    minuteInterval: 5,
-                    use24hFormat: true,
-                    onDateTimeChanged: (d) => selected = d,
-                  ),
-                ),
-              ],
+      title: dateOnly ? l10n.appointments_date : null,
+      heightFactor: 0.5,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              CupertinoButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.common_cancel),
+              ),
+              CupertinoButton(
+                onPressed: () => Navigator.of(context).pop(selected),
+                child: Text(l10n.common_done),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 216,
+            child: CupertinoDatePicker(
+              mode: dateOnly
+                  ? CupertinoDatePickerMode.date
+                  : CupertinoDatePickerMode.dateAndTime,
+              initialDateTime: initial,
+              minuteInterval: 5,
+              use24hFormat: true,
+              onDateTimeChanged: (d) => selected = d,
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
     return picked;
   }
@@ -406,20 +448,13 @@ class _InputState extends State<_Input> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTextField(
+    return FTextField(
       controller: _controller,
-      placeholder: widget.placeholder,
-      placeholderStyle: AppFonts.body(fontSize: 14, color: widget.muted),
-      style: AppFonts.body(fontSize: 14, color: widget.fg),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      hint: widget.placeholder,
+      textCapitalization: TextCapitalization.sentences,
       minLines: widget.minLines,
       maxLines: widget.maxLines ?? widget.minLines,
-      decoration: BoxDecoration(
-        color: widget.surface,
-        border: Border.all(color: widget.border, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      onChanged: widget.onChanged,
+      onChange: widget.onChanged,
     );
   }
 }
@@ -619,7 +654,7 @@ class _ColorPicker extends StatelessWidget {
   const _ColorPicker({required this.selected, required this.onChanged});
 
   static Color _parse(String hex) =>
-      Color(int.parse(hex.replaceFirst('#', '0xff')));
+      hexToColor(hex);
 
   @override
   Widget build(BuildContext context) {
@@ -732,6 +767,68 @@ class _Reminders extends StatelessWidget {
     if (d.inHours < 24) return '${d.inHours}h';
     final days = d.inDays;
     return days == 1 ? '1 day' : '$days days';
+  }
+}
+
+class _MapField extends StatelessWidget {
+  final double? latitude;
+  final double? longitude;
+  final Color surface;
+  final Color border;
+  final Color fg;
+  final Color muted;
+  final Color accent;
+  final VoidCallback onPick;
+  final VoidCallback onClear;
+
+  const _MapField({
+    required this.latitude,
+    required this.longitude,
+    required this.surface,
+    required this.border,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.onPick,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasCoords = latitude != null && longitude != null;
+    return GestureDetector(
+      onTap: onPick,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: border, width: 0.8),
+        ),
+        child: Row(
+          spacing: 10,
+          children: [
+            Icon(CupertinoIcons.map_pin_ellipse, size: 18, color: accent),
+            Expanded(
+              child: Text(
+                hasCoords
+                    ? '${latitude!.toStringAsFixed(5)}, ${longitude!.toStringAsFixed(5)}'
+                    : 'Pin location on map',
+                style: AppFonts.body(
+                    fontSize: 14, color: hasCoords ? fg : muted),
+              ),
+            ),
+            if (hasCoords)
+              GestureDetector(
+                onTap: onClear,
+                child: Icon(CupertinoIcons.xmark_circle_fill,
+                    size: 18, color: muted),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

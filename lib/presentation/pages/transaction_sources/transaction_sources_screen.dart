@@ -233,7 +233,7 @@ class _Body extends StatelessWidget {
                   itemBuilder: (_, i) {
                     final s = loaded.sources[i];
                     final color = s.color != null
-                        ? Color(int.parse(s.color!.replaceFirst('#', '0xff')))
+                        ? hexToColor(s.color!)
                         : accent;
                     return GestureDetector(
                       onTap: () => _openSheet(context, existing: s),

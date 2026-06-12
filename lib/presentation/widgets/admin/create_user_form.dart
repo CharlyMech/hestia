@@ -95,6 +95,7 @@ class _CreateUserFormState extends State<CreateUserForm> {
           CupertinoTextField(
             controller: _nameCtrl,
             placeholder: 'Display name (optional)',
+            textCapitalization: TextCapitalization.words,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             style: AppFonts.body(fontSize: 15, color: fg),
             placeholderStyle: AppFonts.body(fontSize: 15, color: muted),

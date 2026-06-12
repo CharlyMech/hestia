@@ -335,6 +335,8 @@ class _BodyState extends State<_Body> {
                               child: CupertinoTextField(
                                 controller: _newItemCtrl,
                                 placeholder: 'Add an item…',
+                                textCapitalization:
+                                    TextCapitalization.sentences,
                                 decoration: const BoxDecoration(),
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 12),

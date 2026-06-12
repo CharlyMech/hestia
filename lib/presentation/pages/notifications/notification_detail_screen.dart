@@ -136,6 +136,11 @@ class NotificationDetailScreen extends StatelessWidget {
         NotificationType.alert => 'Alert',
         NotificationType.system => 'System',
         NotificationType.reminder => 'Reminder',
+        NotificationType.shopping => 'Shopping',
+        NotificationType.pet => 'Pet',
+        NotificationType.car => 'Car',
+        // ignore: unreachable_switch_case
+        _ => 'Unknown',
       };
 
   String _fmtFull(DateTime d) {

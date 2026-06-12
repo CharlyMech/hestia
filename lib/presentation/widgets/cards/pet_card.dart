@@ -91,13 +91,22 @@ class PetCard extends StatelessWidget {
   }
 
   Widget _avatar() {
-    if (pet.imageUrl != null) {
+    if (pet.imageUrl != null && pet.imageUrl!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(pet.imageUrl!,
-            width: 44, height: 44, fit: BoxFit.cover),
+        child: Image.network(
+          pet.imageUrl!,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _letter(),
+        ),
       );
     }
+    return _letter();
+  }
+
+  Widget _letter() {
     return Container(
       width: 44,
       height: 44,
@@ -107,7 +116,7 @@ class PetCard extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        pet.name.substring(0, 1).toUpperCase(),
+        pet.name.isNotEmpty ? pet.name.substring(0, 1).toUpperCase() : '?',
         style: AppFonts.heading(
             fontSize: 18, fontWeight: FontWeight.w700, color: accent),
       ),

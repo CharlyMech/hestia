@@ -350,7 +350,7 @@ class _GenderBadge extends StatelessWidget {
     final label =
         gender == PetGender.male ? l10n.pets_genderMale : l10n.pets_genderFemale;
     final mutedHex = context.myTheme.onInactiveColor;
-    final muted = Color(int.parse(mutedHex.replaceFirst('#', '0xff')));
+    final muted = hexToColor(mutedHex);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

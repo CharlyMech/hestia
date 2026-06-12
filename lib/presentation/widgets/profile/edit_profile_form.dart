@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -229,14 +230,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
           const SizedBox(height: 24),
           _label(AppLocalizations.of(context).profile_displayName, muted),
           const SizedBox(height: 6),
-          CupertinoTextField(
+          FTextField(
             controller: _name,
-            placeholder: AppLocalizations.of(context).profile_displayName,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            style: AppFonts.body(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-            decoration: field(),
-            onChanged: (_) => setState(() {}),
+            hint: AppLocalizations.of(context).profile_displayName,
+            textCapitalization: TextCapitalization.words,
+            onChange: (_) => setState(() {}),
           ),
           const SizedBox(height: 16),
           _label(AppLocalizations.of(context).profile_birthDate, muted),

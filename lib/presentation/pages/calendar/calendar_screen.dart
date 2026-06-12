@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/profile.dart';
@@ -96,14 +97,35 @@ class _Body extends StatelessWidget {
       borderColor: border,
       foregroundColor: fg,
       titleText: l10n.calendar_title,
-      trailing: AnimatedButton(
-        size: 32,
-        padding: const EdgeInsets.all(4),
-        onTap: () {
-          final state = context.read<CalendarBloc>().state;
-          _openAddSheet(context, state.selectedDate);
-        },
-        child: Plus(width: 22, height: 22, color: fg),
+      trailing: Padding(
+        padding: const EdgeInsets.only(right: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            // Jump back to today's view.
+            AnimatedButton(
+              size: 32,
+              padding: const EdgeInsets.all(4),
+              onTap: () {
+                final today = DateTime.now();
+                final bloc = context.read<CalendarBloc>();
+                bloc.add(CalendarSelectDate(today));
+                bloc.add(CalendarMonthChanged(DateTime(today.year, today.month)));
+              },
+              child: Calendar(width: 20, height: 20, color: fg),
+            ),
+            AnimatedButton(
+              size: 32,
+              padding: const EdgeInsets.all(4),
+              onTap: () {
+                final state = context.read<CalendarBloc>().state;
+                _openAddSheet(context, state.selectedDate);
+              },
+              child: Plus(width: 22, height: 22, color: fg),
+            ),
+          ],
+        ),
       ),
       child: BlocBuilder<UserPrefsBloc, UserPrefsState>(
         builder: (context, prefs) => BlocBuilder<CalendarBloc, CalendarState>(
@@ -166,7 +188,7 @@ class _Body extends StatelessWidget {
                   // Filters
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                      padding: const EdgeInsets.all(0),
                       child: _Filters(
                         showAppointments: state.showAppointments,
                         showTransactions: state.showTransactions,
@@ -277,6 +299,16 @@ class _MonthGridState extends State<_MonthGrid> {
     );
   }
 
+  @override
+  void didUpdateWidget(_MonthGrid old) {
+    super.didUpdateWidget(old);
+    // Follow external month changes (e.g. the "today" action in the app bar).
+    final vm = widget.state.visibleMonth;
+    if (vm.year != _viewMonth.year || vm.month != _viewMonth.month) {
+      _viewMonth = DateTime(vm.year, vm.month);
+    }
+  }
+
   List<DateTime?> _visibleCells(List<DateTime?> all, DateTime selected) {
     if (_expanded) return all;
     final sel = _dayOnly(selected);
@@ -332,8 +364,8 @@ class _MonthGridState extends State<_MonthGrid> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cell =
-            (constraints.maxWidth / DateTime.daysPerWeek).clamp(44.0, 64.0);
-        final cellH = cell * 1.12;
+            (constraints.maxWidth / DateTime.daysPerWeek).clamp(42.0, 64.0);
+        final cellH = cell;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -342,10 +374,13 @@ class _MonthGridState extends State<_MonthGrid> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
+                spacing: 4,
                 children: [
                   CupertinoButton(
                     padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(AppRadii.lg),
                     onPressed: state.loading ? null : () => _shiftMonth(-1),
+                    color: widget.surface,
                     child: Icon(
                       CupertinoIcons.chevron_back,
                       size: 20,
@@ -353,19 +388,28 @@ class _MonthGridState extends State<_MonthGrid> {
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      monthTitle,
-                      textAlign: TextAlign.center,
-                      style: AppFonts.body(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: widget.accent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: widget.surface,
+                        borderRadius: BorderRadius.circular(AppRadii.lg),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        monthTitle,
+                        textAlign: TextAlign.center,
+                        style: AppFonts.body(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: widget.accent,
+                        ),
                       ),
                     ),
                   ),
                   CupertinoButton(
                     padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(AppRadii.lg),
                     onPressed: state.loading ? null : () => _shiftMonth(1),
+                    color: widget.surface,
                     child: Icon(
                       CupertinoIcons.chevron_forward,
                       size: 20,
@@ -374,7 +418,9 @@ class _MonthGridState extends State<_MonthGrid> {
                   ),
                   CupertinoButton(
                     padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(AppRadii.lg),
                     onPressed: () => setState(() => _expanded = !_expanded),
+                    color: widget.surface,
                     child: Icon(
                       _expanded
                           ? CupertinoIcons.chevron_up
@@ -390,7 +436,8 @@ class _MonthGridState extends State<_MonthGrid> {
               children: List.generate(7, (col) {
                 final w = ((widget.startDayOfWeek - 1 + col) % 7) + 1;
                 final idx = w % 7;
-                return SizedBox(
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   width: cell,
                   child: Center(
                     child: Text(
@@ -423,8 +470,8 @@ class _MonthGridState extends State<_MonthGrid> {
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 7,
                   mainAxisExtent: cellH,
-                  mainAxisSpacing: 6,
-                  crossAxisSpacing: 6,
+                  mainAxisSpacing: 4,
+                  crossAxisSpacing: 4,
                 ),
                 itemCount: cells.length,
                 itemBuilder: (context, i) {
@@ -462,8 +509,8 @@ class _MonthGridState extends State<_MonthGrid> {
                         // Transparent fill (except the selected highlight) with
                         // a visible border outline on every cell.
                         color: isSelected
-                            ? widget.accent.withValues(alpha: 0.12)
-                            : const Color(0x00000000),
+                            ? widget.accent
+                            : widget.surface.withValues(alpha: 0.6),
                         border: Border.all(
                           color: isToday
                               ? widget.accent.withValues(alpha: 0.55)
@@ -485,10 +532,8 @@ class _MonthGridState extends State<_MonthGrid> {
                                   ? FontWeight.w800
                                   : FontWeight.w600,
                               color: !inMonth
-                                  ? widget.muted.withValues(alpha: 0.4)
-                                  : isSelected
-                                      ? widget.accent
-                                      : widget.fg,
+                                  ? widget.muted.withValues(alpha: 0.2)
+                                  : widget.fg,
                             ),
                           ),
                           SizedBox(height: cell * 0.06),
@@ -501,7 +546,7 @@ class _MonthGridState extends State<_MonthGrid> {
                                 if (j > 0) const SizedBox(width: 2),
                                 _EventDot(
                                   color: appts[j].color != null
-                                      ? _parseHex(appts[j].color!)
+                                      ? hexToColor(appts[j].color!)
                                       : widget.accent,
                                   dim: isPast ? 0.45 : (isFuture ? 0.85 : 1.0),
                                 ),
@@ -530,8 +575,6 @@ class _MonthGridState extends State<_MonthGrid> {
     );
   }
 
-  static Color _parseHex(String hex) =>
-      Color(int.parse(hex.replaceFirst('#', '0xff')));
 }
 
 class _EventDot extends StatelessWidget {
@@ -594,42 +637,45 @@ class _Filters extends StatelessWidget {
       spacing: 8,
       children: [
         // Type filters row
-        Row(
-          spacing: 8,
-          children: [
-            Expanded(
-              child: _FilterChip(
-                label: l10n.calendar_eventos,
-                icon: Calendar(
-                    width: 13,
-                    height: 13,
-                    color: showAppointments ? accent : muted),
-                active: showAppointments,
-                accent: accent,
-                surface: surface,
-                border: border,
-                fg: fg,
-                muted: muted,
-                onTap: onToggleAppointments,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: _FilterChip(
+                  label: l10n.calendar_eventos,
+                  icon: Calendar(
+                      width: 13,
+                      height: 13,
+                      color: showAppointments ? accent : muted),
+                  active: showAppointments,
+                  accent: accent,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  onTap: onToggleAppointments,
+                ),
               ),
-            ),
-            Expanded(
-              child: _FilterChip(
-                label: l10n.calendar_movimientos,
-                icon: Bell(
-                    width: 13,
-                    height: 13,
-                    color: showTransactions ? accent : muted),
-                active: showTransactions,
-                accent: accent,
-                surface: surface,
-                border: border,
-                fg: fg,
-                muted: muted,
-                onTap: onToggleTransactions,
+              Expanded(
+                child: _FilterChip(
+                  label: l10n.calendar_movimientos,
+                  icon: Bell(
+                      width: 13,
+                      height: 13,
+                      color: showTransactions ? accent : muted),
+                  active: showTransactions,
+                  accent: accent,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  onTap: onToggleTransactions,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         // Per-member chips — only shown when household has >1 member
         if (memberProfiles.length > 1)
@@ -804,10 +850,8 @@ class _SignedOut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg =
-        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
-    final muted =
-        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+    final bg = hexToColor(theme.backgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
     return CupertinoPageScaffold(
       backgroundColor: bg,
       child: Center(

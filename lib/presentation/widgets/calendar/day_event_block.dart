@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
 import 'package:hestia/presentation/widgets/calendar/day_view_layout.dart';
 
@@ -25,6 +26,8 @@ class DayEventBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final height = event.blockHeight(hourHeight);
     final tall = height >= 40;
+    final theme = context.myTheme;
+    final fg = hexToColor(theme.foregroundColor);
 
     return GestureDetector(
       onTap: onTap,
@@ -33,18 +36,11 @@ class DayEventBlock extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.15),
+          color: color,
           borderRadius: BorderRadius.circular(8),
           border: Border(left: BorderSide(color: color, width: 3)),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.12),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
-        padding: const EdgeInsets.fromLTRB(8, 4, 6, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -54,7 +50,7 @@ class DayEventBlock extends StatelessWidget {
               style: AppFonts.body(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: fg,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -64,7 +60,7 @@ class DayEventBlock extends StatelessWidget {
                 _timeRange(),
                 style: AppFonts.body(
                   fontSize: 10,
-                  color: color.withValues(alpha: 0.72),
+                  color: fg.withValues(alpha: 0.9),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

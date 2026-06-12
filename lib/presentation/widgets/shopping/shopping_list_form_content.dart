@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
@@ -242,22 +243,12 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
         children: [
           Text('NAME', style: AppFonts.sectionLabel(color: muted)),
           const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: surface,
-              border: Border.all(color: border, width: 1),
-              borderRadius: BorderRadius.circular(AppRadii.lg),
-            ),
-            child: CupertinoTextField(
-              controller: _name,
-              placeholder: widget.asTemplate
-                  ? 'e.g. Mercadona staples'
-                  : 'e.g. Weekly groceries',
-              decoration: const BoxDecoration(),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              style: AppFonts.body(fontSize: 14, color: fg),
-            ),
+          FTextField(
+            controller: _name,
+            hint: widget.asTemplate
+                ? 'e.g. Mercadona staples'
+                : 'e.g. Weekly groceries',
+            textCapitalization: TextCapitalization.sentences,
           ),
           const SizedBox(height: 14),
           Text('SCOPE', style: AppFonts.sectionLabel(color: muted)),

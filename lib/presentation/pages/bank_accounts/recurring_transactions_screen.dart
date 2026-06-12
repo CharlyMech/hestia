@@ -83,6 +83,7 @@ class _RecurringTransactionsScreenState
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Recurring',
+      onRefresh: _load,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

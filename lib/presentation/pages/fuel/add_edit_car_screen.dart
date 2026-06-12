@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
@@ -189,7 +190,8 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              padding: EdgeInsets.fromLTRB(
+                  20, 16, 20, 32 + MediaQuery.viewInsetsOf(context).bottom),
               children: [
                 Center(
                   child: ImagePickerField(
@@ -318,8 +320,8 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                                 MemberAvatar(
                                   name: p.displayName ?? p.email,
                                   color: p.calendarColor != null
-                                      ? Color(int.parse(p.calendarColor!
-                                          .replaceFirst('#', '0xff')))
+                                      ? hexToColor(p.calendarColor!
+                                          )
                                       : accent,
                                   imageUrl: p.avatarUrl,
                                   size: 28,
@@ -378,20 +380,13 @@ class _Field extends StatelessWidget {
       children: [
         Text(label.toUpperCase(), style: AppFonts.sectionLabel(color: muted)),
         const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          decoration: BoxDecoration(
-            color: surface,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: CupertinoTextField(
-            controller: controller,
-            keyboardType: keyboard,
-            placeholder: '',
-            decoration: const BoxDecoration(),
-            style: AppFonts.body(
-                fontSize: 14, fontWeight: FontWeight.w500, color: fg),
-          ),
+        FTextField(
+          controller: controller,
+          keyboardType: keyboard,
+          textCapitalization:
+              (keyboard == null || keyboard == TextInputType.text)
+                  ? TextCapitalization.sentences
+                  : TextCapitalization.none,
         ),
       ],
     );

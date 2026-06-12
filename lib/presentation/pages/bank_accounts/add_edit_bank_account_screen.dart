@@ -407,14 +407,14 @@ class _BankPickerSheetState extends State<_BankPickerSheet> {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.surfaceColor);
     final border =
-        Color(int.parse(theme.outlineColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.outlineColor);
     final fg =
-        Color(int.parse(theme.foregroundColor.replaceFirst('#', '0xff')));
-    final muted = Color(int.parse(theme.mutedColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.foregroundColor);
+    final muted = hexToColor(theme.mutedColor);
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
 
     final filtered = _filtered;
     final maxListHeight = MediaQuery.of(context).size.height * 0.5;
@@ -448,7 +448,7 @@ class _BankPickerSheetState extends State<_BankPickerSheet> {
                 final bank = filtered[i];
                 final isSelected = widget.selected?.slug == bank.slug;
                 final brandColor =
-                    Color(int.parse(bank.brandColor.replaceFirst('#', '0xff')));
+                    hexToColor(bank.brandColor);
 
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,

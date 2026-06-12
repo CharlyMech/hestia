@@ -306,7 +306,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                         ('', l10n.common_none),
                         for (final p in _pets) (p.id, p.name),
                       ],
-                      selected: state.petId ?? '',
+                      selected: state.petIds.isEmpty ? '' : state.petIds.first,
                       surface: surface,
                       border: border,
                       fg: fg,
@@ -314,7 +314,7 @@ class _AppointmentFormContentState extends State<AppointmentFormContent> {
                       accent: accent,
                       onChanged: (id) => context
                           .read<AppointmentFormBloc>()
-                          .add(FormPetChanged(id.isEmpty ? null : id)),
+                          .add(FormPetsChanged(id.isEmpty ? const {} : {id})),
                     ),
                   ),
                 ],
@@ -623,18 +623,11 @@ class _InputState extends State<_Input> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTextField(
+    return FTextField(
       controller: _ctrl,
-      placeholder: widget.placeholder,
-      placeholderStyle: AppFonts.body(fontSize: 14, color: widget.muted),
-      style: AppFonts.body(fontSize: 14, color: widget.fg),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      decoration: BoxDecoration(
-        color: widget.surface,
-        border: Border.all(color: widget.border),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      onChanged: widget.onChanged,
+      hint: widget.placeholder,
+      textCapitalization: TextCapitalization.sentences,
+      onChange: widget.onChanged,
     );
   }
 }
@@ -843,7 +836,7 @@ class _ColorPicker extends StatelessWidget {
   const _ColorPicker({required this.selected, required this.onChanged});
 
   static Color _parse(String hex) =>
-      Color(int.parse(hex.replaceFirst('#', '0xff')));
+      hexToColor(hex);
 
   @override
   Widget build(BuildContext context) {

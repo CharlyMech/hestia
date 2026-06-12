@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/appointment.dart';
@@ -85,7 +86,7 @@ class _DayViewState extends State<DayView> {
     final border = hexToColor(theme.borderColor);
     final surface = hexToColor(theme.surfaceColor);
     final tints = theme.categoryTints
-        .map((h) => Color(int.parse(h.replaceFirst('#', '0xff'))))
+        .map((h) => hexToColor(h))
         .toList();
 
     final visibleAppts = widget.showAppointments
@@ -201,9 +202,8 @@ class _DayViewState extends State<DayView> {
                                             onTap: () =>
                                                 widget.onTapAppointment(
                                                     e.appointment),
-                                            onLongPress: () =>
-                                                _confirmDelete(
-                                                    context, e.appointment),
+                                            onLongPress: () => _confirmDelete(
+                                                context, e.appointment),
                                             use24h: widget.use24h,
                                           ),
                                         ),
@@ -443,23 +443,21 @@ class _AllDayOverlay extends StatelessWidget {
                   ...appointments.map((item) {
                     final appt = item.appointment;
                     final chipColor = appt.color != null
-                        ? Color(
-                            int.parse(appt.color!.replaceFirst('#', '0xff')))
+                        ? hexToColor(appt.color!)
                         : categoryColor(appt.category, categoryTints);
                     return _AllDayChip(
                       label: appt.title,
                       color: chipColor,
                       onTap: () => onTapAppointment(appt),
-                      onLongPress: () =>
-                          onLongPressAppointment(context, appt),
+                      onLongPress: () => onLongPressAppointment(context, appt),
                     );
                   }),
                   ...transactions.map((item) {
                     final t = item.transaction;
                     final sign = t.isExpense ? '-' : '+';
                     final txColor = t.categoryColor != null
-                        ? Color(int.parse(
-                            t.categoryColor!.replaceFirst('#', '0xff')))
+                        ? hexToColor(
+                            t.categoryColor!)
                         : accent;
                     return _AllDayChip(
                       label:
@@ -492,35 +490,31 @@ class _AllDayChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.10),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Text(
-          label,
-          style: AppFonts.body(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: color,
+    final theme = context.myTheme;
+    final fg = hexToColor(theme.foregroundColor);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(AppRadii.lg),
+            border: Border.all(color: color, width: 1),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          child: Text(
+            label,
+            style: AppFonts.body(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
     );

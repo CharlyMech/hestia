@@ -10,6 +10,7 @@ class TransactionFormState extends Equatable {
   final String? editingId;
   final TransactionKind kind;
   final String amount;
+  final String currency;
   final String? categoryId;
   final String? bankAccountId;
 
@@ -41,6 +42,7 @@ class TransactionFormState extends Equatable {
     this.editingId,
     this.kind = TransactionKind.expense,
     this.amount = '',
+    this.currency = 'EUR',
     this.categoryId,
     this.bankAccountId,
     this.toBankAccountId,
@@ -78,6 +80,7 @@ class TransactionFormState extends Equatable {
     Object? editingId = _unset,
     TransactionKind? kind,
     String? amount,
+    String? currency,
     Object? categoryId = _unset,
     Object? bankAccountId = _unset,
     Object? toBankAccountId = _unset,
@@ -101,6 +104,7 @@ class TransactionFormState extends Equatable {
       editingId: editingId == _unset ? this.editingId : editingId as String?,
       kind: kind ?? this.kind,
       amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
       categoryId:
           categoryId == _unset ? this.categoryId : categoryId as String?,
       bankAccountId: bankAccountId == _unset
@@ -136,6 +140,7 @@ class TransactionFormState extends Equatable {
         editingId,
         kind,
         amount,
+        currency,
         categoryId,
         bankAccountId,
         toBankAccountId,

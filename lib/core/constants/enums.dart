@@ -102,6 +102,9 @@ enum GoalScope {
 enum NotificationType {
   transaction,
   goal,
+  shopping,
+  pet,
+  car,
   alert,
   system,
   reminder;
@@ -109,7 +112,12 @@ enum NotificationType {
   String get value => name;
 
   static NotificationType fromString(String value) {
-    return NotificationType.values.firstWhere((e) => e.name == value);
+    // Accept legacy 'shopping_session' from old push payloads.
+    if (value == 'shopping_session') return NotificationType.shopping;
+    return NotificationType.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => NotificationType.system,
+    );
   }
 }
 
@@ -117,22 +125,6 @@ enum NotificationType {
 enum ViewMode {
   personal,
   household,
-}
-
-/// Payment card network
-enum CardNetwork {
-  visa,
-  mastercard,
-  amex,
-  maestro,
-  unionpay,
-  discover;
-
-  String get value => name;
-
-  static CardNetwork fromString(String value) {
-    return CardNetwork.values.firstWhere((e) => e.name == value);
-  }
 }
 
 /// Financial institution type

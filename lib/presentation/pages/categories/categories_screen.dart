@@ -325,9 +325,9 @@ class _CategoryCard extends StatelessWidget {
                         height: 38,
                         decoration: BoxDecoration(
                           color: (categories[i].color != null
-                                  ? Color(int.parse(categories[i]
+                                  ? hexToColor(categories[i]
                                       .color!
-                                      .replaceFirst('#', '0xff')))
+                                      )
                                   : muted)
                               .withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
@@ -341,9 +341,9 @@ class _CategoryCard extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: categories[i].color != null
-                                ? Color(int.parse(categories[i]
+                                ? hexToColor(categories[i]
                                     .color!
-                                    .replaceFirst('#', '0xff')))
+                                    )
                                 : fg,
                           ),
                         ),

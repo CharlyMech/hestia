@@ -243,7 +243,20 @@ class _FormBody extends StatelessWidget {
                 pillColor: accent,
               ),
               const SizedBox(height: 24),
-              Text('AMOUNT · EUR', style: AppFonts.sectionLabel(color: muted)),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _openCurrencyPicker(context, bloc, state),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    Text('AMOUNT · ${state.currency}',
+                        style: AppFonts.sectionLabel(color: muted)),
+                    Icon(CupertinoIcons.chevron_down, size: 11, color: muted),
+                  ],
+                ),
+              ),
               const SizedBox(height: 6),
               CupertinoTextField(
                 controller: amountCtrl,
@@ -251,7 +264,26 @@ class _FormBody extends StatelessWidget {
                 keyboardType: const TextInputType.numberWithOptions(
                     decimal: true, signed: false),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                  // Accept both '.' and ',' as the decimal separator, then
+                  // normalise ',' → '.' so locales that show a comma key work.
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                  TextInputFormatter.withFunction((oldV, newV) {
+                    var t = newV.text.replaceAll(',', '.');
+                    final firstDot = t.indexOf('.');
+                    if (firstDot != -1) {
+                      // keep only the first dot, max 2 decimals
+                      final intPart = t.substring(0, firstDot);
+                      var dec = t
+                          .substring(firstDot + 1)
+                          .replaceAll('.', '');
+                      if (dec.length > 2) dec = dec.substring(0, 2);
+                      t = '$intPart.$dec';
+                    }
+                    return TextEditingValue(
+                      text: t,
+                      selection: TextSelection.collapsed(offset: t.length),
+                    );
+                  }),
                 ],
                 textAlign: TextAlign.center,
                 style: AppFonts.numeric(
@@ -413,6 +445,7 @@ class _FormBody extends StatelessWidget {
                         child: CupertinoTextField(
                           controller: noteCtrl,
                           placeholder: 'Add a note…',
+                          textCapitalization: TextCapitalization.sentences,
                           maxLines: 3,
                           minLines: 1,
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -640,11 +673,15 @@ class _FormBody extends StatelessWidget {
         accounts: bankAccounts,
         selectedId: isTo ? state.toBankAccountId : state.bankAccountId,
         excludeId: isTo ? state.bankAccountId : null,
-        onSelected: (s) => bloc.add(
-          isTo
-              ? TransactionFormToBankAccountChanged(s.id)
-              : TransactionFormSourceChanged(s.id),
-        ),
+        onSelected: (s) {
+          bloc.add(
+            isTo
+                ? TransactionFormToBankAccountChanged(s.id)
+                : TransactionFormSourceChanged(s.id),
+          );
+          // Default the transaction currency to the source account's.
+          if (!isTo) bloc.add(TransactionFormCurrencyChanged(s.currency));
+        },
       ),
     );
   }
@@ -666,6 +703,52 @@ class _FormBody extends StatelessWidget {
           bloc.add(TransactionFormTransactionSourceChanged(id));
           Navigator.of(context).pop();
         },
+      ),
+    );
+  }
+
+  void _openCurrencyPicker(BuildContext context, TransactionFormBloc bloc,
+      TransactionFormState state) {
+    const currencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD', 'AUD'];
+    final theme = context.myTheme;
+    final fg = hexToColor(theme.onBackgroundColor);
+    final accent = hexToColor(theme.primaryColor);
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Currency',
+      heightFactor: 0.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final c in currencies)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                bloc.add(TransactionFormCurrencyChanged(c));
+                Navigator.of(context).pop();
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(c,
+                          style: AppFonts.body(
+                              fontSize: 15,
+                              color: c == state.currency ? accent : fg,
+                              fontWeight: c == state.currency
+                                  ? FontWeight.w700
+                                  : FontWeight.w400)),
+                    ),
+                    if (c == state.currency)
+                      Icon(CupertinoIcons.checkmark, size: 16, color: accent),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -850,7 +933,7 @@ class _BankLogo extends StatelessWidget {
           orElse: () => null,
         );
     final brand = known != null
-        ? Color(int.parse(known.brandColor.replaceFirst('#', '0xff')))
+        ? hexToColor(known.brandColor)
         : fallbackColor;
     final letter =
         institution.isNotEmpty ? institution[0].toUpperCase() : '?';
@@ -1118,82 +1201,95 @@ class _ActorPickerState extends State<_ActorPicker> {
   void _openPicker() async {
     if (_pets.isEmpty && _cars.isEmpty && _homes.isEmpty) return;
 
-    final options = <({String id, String label, String type})>[
-      for (final p in _pets)
-        (id: p.id, label: '${p.icon} ${p.name}', type: 'pet'),
-      for (final c in _cars)
-        (id: c.id, label: '${c.icon} ${c.name}', type: 'car'),
-      for (final h in _homes)
-        (id: h.id, label: '${h.icon} ${h.name}', type: 'home'),
-    ];
-
-    await showCupertinoModalPopup<void>(
+    await showAppBottomSheet<void>(
       context: context,
-      builder: (ctx) => Container(
-        color: widget.surface,
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Clear option
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  widget.onChanged(null, null, null);
-                  Navigator.of(ctx).pop();
-                },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  child: Row(
-                    children: [
-                      Text('None',
-                          style:
-                              AppFonts.body(fontSize: 15, color: widget.muted)),
-                    ],
-                  ),
+      title: 'Related to',
+      heightFactor: 0.6,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _row(
+            label: 'None',
+            selected:
+                widget.petId == null && widget.carId == null && widget.homeId == null,
+            onTap: () {
+              widget.onChanged(null, null, null);
+              Navigator.of(context).pop();
+            },
+          ),
+          if (_pets.isNotEmpty)
+            _section('Pets', _pets, (id) => widget.petId == id, (id) {
+              widget.onChanged(id, null, null);
+              Navigator.of(context).pop();
+            }),
+          if (_cars.isNotEmpty)
+            _section('Cars', _cars, (id) => widget.carId == id, (id) {
+              widget.onChanged(null, id, null);
+              Navigator.of(context).pop();
+            }),
+          if (_homes.isNotEmpty)
+            _section('Homes', _homes, (id) => widget.homeId == id, (id) {
+              widget.onChanged(null, null, id);
+              Navigator.of(context).pop();
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _section(
+    String title,
+    List<({String id, String name, String icon})> items,
+    bool Function(String id) isSelected,
+    void Function(String id) onPick,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
+          child: Text(
+            title.toUpperCase(),
+            style: AppFonts.label(
+                fontSize: 11, color: widget.muted, letterSpacing: 0.6),
+          ),
+        ),
+        for (final it in items)
+          _row(
+            label: '${it.icon} ${it.name}',
+            selected: isSelected(it.id),
+            onTap: () => onPick(it.id),
+          ),
+      ],
+    );
+  }
+
+  Widget _row({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: AppFonts.body(
+                  fontSize: 15,
+                  color: selected ? widget.accent : widget.fg,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                 ),
               ),
-              Container(height: 0.5, color: widget.border),
-              for (final opt in options) ...[
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onChanged(
-                      opt.type == 'pet' ? opt.id : null,
-                      opt.type == 'car' ? opt.id : null,
-                      opt.type == 'home' ? opt.id : null,
-                    );
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(opt.label,
-                              style: AppFonts.body(
-                                  fontSize: 15,
-                                  color: widget.fg,
-                                  fontWeight: (opt.type == 'pet' &&
-                                              opt.id == widget.petId) ||
-                                          (opt.type == 'car' &&
-                                              opt.id == widget.carId) ||
-                                          (opt.type == 'home' &&
-                                              opt.id == widget.homeId)
-                                      ? FontWeight.w600
-                                      : FontWeight.w400)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(height: 0.5, color: widget.border),
-              ],
-              const SizedBox(height: 8),
-            ],
-          ),
+            ),
+            if (selected)
+              Icon(CupertinoIcons.checkmark, size: 16, color: widget.accent),
+          ],
         ),
       ),
     );

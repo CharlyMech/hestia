@@ -70,7 +70,8 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         ),
       ),
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(0, 12, 0, 32),
+        padding: EdgeInsets.fromLTRB(
+            0, 12, 0, 32 + MediaQuery.viewInsetsOf(context).bottom),
         children: [
           // Preview card
           Padding(

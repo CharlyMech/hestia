@@ -22,6 +22,17 @@ def csv_env(name)
 end
 
 platform :ios do
+  desc "Sync App Store signing assets via match (run before `flutter build ipa`)"
+  lane :sync_signing do
+    api_key = app_store_api_key
+    match(
+      type: "appstore",
+      app_identifier: "com.charlymech.hestia",
+      api_key: api_key,
+      readonly: ENV["CI"] == "true",
+    )
+  end
+
   desc "Upload the already-built IPA to TestFlight"
   lane :beta do
     api_key = app_store_api_key

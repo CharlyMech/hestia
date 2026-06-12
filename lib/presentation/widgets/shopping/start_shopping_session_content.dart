@@ -214,6 +214,7 @@ class _StartShoppingSessionContentState
             child: CupertinoTextField(
               controller: _name,
               placeholder: 'e.g. Saturday groceries',
+              textCapitalization: TextCapitalization.sentences,
               decoration: const BoxDecoration(),
               padding: const EdgeInsets.symmetric(vertical: 14),
               style: AppFonts.body(fontSize: 14, color: fg),

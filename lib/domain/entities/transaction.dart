@@ -8,8 +8,8 @@ class Transaction extends Equatable {
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
-  final String? paymentCardId;
   final double amount;
+  final String currency;
   final TransactionType type;
   final String? note;
   final DateTime date;
@@ -42,8 +42,8 @@ class Transaction extends Equatable {
     required this.categoryId,
     required this.bankAccountId,
     this.transactionSourceId,
-    this.paymentCardId,
     required this.amount,
+    this.currency = 'EUR',
     required this.type,
     this.note,
     required this.date,
@@ -77,9 +77,8 @@ class Transaction extends Equatable {
     String? bankAccountId,
     String? transactionSourceId,
     bool clearTransactionSource = false,
-    String? paymentCardId,
-    bool clearPaymentCard = false,
     double? amount,
+    String? currency,
     TransactionType? type,
     String? note,
     bool clearNote = false,
@@ -113,9 +112,8 @@ class Transaction extends Equatable {
       transactionSourceId: clearTransactionSource
           ? null
           : (transactionSourceId ?? this.transactionSourceId),
-      paymentCardId:
-          clearPaymentCard ? null : (paymentCardId ?? this.paymentCardId),
       amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
       type: type ?? this.type,
       note: clearNote ? null : (note ?? this.note),
       date: date ?? this.date,
@@ -142,11 +140,11 @@ class Transaction extends Equatable {
   List<Object?> get props => [
         id,
         amount,
+        currency,
         type,
         date,
         categoryId,
         bankAccountId,
-        paymentCardId,
         latitude,
         longitude,
       ];

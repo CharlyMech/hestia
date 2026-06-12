@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
@@ -9,7 +10,9 @@ import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/pet.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
+import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
 import 'package:hestia/presentation/widgets/common/primary_button.dart';
@@ -180,7 +183,8 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
         ),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        padding: EdgeInsets.fromLTRB(
+            20, 16, 20, 40 + MediaQuery.viewInsetsOf(context).bottom),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -205,7 +209,17 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
             _speciesPicker(surface, border, fg, muted),
             const SizedBox(height: 12),
             _label('Gender', fg),
-            _genderPicker(surface, border, fg, muted),
+            AnimatedPillTabs(
+              labels: const ['Male', 'Female', 'Unknown'],
+              selectedIndex: PetGender.values.indexOf(_gender),
+              onChanged: (i) =>
+                  setState(() => _gender = PetGender.values[i]),
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              pillColor: accent,
+            ),
             const SizedBox(height: 12),
             _label('Breed', fg),
             _field(_breed, 'e.g. Labrador', fg, surface, border),
@@ -245,26 +259,15 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
     bool numeric = false,
     int maxLines = 1,
   }) =>
-      Container(
-        margin: const EdgeInsets.only(bottom: 0),
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: border),
-        ),
-        child: CupertinoTextField(
-          controller: ctrl,
-          placeholder: placeholder,
-          style: AppFonts.body(fontSize: 14, color: fg),
-          placeholderStyle:
-              AppFonts.body(fontSize: 14, color: fg.withValues(alpha: 0.35)),
-          decoration: null,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          keyboardType: numeric
-              ? const TextInputType.numberWithOptions(decimal: true)
-              : TextInputType.text,
-          maxLines: maxLines,
-        ),
+      FTextField(
+        controller: ctrl,
+        hint: placeholder,
+        maxLines: maxLines,
+        keyboardType: numeric
+            ? const TextInputType.numberWithOptions(decimal: true)
+            : TextInputType.text,
+        textCapitalization:
+            numeric ? TextCapitalization.none : TextCapitalization.sentences,
       );
 
   Widget _speciesPicker(Color surface, Color border, Color fg, Color muted) =>
@@ -282,30 +285,6 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
               Expanded(
                 child: Text(
                   _speciesLabel(_species),
-                  style: AppFonts.body(fontSize: 14, color: fg),
-                ),
-              ),
-              Icon(CupertinoIcons.chevron_down, size: 14, color: muted),
-            ],
-          ),
-        ),
-      );
-
-  Widget _genderPicker(Color surface, Color border, Color fg, Color muted) =>
-      Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: border),
-        ),
-        child: CupertinoButton(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          onPressed: () => _pickGender(fg, surface),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _genderLabel(_gender),
                   style: AppFonts.body(fontSize: 14, color: fg),
                 ),
               ),
@@ -348,11 +327,12 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
 
   void _pickSpecies(Color fg, Color surface) {
     final options = PetSpecies.values;
-    showCupertinoModalPopup(
+    showAppBottomSheet<void>(
       context: context,
-      builder: (_) => Container(
-        height: 280,
-        color: surface,
+      title: 'Species',
+      heightFactor: 0.5,
+      child: SizedBox(
+        height: 240,
         child: CupertinoPicker(
           itemExtent: 40,
           scrollController: FixedExtentScrollController(
@@ -370,78 +350,54 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
     );
   }
 
-  void _pickGender(Color fg, Color surface) {
-    final options = PetGender.values;
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => Container(
-        height: 220,
-        color: surface,
-        child: CupertinoPicker(
-          itemExtent: 40,
-          scrollController: FixedExtentScrollController(
-            initialItem: options.indexOf(_gender),
-          ),
-          onSelectedItemChanged: (i) => setState(() => _gender = options[i]),
-          children: options
-              .map((g) => Center(
-                    child: Text(_genderLabel(g),
-                        style: AppFonts.body(fontSize: 16, color: fg)),
-                  ))
-              .toList(),
-        ),
-      ),
-    );
-  }
-
   void _pickDate(Color fg, Color surface, Color accent) {
     DateTime temp = _birthDate ?? DateTime(2020, 1, 1);
-    showCupertinoModalPopup(
+    showAppBottomSheet<void>(
       context: context,
-      builder: (_) => Container(
-        height: 300,
-        color: surface,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () {
-                      setState(() => _birthDate = null);
-                      Navigator.pop(context);
-                    },
-                    child: Text('Clear',
-                        style: AppFonts.body(fontSize: 15, color: fg)),
-                  ),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () {
-                      setState(() => _birthDate = temp);
-                      Navigator.pop(context);
-                    },
-                    child: Text('Done',
-                        style: AppFonts.body(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: accent)),
-                  ),
-                ],
-              ),
+      title: 'Birth date',
+      heightFactor: 0.55,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setState(() => _birthDate = null);
+                    Navigator.pop(context);
+                  },
+                  child: Text('Clear',
+                      style: AppFonts.body(fontSize: 15, color: fg)),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setState(() => _birthDate = temp);
+                    Navigator.pop(context);
+                  },
+                  child: Text('Done',
+                      style: AppFonts.body(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: accent)),
+                ),
+              ],
             ),
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: temp,
-                maximumDate: DateTime.now(),
-                onDateTimeChanged: (d) => temp = d,
-              ),
+          ),
+          SizedBox(
+            height: 240,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: temp,
+              maximumDate: DateTime.now(),
+              onDateTimeChanged: (d) => temp = d,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -456,9 +412,4 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
         PetSpecies.other => 'Other',
       };
 
-  String _genderLabel(PetGender g) => switch (g) {
-        PetGender.male => 'Male',
-        PetGender.female => 'Female',
-        PetGender.unknown => 'Unknown',
-      };
 }

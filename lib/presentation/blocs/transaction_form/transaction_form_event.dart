@@ -38,6 +38,13 @@ class TransactionFormAmountChanged extends TransactionFormEvent {
   List<Object?> get props => [value];
 }
 
+class TransactionFormCurrencyChanged extends TransactionFormEvent {
+  final String currency;
+  const TransactionFormCurrencyChanged(this.currency);
+  @override
+  List<Object?> get props => [currency];
+}
+
 class TransactionFormCategoryChanged extends TransactionFormEvent {
   final String categoryId;
   const TransactionFormCategoryChanged(this.categoryId);

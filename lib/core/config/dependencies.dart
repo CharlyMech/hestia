@@ -5,7 +5,6 @@ import 'package:hestia/data/repositories/account_member_repository_impl.dart';
 import 'package:hestia/data/repositories/app_version_repository_impl.dart';
 import 'package:hestia/data/repositories/appointment_repository_impl.dart';
 import 'package:hestia/data/repositories/auth_repository_impl.dart';
-import 'package:hestia/data/repositories/card_repository_impl.dart';
 import 'package:hestia/data/repositories/category_repository_impl.dart';
 import 'package:hestia/data/repositories/financial_institution_repository_impl.dart';
 import 'package:hestia/data/repositories/goal_repository_impl.dart';
@@ -26,7 +25,6 @@ import 'package:hestia/data/services/account_member_service.dart';
 import 'package:hestia/data/services/app_version_service.dart';
 import 'package:hestia/data/services/appointment_service.dart';
 import 'package:hestia/data/services/auth_service.dart';
-import 'package:hestia/data/services/card_service.dart';
 import 'package:hestia/data/services/category_service.dart';
 import 'package:hestia/data/services/financial_institution_service.dart';
 import 'package:hestia/data/services/image_upload_service.dart';
@@ -41,6 +39,7 @@ import 'package:hestia/data/services/transaction_source_service.dart';
 import 'package:hestia/data/services/shopping_service.dart';
 import 'package:hestia/data/services/shopping_session_service.dart';
 import 'package:hestia/data/services/home_service.dart';
+import 'package:hestia/data/services/notification_realtime_service.dart';
 import 'package:hestia/data/services/notification_service.dart';
 import 'package:hestia/data/services/push_notification_service.dart';
 import 'package:hestia/data/services/shopping_realtime_service.dart';
@@ -51,7 +50,6 @@ import 'package:hestia/domain/repositories/account_member_repository.dart';
 import 'package:hestia/domain/repositories/app_version_repository.dart';
 import 'package:hestia/domain/repositories/appointment_repository.dart';
 import 'package:hestia/domain/repositories/auth_repository.dart';
-import 'package:hestia/domain/repositories/card_repository.dart';
 import 'package:hestia/domain/repositories/category_repository.dart';
 import 'package:hestia/domain/repositories/financial_institution_repository.dart';
 import 'package:hestia/domain/repositories/goal_repository.dart';
@@ -80,11 +78,11 @@ class AppDependencies {
   BankAccountService? bankAccountService;
   GoalService? goalService;
   NotificationService? notificationService;
+  late final NotificationRealtimeService notificationRealtimeService;
   AppVersionService? appVersionService;
   AppointmentService? appointmentService;
   GoogleCalendarService? googleCalendarService;
   FinancialInstitutionService? financialInstitutionService;
-  CardService? cardService;
   AccountMemberService? accountMemberService;
   late final PushNotificationService pushNotificationService;
 
@@ -100,7 +98,6 @@ class AppDependencies {
   late final CategoryRepository categoryRepository;
   late final BankAccountRepository bankAccountRepository;
   late final FinancialInstitutionRepository financialInstitutionRepository;
-  late final CardRepository cardRepository;
   late final AccountMemberRepository accountMemberRepository;
   late final CarRepository carRepository;
   late final FuelEntryRepository fuelEntryRepository;
@@ -135,11 +132,11 @@ class AppDependencies {
     deps.bankAccountService = BankAccountService();
     deps.goalService = GoalService();
     deps.notificationService = NotificationService();
+    deps.notificationRealtimeService = NotificationRealtimeService();
     deps.appVersionService = AppVersionService();
     deps.appointmentService = AppointmentService();
     deps.googleCalendarService = GoogleCalendarService();
     deps.financialInstitutionService = FinancialInstitutionService();
-    deps.cardService = CardService();
     deps.accountMemberService = AccountMemberService();
 
     // Repositories
@@ -151,7 +148,6 @@ class AppDependencies {
         BankAccountRepositoryImpl(deps.bankAccountService!);
     deps.financialInstitutionRepository =
         FinancialInstitutionRepositoryImpl(deps.financialInstitutionService!);
-    deps.cardRepository = CardRepositoryImpl(deps.cardService!);
     deps.accountMemberRepository =
         AccountMemberRepositoryImpl(deps.accountMemberService!);
     deps.carRepository = CarRepositoryImpl(CarService());

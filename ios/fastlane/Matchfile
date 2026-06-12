@@ -1,0 +1,8 @@
+# Fastlane match config. Signing assets live encrypted in a private git repo
+# and are synced here and in CI. See docs/testflight.md Part 4.
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+type("appstore")
+app_identifier(["com.charlymech.hestia"])
+# Read-only in CI so a build never mutates the certs repo.
+readonly(ENV["CI"] == "true")

@@ -57,8 +57,8 @@ class _PrimaryButtonState extends State<PrimaryButton>
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.onPrimaryColor.replaceFirst('#', '0xff')));
+    final bg = hexToColor(theme.primaryColor);
+    final fg = hexToColor(theme.onPrimaryColor);
     final disabled = widget.onPressed == null || widget.loading;
 
     return GestureDetector(

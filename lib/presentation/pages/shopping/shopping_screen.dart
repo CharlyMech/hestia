@@ -48,7 +48,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     return _Body(userId: auth.profile.id);
   }
 
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+  Color _c(String hex) => hexToColor(hex);
 }
 
 class _Body extends StatefulWidget {
@@ -446,7 +446,7 @@ class _BodyState extends State<_Body> {
     ];
   }
 
-  Color _c(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
+  Color _c(String hex) => hexToColor(hex);
 }
 
 class _ActiveSessionBanner extends StatelessWidget {

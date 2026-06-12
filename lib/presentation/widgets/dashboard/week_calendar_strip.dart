@@ -138,7 +138,6 @@ class _WeekCalendarStripState extends State<WeekCalendarStrip> {
                             day: day,
                             isToday: isToday,
                             appointmentColors: apptColors,
-                            hasTx: txs.isNotEmpty,
                             dayLabel: _dayLabel(context, day),
                             accent: widget.accent,
                             fg: widget.fg,
@@ -189,7 +188,6 @@ class _DayCell extends StatelessWidget {
   final DateTime day;
   final bool isToday;
   final List<Color> appointmentColors;
-  final bool hasTx;
   final String dayLabel;
   final Color accent;
   final Color fg;
@@ -201,7 +199,6 @@ class _DayCell extends StatelessWidget {
     required this.day,
     required this.isToday,
     required this.appointmentColors,
-    required this.hasTx,
     required this.dayLabel,
     required this.accent,
     required this.fg,
@@ -218,7 +215,7 @@ class _DayCell extends StatelessWidget {
     final labelFg = isToday ? onPrimary : muted;
     final visibleAppointmentColors = appointmentColors.take(3).toList();
     final hasMoreAppointments = appointmentColors.length > 3;
-    final hasIndicators = appointmentColors.isNotEmpty || hasTx;
+    final hasIndicators = appointmentColors.isNotEmpty;
 
     return Container(
       width: 44,
@@ -265,10 +262,6 @@ class _DayCell extends StatelessWidget {
                   const SizedBox(width: 3),
                 Plus(width: 6, height: 6, color: isToday ? onPrimary : accent),
               ],
-              if ((appointmentColors.isNotEmpty || hasMoreAppointments) &&
-                  hasTx)
-                const SizedBox(width: 3),
-              if (hasTx) const _EventDot(color: Color(0xFF4CB782), size: 5),
               if (!hasIndicators) const SizedBox(width: 5, height: 5),
             ],
           ),

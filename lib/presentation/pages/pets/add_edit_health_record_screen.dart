@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
@@ -8,7 +9,27 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+
+/// Opens the add/edit health-record form in an app bottom sheet (bug #7).
+Future<void> showHealthRecordSheet(
+  BuildContext context, {
+  String? petId,
+  PetHealthRecord? existing,
+}) {
+  return showAppBottomSheet<void>(
+    context: context,
+    title: existing == null ? 'Add Record' : 'Edit Record',
+    heightFactor: 0.92,
+    expand: true,
+    child: _AddEditHealthRecordView(
+      petId: petId,
+      existing: existing,
+      asSheet: true,
+    ),
+  );
+}
 
 class AddEditHealthRecordScreen extends StatelessWidget {
   /// petId is set when creating a new record.
@@ -29,7 +50,12 @@ class AddEditHealthRecordScreen extends StatelessWidget {
 class _AddEditHealthRecordView extends StatefulWidget {
   final String? petId;
   final PetHealthRecord? existing;
-  const _AddEditHealthRecordView({this.petId, this.existing});
+  final bool asSheet;
+  const _AddEditHealthRecordView({
+    this.petId,
+    this.existing,
+    this.asSheet = false,
+  });
   @override
   State<_AddEditHealthRecordView> createState() =>
       _AddEditHealthRecordViewState();
@@ -146,26 +172,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
 
-    return CupertinoPushedRouteShell(
-      backgroundColor: bg,
-      navBackground: surface,
-      borderColor: border,
-      foregroundColor: fg,
-      titleText: widget.existing == null ? 'Add Record' : 'Edit Record',
-      trailing: GestureDetector(
-        onTap: _save,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: Text(
-            'Save',
-            style: AppFonts.body(
-                fontSize: 15, fontWeight: FontWeight.w600, color: accent),
-          ),
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-        child: Column(
+    final form = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _label('Type', fg),
@@ -223,7 +230,36 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
               ),
             ),
           ],
+        );
+
+    // Sheet variant: just the padded, scrollable form (host provides chrome).
+    if (widget.asSheet) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+        child: form,
+      );
+    }
+
+    return CupertinoPushedRouteShell(
+      backgroundColor: bg,
+      navBackground: surface,
+      borderColor: border,
+      foregroundColor: fg,
+      titleText: widget.existing == null ? 'Add Record' : 'Edit Record',
+      trailing: GestureDetector(
+        onTap: _save,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Text(
+            'Save',
+            style: AppFonts.body(
+                fontSize: 15, fontWeight: FontWeight.w600, color: accent),
+          ),
         ),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        child: form,
       ),
     );
   }
@@ -244,25 +280,15 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     bool numeric = false,
     int maxLines = 1,
   }) =>
-      Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: border),
-        ),
-        child: CupertinoTextField(
-          controller: ctrl,
-          placeholder: placeholder,
-          style: AppFonts.body(fontSize: 14, color: fg),
-          placeholderStyle:
-              AppFonts.body(fontSize: 14, color: fg.withValues(alpha: 0.35)),
-          decoration: null,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          keyboardType: numeric
-              ? const TextInputType.numberWithOptions(decimal: true)
-              : TextInputType.text,
-          maxLines: maxLines,
-        ),
+      FTextField(
+        controller: ctrl,
+        hint: placeholder,
+        maxLines: maxLines,
+        keyboardType: numeric
+            ? const TextInputType.numberWithOptions(decimal: true)
+            : TextInputType.text,
+        textCapitalization:
+            numeric ? TextCapitalization.none : TextCapitalization.sentences,
       );
 
   Widget _typePicker(Color surface, Color border, Color fg, Color muted) =>

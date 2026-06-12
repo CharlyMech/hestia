@@ -155,16 +155,18 @@ class PushNotificationService {
   }
 
   void _handleForeground(RemoteMessage msg) {
+    // Realtime handles in-app banners — only show FCM toast on real device
+    // where msg.notification is populated (avoids duplicate banners).
     final notification = msg.notification;
     if (notification == null) return;
 
-    final ctx = rootNavigatorKey.currentContext;
-    if (ctx == null) return;
+    final overlay = rootNavigatorKey.currentState?.overlay;
+    if (overlay == null) return;
 
-    ctx.showToast(AppToastConfig(
+    AppToastService.showOnOverlay(overlay, AppToastConfig(
       type: _toastTypeFor(msg.data),
-      title: notification.title ?? 'Notification',
-      description: notification.body,
+      title: notification.title ?? msg.data['title'] as String? ?? 'Notification',
+      description: notification.body ?? msg.data['body'] as String?,
       actionLabel: 'View',
       onAction: () => _routeFromMessage(msg),
       position: ToastPosition.top,
@@ -184,12 +186,17 @@ class PushNotificationService {
         ctx.push(AppRoutes.transactions);
       case 'goal':
         ctx.push(AppRoutes.goals);
+      case 'shopping':
       case 'shopping_session':
         if (id != null) {
           ctx.push(AppRoutes.shoppingListDetail, extra: id);
         } else {
           ctx.push(AppRoutes.notifications);
         }
+      case 'pet':
+        ctx.push(AppRoutes.pets);
+      case 'car':
+        ctx.push(AppRoutes.cars);
       case 'reminder':
       case 'appointment':
         ctx.push(AppRoutes.calendarScreen);
@@ -204,7 +211,8 @@ class PushNotificationService {
       switch (data['type'] as String?) {
         'transaction' => ToastType.success,
         'goal' => ToastType.info,
-        'shopping_session' => ToastType.info,
+        'shopping' || 'shopping_session' => ToastType.info,
+        'pet' || 'car' => ToastType.info,
         'alert' => ToastType.warning,
         _ => ToastType.neutral,
       };

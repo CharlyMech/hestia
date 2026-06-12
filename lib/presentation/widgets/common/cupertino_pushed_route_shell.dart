@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show RefreshIndicator;
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show NavArrowLeft;
 
 /// Fixed iOS-style top row for pushed stack routes: plain back chevron (no
 /// bordered button), bottom hairline on [navBackground]; body scrolls underneath.
+///
+/// When [onRefresh] is set, the body is wrapped in a [RefreshIndicator] so any
+/// scrollable [child] (e.g. a ListView) gets pull-to-refresh.
 class CupertinoPushedRouteShell extends StatelessWidget {
   const CupertinoPushedRouteShell({
     super.key,
@@ -17,6 +21,7 @@ class CupertinoPushedRouteShell extends StatelessWidget {
     this.title,
     this.trailing,
     this.onBack,
+    this.onRefresh,
     this.topPadding = const EdgeInsets.fromLTRB(2, 2, 12, 10),
   }) : assert(
           title == null || titleText == null,
@@ -34,6 +39,10 @@ class CupertinoPushedRouteShell extends StatelessWidget {
   final Widget? title;
   final Widget? trailing;
   final VoidCallback? onBack;
+
+  /// Optional pull-to-refresh. Wraps the scrollable [child] in a
+  /// [RefreshIndicator]. No-op when null.
+  final Future<void> Function()? onRefresh;
   final EdgeInsets topPadding;
 
   @override
@@ -115,7 +124,14 @@ class CupertinoPushedRouteShell extends StatelessWidget {
             Expanded(
               child: ColoredBox(
                 color: backgroundColor,
-                child: child,
+                child: onRefresh == null
+                    ? child
+                    : RefreshIndicator(
+                        onRefresh: onRefresh!,
+                        color: foregroundColor,
+                        backgroundColor: navBackground,
+                        child: child,
+                      ),
               ),
             ),
           ],

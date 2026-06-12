@@ -9,6 +9,8 @@ class Appointment extends Equatable {
   final String title;
   final String? notes;
   final String? location;
+  final double? latitude;
+  final double? longitude;
   final DateTime startsAt;
   final Duration duration;
   final AppointmentCategory category;
@@ -20,8 +22,14 @@ class Appointment extends Equatable {
   final String? googleEventId;
 
   /// Optional pet/car links for calendar integration.
-  final String? petId;
+  ///
+  /// [petIds] is the source of truth for related pets (multi-select, persisted
+  /// via the `appointment_pets` join). [petId] is the first of [petIds], kept
+  /// for single-link integrations (e.g. Google Calendar sync).
+  final List<String> petIds;
   final String? carId;
+
+  String? get petId => petIds.isEmpty ? null : petIds.first;
 
   /// All-day events are shown at the top of the day view.
   final bool isAllDay;
@@ -44,12 +52,14 @@ class Appointment extends Equatable {
     required this.title,
     this.notes,
     this.location,
+    this.latitude,
+    this.longitude,
     required this.startsAt,
     this.duration = const Duration(hours: 1),
     this.category = AppointmentCategory.other,
     this.reminderOffsets = const [Duration(hours: 1)],
     this.googleEventId,
-    this.petId,
+    this.petIds = const [],
     this.carId,
     this.isAllDay = false,
     this.isShared = true,
@@ -67,12 +77,15 @@ class Appointment extends Equatable {
     String? title,
     String? notes,
     String? location,
+    double? latitude,
+    double? longitude,
+    bool clearLocationCoords = false,
     DateTime? startsAt,
     Duration? duration,
     AppointmentCategory? category,
     List<Duration>? reminderOffsets,
     String? googleEventId,
-    String? petId,
+    List<String>? petIds,
     String? carId,
     bool? isAllDay,
     bool? isShared,
@@ -88,12 +101,14 @@ class Appointment extends Equatable {
         title: title ?? this.title,
         notes: notes ?? this.notes,
         location: location ?? this.location,
+        latitude: clearLocationCoords ? null : (latitude ?? this.latitude),
+        longitude: clearLocationCoords ? null : (longitude ?? this.longitude),
         startsAt: startsAt ?? this.startsAt,
         duration: duration ?? this.duration,
         category: category ?? this.category,
         reminderOffsets: reminderOffsets ?? this.reminderOffsets,
         googleEventId: googleEventId ?? this.googleEventId,
-        petId: petId ?? this.petId,
+        petIds: petIds ?? this.petIds,
         carId: carId ?? this.carId,
         isAllDay: isAllDay ?? this.isAllDay,
         isShared: isShared ?? this.isShared,
@@ -110,12 +125,14 @@ class Appointment extends Equatable {
         title,
         notes,
         location,
+        latitude,
+        longitude,
         startsAt,
         duration,
         category,
         reminderOffsets,
         googleEventId,
-        petId,
+        petIds,
         carId,
         isAllDay,
         isShared,

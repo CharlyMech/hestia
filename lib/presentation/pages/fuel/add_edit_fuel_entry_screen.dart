@@ -295,7 +295,8 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        padding: EdgeInsets.fromLTRB(
+            20, 16, 20, 32 + MediaQuery.viewInsetsOf(context).bottom),
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -482,19 +483,13 @@ class _Field extends StatelessWidget {
       children: [
         Text(label.toUpperCase(), style: AppFonts.sectionLabel(color: muted)),
         const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          decoration: BoxDecoration(
-            color: surface,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: CupertinoTextField(
-            controller: controller,
-            keyboardType: keyboard,
-            decoration: const BoxDecoration(),
-            style: AppFonts.body(
-                fontSize: 14, fontWeight: FontWeight.w500, color: fg),
-          ),
+        FTextField(
+          controller: controller,
+          keyboardType: keyboard,
+          textCapitalization:
+              (keyboard == null || keyboard == TextInputType.text)
+                  ? TextCapitalization.sentences
+                  : TextCapitalization.none,
         ),
       ],
     );

@@ -111,6 +111,7 @@ class _HomesScreenState extends State<HomesScreen> {
       borderColor: border,
       foregroundColor: fg,
       titleText: 'Homes',
+      onRefresh: _load,
       trailing: GestureDetector(
         onTap: _openAddSheet,
         child: Padding(
@@ -127,6 +128,9 @@ class _HomesScreenState extends State<HomesScreen> {
                   onAdd: _openAddSheet,
                 )
               : ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   itemCount: _homes.length,
@@ -371,14 +375,14 @@ class _HomeFormSheetState extends State<_HomeFormSheet> {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.surfaceColor);
     final border =
-        Color(int.parse(theme.outlineColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.outlineColor);
     final fg =
-        Color(int.parse(theme.foregroundColor.replaceFirst('#', '0xff')));
-    final muted = Color(int.parse(theme.mutedColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.foregroundColor);
+    final muted = hexToColor(theme.mutedColor);
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -447,6 +451,7 @@ class _HomeFormSheetState extends State<_HomeFormSheet> {
         CupertinoTextField(
           controller: ctrl,
           placeholder: placeholder,
+          textCapitalization: TextCapitalization.sentences,
           style: AppFonts.body(fontSize: 15, color: fg),
           placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

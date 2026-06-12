@@ -455,9 +455,9 @@ class _SignedOut extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final bg =
-        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.backgroundColor);
     final muted =
-        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.onInactiveColor);
     return CupertinoPageScaffold(
       backgroundColor: bg,
       child: Center(

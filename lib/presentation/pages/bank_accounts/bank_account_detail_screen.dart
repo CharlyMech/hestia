@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,18 +8,16 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/financial_goal.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
-import 'package:hestia/domain/entities/payment_card.dart';
 import 'package:hestia/domain/entities/transaction.dart';
-import 'package:uuid/uuid.dart';
-import 'package:hestia/presentation/widgets/common/app_toast.dart';
-import 'package:hestia/presentation/widgets/common/primary_button.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/goals/goals_bloc.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
+import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
 import 'package:hestia/presentation/widgets/goals/goal_form_content.dart';
 import 'package:hestia/presentation/widgets/goals/goal_progress_card.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/balance_line_chart.dart';
@@ -44,7 +41,6 @@ class BankAccountDetailScreen extends StatefulWidget {
 class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
   BankAccount? _source;
   List<Transaction> _transactions = const [];
-  List<PaymentCard> _cards = const [];
   List<FinancialGoal> _goals = const [];
   List<BankAccount> _allSources = const [];
   String? _householdId;
@@ -102,47 +98,47 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
       viewMode: ViewMode.personal,
       userId: profile.id,
     );
-    final (cards, _) = await AppDependencies.instance.cardRepository
-        .getCardsByAccount(accountId: source.id);
     if (!mounted) return;
     setState(() {
       _source = source;
       _transactions = transactions;
       _allSources = sources;
-      _cards = cards;
       _householdId = household.id;
       _userId = profile.id;
       _goals = goals.where((g) => g.bankAccountId == source.id).toList();
     });
   }
 
-  Future<void> _reloadCards() async {
+  /// Opens the transaction sheet with the bank account pre-filled (bug #6).
+  Future<void> _openNewTransactionSheet() async {
     final source = _source;
-    if (source == null) return;
-    final (cards, _) = await AppDependencies.instance.cardRepository
-        .getCardsByAccount(accountId: source.id);
-    if (mounted) setState(() => _cards = cards);
-  }
-
-  Future<void> _openAddCardSheet() async {
-    final source = _source;
-    if (source == null) return;
+    if (_householdId == null || _userId == null || source == null) return;
+    final now = DateTime.now();
+    final seed = Transaction(
+      id: '',
+      householdId: _householdId!,
+      userId: _userId!,
+      categoryId: '',
+      bankAccountId: source.id,
+      amount: 0,
+      currency: source.currency,
+      type: TransactionType.expense,
+      date: now,
+      createdAt: now,
+      lastUpdate: now,
+    );
     await showAppBottomSheet<void>(
       context: context,
-      title: 'New card',
-      child: _CardForm(
-        accountId: source.id,
-        onSaved: (card) async {
-          await AppDependencies.instance.cardRepository.createCard(card);
-        },
+      title: 'New transaction',
+      heightFactor: 0.92,
+      expand: true,
+      child: TransactionForm(
+        householdId: _householdId!,
+        userId: _userId!,
+        initialTransaction: seed,
       ),
     );
-    await _reloadCards();
-  }
-
-  Future<void> _deleteCard(PaymentCard card) async {
-    await AppDependencies.instance.cardRepository.deleteCard(card.id);
-    await _reloadCards();
+    if (mounted) await _load();
   }
 
   ({DateTime start, DateTime end, int barMonths}) _periodBounds() {
@@ -268,58 +264,12 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
           final filteredTxs = _transactionsInPeriod();
           final p = _periodBounds();
           return ListView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
               WalletCard(source: source),
-              const SizedBox(height: 14),
-
-              // ── Cards ───────────────────────────────────────────────────
-              Row(
-                children: [
-                  Expanded(
-                    child: Text('Cards',
-                        style: AppFonts.sectionLabel(color: muted)),
-                  ),
-                  GestureDetector(
-                    onTap: _openAddCardSheet,
-                    behavior: HitTestBehavior.opaque,
-                    child: Row(
-                      spacing: 4,
-                      children: [
-                        Plus(width: 14, height: 14, color: accent),
-                        Text('Add card',
-                            style: AppFonts.body(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: accent)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (_cards.isEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: surface,
-                    borderRadius: BorderRadius.circular(AppRadii.xl),
-                  ),
-                  child: Text('No cards yet',
-                      style: AppFonts.body(fontSize: 13, color: muted)),
-                )
-              else
-                for (final c in _cards) ...[
-                  _CardRow(
-                    card: c,
-                    surface: surface,
-                    fg: fg,
-                    muted: muted,
-                    onDelete: () => _deleteCard(c),
-                  ),
-                  const SizedBox(height: 8),
-                ],
               const SizedBox(height: 14),
 
               Row(
@@ -430,9 +380,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                   muted: muted,
                   border: border,
                   surface: surface,
-                  palette: theme.categoryTints
-                      .map((h) => Color(int.parse(h.replaceFirst('#', '0xff'))))
-                      .toList(),
+                  palette: theme.categoryTints.map(hexToColor).toList(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -525,10 +473,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                     for (final g in _goals)
                       GoalProgressCard(
                         goal: g,
-                        color: g.color != null
-                            ? Color(
-                                int.parse(g.color!.replaceFirst('#', '0xff')))
-                            : accent,
+                        color: g.color != null ? hexToColor(g.color!) : accent,
                         surface: surface,
                         border: border,
                         fg: fg,
@@ -592,6 +537,18 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
       borderColor: border,
       foregroundColor: fg,
       titleText: barTitle,
+      onRefresh: _load,
+      trailing: (_source == null || _notFound)
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: AnimatedButton(
+                size: 32,
+                padding: const EdgeInsets.all(4),
+                onTap: _openNewTransactionSheet,
+                child: Plus(width: 22, height: 22, color: fg),
+              ),
+            ),
       child: body,
     );
   }
@@ -620,255 +577,4 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
 
   String _fmtDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
-}
-
-// ── Card row ────────────────────────────────────────────────────────────────
-
-class _CardRow extends StatelessWidget {
-  final PaymentCard card;
-  final Color surface;
-  final Color fg;
-  final Color muted;
-  final VoidCallback onDelete;
-
-  const _CardRow({
-    required this.card,
-    required this.surface,
-    required this.fg,
-    required this.muted,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(AppRadii.xl),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  spacing: 8,
-                  children: [
-                    Text(
-                      card.network.value.toUpperCase(),
-                      style: AppFonts.label(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: fg),
-                    ),
-                    if (card.isVirtual)
-                      Text('VIRTUAL',
-                          style: AppFonts.label(fontSize: 9, color: muted)),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(card.maskedNumber,
-                    style: AppFonts.numeric(fontSize: 13, color: fg)),
-                const SizedBox(height: 2),
-                Text(
-                  '${card.cardholderName} · ${card.expiryFormatted}',
-                  style: AppFonts.body(fontSize: 11, color: muted),
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: onDelete,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: Icon(CupertinoIcons.trash, size: 16, color: muted),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Add card form ─────────────────────────────────────────────────────────
-
-class _CardForm extends StatefulWidget {
-  final String accountId;
-  final Future<void> Function(PaymentCard) onSaved;
-
-  const _CardForm({required this.accountId, required this.onSaved});
-
-  @override
-  State<_CardForm> createState() => _CardFormState();
-}
-
-class _CardFormState extends State<_CardForm> {
-  static const _uuid = Uuid();
-  final _last4 = TextEditingController();
-  final _holder = TextEditingController();
-  final _expiry = TextEditingController();
-  CardNetwork _network = CardNetwork.visa;
-  bool _virtual = false;
-  bool _saving = false;
-
-  @override
-  void dispose() {
-    _last4.dispose();
-    _holder.dispose();
-    _expiry.dispose();
-    super.dispose();
-  }
-  Future<void> _save() async {
-    final last4 = _last4.text.trim();
-    final exp = _expiry.text.trim();
-    final parts = exp.split('/');
-    final mm = parts.isNotEmpty ? int.tryParse(parts[0]) : null;
-    var yy = parts.length > 1 ? int.tryParse(parts[1]) : null;
-    if (last4.length != 4 || mm == null || yy == null) {
-      context.showToast(const AppToastConfig(
-          type: ToastType.error,
-          title: 'Enter last 4 digits and MM/YY'));
-      return;
-    }
-    if (yy < 100) yy += 2000;
-    setState(() => _saving = true);
-    final now = DateTime.now();
-    await widget.onSaved(PaymentCard(
-      id: _uuid.v4(),
-      accountId: widget.accountId,
-      network: _network,
-      last4: last4,
-      expiryMonth: mm,
-      expiryYear: yy,
-      cardholderName: _holder.text.trim(),
-      isVirtual: _virtual,
-      createdAt: now,
-      lastUpdate: now,
-    ));
-    if (mounted) Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.myTheme;
-    final surface = hexToColor(theme.surfaceColor);
-    final border = hexToColor(theme.borderColor);
-    final fg = hexToColor(theme.onBackgroundColor);
-    final muted = hexToColor(theme.onInactiveColor);
-    final accent = hexToColor(theme.primaryColor);
-
-    Widget field(TextEditingController c, String hint,
-        {TextInputType? kb,
-        List<TextInputFormatter>? fmt,
-        TextCapitalization cap = TextCapitalization.none}) {
-      return CupertinoTextField(
-        controller: c,
-        placeholder: hint,
-        keyboardType: kb,
-        inputFormatters: fmt,
-        textCapitalization: cap,
-        style: AppFonts.body(fontSize: 14, color: fg),
-        placeholderStyle: AppFonts.body(fontSize: 14, color: muted),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: border, width: 0.8),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-          16, 4, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          // Network selector
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final n in CardNetwork.values)
-                GestureDetector(
-                  onTap: () => setState(() => _network = n),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _network == n
-                          ? accent.withValues(alpha: 0.14)
-                          : surface,
-                      border: Border.all(
-                          color: _network == n
-                              ? accent
-                              : const Color(0x00000000)),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      n.value.toUpperCase(),
-                      style: AppFonts.body(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: _network == n ? accent : muted),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          field(_holder, 'Cardholder name',
-              cap: TextCapitalization.words),
-          Row(
-            spacing: 12,
-            children: [
-              Expanded(
-                child: field(_last4, 'Last 4 digits',
-                    kb: TextInputType.number,
-                    fmt: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(4),
-                    ]),
-              ),
-              Expanded(
-                child: field(_expiry, 'MM/YY',
-                    kb: TextInputType.datetime,
-                    fmt: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[\d/]')),
-                      LengthLimitingTextInputFormatter(5),
-                    ]),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () => setState(() => _virtual = !_virtual),
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Icon(
-                  _virtual
-                      ? CupertinoIcons.checkmark_square_fill
-                      : CupertinoIcons.square,
-                  size: 20,
-                  color: _virtual ? accent : muted,
-                ),
-                const SizedBox(width: 8),
-                Text('Virtual card',
-                    style: AppFonts.body(fontSize: 14, color: fg)),
-              ],
-            ),
-          ),
-          PrimaryButton(
-            label: 'Add card',
-            onPressed: _saving ? null : _save,
-            loading: _saving,
-          ),
-        ],
-      ),
-    );
-  }
 }

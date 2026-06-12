@@ -73,6 +73,23 @@ class AppToastService {
     _current = entry;
     overlay.insert(entry);
   }
+
+  static void showOnOverlay(OverlayState overlay, AppToastConfig config) {
+    _current?.remove();
+    _current = null;
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => _ToastWidget(
+        config: config,
+        onDismiss: () {
+          entry.remove();
+          if (_current == entry) _current = null;
+        },
+      ),
+    );
+    _current = entry;
+    overlay.insert(entry);
+  }
 }
 
 // ── Widget ────────────────────────────────────────────────────────────────────

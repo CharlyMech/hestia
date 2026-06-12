@@ -15,7 +15,7 @@ class AppointmentService extends SupabaseService {
   }) async {
     try {
       final response = await from(SupabaseTables.appointments)
-          .select()
+          .select('*, appointment_pets(pet_id)')
           .eq('user_id', userId)
           .gte('starts_at', fromDate.toIso8601String())
           .lte('starts_at', toDate.toIso8601String())
@@ -29,7 +29,7 @@ class AppointmentService extends SupabaseService {
   Future<Map<String, dynamic>?> getById(String id) async {
     try {
       final response = await from(SupabaseTables.appointments)
-          .select()
+          .select('*, appointment_pets(pet_id)')
           .eq('id', id)
           .maybeSingle();
       return response;
@@ -44,6 +44,9 @@ class AppointmentService extends SupabaseService {
           .insert(_toRow(a, isCreate: true))
           .select()
           .single();
+      await _syncPets(inserted['id'] as String, a.petIds);
+      inserted['appointment_pets'] =
+          a.petIds.map((id) => {'pet_id': id}).toList();
       return inserted;
     } catch (e) {
       throw ServerException('Failed to create appointment: $e');
@@ -57,10 +60,25 @@ class AppointmentService extends SupabaseService {
           .eq('id', a.id)
           .select()
           .single();
+      await _syncPets(a.id, a.petIds);
+      updated['appointment_pets'] =
+          a.petIds.map((id) => {'pet_id': id}).toList();
       return updated;
     } catch (e) {
       throw ServerException('Failed to update appointment: $e');
     }
+  }
+
+  /// Replaces the `appointment_pets` rows for an appointment.
+  Future<void> _syncPets(String appointmentId, List<String> petIds) async {
+    await from(SupabaseTables.appointmentPets)
+        .delete()
+        .eq('appointment_id', appointmentId);
+    if (petIds.isEmpty) return;
+    await from(SupabaseTables.appointmentPets).insert([
+      for (final id in petIds)
+        {'appointment_id': appointmentId, 'pet_id': id},
+    ]);
   }
 
   Future<void> delete(String id) async {
@@ -87,6 +105,8 @@ class AppointmentService extends SupabaseService {
       'title': a.title,
       'notes': a.notes,
       'location': a.location,
+      'latitude': a.latitude,
+      'longitude': a.longitude,
       'starts_at': a.startsAt.toIso8601String(),
       'duration_minutes': a.duration.inMinutes,
       'category': a.category.name,
@@ -119,6 +139,8 @@ extension AppointmentRowMapper on Map<String, dynamic> {
       title: this['title'] as String,
       notes: this['notes'] as String?,
       location: this['location'] as String?,
+      latitude: (this['latitude'] as num?)?.toDouble(),
+      longitude: (this['longitude'] as num?)?.toDouble(),
       startsAt: DateTime.parse(this['starts_at'] as String),
       duration:
           Duration(minutes: (this['duration_minutes'] as num?)?.toInt() ?? 60),
@@ -127,7 +149,7 @@ extension AppointmentRowMapper on Map<String, dynamic> {
           .map((m) => Duration(minutes: (m as num).toInt()))
           .toList(),
       googleEventId: this['google_event_id'] as String?,
-      petId: this['pet_id'] as String?,
+      petIds: _petIdsFromRow(this),
       carId: this['car_id'] as String?,
       isAllDay: this['is_all_day'] as bool? ?? false,
       isShared: this['is_shared'] as bool? ?? true,
@@ -145,6 +167,20 @@ extension AppointmentRowMapper on Map<String, dynamic> {
       (c) => c.name == name,
       orElse: () => AppointmentCategory.other,
     );
+  }
+
+  /// Resolves related pet ids. Prefers the joined `appointment_pets` list when
+  /// present (select with the join), else falls back to the legacy `pet_id`.
+  List<String> _petIdsFromRow(Map<String, dynamic> row) {
+    final joined = row['appointment_pets'] as List?;
+    if (joined != null) {
+      return joined
+          .map((e) => (e as Map<String, dynamic>)['pet_id'] as String?)
+          .whereType<String>()
+          .toList();
+    }
+    final single = row['pet_id'] as String?;
+    return single == null ? const [] : [single];
   }
 
   // Avoid warning that ViewMode import is unused if a future helper needs it.

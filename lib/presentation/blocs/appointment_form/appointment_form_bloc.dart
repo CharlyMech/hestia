@@ -46,6 +46,14 @@ class FormLocationChanged extends AppointmentFormEvent {
   List<Object?> get props => [location];
 }
 
+class FormLocationCoordsChanged extends AppointmentFormEvent {
+  final double? latitude;
+  final double? longitude;
+  const FormLocationCoordsChanged(this.latitude, this.longitude);
+  @override
+  List<Object?> get props => [latitude, longitude];
+}
+
 class FormStartChanged extends AppointmentFormEvent {
   final DateTime startsAt;
   const FormStartChanged(this.startsAt);
@@ -78,11 +86,11 @@ class FormClearReminders extends AppointmentFormEvent {
   const FormClearReminders();
 }
 
-class FormPetChanged extends AppointmentFormEvent {
-  final String? petId;
-  const FormPetChanged(this.petId);
+class FormPetsChanged extends AppointmentFormEvent {
+  final Set<String> petIds;
+  const FormPetsChanged(this.petIds);
   @override
-  List<Object?> get props => [petId];
+  List<Object?> get props => [petIds];
 }
 
 class FormCarChanged extends AppointmentFormEvent {
@@ -128,12 +136,14 @@ class AppointmentFormState extends Equatable {
   final String title;
   final String notes;
   final String location;
+  final double? latitude;
+  final double? longitude;
   final DateTime startsAt;
   final Duration duration;
   final AppointmentCategory category;
   final List<Duration> reminderOffsets;
   final String? googleEventId;
-  final String? petId;
+  final Set<String> petIds;
   final String? carId;
   final bool isShared;
   final bool isAllDay;
@@ -152,12 +162,14 @@ class AppointmentFormState extends Equatable {
     this.title = '',
     this.notes = '',
     this.location = '',
+    this.latitude,
+    this.longitude,
     required this.startsAt,
     this.duration = const Duration(hours: 1),
     this.category = AppointmentCategory.other,
     this.reminderOffsets = const [Duration(hours: 1)],
     this.googleEventId,
-    this.petId,
+    this.petIds = const {},
     this.carId,
     this.isShared = true,
     this.isAllDay = false,
@@ -176,13 +188,15 @@ class AppointmentFormState extends Equatable {
     String? title,
     String? notes,
     String? location,
+    double? latitude,
+    double? longitude,
+    bool clearLocationCoords = false,
     DateTime? startsAt,
     Duration? duration,
     AppointmentCategory? category,
     List<Duration>? reminderOffsets,
-    String? petId,
+    Set<String>? petIds,
     String? carId,
-    bool clearPetId = false,
     bool clearCarId = false,
     bool? isShared,
     bool? isAllDay,
@@ -201,12 +215,14 @@ class AppointmentFormState extends Equatable {
         title: title ?? this.title,
         notes: notes ?? this.notes,
         location: location ?? this.location,
+        latitude: clearLocationCoords ? null : (latitude ?? this.latitude),
+        longitude: clearLocationCoords ? null : (longitude ?? this.longitude),
         startsAt: startsAt ?? this.startsAt,
         duration: duration ?? this.duration,
         category: category ?? this.category,
         reminderOffsets: reminderOffsets ?? this.reminderOffsets,
         googleEventId: googleEventId,
-        petId: clearPetId ? null : (petId ?? this.petId),
+        petIds: petIds ?? this.petIds,
         carId: clearCarId ? null : (carId ?? this.carId),
         isShared: isShared ?? this.isShared,
         isAllDay: isAllDay ?? this.isAllDay,
@@ -226,12 +242,14 @@ class AppointmentFormState extends Equatable {
         title,
         notes,
         location,
+        latitude,
+        longitude,
         startsAt,
         duration,
         category,
         reminderOffsets,
         googleEventId,
-        petId,
+        petIds,
         carId,
         isShared,
         isAllDay,
@@ -263,13 +281,15 @@ class AppointmentFormBloc
           title: existing?.title ?? '',
           notes: existing?.notes ?? '',
           location: existing?.location ?? '',
+          latitude: existing?.latitude,
+          longitude: existing?.longitude,
           startsAt: existing?.startsAt ??
               _defaultStart(defaultDate ?? DateTime.now()),
           duration: existing?.duration ?? const Duration(hours: 1),
           category: existing?.category ?? AppointmentCategory.other,
           reminderOffsets:
               existing?.reminderOffsets ?? const [Duration(hours: 1)],
-          petId: existing?.petId,
+          petIds: existing?.petIds.toSet() ?? const {},
           carId: existing?.carId,
           isShared: existing?.isShared ?? true,
           isAllDay: existing?.isAllDay ?? false,
@@ -280,6 +300,9 @@ class AppointmentFormBloc
     on<FormNotesChanged>((e, emit) => emit(state.copyWith(notes: e.notes)));
     on<FormLocationChanged>(
         (e, emit) => emit(state.copyWith(location: e.location)));
+    on<FormLocationCoordsChanged>((e, emit) => emit(e.latitude == null
+        ? state.copyWith(clearLocationCoords: true)
+        : state.copyWith(latitude: e.latitude, longitude: e.longitude)));
     on<FormStartChanged>(
         (e, emit) => emit(state.copyWith(startsAt: e.startsAt)));
     on<FormDurationChanged>(
@@ -289,9 +312,7 @@ class AppointmentFormBloc
     on<FormToggleReminder>(_onToggleReminder);
     on<FormClearReminders>(
         (e, emit) => emit(state.copyWith(reminderOffsets: const [])));
-    on<FormPetChanged>((e, emit) => emit(e.petId == null
-        ? state.copyWith(clearPetId: true)
-        : state.copyWith(petId: e.petId)));
+    on<FormPetsChanged>((e, emit) => emit(state.copyWith(petIds: e.petIds)));
     on<FormCarChanged>((e, emit) => emit(e.carId == null
         ? state.copyWith(clearCarId: true)
         : state.copyWith(carId: e.carId)));
@@ -344,12 +365,14 @@ class AppointmentFormBloc
       title: state.title.trim(),
       notes: state.notes.trim().isEmpty ? null : state.notes.trim(),
       location: state.location.trim().isEmpty ? null : state.location.trim(),
+      latitude: state.latitude,
+      longitude: state.longitude,
       startsAt: state.startsAt,
       duration: state.duration,
       category: state.category,
       reminderOffsets: state.reminderOffsets,
       googleEventId: state.googleEventId,
-      petId: state.petId,
+      petIds: state.petIds.toList(),
       carId: state.carId,
       isAllDay: state.isAllDay,
       isShared: state.isShared,

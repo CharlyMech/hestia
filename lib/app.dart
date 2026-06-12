@@ -10,7 +10,10 @@ import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/app_update/app_update_cubit.dart';
 import 'package:hestia/presentation/blocs/map/map_bloc.dart';
 import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
+import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/app_update_dialog.dart';
+import 'package:hestia/presentation/widgets/notifications/notification_icon.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/config/crashlytics.dart';
 import 'core/config/router.dart';
@@ -55,7 +58,10 @@ class _HestiaAppState extends State<HestiaApp> {
             ..add(const UserPrefsLoad()),
         ),
         BlocProvider(
-          create: (_) => NotificationsBloc(deps.notificationRepository),
+          create: (_) => NotificationsBloc(
+            deps.notificationRepository,
+            deps.notificationRealtimeService,
+          ),
         ),
         BlocProvider(
           create: (_) => AppUpdateCubit(deps.appVersionRepository),
@@ -81,14 +87,42 @@ class _HestiaAppState extends State<HestiaApp> {
                 deps.pushNotificationService
                     .initialize(userId: state.profile.id);
                 context.read<AppUpdateCubit>().checkForUpdates();
-                // Preload map data so the dashboard preview and the full map
-                // share the same source from app start.
+                context.read<NotificationsBloc>()
+                    .startListening(state.profile.id);
                 context.read<MapBloc>().add(MapLoad(state.profile.id));
               } else if (state is AuthUnauthenticated) {
                 authStatusListenable.value = false;
                 setCrashlyticsUser(null);
                 deps.pushNotificationService.onSignOut();
+                context.read<NotificationsBloc>().stopListening();
               }
+            },
+          ),
+          BlocListener<NotificationsBloc, NotificationsState>(
+            listenWhen: (_, current) =>
+                current is NotificationsLoaded &&
+                current.incoming != null,
+            listener: (_, state) {
+              final n = (state as NotificationsLoaded).incoming!;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                final overlay = rootNavigatorKey.currentState?.overlay;
+                final overlayCtx = rootNavigatorKey.currentContext;
+                if (overlay == null || overlayCtx == null) return;
+                final visual = NotifVisual.of(overlayCtx, n.type);
+                AppToastService.showOnOverlay(overlay, AppToastConfig(
+                  // neutral → surface background; per-type colored icon is
+                  // supplied explicitly so the banner still reads at a glance.
+                  type: ToastType.neutral,
+                  icon: visual.icon,
+                  title: n.title,
+                  description: n.body,
+                  actionLabel: 'View',
+                  onAction: () => rootNavigatorKey.currentContext
+                      ?.go(AppRoutes.notifications),
+                  position: ToastPosition.top,
+                  duration: const Duration(seconds: 5),
+                ));
+              });
             },
           ),
           BlocListener<AppUpdateCubit, AppUpdateState>(

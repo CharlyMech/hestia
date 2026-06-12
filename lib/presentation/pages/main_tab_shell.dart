@@ -211,9 +211,9 @@ class _MainTabShellState extends State<MainTabShell> {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final bg =
-        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.backgroundColor);
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
     final statusBarHeight = MediaQuery.viewPaddingOf(context).top;
 
     return MultiBlocProvider(

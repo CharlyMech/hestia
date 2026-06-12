@@ -342,7 +342,7 @@ class _StatusBadge extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final label = isActive ? l10n.cars_statusActive : 'Inactive';
     final mutedHex = context.myTheme.onInactiveColor;
-    final muted = Color(int.parse(mutedHex.replaceFirst('#', '0xff')));
+    final muted = hexToColor(mutedHex);
     final color = isActive ? accent : muted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

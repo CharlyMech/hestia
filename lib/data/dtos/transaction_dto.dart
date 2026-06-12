@@ -5,8 +5,8 @@ class TransactionDto {
   final String categoryId;
   final String bankAccountId;
   final String? transactionSourceId;
-  final String? paymentCardId;
   final num amount;
+  final String currency;
   final String type;
   final String? note;
   final int date;
@@ -30,8 +30,8 @@ class TransactionDto {
     required this.categoryId,
     required this.bankAccountId,
     this.transactionSourceId,
-    this.paymentCardId,
     required this.amount,
+    this.currency = 'EUR',
     required this.type,
     this.note,
     required this.date,
@@ -55,8 +55,8 @@ class TransactionDto {
       categoryId: json['category_id'] as String,
       bankAccountId: json['bank_account_id'] as String,
       transactionSourceId: json['transaction_source_id'] as String?,
-      paymentCardId: json['payment_card_id'] as String?,
       amount: json['amount'] as num,
+      currency: json['currency'] as String? ?? 'EUR',
       type: json['type'] as String,
       note: json['note'] as String?,
       date: json['date'] as int,
@@ -80,8 +80,8 @@ class TransactionDto {
       'category_id': categoryId,
       'bank_account_id': bankAccountId,
       'transaction_source_id': transactionSourceId,
-      'payment_card_id': paymentCardId,
       'amount': amount,
+      'currency': currency,
       'type': type,
       'note': note,
       'date': date,
@@ -98,8 +98,8 @@ class TransactionDto {
       'category_id': categoryId,
       'bank_account_id': bankAccountId,
       'transaction_source_id': transactionSourceId,
-      'payment_card_id': paymentCardId,
       'amount': amount,
+      'currency': currency,
       'type': type,
       'note': note,
       'date': date,

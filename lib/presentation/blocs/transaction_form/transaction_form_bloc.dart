@@ -32,6 +32,8 @@ class TransactionFormBloc
         emit(state.copyWith(kind: e.kind, errors: const {}, failure: null)));
     on<TransactionFormAmountChanged>(
         (e, emit) => emit(state.copyWith(amount: e.value)));
+    on<TransactionFormCurrencyChanged>(
+        (e, emit) => emit(state.copyWith(currency: e.currency)));
     on<TransactionFormCategoryChanged>(
         (e, emit) => emit(state.copyWith(categoryId: e.categoryId)));
     on<TransactionFormSourceChanged>(
@@ -73,7 +75,8 @@ class TransactionFormBloc
       kind: t.type == TransactionType.expense
           ? TransactionKind.expense
           : TransactionKind.income,
-      amount: t.amount.toStringAsFixed(2),
+      amount: t.amount == 0 ? '' : t.amount.toStringAsFixed(2),
+      currency: t.currency,
       categoryId: t.categoryId,
       bankAccountId: t.bankAccountId,
       transactionSourceId: t.transactionSourceId,
@@ -251,6 +254,7 @@ class TransactionFormBloc
       bankAccountId: state.bankAccountId!,
       transactionSourceId: state.transactionSourceId,
       amount: amount,
+      currency: state.currency,
       type: type,
       note: state.note.isEmpty ? null : state.note,
       date: state.date,

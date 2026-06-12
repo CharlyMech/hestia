@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/widgets/common/swipeable_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show EditPencil, Trash;
@@ -40,7 +41,7 @@ class TransactionCard extends StatelessWidget {
     final amount = '$sign${transaction.amount.abs().toStringAsFixed(2)}';
 
     final categoryColor = transaction.categoryColor != null
-        ? Color(int.parse(transaction.categoryColor!.replaceFirst('#', '0xff')))
+        ? hexToColor(transaction.categoryColor!)
         : muted;
 
     return SwipeableCard(

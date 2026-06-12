@@ -351,7 +351,7 @@ class _BodyState extends State<_Body> {
 
   Color _goalColor(FinancialGoal g, Color accent, List<Color> tints) {
     if (g.color != null) {
-      return Color(int.parse(g.color!.replaceFirst('#', '0xff')));
+      return hexToColor(g.color!);
     }
     if (tints.isEmpty) return accent;
     final idx = g.id.hashCode.abs() % tints.length;

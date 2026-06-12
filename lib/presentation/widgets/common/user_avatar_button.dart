@@ -26,7 +26,7 @@ class UserAvatarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.myTheme;
     final accent =
-        Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
+        hexToColor(theme.primaryColor);
     final avatarColor = profile.calendarColor != null
         ? Color(int.parse((profile.calendarColor!).replaceFirst('#', '0xff')))
         : accent;

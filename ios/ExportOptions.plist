@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Manual signing with Fastlane match. The provisioning profile name below is
+  the one `match appstore` creates for the bundle id. Replace TEAMID000 with
+  your Apple Team ID (Membership details in the developer portal) before the
+  first release. See docs/testflight.md Part 5.
+-->
 <plist version="1.0">
 <dict>
 	<key>method</key>
@@ -7,7 +13,14 @@
 	<key>destination</key>
 	<string>export</string>
 	<key>signingStyle</key>
-	<string>automatic</string>
+	<string>manual</string>
+	<key>teamID</key>
+	<string>TEAMID000</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.charlymech.hestia</key>
+		<string>match AppStore com.charlymech.hestia</string>
+	</dict>
 	<key>stripSwiftSymbols</key>
 	<true/>
 	<key>uploadSymbols</key>

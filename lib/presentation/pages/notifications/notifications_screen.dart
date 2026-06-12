@@ -289,6 +289,11 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
           return ScreenShell(
             bg: bg,
             bottomPadding: 24,
+            onRefresh: () async {
+              final bloc = context.read<NotificationsBloc>();
+              bloc.add(NotificationsLoad(widget.userId));
+              await bloc.stream.firstWhere((s) => s is! NotificationsLoading);
+            },
             slivers: [
               SliverToBoxAdapter(
                 child: _InboxSubtitle(
@@ -335,10 +340,30 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                     ),
                   ),
                 ),
-                if (_readExpanded) ...[
-                  const SliverToBoxAdapter(child: SizedBox(height: 10)),
-                  SliverToBoxAdapter(child: card(read)),
-                ],
+                SliverToBoxAdapter(
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 260),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, anim) =>
+                          FadeTransition(opacity: anim, child: child),
+                      child: _readExpanded
+                          ? Padding(
+                              key: const ValueKey('read-open'),
+                              padding: const EdgeInsets.only(top: 10),
+                              child: card(read),
+                            )
+                          : const SizedBox(
+                              key: ValueKey('read-closed'),
+                              width: double.infinity,
+                            ),
+                    ),
+                  ),
+                ),
               ],
             ],
           );
@@ -411,16 +436,11 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg =
-        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
-    final surface =
-        Color(int.parse(theme.surfaceColor.replaceFirst('#', '0xff')));
-    final border =
-        Color(int.parse(theme.borderColor.replaceFirst('#', '0xff')));
-    final fg =
-        Color(int.parse(theme.onBackgroundColor.replaceFirst('#', '0xff')));
-    final muted =
-        Color(int.parse(theme.onInactiveColor.replaceFirst('#', '0xff')));
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
       navBackground: surface,
