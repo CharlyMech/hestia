@@ -665,5 +665,45 @@
     "placeholders": {
       "n": { "type": "int" }
     }
+  },
+
+  "maintenance_addRecord": "Añadir registro de mantenimiento",
+  "maintenance_editRecord": "Editar registro de mantenimiento",
+  "maintenance_saveChanges": "Guardar cambios",
+  "maintenance_couldNotSave": "No se pudo guardar",
+  "maintenance_title": "Título",
+  "maintenance_titlePlaceholder": "p. ej. Cambio de aceite",
+  "maintenance_type": "Tipo",
+  "maintenance_mechanic": "Mecánico",
+  "maintenance_itv": "ITV / Inspección",
+  "maintenance_tires": "Neumáticos",
+  "maintenance_oil": "Cambio de aceite",
+  "maintenance_insurance": "Seguro",
+  "maintenance_other": "Otro",
+  "maintenance_workshop": "Taller",
+  "maintenance_workshopPlaceholder": "Opcional",
+  "maintenance_date": "Fecha",
+  "maintenance_nextDueDate": "Próxima fecha",
+  "maintenance_odometerKm": "Odómetro (km)",
+  "maintenance_cost": "Coste (€)",
+  "maintenance_createExpense": "Crear transacción de gasto",
+  "maintenance_bankAccount": "Cuenta bancaria",
+  "maintenance_notes": "Notas",
+  "maintenance_notesPlaceholder": "Notas opcionales…",
+  "maintenance_records": "Registros de mantenimiento",
+  "maintenance_noRecordsYet": "Aún no hay registros de mantenimiento",
+  "maintenance_addFirst": "Añade tu primer registro de mantenimiento",
+  "maintenance_deleteTitle": "Eliminar registro",
+  "maintenance_deleteConfirm": "¿Eliminar \"{title}\"? Esta acción no se puede deshacer.",
+  "@maintenance_deleteConfirm": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "maintenance_costEuro": "{amount} €",
+  "@maintenance_costEuro": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
   }
 }

@@ -1,8 +1,11 @@
 import 'package:hestia/core/error/error_handler.dart';
 import 'package:hestia/core/error/failures.dart';
 import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/data/dtos/car_maintenance_record_dto.dart';
+import 'package:hestia/data/mappers/car_maintenance_record_mapper.dart';
 import 'package:hestia/data/services/car_service.dart';
 import 'package:hestia/domain/entities/car.dart';
+import 'package:hestia/domain/entities/car_maintenance_record.dart';
 import 'package:hestia/domain/entities/car_member.dart';
 import 'package:hestia/domain/repositories/car_repository.dart';
 
@@ -124,6 +127,64 @@ class CarRepositoryImpl implements CarRepository {
       return (members, null);
     } catch (e, st) {
       return (<CarMember>[], reportError(e, st, reason: 'getCarMembers'));
+    }
+  }
+
+  @override
+  Future<(List<CarMaintenanceRecord>, Failure?)> getMaintenanceRecords(
+      String carId) async {
+    try {
+      final data = await _service.getMaintenanceRecords(carId);
+      return (
+        data
+            .map((j) => CarMaintenanceRecordMapper.fromDto(
+                CarMaintenanceRecordDto.fromJson(j)))
+            .toList(),
+        null
+      );
+    } catch (e, st) {
+      return (
+        <CarMaintenanceRecord>[],
+        reportError(e, st, reason: 'getMaintenanceRecords')
+      );
+    }
+  }
+
+  @override
+  Future<Failure?> createMaintenanceRecord(CarMaintenanceRecord record,
+      {Map<String, dynamic>? transaction}) async {
+    try {
+      await _service.createMaintenanceRecord(
+        record: CarMaintenanceRecordMapper.toDto(record).toInsertJson(),
+        transaction: transaction,
+        id: record.id.isEmpty ? null : record.id,
+      );
+      return null;
+    } catch (e, st) {
+      return reportError(e, st, reason: 'createMaintenanceRecord');
+    }
+  }
+
+  @override
+  Future<Failure?> updateMaintenanceRecord(CarMaintenanceRecord record) async {
+    try {
+      await _service.updateMaintenanceRecord(
+        record.id,
+        CarMaintenanceRecordMapper.toDto(record).toInsertJson(),
+      );
+      return null;
+    } catch (e, st) {
+      return reportError(e, st, reason: 'updateMaintenanceRecord');
+    }
+  }
+
+  @override
+  Future<Failure?> deleteMaintenanceRecord(String id) async {
+    try {
+      await _service.deleteMaintenanceRecord(id);
+      return null;
+    } catch (e, st) {
+      return reportError(e, st, reason: 'deleteMaintenanceRecord');
     }
   }
 }

@@ -76,4 +76,62 @@ class CarService extends SupabaseService {
       throw ServerException('Failed to fetch car members: $e');
     }
   }
+
+  Future<List<Map<String, dynamic>>> getMaintenanceRecords(
+      String carId) async {
+    try {
+      final res = await from(SupabaseTables.carMaintenanceRecords)
+          .select()
+          .eq('car_id', carId)
+          .order('recorded_at', ascending: false);
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e) {
+      throw ServerException('Failed to fetch maintenance records: $e');
+    }
+  }
+
+  /// Create via `create-maintenance-record` edge function.
+  Future<Map<String, dynamic>> createMaintenanceRecord({
+    required Map<String, dynamic> record,
+    Map<String, dynamic>? transaction,
+    String? id,
+  }) async {
+    try {
+      final res = await client.functions.invoke(
+        'create-maintenance-record',
+        body: {
+          'record': record,
+          if (transaction != null) 'transaction': transaction,
+          if (id != null) 'id': id,
+        },
+      );
+      final body = res.data as Map<String, dynamic>;
+      if (body['error'] != null) {
+        throw ServerException(
+            'Failed to create maintenance record: ${body['error']}');
+      }
+      return Map<String, dynamic>.from(body['record'] as Map);
+    } catch (e) {
+      throw ServerException('Failed to create maintenance record: $e');
+    }
+  }
+
+  Future<void> updateMaintenanceRecord(
+      String id, Map<String, dynamic> data) async {
+    try {
+      await from(SupabaseTables.carMaintenanceRecords)
+          .update(data)
+          .eq('id', id);
+    } catch (e) {
+      throw ServerException('Failed to update maintenance record: $e');
+    }
+  }
+
+  Future<void> deleteMaintenanceRecord(String id) async {
+    try {
+      await from(SupabaseTables.carMaintenanceRecords).delete().eq('id', id);
+    } catch (e) {
+      throw ServerException('Failed to delete maintenance record: $e');
+    }
+  }
 }

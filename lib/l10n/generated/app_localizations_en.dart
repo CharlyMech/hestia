@@ -1526,4 +1526,95 @@ class AppLocalizationsEn extends AppLocalizations {
   String appointment_reminderDays(int n) {
     return '$n days';
   }
+
+  @override
+  String get maintenance_addRecord => 'Add Maintenance Record';
+
+  @override
+  String get maintenance_editRecord => 'Edit Maintenance Record';
+
+  @override
+  String get maintenance_saveChanges => 'Save Changes';
+
+  @override
+  String get maintenance_couldNotSave => 'Could not save';
+
+  @override
+  String get maintenance_title => 'Title';
+
+  @override
+  String get maintenance_titlePlaceholder => 'e.g. Oil change';
+
+  @override
+  String get maintenance_type => 'Type';
+
+  @override
+  String get maintenance_mechanic => 'Mechanic';
+
+  @override
+  String get maintenance_itv => 'ITV / Inspection';
+
+  @override
+  String get maintenance_tires => 'Tires';
+
+  @override
+  String get maintenance_oil => 'Oil Change';
+
+  @override
+  String get maintenance_insurance => 'Insurance';
+
+  @override
+  String get maintenance_other => 'Other';
+
+  @override
+  String get maintenance_workshop => 'Workshop';
+
+  @override
+  String get maintenance_workshopPlaceholder => 'Optional';
+
+  @override
+  String get maintenance_date => 'Date';
+
+  @override
+  String get maintenance_nextDueDate => 'Next due date';
+
+  @override
+  String get maintenance_odometerKm => 'Odometer (km)';
+
+  @override
+  String get maintenance_cost => 'Cost (€)';
+
+  @override
+  String get maintenance_createExpense => 'Create expense transaction';
+
+  @override
+  String get maintenance_bankAccount => 'Bank account';
+
+  @override
+  String get maintenance_notes => 'Notes';
+
+  @override
+  String get maintenance_notesPlaceholder => 'Optional notes…';
+
+  @override
+  String get maintenance_records => 'Maintenance records';
+
+  @override
+  String get maintenance_noRecordsYet => 'No maintenance records yet';
+
+  @override
+  String get maintenance_addFirst => 'Add your first maintenance record';
+
+  @override
+  String get maintenance_deleteTitle => 'Delete record';
+
+  @override
+  String maintenance_deleteConfirm(String title) {
+    return 'Remove \"$title\"? This cannot be undone.';
+  }
+
+  @override
+  String maintenance_costEuro(String amount) {
+    return '$amount €';
+  }
 }

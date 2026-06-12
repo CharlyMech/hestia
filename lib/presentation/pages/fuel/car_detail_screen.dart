@@ -11,7 +11,9 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/car.dart';
 import 'package:hestia/domain/entities/fuel_entry.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/domain/entities/car_maintenance_record.dart';
 import 'package:hestia/presentation/blocs/cars/car_detail_bloc.dart';
+import 'package:hestia/presentation/blocs/cars/car_maintenance_bloc.dart';
 import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
 import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
@@ -35,6 +37,11 @@ class CarDetailScreen extends StatelessWidget {
               AppDependencies.instance.fuelEntryRepository,
               AppDependencies.instance.carRepository)
             ..add(FuelLoad(carId)),
+        ),
+        BlocProvider(
+          create: (_) =>
+              CarMaintenanceBloc(AppDependencies.instance.carRepository)
+                ..add(CarMaintenanceLoad(carId)),
         ),
       ],
       child: _CarDetailBody(carId: carId),
@@ -177,6 +184,21 @@ class _CarDetailBody extends StatelessWidget {
                           context.push(AppRoutes.carAnalytics, extra: car.id),
                       onEditEntry: (e) =>
                           context.push(AppRoutes.editCarEntry, extra: e),
+                      onAddMaintenance: () => context.push(
+                          AppRoutes.addMaintenance,
+                          extra: (
+                            car: car,
+                            maintenanceBloc: context
+                                .read<CarMaintenanceBloc>(),
+                          )),
+                      onEditMaintenance: (r) => context.push(
+                          AppRoutes.editMaintenance,
+                          extra: (
+                            car: car,
+                            record: r,
+                            maintenanceBloc: context
+                                .read<CarMaintenanceBloc>(),
+                          )),
                     ),
             ),
           ),
@@ -256,6 +278,8 @@ class _CarBody extends StatelessWidget {
   final VoidCallback onAddEntry;
   final VoidCallback onAnalytics;
   final void Function(FuelEntry) onEditEntry;
+  final VoidCallback onAddMaintenance;
+  final void Function(CarMaintenanceRecord) onEditMaintenance;
 
   const _CarBody({
     required this.l10n,
@@ -268,6 +292,8 @@ class _CarBody extends StatelessWidget {
     required this.onAddEntry,
     required this.onAnalytics,
     required this.onEditEntry,
+    required this.onAddMaintenance,
+    required this.onEditMaintenance,
   });
 
   @override
@@ -373,6 +399,88 @@ class _CarBody extends StatelessWidget {
                       muted: muted,
                       isLast: i == entries.length - 1,
                       onTap: () => onEditEntry(entries[i]),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: Text(l10n.maintenance_records,
+                  style: AppFonts.sectionLabel(color: muted)),
+            ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onAddMaintenance,
+              child: Text(l10n.common_add,
+                  style: AppFonts.body(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: accent)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        BlocBuilder<CarMaintenanceBloc, CarMaintenanceState>(
+          builder: (ctx, state) {
+            if (state is CarMaintenanceLoading ||
+                state is CarMaintenanceInitial) {
+              return Skeletonizer(
+                enabled: true,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(AppRadii.xl),
+                  ),
+                  child: Column(
+                    children: List.generate(
+                      2,
+                      (i) => Container(height: 52, color: surface),
+                    ),
+                  ),
+                ),
+              );
+            }
+            if (state is CarMaintenanceError) {
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(state.message,
+                    style: AppFonts.body(fontSize: 13, color: muted)),
+              );
+            }
+            final records = state is CarMaintenanceLoaded
+                ? state.records.take(10).toList()
+                : <CarMaintenanceRecord>[];
+            if (records.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Center(
+                  child: Text(l10n.maintenance_noRecordsYet,
+                      style: AppFonts.body(fontSize: 13, color: muted)),
+                ),
+              );
+            }
+            return Container(
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadii.xl),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < records.length; i++)
+                    _MaintenanceRow(
+                      l10n: l10n,
+                      record: records[i],
+                      border: border,
+                      fg: fg,
+                      muted: muted,
+                      accent: accent,
+                      isLast: i == records.length - 1,
+                      onTap: () => onEditMaintenance(records[i]),
                     ),
                 ],
               ),
@@ -606,6 +714,86 @@ class _EntryRow extends StatelessWidget {
             Text(l10n.cars_amountEuro(entry.totalAmount.toStringAsFixed(2)),
                 style: AppFonts.numeric(
                     fontSize: 14, fontWeight: FontWeight.w700, color: fg)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Maintenance row ───────────────────────────────────────────────────────────
+
+class _MaintenanceRow extends StatelessWidget {
+  final AppLocalizations l10n;
+  final CarMaintenanceRecord record;
+  final Color border, fg, muted, accent;
+  final bool isLast;
+  final VoidCallback onTap;
+  const _MaintenanceRow({
+    required this.l10n,
+    required this.record,
+    required this.border,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.isLast,
+    required this.onTap,
+  });
+
+  String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  String _typeLabel(AppLocalizations l10n) => switch (record.type) {
+        MaintenanceType.mechanic => l10n.maintenance_mechanic,
+        MaintenanceType.itv => l10n.maintenance_itv,
+        MaintenanceType.tires => l10n.maintenance_tires,
+        MaintenanceType.oil => l10n.maintenance_oil,
+        MaintenanceType.insurance => l10n.maintenance_insurance,
+        MaintenanceType.other => l10n.maintenance_other,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        decoration: BoxDecoration(
+          border: isLast
+              ? null
+              : Border(bottom: BorderSide(color: border, width: 1)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 2,
+                children: [
+                  Text(
+                    record.title,
+                    style: AppFonts.body(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: fg),
+                  ),
+                  Text(
+                    '${_typeLabel(l10n)} · ${_fmtDate(record.recordedAt)}',
+                    style: AppFonts.body(fontSize: 11, color: muted),
+                  ),
+                ],
+              ),
+            ),
+            if (record.cost != null)
+              Text(
+                l10n.maintenance_costEuro(
+                    record.cost!.toStringAsFixed(2)),
+                style: AppFonts.numeric(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: fg),
+              ),
           ],
         ),
       ),

@@ -3002,6 +3002,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n} days'**
   String appointment_reminderDays(int n);
+
+  /// No description provided for @maintenance_addRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Maintenance Record'**
+  String get maintenance_addRecord;
+
+  /// No description provided for @maintenance_editRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Maintenance Record'**
+  String get maintenance_editRecord;
+
+  /// No description provided for @maintenance_saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get maintenance_saveChanges;
+
+  /// No description provided for @maintenance_couldNotSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save'**
+  String get maintenance_couldNotSave;
+
+  /// No description provided for @maintenance_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get maintenance_title;
+
+  /// No description provided for @maintenance_titlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Oil change'**
+  String get maintenance_titlePlaceholder;
+
+  /// No description provided for @maintenance_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get maintenance_type;
+
+  /// No description provided for @maintenance_mechanic.
+  ///
+  /// In en, this message translates to:
+  /// **'Mechanic'**
+  String get maintenance_mechanic;
+
+  /// No description provided for @maintenance_itv.
+  ///
+  /// In en, this message translates to:
+  /// **'ITV / Inspection'**
+  String get maintenance_itv;
+
+  /// No description provided for @maintenance_tires.
+  ///
+  /// In en, this message translates to:
+  /// **'Tires'**
+  String get maintenance_tires;
+
+  /// No description provided for @maintenance_oil.
+  ///
+  /// In en, this message translates to:
+  /// **'Oil Change'**
+  String get maintenance_oil;
+
+  /// No description provided for @maintenance_insurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get maintenance_insurance;
+
+  /// No description provided for @maintenance_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get maintenance_other;
+
+  /// No description provided for @maintenance_workshop.
+  ///
+  /// In en, this message translates to:
+  /// **'Workshop'**
+  String get maintenance_workshop;
+
+  /// No description provided for @maintenance_workshopPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get maintenance_workshopPlaceholder;
+
+  /// No description provided for @maintenance_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get maintenance_date;
+
+  /// No description provided for @maintenance_nextDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due date'**
+  String get maintenance_nextDueDate;
+
+  /// No description provided for @maintenance_odometerKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Odometer (km)'**
+  String get maintenance_odometerKm;
+
+  /// No description provided for @maintenance_cost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost (€)'**
+  String get maintenance_cost;
+
+  /// No description provided for @maintenance_createExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Create expense transaction'**
+  String get maintenance_createExpense;
+
+  /// No description provided for @maintenance_bankAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank account'**
+  String get maintenance_bankAccount;
+
+  /// No description provided for @maintenance_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get maintenance_notes;
+
+  /// No description provided for @maintenance_notesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional notes…'**
+  String get maintenance_notesPlaceholder;
+
+  /// No description provided for @maintenance_records.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance records'**
+  String get maintenance_records;
+
+  /// No description provided for @maintenance_noRecordsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No maintenance records yet'**
+  String get maintenance_noRecordsYet;
+
+  /// No description provided for @maintenance_addFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first maintenance record'**
+  String get maintenance_addFirst;
+
+  /// No description provided for @maintenance_deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete record'**
+  String get maintenance_deleteTitle;
+
+  /// No description provided for @maintenance_deleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{title}\"? This cannot be undone.'**
+  String maintenance_deleteConfirm(String title);
+
+  /// No description provided for @maintenance_costEuro.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} €'**
+  String maintenance_costEuro(String amount);
 }
 
 class _AppLocalizationsDelegate

@@ -1533,4 +1533,97 @@ class AppLocalizationsEs extends AppLocalizations {
   String appointment_reminderDays(int n) {
     return '$n días';
   }
+
+  @override
+  String get maintenance_addRecord => 'Añadir registro de mantenimiento';
+
+  @override
+  String get maintenance_editRecord => 'Editar registro de mantenimiento';
+
+  @override
+  String get maintenance_saveChanges => 'Guardar cambios';
+
+  @override
+  String get maintenance_couldNotSave => 'No se pudo guardar';
+
+  @override
+  String get maintenance_title => 'Título';
+
+  @override
+  String get maintenance_titlePlaceholder => 'p. ej. Cambio de aceite';
+
+  @override
+  String get maintenance_type => 'Tipo';
+
+  @override
+  String get maintenance_mechanic => 'Mecánico';
+
+  @override
+  String get maintenance_itv => 'ITV / Inspección';
+
+  @override
+  String get maintenance_tires => 'Neumáticos';
+
+  @override
+  String get maintenance_oil => 'Cambio de aceite';
+
+  @override
+  String get maintenance_insurance => 'Seguro';
+
+  @override
+  String get maintenance_other => 'Otro';
+
+  @override
+  String get maintenance_workshop => 'Taller';
+
+  @override
+  String get maintenance_workshopPlaceholder => 'Opcional';
+
+  @override
+  String get maintenance_date => 'Fecha';
+
+  @override
+  String get maintenance_nextDueDate => 'Próxima fecha';
+
+  @override
+  String get maintenance_odometerKm => 'Odómetro (km)';
+
+  @override
+  String get maintenance_cost => 'Coste (€)';
+
+  @override
+  String get maintenance_createExpense => 'Crear transacción de gasto';
+
+  @override
+  String get maintenance_bankAccount => 'Cuenta bancaria';
+
+  @override
+  String get maintenance_notes => 'Notas';
+
+  @override
+  String get maintenance_notesPlaceholder => 'Notas opcionales…';
+
+  @override
+  String get maintenance_records => 'Registros de mantenimiento';
+
+  @override
+  String get maintenance_noRecordsYet =>
+      'Aún no hay registros de mantenimiento';
+
+  @override
+  String get maintenance_addFirst =>
+      'Añade tu primer registro de mantenimiento';
+
+  @override
+  String get maintenance_deleteTitle => 'Eliminar registro';
+
+  @override
+  String maintenance_deleteConfirm(String title) {
+    return '¿Eliminar \"$title\"? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String maintenance_costEuro(String amount) {
+    return '$amount €';
+  }
 }

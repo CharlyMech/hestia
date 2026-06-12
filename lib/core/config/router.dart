@@ -8,7 +8,11 @@ import 'package:hestia/presentation/pages/pets/add_edit_pet_screen.dart';
 import 'package:hestia/presentation/pages/pets/pet_detail_screen.dart';
 import 'package:hestia/presentation/pages/transactions/transaction_map_picker_screen.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
+import 'package:hestia/domain/entities/car.dart';
+import 'package:hestia/domain/entities/car_maintenance_record.dart';
+import 'package:hestia/presentation/blocs/cars/car_maintenance_bloc.dart';
 import 'package:hestia/presentation/pages/fuel/add_edit_fuel_entry_screen.dart';
+import 'package:hestia/presentation/pages/fuel/add_edit_maintenance_record_screen.dart';
 import 'package:hestia/presentation/pages/fuel/car_detail_screen.dart';
 import 'package:hestia/presentation/pages/fuel/cars_standalone_screen.dart';
 import 'package:hestia/presentation/pages/fuel/fuel_analytics_screen.dart';
@@ -121,6 +125,8 @@ abstract final class AppRoutes {
   static const addCarEntry = '/cars/entries/add';
   static const editCarEntry = '/cars/entries/edit';
   static const carAnalytics = '/cars/analytics';
+  static const addMaintenance = '/cars/maintenance/add';
+  static const editMaintenance = '/cars/maintenance/edit';
 
   /// Pick GPS coordinates for a transaction (returns (lat,lng) record via `pop`).
   static const transactionMapPicker = '/transactions/map-picker';
@@ -455,6 +461,32 @@ final appRouter = GoRouter(
       pageBuilder: (context, state) {
         final id = state.extra as String;
         return CupertinoPage(child: FuelAnalyticsScreen(carId: id));
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.addMaintenance,
+      pageBuilder: (context, state) {
+        final extra = state.extra
+            as ({Car car, CarMaintenanceBloc maintenanceBloc});
+        return CupertinoPage(
+          child: BlocProvider.value(
+            value: extra.maintenanceBloc,
+            child: AddEditMaintenanceRecordScreen(carId: extra.car.id),
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.editMaintenance,
+      pageBuilder: (context, state) {
+        final extra = state.extra
+            as ({Car car, CarMaintenanceRecord record, CarMaintenanceBloc maintenanceBloc});
+        return CupertinoPage(
+          child: BlocProvider.value(
+            value: extra.maintenanceBloc,
+            child: AddEditMaintenanceRecordScreen(existing: extra.record),
+          ),
+        );
       },
     ),
     GoRoute(

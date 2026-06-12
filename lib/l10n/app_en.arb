@@ -694,5 +694,45 @@
     "placeholders": {
       "n": { "type": "int" }
     }
+  },
+
+  "maintenance_addRecord": "Add Maintenance Record",
+  "maintenance_editRecord": "Edit Maintenance Record",
+  "maintenance_saveChanges": "Save Changes",
+  "maintenance_couldNotSave": "Could not save",
+  "maintenance_title": "Title",
+  "maintenance_titlePlaceholder": "e.g. Oil change",
+  "maintenance_type": "Type",
+  "maintenance_mechanic": "Mechanic",
+  "maintenance_itv": "ITV / Inspection",
+  "maintenance_tires": "Tires",
+  "maintenance_oil": "Oil Change",
+  "maintenance_insurance": "Insurance",
+  "maintenance_other": "Other",
+  "maintenance_workshop": "Workshop",
+  "maintenance_workshopPlaceholder": "Optional",
+  "maintenance_date": "Date",
+  "maintenance_nextDueDate": "Next due date",
+  "maintenance_odometerKm": "Odometer (km)",
+  "maintenance_cost": "Cost (€)",
+  "maintenance_createExpense": "Create expense transaction",
+  "maintenance_bankAccount": "Bank account",
+  "maintenance_notes": "Notes",
+  "maintenance_notesPlaceholder": "Optional notes…",
+  "maintenance_records": "Maintenance records",
+  "maintenance_noRecordsYet": "No maintenance records yet",
+  "maintenance_addFirst": "Add your first maintenance record",
+  "maintenance_deleteTitle": "Delete record",
+  "maintenance_deleteConfirm": "Remove \"{title}\"? This cannot be undone.",
+  "@maintenance_deleteConfirm": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "maintenance_costEuro": "{amount} €",
+  "@maintenance_costEuro": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
   }
 }
