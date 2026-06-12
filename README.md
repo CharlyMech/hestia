@@ -40,7 +40,67 @@ Household money and household logistics usually live in a dozen disconnected app
 
 Flutter · BLoC · Supabase · Drift · Firebase · iOS (TestFlight)
 
-> More detail (architecture, Supabase, releases): [docs/](docs/).
+> Backend detail: [supabase/README.md](supabase/README.md) · Full setup runbook: [supabase/SETUP.md](supabase/SETUP.md)
+
+## Data model
+
+```mermaid
+erDiagram
+    households ||--o{ household_members : "members"
+    household_members }o--|| profiles : "profile"
+
+    households ||--o{ bank_accounts : "accounts"
+    bank_accounts ||--o{ account_members : "shared with"
+    bank_accounts ||--o{ payment_cards : "cards"
+    payment_cards ||--o{ transactions : "paid with (optional)"
+
+    bank_accounts ||--o{ transactions : "from account"
+    bank_accounts ||--o{ transfers : "from"
+    bank_accounts ||--o{ transfers : "to"
+    bank_accounts ||--o{ financial_goals : "goal account"
+
+    transactions }o--o| categories : "category"
+    transactions }o--o| transaction_sources : "source"
+    transactions }o--o| pets : "for pet"
+    transactions }o--o| cars : "for car"
+    transactions }o--o| homes : "for home"
+
+    households ||--o{ pets : "pets"
+    pets ||--o{ pet_health_records : "health"
+    pets ||--o{ pet_measurements : "weight/size"
+    pet_health_records }o--o| transactions : "expense (optional)"
+    pet_health_records }o--o| appointments : "linked appt"
+
+    households ||--o{ cars : "cars"
+    cars ||--o{ car_members : "drivers"
+    cars ||--o{ fuel_entries : "refuels"
+    cars ||--o{ car_maintenance_records : "maintenance"
+    fuel_entries }o--o| transactions : "expense (optional)"
+    car_maintenance_records }o--o| transactions : "expense (optional)"
+    car_maintenance_records }o--o| appointments : "linked appt"
+
+    households ||--o{ homes : "homes"
+    households ||--o{ shopping_lists : "lists"
+    shopping_lists ||--o{ shopping_list_items : "items"
+    shopping_lists ||--o{ shopping_sessions : "sessions"
+    shopping_sessions }o--o| transactions : "expense (optional)"
+
+    households ||--o{ appointments : "calendar"
+    appointments ||--o{ appointment_pets : "pets in appt"
+    google_credentials ||--|| profiles : "GCal link"
+
+    profiles ||--o{ notifications : "inbox"
+    profiles ||--o{ device_tokens : "push targets"
+    profiles ||--o{ notification_settings : "prefs"
+    scheduled_notifications }o--|| appointments : "reminder for"
+```
+
+Key constraints:
+
+- `payment_cards.is_primary` — partial unique index: at most one primary card per account
+- `transactions.payment_card_id` — nullable; card must belong to `bank_account_id`
+- `google_credentials` — RLS deny-all for app users; only edge functions (service-role) can read refresh tokens
+- Timestamps are **unix seconds** (`bigint`) everywhere except `appointments` (`timestamptz`)
 
 ## License
 
