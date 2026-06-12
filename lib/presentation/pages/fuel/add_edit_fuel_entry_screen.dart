@@ -11,6 +11,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
@@ -123,7 +124,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   child: Row(children: [
-                    Text('None',
+                    Text(AppLocalizations.of(context).common_none,
                         style: AppFonts.body(fontSize: 15, color: muted)),
                   ]),
                 ),
@@ -206,7 +207,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
             ),
             AnimatedButton(
               onTap: () => Navigator.of(context).pop(),
-              child: const Text('Done'),
+              child: Text(AppLocalizations.of(context).fuelEntry_done),
             ),
           ],
         ),
@@ -241,19 +242,20 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
       createdAt: widget.entry?.createdAt ?? now,
     );
 
+    final l10n = AppLocalizations.of(context);
     if (widget.entry == null) {
       context
           .read<FuelBloc>()
           .add(FuelCreate(entry, createTransaction: _createTransaction));
       if (mounted) {
-        context.showToast(const AppToastConfig(
-            type: ToastType.success, title: 'Fuel entry added'));
+        context.showToast(AppToastConfig(
+            type: ToastType.success, title: l10n.fuelEntry_added));
       }
     } else {
       context.read<FuelBloc>().add(FuelUpdate(entry));
       if (mounted) {
-        context.showToast(const AppToastConfig(
-            type: ToastType.success, title: 'Fuel entry updated'));
+        context.showToast(AppToastConfig(
+            type: ToastType.success, title: l10n.fuelEntry_updated));
       }
     }
     if (mounted) context.pop();
@@ -271,6 +273,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
+    final l10n = AppLocalizations.of(context);
     final isEdit = widget.entry != null;
 
     return CupertinoPushedRouteShell(
@@ -278,13 +281,13 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: isEdit ? 'Edit fill-up' : 'Add fill-up',
+      titleText: isEdit ? l10n.fuelEntry_editFillUp : l10n.fuelEntry_addFillUp,
       trailing: Padding(
         padding: const EdgeInsets.only(right: 12),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _save,
-          child: Text('Save',
+          child: Text(l10n.common_save,
               style: AppFonts.body(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -303,7 +306,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
             behavior: HitTestBehavior.opaque,
             onTap: _pickDate,
             child: _ReadOnlyField(
-              label: 'Filled at',
+              label: l10n.fuelEntry_filledAt,
               value: _fmtDate(_filledAt),
               surface: surface,
               fg: fg,
@@ -312,7 +315,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
           ),
           const SizedBox(height: 12),
           _Field(
-              label: 'Odometer (km)',
+              label: l10n.fuelEntry_odometerKm,
               controller: _odo,
               keyboard: const TextInputType.numberWithOptions(decimal: true),
               surface: surface,
@@ -320,7 +323,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
               muted: muted),
           const SizedBox(height: 12),
           _Field(
-              label: 'Liters',
+              label: l10n.fuelEntry_liters,
               controller: _liters,
               keyboard: const TextInputType.numberWithOptions(decimal: true),
               surface: surface,
@@ -328,7 +331,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
               muted: muted),
           const SizedBox(height: 12),
           _Field(
-              label: 'Price per liter (€)',
+              label: l10n.fuelEntry_pricePerLiter,
               controller: _ppl,
               keyboard: const TextInputType.numberWithOptions(decimal: true),
               surface: surface,
@@ -336,7 +339,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
               muted: muted),
           const SizedBox(height: 12),
           _Field(
-              label: 'Total (€)',
+              label: l10n.fuelEntry_totalEuro,
               controller: _total,
               keyboard: const TextInputType.numberWithOptions(decimal: true),
               surface: surface,
@@ -363,14 +366,14 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 2,
                         children: [
-                          Text('STATION',
+                          Text(l10n.fuelEntry_station,
                               style: AppFonts.body(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: muted,
                                   letterSpacing: 0.5)),
                           Text(
-                            _station?.name ?? 'None',
+                            _station?.name ?? l10n.common_none,
                             style: AppFonts.body(
                               fontSize: 14,
                               color: _station != null ? fg : muted,
@@ -395,7 +398,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text('Full tank',
+                  child: Text(l10n.fuelEntry_fullTank,
                       style: AppFonts.body(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -421,13 +424,13 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Also create transaction',
+                      Text(l10n.fuelEntry_alsoCreateTransaction,
                           style: AppFonts.body(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: fg)),
                       const SizedBox(height: 2),
-                      Text('Coming soon',
+                      Text(l10n.fuelEntry_comingSoon,
                           style: AppFonts.body(fontSize: 11, color: muted)),
                     ],
                   ),
@@ -440,7 +443,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
             ),
           ),
           const SizedBox(height: 12),
-          Text('NOTES', style: AppFonts.sectionLabel(color: muted)),
+          Text(l10n.fuelEntry_notes, style: AppFonts.sectionLabel(color: muted)),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -452,7 +455,7 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
               controller: _notes,
               maxLines: 3,
               decoration: const BoxDecoration(),
-              placeholder: 'Optional notes',
+              placeholder: l10n.fuelEntry_notesPlaceholder,
               style: AppFonts.body(fontSize: 13, color: fg),
             ),
           ),

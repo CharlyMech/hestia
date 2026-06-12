@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_save => 'Save';
 
   @override
+  String get common_ok => 'OK';
+
+  @override
   String get common_cancel => 'Cancel';
 
   @override
@@ -281,6 +284,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pets_title => 'Pet';
+
+  @override
+  String get pets_sectionTitle => 'Pets';
 
   @override
   String get pets_notFound => 'Not found';
@@ -569,10 +575,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications_empty => 'No notifications';
 
   @override
-  String get notifications_markRead => 'Mark as read';
+  String get notifications_markRead => 'Mark read';
 
   @override
-  String get notifications_markUnread => 'Mark as unread';
+  String get notifications_markUnread => 'Mark unread';
 
   @override
   String get transaction_new => 'New transaction';
@@ -770,4 +776,754 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get map_toggleVendors => 'Vendors';
+
+  @override
+  String get bankAccount_accountNotFound => 'Account not found';
+
+  @override
+  String get bankAccount_account => 'Account';
+
+  @override
+  String get bankAccount_period => 'Period';
+
+  @override
+  String get bankAccount_periodThisMonth => 'This month';
+
+  @override
+  String get bankAccount_periodLast6Months => 'Last 6 months';
+
+  @override
+  String get bankAccount_periodLast12Months => 'Last 12 months';
+
+  @override
+  String get bankAccount_periodMonth => 'Month';
+
+  @override
+  String get bankAccount_period6Months => '6 months';
+
+  @override
+  String get bankAccount_period1Year => '1 year';
+
+  @override
+  String bankAccount_balancePeriod(String period) {
+    return 'Balance · $period';
+  }
+
+  @override
+  String bankAccount_incomeVsExpense(String period) {
+    return 'Income vs expense · $period';
+  }
+
+  @override
+  String get bankAccount_recurringTransactions => 'Recurring transactions';
+
+  @override
+  String get bankAccount_noGoalsYet => 'No goals yet — tap to add one';
+
+  @override
+  String get bankAccount_actionLogs => 'Action logs';
+
+  @override
+  String get bankAccount_noActivityInWindow => 'No activity in this window';
+
+  @override
+  String get bankAccount_income => 'Income';
+
+  @override
+  String get bankAccount_expense => 'Expense';
+
+  @override
+  String get bankAccount_date => 'Date';
+
+  @override
+  String get bankAccount_action => 'Action';
+
+  @override
+  String get bankAccount_amount => 'Amount';
+
+  @override
+  String get bankAccount_newTransaction => 'New transaction';
+
+  @override
+  String get bankAccount_newGoal => 'New goal';
+
+  @override
+  String get bankAccount_editGoal => 'Edit goal';
+
+  @override
+  String get bankAccount_addGoal => 'Add goal';
+
+  @override
+  String get bankAccount_addCard => 'Add card';
+
+  @override
+  String get bankAccount_setAsPrimary => 'Set as primary';
+
+  @override
+  String get settings_homes => 'Homes';
+
+  @override
+  String get settings_homesSub => 'Manage household locations';
+
+  @override
+  String get settings_googleCalendar => 'Google Calendar';
+
+  @override
+  String get settings_googleCalendarSub =>
+      'Connect a Google account to sync events';
+
+  @override
+  String get settings_startDayMonday => 'Monday';
+
+  @override
+  String get settings_startDaySaturday => 'Saturday';
+
+  @override
+  String get settings_startDaySunday => 'Sunday';
+
+  @override
+  String settings_permissionAccess(String permission) {
+    return '$permission access';
+  }
+
+  @override
+  String settings_permissionMessage(String permission) {
+    return 'Hestia needs $permission access. Tap \"Open Settings\" to enable it.';
+  }
+
+  @override
+  String get settings_disableLocationMessage =>
+      'To disable location access, open Settings → Hestia → Location and turn it off.';
+
+  @override
+  String get settings_disableNotificationsMessage =>
+      'To disable notifications, open Settings → Hestia → Notifications and turn them off.';
+
+  @override
+  String get settings_openSettings => 'Open Settings';
+
+  @override
+  String get settings_syncNow => 'Sync now';
+
+  @override
+  String get settings_disconnect => 'Disconnect';
+
+  @override
+  String get settings_calendarSynced => 'Calendar synced';
+
+  @override
+  String get settings_calendarDisconnected => 'Google Calendar disconnected';
+
+  @override
+  String get settings_calendarConnected => 'Google Calendar connected';
+
+  @override
+  String get healthRecord_addRecord => 'Add Record';
+
+  @override
+  String get healthRecord_editRecord => 'Edit Record';
+
+  @override
+  String get healthRecord_saveChanges => 'Save Changes';
+
+  @override
+  String get healthRecord_couldNotSave => 'Could not save';
+
+  @override
+  String get healthRecord_type => 'Type';
+
+  @override
+  String get healthRecord_title => 'Title';
+
+  @override
+  String get healthRecord_titlePlaceholder => 'e.g. Annual vaccination';
+
+  @override
+  String get healthRecord_vetClinic => 'Vet / Clinic';
+
+  @override
+  String get healthRecord_optional => 'Optional';
+
+  @override
+  String get healthRecord_date => 'Date';
+
+  @override
+  String get healthRecord_nextDueDate => 'Next due date';
+
+  @override
+  String get healthRecord_costEuro => 'Cost (€)';
+
+  @override
+  String get healthRecord_notes => 'Notes';
+
+  @override
+  String get healthRecord_notesPlaceholder => 'Optional notes…';
+
+  @override
+  String get notifications_inbox => 'Inbox';
+
+  @override
+  String get notifications_markAll => 'Mark all';
+
+  @override
+  String get notifications_allMarkedRead => 'All marked as read';
+
+  @override
+  String get notifications_noNotificationsYet => 'No notifications yet';
+
+  @override
+  String get notifications_signInPrompt => 'Sign in to view notifications.';
+
+  @override
+  String get notifications_delete => 'Delete';
+
+  @override
+  String get notifications_deleteTitle => 'Delete notification';
+
+  @override
+  String get notifications_deleteConfirm => 'This action cannot be undone.';
+
+  @override
+  String get notifications_deleted => 'Notification deleted';
+
+  @override
+  String get notifications_markedRead => 'Marked as read';
+
+  @override
+  String get notifications_markedUnread => 'Marked unread';
+
+  @override
+  String get notifications_allCaughtUp => 'All caught up';
+
+  @override
+  String notifications_unreadCount(int count) {
+    return '$count unread';
+  }
+
+  @override
+  String get notifications_yesterday => 'Yesterday';
+
+  @override
+  String notifications_daysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String get goals_goalTitle => 'Goal';
+
+  @override
+  String get goals_saved => 'SAVED';
+
+  @override
+  String get goals_remaining => 'Remaining';
+
+  @override
+  String get goals_monthlyNeed => 'Monthly need';
+
+  @override
+  String get goals_daysLeft => 'Days left';
+
+  @override
+  String get goals_linkedSource => 'Linked source';
+
+  @override
+  String get goals_contributions => 'Contributions';
+
+  @override
+  String get goals_addContribution => 'Add contribution';
+
+  @override
+  String get fuelEntry_addFillUp => 'Add fill-up';
+
+  @override
+  String get fuelEntry_editFillUp => 'Edit fill-up';
+
+  @override
+  String get fuelEntry_filledAt => 'Filled at';
+
+  @override
+  String get fuelEntry_odometerKm => 'Odometer (km)';
+
+  @override
+  String get fuelEntry_liters => 'Liters';
+
+  @override
+  String get fuelEntry_pricePerLiter => 'Price per liter (€)';
+
+  @override
+  String get fuelEntry_totalEuro => 'Total (€)';
+
+  @override
+  String get fuelEntry_station => 'STATION';
+
+  @override
+  String get fuelEntry_fullTank => 'Full tank';
+
+  @override
+  String get fuelEntry_alsoCreateTransaction => 'Also create transaction';
+
+  @override
+  String get fuelEntry_comingSoon => 'Coming soon';
+
+  @override
+  String get fuelEntry_notes => 'NOTES';
+
+  @override
+  String get fuelEntry_notesPlaceholder => 'Optional notes';
+
+  @override
+  String get fuelEntry_added => 'Fuel entry added';
+
+  @override
+  String get fuelEntry_updated => 'Fuel entry updated';
+
+  @override
+  String get fuelEntry_done => 'Done';
+
+  @override
+  String get car_newCar => 'New car';
+
+  @override
+  String get car_editCar => 'Edit car';
+
+  @override
+  String get car_name => 'Name';
+
+  @override
+  String get car_make => 'Make';
+
+  @override
+  String get car_model => 'Model';
+
+  @override
+  String get car_year => 'Year';
+
+  @override
+  String get car_licensePlate => 'License plate';
+
+  @override
+  String get car_gasoline => 'Gasoline';
+
+  @override
+  String get car_diesel => 'Diesel';
+
+  @override
+  String get car_electric => 'Electric';
+
+  @override
+  String get car_hybrid => 'Hybrid';
+
+  @override
+  String get car_tankCapacity => 'Tank capacity (L)';
+
+  @override
+  String get car_currentOdometer => 'Current odometer (km)';
+
+  @override
+  String get car_status => 'Status';
+
+  @override
+  String get car_statusActive => 'Active';
+
+  @override
+  String get car_statusInactive => 'Inactive';
+
+  @override
+  String get car_drivers => 'DRIVERS';
+
+  @override
+  String get fuelAnalytics_avgL100km => 'Avg L/100km';
+
+  @override
+  String get fuelAnalytics_costPerKm => 'Cost / km';
+
+  @override
+  String get fuelAnalytics_last30Days => 'Last 30 days';
+
+  @override
+  String get fuelAnalytics_consumption => 'CONSUMPTION (L/100KM)';
+
+  @override
+  String get fuelAnalytics_monthlyCost => 'MONTHLY COST';
+
+  @override
+  String get fuelAnalytics_noDataYet => 'No data yet';
+
+  @override
+  String get fuelAnalytics_needFullTanks => 'Need at least 2 full tanks';
+
+  @override
+  String get bankAccountForm_newAccount => 'New account';
+
+  @override
+  String get bankAccountForm_editAccount => 'Edit account';
+
+  @override
+  String get bankAccountForm_bank => 'BANK';
+
+  @override
+  String get bankAccountForm_selectBank => 'Select bank';
+
+  @override
+  String get bankAccountForm_accountName => 'ACCOUNT NAME';
+
+  @override
+  String get bankAccountForm_accountNamePlaceholder => 'e.g. Main Checking';
+
+  @override
+  String get bankAccountForm_ibanOptional => 'IBAN (OPTIONAL)';
+
+  @override
+  String get bankAccountForm_type => 'TYPE';
+
+  @override
+  String get bankAccountForm_checking => 'Checking';
+
+  @override
+  String get bankAccountForm_savings => 'Savings';
+
+  @override
+  String get bankAccountForm_credit => 'Credit';
+
+  @override
+  String get bankAccountForm_cash => 'Cash';
+
+  @override
+  String get bankAccountForm_investment => 'Investment';
+
+  @override
+  String get bankAccountForm_ownership => 'OWNERSHIP';
+
+  @override
+  String get bankAccountForm_personal => 'Personal';
+
+  @override
+  String get bankAccountForm_shared => 'Shared';
+
+  @override
+  String get bankAccountForm_initialBalance => 'INITIAL BALANCE';
+
+  @override
+  String get bankAccountForm_createAccount => 'Create account';
+
+  @override
+  String get bankAccountForm_saveChanges => 'Save changes';
+
+  @override
+  String get bankAccountForm_accountCreated => 'Account created';
+
+  @override
+  String get bankAccountForm_accountUpdated => 'Account updated';
+
+  @override
+  String get bankAccountForm_couldNotSave => 'Could not save';
+
+  @override
+  String get bankAccountForm_enterName => 'Enter an account name';
+
+  @override
+  String get bankAccountForm_searchBank => 'Search bank…';
+
+  @override
+  String get bankAccountForm_noneEnterManually => 'None / enter manually';
+
+  @override
+  String get bankAccountForm_selectBankTitle => 'Select bank';
+
+  @override
+  String get recurringTransactions_title => 'Recurring';
+
+  @override
+  String get recurringTransactions_noTransactionsYet =>
+      'No recurring transactions yet';
+
+  @override
+  String get recurringTransactions_recurring => 'Recurring';
+
+  @override
+  String get homes_title => 'Homes';
+
+  @override
+  String get homes_noHomesYet => 'No homes yet';
+
+  @override
+  String get homes_addHomeDescription =>
+      'Add your home to associate it with transactions.';
+
+  @override
+  String get homes_addHome => 'Add home';
+
+  @override
+  String get homes_editHome => 'Edit home';
+
+  @override
+  String get homes_name => 'Name';
+
+  @override
+  String get homes_namePlaceholder => 'e.g. Main Apartment';
+
+  @override
+  String get homes_address => 'Address';
+
+  @override
+  String get homes_addressPlaceholder => 'Full street address';
+
+  @override
+  String get homes_saveChanges => 'Save changes';
+
+  @override
+  String get homes_deleteLabel => 'Delete';
+
+  @override
+  String get homes_editLabel => 'Edit';
+
+  @override
+  String get transaction_expense => 'Expense';
+
+  @override
+  String get transaction_income => 'Income';
+
+  @override
+  String get transaction_transfer => 'Transfer';
+
+  @override
+  String get transaction_category => 'Category';
+
+  @override
+  String get transaction_selectCategory => 'Select';
+
+  @override
+  String get transaction_bankAccount => 'Bank account';
+
+  @override
+  String get transaction_fromAccount => 'From account';
+
+  @override
+  String get transaction_toAccount => 'To account';
+
+  @override
+  String get transaction_card => 'Card';
+
+  @override
+  String get transaction_source => 'Source';
+
+  @override
+  String get transaction_sourceOptional => 'Optional';
+
+  @override
+  String get transaction_sourceSub => 'Merchant, employer, service';
+
+  @override
+  String get transaction_date => 'Date';
+
+  @override
+  String get transaction_repeat => 'Repeat';
+
+  @override
+  String get transaction_oneTime => 'One-time';
+
+  @override
+  String get transaction_recurring => 'Recurring';
+
+  @override
+  String get transaction_addNote => 'Add a note…';
+
+  @override
+  String get transaction_attachLocation => 'Attach location';
+
+  @override
+  String get transaction_locationOn => 'On';
+
+  @override
+  String get transaction_locationOff => 'Off';
+
+  @override
+  String get transaction_useGps => 'Use GPS';
+
+  @override
+  String get transaction_map => 'Map';
+
+  @override
+  String get transaction_today => 'Today';
+
+  @override
+  String get transaction_update => 'Update';
+
+  @override
+  String get transaction_saveTransaction => 'Save transaction';
+
+  @override
+  String get transaction_expenseSaved => 'Expense saved';
+
+  @override
+  String get transaction_incomeSaved => 'Income saved';
+
+  @override
+  String get transaction_deleted => 'Transaction deleted';
+
+  @override
+  String get transaction_somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get transaction_selectCategoryTitle => 'Select category';
+
+  @override
+  String get transaction_selectBankAccount => 'Select bank account';
+
+  @override
+  String get transaction_selectFromAccount => 'Select from account';
+
+  @override
+  String get transaction_selectDestinationAccount =>
+      'Select destination account';
+
+  @override
+  String get transaction_selectCard => 'Select card';
+
+  @override
+  String get transaction_noCard => 'None';
+
+  @override
+  String get transaction_noCardSub => 'No card';
+
+  @override
+  String get transaction_currency => 'Currency';
+
+  @override
+  String get transaction_counterpartySource => 'Counterparty source';
+
+  @override
+  String get transaction_selectDate => 'Select date';
+
+  @override
+  String get transaction_newSource => 'New source';
+
+  @override
+  String get transaction_editSource => 'Edit source';
+
+  @override
+  String get card_primary => 'PRIMARY';
+
+  @override
+  String get card_virtual => 'VIRTUAL';
+
+  @override
+  String get card_expires => 'EXPIRES';
+
+  @override
+  String get appointment_duration => 'Duration';
+
+  @override
+  String get appointment_pinLocation => 'Pin location on map';
+
+  @override
+  String get appointment_signInRequired => 'Sign in required';
+
+  @override
+  String get appointment_categoryHealth => 'Health';
+
+  @override
+  String get appointment_categoryVehicle => 'Vehicle';
+
+  @override
+  String get appointment_categoryBeauty => 'Beauty';
+
+  @override
+  String get appointment_categoryWork => 'Work';
+
+  @override
+  String get appointment_categoryPersonal => 'Personal';
+
+  @override
+  String get appointment_categoryOther => 'Other';
+
+  @override
+  String get bankAccount_goalsOnThisAccount => 'Goals on this account';
+
+  @override
+  String homes_coordinatesNote(String lat, String lng) {
+    return 'Coordinates: $lat, $lng\nTap the map in the full map view to pick a precise location.';
+  }
+
+  @override
+  String get card_addCard => 'Add Card';
+
+  @override
+  String get card_editCard => 'Edit Card';
+
+  @override
+  String get card_network => 'Network';
+
+  @override
+  String get card_last4Digits => 'Last 4 digits';
+
+  @override
+  String get card_cardholderName => 'Cardholder name';
+
+  @override
+  String get card_month => 'Month';
+
+  @override
+  String get card_year => 'Year';
+
+  @override
+  String get card_cardholderOwner => 'Cardholder owner';
+
+  @override
+  String get card_primaryCard => 'Primary card';
+
+  @override
+  String get card_virtualCard => 'Virtual card';
+
+  @override
+  String get card_saveChanges => 'Save Changes';
+
+  @override
+  String get card_none => 'None';
+
+  @override
+  String get card_last4Error => 'Last 4 digits must be exactly 4 numbers';
+
+  @override
+  String get card_cardholderRequired => 'Cardholder name is required';
+
+  @override
+  String get card_setAsPrimary => 'Set as primary';
+
+  @override
+  String get transaction_relatedTo => 'Related to';
+
+  @override
+  String get transaction_createNewSource => 'Create new source';
+
+  @override
+  String transaction_amountLabel(String currency) {
+    return 'AMOUNT · $currency';
+  }
+
+  @override
+  String get transaction_relatedToNone => 'None';
+
+  @override
+  String appointment_durationMinutes(int n) {
+    return '$n min';
+  }
+
+  @override
+  String appointment_durationHours(int n) {
+    return '${n}h';
+  }
+
+  @override
+  String appointment_durationHoursMinutes(int h, int m) {
+    return '${h}h ${m}m';
+  }
+
+  @override
+  String get appointment_reminder1Day => '1 day';
+
+  @override
+  String appointment_reminderDays(int n) {
+    return '$n days';
+  }
 }

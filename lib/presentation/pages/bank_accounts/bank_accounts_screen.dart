@@ -597,7 +597,7 @@ class _CardTile extends StatelessWidget {
               onTap: onSetPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: Text(
-                'Set as primary',
+                AppLocalizations.of(context).bankAccount_setAsPrimary,
                 style: AppFonts.label(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -659,7 +659,7 @@ class _AddCardPill extends StatelessWidget {
               children: [
                 Plus(width: 22, height: 22, color: muted),
                 Text(
-                  'Add card',
+                  AppLocalizations.of(context).bankAccount_addCard,
                   style: AppFonts.body(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

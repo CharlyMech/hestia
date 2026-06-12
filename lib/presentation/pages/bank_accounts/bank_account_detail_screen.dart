@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
@@ -127,9 +128,10 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
       createdAt: now,
       lastUpdate: now,
     );
+    final l10nSheet = AppLocalizations.of(context);
     await showAppBottomSheet<void>(
       context: context,
-      title: 'New transaction',
+      title: l10nSheet.bankAccount_newTransaction,
       heightFactor: 0.92,
       expand: true,
       child: TransactionForm(
@@ -163,10 +165,10 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
     };
   }
 
-  String _periodShortLabel() => switch (_periodIndex) {
-        1 => 'Last 6 months',
-        2 => 'Last 12 months',
-        _ => 'This month',
+  String _periodShortLabel(AppLocalizations l10n) => switch (_periodIndex) {
+        1 => l10n.bankAccount_periodLast6Months,
+        2 => l10n.bankAccount_periodLast12Months,
+        _ => l10n.bankAccount_periodThisMonth,
       };
 
   List<Transaction> _transactionsInPeriod() {
@@ -183,9 +185,10 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
     if (_householdId == null || _userId == null) return;
     _goalsBloc ??= GoalsBloc(AppDependencies.instance.goalRepository)
       ..add(GoalsLoad(householdId: _householdId!, userId: _userId!));
+    final l10n = AppLocalizations.of(context);
     await showAppBottomSheet<void>(
       context: context,
-      title: existing == null ? 'New goal' : 'Edit goal',
+      title: existing == null ? l10n.bankAccount_newGoal : l10n.bankAccount_editGoal,
       heightFactor: 0.92,
       child: BlocProvider.value(
         value: _goalsBloc!,
@@ -204,6 +207,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
     final bg = hexToColor(theme.backgroundColor);
     final surface = hexToColor(theme.surfaceColor);
@@ -223,12 +227,12 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
       barTitle = null;
       body = Center(
         child: Text(
-          'Account not found',
+          l10n.bankAccount_accountNotFound,
           style: AppFonts.body(fontSize: 13, color: muted),
         ),
       );
     } else if (source == null) {
-      barTitle = 'Account';
+      barTitle = l10n.bankAccount_account;
       body = Skeletonizer(
         enabled: true,
         child: ListView(
@@ -242,18 +246,18 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
               ),
               alignment: Alignment.center,
               child: Text(
-                'Loading',
+                '···',
                 style: AppFonts.body(fontSize: 14, color: muted),
               ),
             ),
             const SizedBox(height: 16),
-            Text('Period', style: AppFonts.sectionLabel(color: muted)),
+            Text(l10n.bankAccount_period, style: AppFonts.sectionLabel(color: muted)),
             const SizedBox(height: 8),
             SizedBox(height: 36),
-            Text('Balance · this month',
+            Text(l10n.bankAccount_balancePeriod(l10n.bankAccount_periodThisMonth.toLowerCase()),
                 style: AppFonts.sectionLabel(color: muted)),
             const SizedBox(height: 200),
-            Text('Goals', style: AppFonts.sectionLabel(color: muted)),
+            Text(l10n.goals_addGoal, style: AppFonts.sectionLabel(color: muted)),
           ],
         ),
       );
@@ -276,19 +280,19 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Period',
+                      l10n.bankAccount_period,
                       style: AppFonts.sectionLabel(color: muted),
                     ),
                   ),
                   Text(
-                    _periodShortLabel(),
+                    _periodShortLabel(l10n),
                     style: AppFonts.body(fontSize: 11, color: muted),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               AnimatedPillTabs(
-                labels: const ['Month', '6 months', '1 year'],
+                labels: [l10n.bankAccount_periodMonth, l10n.bankAccount_period6Months, l10n.bankAccount_period1Year],
                 selectedIndex: _periodIndex,
                 onChanged: (i) => setState(() => _periodIndex = i),
                 surface: surface,
@@ -309,7 +313,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                   spacing: 8,
                   children: [
                     Text(
-                      'Balance · ${_periodShortLabel().toLowerCase()}',
+                      l10n.bankAccount_balancePeriod(_periodShortLabel(l10n).toLowerCase()),
                       style: AppFonts.sectionLabel(color: muted),
                     ),
                     BalanceLineChart(
@@ -350,7 +354,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                   spacing: 8,
                   children: [
                     Text(
-                      'Income vs expense · ${_periodShortLabel().toLowerCase()}',
+                      l10n.bankAccount_incomeVsExpense(_periodShortLabel(l10n).toLowerCase()),
                       style: AppFonts.sectionLabel(color: muted),
                     ),
                     MonthlyIoBarChart(
@@ -403,7 +407,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                       ClockRotateRight(width: 18, height: 18, color: accent),
                       Expanded(
                         child: Text(
-                          'Recurring transactions',
+                          l10n.bankAccount_recurringTransactions,
                           style: AppFonts.body(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -421,7 +425,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Goals on this account',
+                      l10n.bankAccount_goalsOnThisAccount,
                       style: AppFonts.sectionLabel(color: muted),
                     ),
                   ),
@@ -434,7 +438,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                       children: [
                         Plus(width: 14, height: 14, color: accent),
                         Text(
-                          'Add goal',
+                          l10n.bankAccount_addGoal,
                           style: AppFonts.body(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -460,7 +464,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        'No goals yet — tap to add one',
+                        l10n.bankAccount_noGoalsYet,
                         style: AppFonts.body(fontSize: 12, color: muted),
                       ),
                     ),
@@ -484,7 +488,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                 ),
               const SizedBox(height: 18),
               Text(
-                'Action logs',
+                l10n.bankAccount_actionLogs,
                 style: AppFonts.sectionLabel(color: muted),
               ),
               const SizedBox(height: 8),
@@ -498,7 +502,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      'No activity in this window',
+                      l10n.bankAccount_noActivityInWindow,
                       style: AppFonts.body(fontSize: 12, color: muted),
                     ),
                   ),
@@ -511,13 +515,13 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
                   ),
                   child: Column(
                     children: [
-                      _row('Date', 'Action', 'Amount', muted, border),
+                      _row(l10n.bankAccount_date, l10n.bankAccount_action, l10n.bankAccount_amount, muted, border),
                       for (final tx in filteredTxs.take(50))
                         _row(
                           _fmtDate(tx.date),
                           tx.type == TransactionType.income
-                              ? 'Income'
-                              : 'Expense',
+                              ? l10n.bankAccount_income
+                              : l10n.bankAccount_expense,
                           '${tx.type == TransactionType.income ? '+' : '-'}${tx.amount.toStringAsFixed(2)} ${source.currency}',
                           tx.type == TransactionType.income ? income : expense,
                           border,

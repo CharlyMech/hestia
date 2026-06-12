@@ -168,14 +168,14 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: isEdit ? 'Edit car' : 'New car',
+      titleText: isEdit ? l10n.car_editCar : l10n.car_newCar,
       trailing: Padding(
         padding: const EdgeInsets.only(right: 12),
         child: GestureDetector(
           onTap: _save,
           behavior: HitTestBehavior.opaque,
           child: Text(
-            'Save',
+            l10n.common_save,
             style: AppFonts.body(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -209,28 +209,28 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                 ),
                 const SizedBox(height: 20),
                 _Field(
-                    label: 'Name',
+                    label: l10n.car_name,
                     controller: _name,
                     surface: surface,
                     fg: fg,
                     muted: muted),
                 const SizedBox(height: 12),
                 _Field(
-                    label: 'Make',
+                    label: l10n.car_make,
                     controller: _make,
                     surface: surface,
                     fg: fg,
                     muted: muted),
                 const SizedBox(height: 12),
                 _Field(
-                    label: 'Model',
+                    label: l10n.car_model,
                     controller: _model,
                     surface: surface,
                     fg: fg,
                     muted: muted),
                 const SizedBox(height: 12),
                 _Field(
-                    label: 'Year',
+                    label: l10n.car_year,
                     controller: _year,
                     keyboard: TextInputType.number,
                     surface: surface,
@@ -238,7 +238,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                     muted: muted),
                 const SizedBox(height: 12),
                 _Field(
-                    label: 'License plate',
+                    label: l10n.car_licensePlate,
                     controller: _plate,
                     surface: surface,
                     fg: fg,
@@ -246,11 +246,11 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                 const SizedBox(height: 12),
                 _Segmented<FuelType>(
                   label: l10n.cars_fuelType,
-                  options: const [
-                    (FuelType.gasoline, 'Gasoline'),
-                    (FuelType.diesel, 'Diesel'),
-                    (FuelType.electric, 'Electric'),
-                    (FuelType.hybrid, 'Hybrid'),
+                  options: [
+                    (FuelType.gasoline, l10n.car_gasoline),
+                    (FuelType.diesel, l10n.car_diesel),
+                    (FuelType.electric, l10n.car_electric),
+                    (FuelType.hybrid, l10n.car_hybrid),
                   ],
                   value: _fuelType,
                   onChanged: (v) => setState(() => _fuelType = v),
@@ -261,7 +261,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                 ),
                 const SizedBox(height: 12),
                 _Field(
-                    label: 'Tank capacity (L)',
+                    label: l10n.car_tankCapacity,
                     controller: _tank,
                     keyboard:
                         const TextInputType.numberWithOptions(decimal: true),
@@ -270,7 +270,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                     muted: muted),
                 const SizedBox(height: 12),
                 _Field(
-                    label: 'Current odometer (km)',
+                    label: l10n.car_currentOdometer,
                     controller: _odo,
                     keyboard:
                         const TextInputType.numberWithOptions(decimal: true),
@@ -279,10 +279,10 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                     muted: muted),
                 const SizedBox(height: 12),
                 _Segmented<bool>(
-                  label: 'Status',
-                  options: const [
-                    (true, 'Active'),
-                    (false, 'Inactive'),
+                  label: l10n.car_status,
+                  options: [
+                    (true, l10n.car_statusActive),
+                    (false, l10n.car_statusInactive),
                   ],
                   value: _isActive,
                   onChanged: (v) => setState(() => _isActive = v),
@@ -292,7 +292,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                   accent: accent,
                 ),
                 const SizedBox(height: 18),
-                Text('DRIVERS', style: AppFonts.sectionLabel(color: muted)),
+                Text(l10n.car_drivers, style: AppFonts.sectionLabel(color: muted)),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.all(8),

@@ -5,6 +5,7 @@ import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/payment_card.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 
 /// ISO ID-1 (credit-card) style widget for a [PaymentCard].
@@ -127,7 +128,7 @@ class PaymentCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'EXPIRES',
+                            AppLocalizations.of(context).card_expires,
                             style: AppFonts.body(
                               fontSize: 8,
                               color:
@@ -157,8 +158,8 @@ class PaymentCardWidget extends StatelessWidget {
               child: Row(
                 spacing: 4,
                 children: [
-                  if (card.isPrimary) _Badge(label: 'PRIMARY'),
-                  if (card.isVirtual) _Badge(label: 'VIRTUAL'),
+                  if (card.isPrimary) _Badge(label: AppLocalizations.of(context).card_primary),
+                  if (card.isVirtual) _Badge(label: AppLocalizations.of(context).card_virtual),
                 ],
               ),
             ),

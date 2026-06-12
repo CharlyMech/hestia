@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -35,12 +36,14 @@ class GoalDetailScreen extends StatelessWidget {
       _Contrib('Luis', tints[2], 'Mar 28', 250),
     ];
 
+    final l10n = AppLocalizations.of(context);
+
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: 'Goal',
+      titleText: l10n.goals_goalTitle,
       trailing: Padding(
         padding: const EdgeInsets.only(right: 4),
         child: AnimatedButton(
@@ -98,7 +101,7 @@ class GoalDetailScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'SAVED',
+                            l10n.goals_saved,
                             style: AppFonts.sectionLabel(color: muted),
                           ),
                           const SizedBox(height: 4),
@@ -134,7 +137,7 @@ class GoalDetailScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     _StatCell(
-                      label: 'Remaining',
+                      label: l10n.goals_remaining,
                       value: '1,140€',
                       surface: surface,
                       border: border,
@@ -143,7 +146,7 @@ class GoalDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     _StatCell(
-                      label: 'Monthly need',
+                      label: l10n.goals_monthlyNeed,
                       value: '285€',
                       surface: surface,
                       border: border,
@@ -152,7 +155,7 @@ class GoalDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     _StatCell(
-                      label: 'Days left',
+                      label: l10n.goals_daysLeft,
                       value: '120',
                       surface: surface,
                       border: border,
@@ -168,7 +171,7 @@ class GoalDetailScreen extends StatelessWidget {
               // Linked source
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: SectionLabel('Linked source', color: muted),
+                child: SectionLabel(l10n.goals_linkedSource, color: muted),
               ),
               const SizedBox(height: 8),
               Padding(
@@ -223,8 +226,8 @@ class GoalDetailScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: SectionLabel(
-                  'Contributions',
-                  action: 'Add',
+                  l10n.goals_contributions,
+                  action: l10n.common_add,
                   color: muted,
                   actionColor: accent,
                 ),
@@ -292,7 +295,7 @@ class GoalDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Add contribution',
+                          l10n.goals_addContribution,
                           style: AppFonts.body(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

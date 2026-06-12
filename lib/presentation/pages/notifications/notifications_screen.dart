@@ -27,7 +27,7 @@ class NotificationsScreen extends StatelessWidget {
     final userId = auth is AuthAuthenticated ? auth.profile.id : null;
 
     if (userId == null) {
-      return const _Empty(text: 'Sign in to view notifications.');
+      return _Empty(text: AppLocalizations.of(context).notifications_signInPrompt);
     }
 
     // Reuse the app-level NotificationsBloc; refresh on entry.
@@ -63,9 +63,10 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: 'Inbox',
+      titleText: AppLocalizations.of(context).notifications_inbox,
       trailing: BlocBuilder<NotificationsBloc, NotificationsState>(
         builder: (context, state) {
+          final l10nTrail = AppLocalizations.of(context);
           final enabled = state is NotificationsLoaded && state.unreadCount > 0;
           return GestureDetector(
             onTap: enabled
@@ -73,18 +74,18 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                     context
                         .read<NotificationsBloc>()
                         .add(NotificationsMarkAllRead(widget.userId));
-                    context.showToast(const AppToastConfig(
+                    context.showToast(AppToastConfig(
                       type: ToastType.success,
-                      title: 'All marked as read',
+                      title: l10nTrail.notifications_allMarkedRead,
                       position: ToastPosition.bottom,
-                      duration: Duration(seconds: 2),
+                      duration: const Duration(seconds: 2),
                     ));
                   }
                 : null,
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Text(
-                'Mark all',
+                l10nTrail.notifications_markAll,
                 style: AppFonts.body(
                   fontSize: 13,
                   color: enabled ? accent : muted,
@@ -164,7 +165,7 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                 SliverToBoxAdapter(
                   child: Center(
                     child: Text(
-                      'No notifications yet',
+                      AppLocalizations.of(context).notifications_noNotificationsYet,
                       style: AppFonts.body(fontSize: 14, color: muted),
                     ),
                   ),
@@ -194,7 +195,7 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                           padding: const EdgeInsets.only(left: 20),
                           color: accent.withValues(alpha: 0.18),
                           child: Text(
-                            rows[i].isRead ? 'Mark unread' : 'Mark read',
+                            rows[i].isRead ? l10n.notifications_markUnread : l10n.notifications_markRead,
                             style: AppFonts.body(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -207,7 +208,7 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                           padding: const EdgeInsets.only(right: 20),
                           color: const Color(0xFFEF4444),
                           child: Text(
-                            'Delete',
+                            l10n.notifications_delete,
                             style: AppFonts.body(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -220,20 +221,19 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                             return await showCupertinoDialog<bool>(
                                   context: context,
                                   builder: (ctx) => CupertinoAlertDialog(
-                                    title: const Text('Delete notification'),
-                                    content: const Text(
-                                        'This action cannot be undone.'),
+                                    title: Text(l10n.notifications_deleteTitle),
+                                    content: Text(l10n.notifications_deleteConfirm),
                                     actions: [
                                       CupertinoDialogAction(
                                         onPressed: () =>
                                             Navigator.pop(ctx, false),
-                                        child: const Text('Cancel'),
+                                        child: Text(l10n.common_cancel),
                                       ),
                                       CupertinoDialogAction(
                                         isDestructiveAction: true,
                                         onPressed: () =>
                                             Navigator.pop(ctx, true),
-                                        child: const Text('Delete'),
+                                        child: Text(l10n.notifications_delete),
                                       ),
                                     ],
                                   ),
@@ -248,8 +248,8 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                           context.showToast(AppToastConfig(
                             type: ToastType.neutral,
                             title: rows[i].isRead
-                                ? 'Marked unread'
-                                : 'Marked as read',
+                                ? l10n.notifications_markedUnread
+                                : l10n.notifications_markedRead,
                             position: ToastPosition.bottom,
                             duration: const Duration(seconds: 2),
                           ));
@@ -260,11 +260,11 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
                             context
                                 .read<NotificationsBloc>()
                                 .add(NotificationsDelete(rows[i].id));
-                            context.showToast(const AppToastConfig(
+                            context.showToast(AppToastConfig(
                               type: ToastType.neutral,
-                              title: 'Notification deleted',
+                              title: l10n.notifications_deleted,
                               position: ToastPosition.bottom,
-                              duration: Duration(seconds: 2),
+                              duration: const Duration(seconds: 2),
                             ));
                           }
                         },
@@ -386,7 +386,7 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
       color: v.color,
       title: n.title,
       body: n.body,
-      time: _fmtTime(n.createdAt),
+      time: _fmtTime(n.createdAt, AppLocalizations.of(context)),
       unread: !n.isRead,
     );
   }
@@ -394,7 +394,7 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _fmtTime(DateTime d) {
+  String _fmtTime(DateTime d, AppLocalizations l10n) {
     final now = DateTime.now();
     if (_isSameDay(d, now)) {
       final hh = d.hour.toString().padLeft(2, '0');
@@ -402,8 +402,8 @@ class _NotificationsBodyState extends State<_NotificationsBody> {
       return '$hh:$mm';
     }
     final diff = now.difference(d).inDays;
-    if (diff == 1) return 'Yesterday';
-    if (diff < 7) return '$diff days ago';
+    if (diff == 1) return l10n.notifications_yesterday;
+    if (diff < 7) return l10n.notifications_daysAgo(diff);
     return '${d.day}/${d.month}';
   }
 }
@@ -420,9 +420,14 @@ class _InboxSubtitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(
-          unread == 0 ? 'All caught up' : '$unread unread',
-          style: AppFonts.body(fontSize: 13, color: muted),
+        child: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context);
+            return Text(
+              unread == 0 ? l10n.notifications_allCaughtUp : l10n.notifications_unreadCount(unread),
+              style: AppFonts.body(fontSize: 13, color: muted),
+            );
+          },
         ),
       ),
     );
@@ -446,7 +451,7 @@ class _Empty extends StatelessWidget {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: 'Inbox',
+      titleText: AppLocalizations.of(context).notifications_inbox,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),

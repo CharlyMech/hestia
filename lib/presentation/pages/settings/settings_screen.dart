@@ -78,6 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final auth = context.read<AuthBloc>().state;
     final userId = auth is AuthAuthenticated ? auth.profile.id : null;
     if (userId == null) return;
+    final l10n = AppLocalizations.of(context);
 
     final syncState = _googleSyncCubit.state;
 
@@ -87,21 +88,21 @@ class _SettingsScreenState extends State<SettingsScreen>
         builder: (ctx) => CupertinoActionSheet(
           title: Text(syncState.email.isNotEmpty
               ? syncState.email
-              : 'Google Calendar'),
+              : l10n.settings_googleCalendar),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () => Navigator.pop(ctx, 'sync'),
-              child: const Text('Sync now'),
+              child: Text(l10n.settings_syncNow),
             ),
             CupertinoActionSheetAction(
               isDestructiveAction: true,
               onPressed: () => Navigator.pop(ctx, 'unlink'),
-              child: const Text('Disconnect'),
+              child: Text(l10n.settings_disconnect),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
         ),
       );
@@ -109,14 +110,14 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (action == 'sync') {
         await _googleSyncCubit.syncNow(userId);
         if (mounted) {
-          context.showToast(const AppToastConfig(
-              type: ToastType.success, title: 'Calendar synced'));
+          context.showToast(AppToastConfig(
+              type: ToastType.success, title: l10n.settings_calendarSynced));
         }
       } else if (action == 'unlink') {
         await _googleSyncCubit.unlink(userId);
         if (mounted) {
-          context.showToast(const AppToastConfig(
-              type: ToastType.success, title: 'Google Calendar disconnected'));
+          context.showToast(AppToastConfig(
+              type: ToastType.success, title: l10n.settings_calendarDisconnected));
         }
       }
     } else {
@@ -124,8 +125,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       if (!mounted) return;
       final next = _googleSyncCubit.state;
       if (next is GoogleSyncLinked) {
-        context.showToast(const AppToastConfig(
-            type: ToastType.success, title: 'Google Calendar connected'));
+        context.showToast(AppToastConfig(
+            type: ToastType.success, title: l10n.settings_calendarConnected));
       } else if (next is GoogleSyncError) {
         context.showToast(AppToastConfig(
             type: ToastType.error, title: next.message));
@@ -169,9 +170,9 @@ class _SettingsScreenState extends State<SettingsScreen>
   Future<void> _pickStartDay(
       BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
     final options = <({int v, String label})>[
-      (v: DateTime.monday, label: 'Monday'),
-      (v: DateTime.saturday, label: 'Saturday'),
-      (v: DateTime.sunday, label: 'Sunday'),
+      (v: DateTime.monday, label: l10n.settings_startDayMonday),
+      (v: DateTime.saturday, label: l10n.settings_startDaySaturday),
+      (v: DateTime.sunday, label: l10n.settings_startDaySunday),
     ];
     final picked = await _showOptionSheet<int>(
       context: context,
@@ -184,11 +185,11 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
-  String _startDayLabel(int day) => switch (day) {
-        DateTime.monday => 'Monday',
-        DateTime.saturday => 'Saturday',
-        DateTime.sunday => 'Sunday',
-        _ => 'Monday',
+  String _startDayLabel(int day, AppLocalizations l10n) => switch (day) {
+        DateTime.monday => l10n.settings_startDayMonday,
+        DateTime.saturday => l10n.settings_startDaySaturday,
+        DateTime.sunday => l10n.settings_startDaySunday,
+        _ => l10n.settings_startDayMonday,
       };
 
   Future<void> _pickLanguage(
@@ -316,15 +317,17 @@ class _SettingsScreenState extends State<SettingsScreen>
     if (value) {
       final perm = await loc.checkPermission();
       if (perm == LocationPermission.deniedForever) {
-        if (context.mounted) await _showOpenSettingsDialog(context, 'Location');
+        if (context.mounted) await _showOpenSettingsDialog(context, AppLocalizations.of(context).settings_locationSection);
       } else {
         await loc.requestPermission();
       }
     } else {
       if (context.mounted) {
-        await _showOpenSettingsDialog(context, 'Location',
-            message:
-                'To disable location access, open Settings → Hestia → Location and turn it off.');
+        await _showOpenSettingsDialog(
+          context,
+          AppLocalizations.of(context).settings_locationSection,
+          message: AppLocalizations.of(context).settings_disableLocationMessage,
+        );
       }
     }
     await _refreshPermissions();
@@ -339,7 +342,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       final status = await Permission.notification.status;
       if (status.isPermanentlyDenied) {
         if (context.mounted) {
-          await _showOpenSettingsDialog(context, 'Notifications');
+          await _showOpenSettingsDialog(context, AppLocalizations.of(context).notifications_title);
         }
       } else {
         // Request via the push service so the FCM token is registered on grant.
@@ -348,9 +351,12 @@ class _SettingsScreenState extends State<SettingsScreen>
       }
     } else {
       if (context.mounted) {
-        await _showOpenSettingsDialog(context, 'Notifications',
-            message:
-                'To disable notifications, open Settings → Hestia → Notifications and turn them off.');
+        await _showOpenSettingsDialog(
+          context,
+          AppLocalizations.of(context).notifications_title,
+          message:
+              AppLocalizations.of(context).settings_disableNotificationsMessage,
+        );
       }
     }
     // Reconcile the toggle with the real device state (handles deny/cancel).
@@ -362,23 +368,23 @@ class _SettingsScreenState extends State<SettingsScreen>
     String permission, {
     String? message,
   }) async {
+    final l10n = AppLocalizations.of(context);
     await showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: Text('$permission access'),
-        content: Text(message ??
-            'Hestia needs $permission access. Tap "Open Settings" to enable it.'),
+        title: Text(l10n.settings_permissionAccess(permission)),
+        content: Text(message ?? l10n.settings_permissionMessage(permission)),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           CupertinoDialogAction(
             onPressed: () async {
               Navigator.of(ctx).pop();
               await openAppSettings();
             },
-            child: const Text('Open Settings'),
+            child: Text(l10n.settings_openSettings),
           ),
         ],
       ),
@@ -453,17 +459,17 @@ class _SettingsScreenState extends State<SettingsScreen>
           icon: HomeSimpleDoor(
               width: 16, height: 16, color: tints[4 % tints.length]),
           color: tints[4 % tints.length],
-          label: 'Homes',
-          sub: 'Manage household locations',
+          label: l10n.settings_homes,
+          sub: l10n.settings_homesSub,
           onTap: () => context.push(AppRoutes.homes),
         ),
         _Tile.chevron(
           icon: CalendarPlus(width: 16, height: 16, color: tints[1]),
           color: tints[1],
-          label: 'Google Calendar',
+          label: l10n.settings_googleCalendar,
           sub: gcalState is GoogleSyncLinked
               ? gcalState.email
-              : 'Connect a Google account to sync events',
+              : l10n.settings_googleCalendarSub,
           onTap: _manageGoogleCalendar,
         ),
       ]),
@@ -488,7 +494,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           icon: CalendarPlus(width: 16, height: 16, color: tints[0]),
           color: tints[0],
           label: l10n.settings_startDay,
-          sub: _startDayLabel(prefs.startDay),
+          sub: _startDayLabel(prefs.startDay, l10n),
           onTap: () => _pickStartDay(context, prefs, l10n),
         ),
         _Tile.toggle(

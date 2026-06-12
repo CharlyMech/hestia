@@ -1,6 +1,7 @@
 {
   "@@locale": "es",
   "common_save": "Guardar",
+  "common_ok": "Aceptar",
   "common_cancel": "Cancelar",
   "common_done": "Hecho",
   "common_delete": "Eliminar",
@@ -137,6 +138,7 @@
   "pets_genderMale": "M",
   "pets_genderFemale": "F",
   "pets_title": "Mascota",
+  "pets_sectionTitle": "Mascotas",
   "pets_notFound": "No encontrado",
   "pets_deletePetTitle": "Eliminar mascota",
   "pets_deletePetConfirm": "¿Eliminar {name}? Esta acción no se puede deshacer.",
@@ -328,5 +330,340 @@
   "update_later": "Más tarde",
   "map_toggleTransactions": "Gastos",
   "map_toggleHomes": "Casas",
-  "map_toggleVendors": "Locales"
+  "map_toggleVendors": "Locales",
+
+  "bankAccount_accountNotFound": "Cuenta no encontrada",
+  "bankAccount_account": "Cuenta",
+  "bankAccount_period": "Período",
+  "bankAccount_periodThisMonth": "Este mes",
+  "bankAccount_periodLast6Months": "Últimos 6 meses",
+  "bankAccount_periodLast12Months": "Últimos 12 meses",
+  "bankAccount_periodMonth": "Mes",
+  "bankAccount_period6Months": "6 meses",
+  "bankAccount_period1Year": "1 año",
+  "bankAccount_balancePeriod": "Saldo · {period}",
+  "@bankAccount_balancePeriod": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "bankAccount_incomeVsExpense": "Ingresos vs gastos · {period}",
+  "@bankAccount_incomeVsExpense": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "bankAccount_recurringTransactions": "Transacciones recurrentes",
+  "bankAccount_noGoalsYet": "Sin objetivos — toca para añadir uno",
+  "bankAccount_actionLogs": "Registro de acciones",
+  "bankAccount_noActivityInWindow": "Sin actividad en este período",
+  "bankAccount_income": "Ingreso",
+  "bankAccount_expense": "Gasto",
+  "bankAccount_date": "Fecha",
+  "bankAccount_action": "Acción",
+  "bankAccount_amount": "Importe",
+  "bankAccount_newTransaction": "Nueva transacción",
+  "bankAccount_newGoal": "Nuevo objetivo",
+  "bankAccount_editGoal": "Editar objetivo",
+  "bankAccount_addGoal": "Añadir objetivo",
+  "bankAccount_addCard": "Añadir tarjeta",
+  "bankAccount_setAsPrimary": "Establecer como principal",
+
+  "settings_homes": "Casas",
+  "settings_homesSub": "Gestionar ubicaciones del hogar",
+  "settings_googleCalendar": "Google Calendar",
+  "settings_googleCalendarSub": "Conecta una cuenta de Google para sincronizar eventos",
+  "settings_startDayMonday": "Lunes",
+  "settings_startDaySaturday": "Sábado",
+  "settings_startDaySunday": "Domingo",
+  "settings_permissionAccess": "Acceso a {permission}",
+  "@settings_permissionAccess": {
+    "placeholders": {
+      "permission": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_permissionMessage": "Hestia necesita acceso a {permission}. Toca \"Abrir ajustes\" para habilitarlo.",
+  "@settings_permissionMessage": {
+    "placeholders": {
+      "permission": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_disableLocationMessage": "Para desactivar el acceso a la ubicación, ve a Ajustes → Hestia → Ubicación y desactívalo.",
+  "settings_disableNotificationsMessage": "Para desactivar las notificaciones, ve a Ajustes → Hestia → Notificaciones y desactívalas.",
+  "settings_openSettings": "Abrir ajustes",
+  "settings_syncNow": "Sincronizar ahora",
+  "settings_disconnect": "Desconectar",
+  "settings_calendarSynced": "Calendario sincronizado",
+  "settings_calendarDisconnected": "Google Calendar desconectado",
+  "settings_calendarConnected": "Google Calendar conectado",
+
+  "healthRecord_addRecord": "Añadir registro",
+  "healthRecord_editRecord": "Editar registro",
+  "healthRecord_saveChanges": "Guardar cambios",
+  "healthRecord_couldNotSave": "No se pudo guardar",
+  "healthRecord_type": "Tipo",
+  "healthRecord_title": "Título",
+  "healthRecord_titlePlaceholder": "p. ej. Vacunación anual",
+  "healthRecord_vetClinic": "Veterinario / Clínica",
+  "healthRecord_optional": "Opcional",
+  "healthRecord_date": "Fecha",
+  "healthRecord_nextDueDate": "Próxima fecha",
+  "healthRecord_costEuro": "Coste (€)",
+  "healthRecord_notes": "Notas",
+  "healthRecord_notesPlaceholder": "Notas opcionales…",
+
+  "notifications_inbox": "Bandeja",
+  "notifications_markAll": "Marcar todo",
+  "notifications_allMarkedRead": "Todo marcado como leído",
+  "notifications_noNotificationsYet": "Aún no hay notificaciones",
+  "notifications_signInPrompt": "Inicia sesión para ver las notificaciones.",
+  "notifications_markUnread": "Marcar no leída",
+  "notifications_markRead": "Marcar leída",
+  "notifications_delete": "Eliminar",
+  "notifications_deleteTitle": "Eliminar notificación",
+  "notifications_deleteConfirm": "Esta acción no se puede deshacer.",
+  "notifications_deleted": "Notificación eliminada",
+  "notifications_markedRead": "Marcada como leída",
+  "notifications_markedUnread": "Marcada como no leída",
+  "notifications_allCaughtUp": "Todo al día",
+  "notifications_unreadCount": "{count} sin leer",
+  "@notifications_unreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifications_yesterday": "Ayer",
+  "notifications_daysAgo": "Hace {count} días",
+  "@notifications_daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "goals_goalTitle": "Objetivo",
+  "goals_saved": "AHORRADO",
+  "goals_remaining": "Restante",
+  "goals_monthlyNeed": "Necesario/mes",
+  "goals_daysLeft": "Días restantes",
+  "goals_linkedSource": "Cuenta vinculada",
+  "goals_contributions": "Aportaciones",
+  "goals_addContribution": "Añadir aportación",
+
+  "fuelEntry_addFillUp": "Añadir repostaje",
+  "fuelEntry_editFillUp": "Editar repostaje",
+  "fuelEntry_filledAt": "Repostado el",
+  "fuelEntry_odometerKm": "Odómetro (km)",
+  "fuelEntry_liters": "Litros",
+  "fuelEntry_pricePerLiter": "Precio por litro (€)",
+  "fuelEntry_totalEuro": "Total (€)",
+  "fuelEntry_station": "GASOLINERA",
+  "fuelEntry_fullTank": "Depósito lleno",
+  "fuelEntry_alsoCreateTransaction": "Crear también transacción",
+  "fuelEntry_comingSoon": "Próximamente",
+  "fuelEntry_notes": "NOTAS",
+  "fuelEntry_notesPlaceholder": "Notas opcionales",
+  "fuelEntry_added": "Repostaje añadido",
+  "fuelEntry_updated": "Repostaje actualizado",
+  "fuelEntry_done": "Listo",
+
+  "car_newCar": "Nuevo coche",
+  "car_editCar": "Editar coche",
+  "car_name": "Nombre",
+  "car_make": "Marca",
+  "car_model": "Modelo",
+  "car_year": "Año",
+  "car_licensePlate": "Matrícula",
+  "car_gasoline": "Gasolina",
+  "car_diesel": "Diésel",
+  "car_electric": "Eléctrico",
+  "car_hybrid": "Híbrido",
+  "car_tankCapacity": "Capacidad del depósito (L)",
+  "car_currentOdometer": "Odómetro actual (km)",
+  "car_status": "Estado",
+  "car_statusActive": "Activo",
+  "car_statusInactive": "Inactivo",
+  "car_drivers": "CONDUCTORES",
+
+  "fuelAnalytics_avgL100km": "Media L/100km",
+  "fuelAnalytics_costPerKm": "Coste / km",
+  "fuelAnalytics_last30Days": "Últimos 30 días",
+  "fuelAnalytics_consumption": "CONSUMO (L/100KM)",
+  "fuelAnalytics_monthlyCost": "COSTE MENSUAL",
+  "fuelAnalytics_noDataYet": "Aún no hay datos",
+  "fuelAnalytics_needFullTanks": "Se necesitan al menos 2 depósitos llenos",
+
+  "bankAccountForm_newAccount": "Nueva cuenta",
+  "bankAccountForm_editAccount": "Editar cuenta",
+  "bankAccountForm_bank": "BANCO",
+  "bankAccountForm_selectBank": "Seleccionar banco",
+  "bankAccountForm_accountName": "NOMBRE DE CUENTA",
+  "bankAccountForm_accountNamePlaceholder": "p. ej. Cuenta corriente principal",
+  "bankAccountForm_ibanOptional": "IBAN (OPCIONAL)",
+  "bankAccountForm_type": "TIPO",
+  "bankAccountForm_checking": "Corriente",
+  "bankAccountForm_savings": "Ahorro",
+  "bankAccountForm_credit": "Crédito",
+  "bankAccountForm_cash": "Efectivo",
+  "bankAccountForm_investment": "Inversión",
+  "bankAccountForm_ownership": "TITULARIDAD",
+  "bankAccountForm_personal": "Personal",
+  "bankAccountForm_shared": "Compartida",
+  "bankAccountForm_initialBalance": "SALDO INICIAL",
+  "bankAccountForm_createAccount": "Crear cuenta",
+  "bankAccountForm_saveChanges": "Guardar cambios",
+  "bankAccountForm_accountCreated": "Cuenta creada",
+  "bankAccountForm_accountUpdated": "Cuenta actualizada",
+  "bankAccountForm_couldNotSave": "No se pudo guardar",
+  "bankAccountForm_enterName": "Introduce un nombre de cuenta",
+  "bankAccountForm_searchBank": "Buscar banco…",
+  "bankAccountForm_noneEnterManually": "Ninguno / introducir manualmente",
+  "bankAccountForm_selectBankTitle": "Seleccionar banco",
+
+  "recurringTransactions_title": "Recurrentes",
+  "recurringTransactions_noTransactionsYet": "Aún no hay transacciones recurrentes",
+  "recurringTransactions_recurring": "Recurrente",
+
+  "homes_title": "Casas",
+  "homes_noHomesYet": "Aún no hay casas",
+  "homes_addHomeDescription": "Añade tu casa para asociarla a transacciones.",
+  "homes_addHome": "Añadir casa",
+  "homes_editHome": "Editar casa",
+  "homes_name": "Nombre",
+  "homes_namePlaceholder": "p. ej. Piso principal",
+  "homes_address": "Dirección",
+  "homes_addressPlaceholder": "Dirección completa",
+  "homes_saveChanges": "Guardar cambios",
+  "homes_deleteLabel": "Eliminar",
+  "homes_editLabel": "Editar",
+
+  "transaction_expense": "Gasto",
+  "transaction_income": "Ingreso",
+  "transaction_transfer": "Transferencia",
+  "transaction_category": "Categoría",
+  "transaction_selectCategory": "Seleccionar",
+  "transaction_bankAccount": "Cuenta bancaria",
+  "transaction_fromAccount": "Cuenta origen",
+  "transaction_toAccount": "Cuenta destino",
+  "transaction_card": "Tarjeta",
+  "transaction_source": "Origen",
+  "transaction_sourceOptional": "Opcional",
+  "transaction_sourceSub": "Comerciante, empleador, servicio",
+  "transaction_date": "Fecha",
+  "transaction_repeat": "Repetir",
+  "transaction_oneTime": "Una vez",
+  "transaction_recurring": "Recurrente",
+  "transaction_addNote": "Añadir una nota…",
+  "transaction_attachLocation": "Adjuntar ubicación",
+  "transaction_locationOn": "Activado",
+  "transaction_locationOff": "Desactivado",
+  "transaction_useGps": "Usar GPS",
+  "transaction_map": "Mapa",
+  "transaction_today": "Hoy",
+  "transaction_update": "Actualizar",
+  "transaction_saveTransaction": "Guardar transacción",
+  "transaction_expenseSaved": "Gasto guardado",
+  "transaction_incomeSaved": "Ingreso guardado",
+  "transaction_deleted": "Transacción eliminada",
+  "transaction_somethingWentWrong": "Algo salió mal",
+  "transaction_selectCategoryTitle": "Seleccionar categoría",
+  "transaction_selectBankAccount": "Seleccionar cuenta bancaria",
+  "transaction_selectFromAccount": "Seleccionar cuenta origen",
+  "transaction_selectDestinationAccount": "Seleccionar cuenta destino",
+  "transaction_selectCard": "Seleccionar tarjeta",
+  "transaction_noCard": "Ninguna",
+  "transaction_noCardSub": "Sin tarjeta",
+  "transaction_currency": "Moneda",
+  "transaction_counterpartySource": "Origen de la contraparte",
+  "transaction_selectDate": "Seleccionar fecha",
+  "transaction_newSource": "Nueva fuente",
+  "transaction_editSource": "Editar fuente",
+
+  "card_primary": "PRINCIPAL",
+  "card_virtual": "VIRTUAL",
+  "card_expires": "CADUCA",
+
+  "appointment_duration": "Duración",
+  "appointment_pinLocation": "Marcar ubicación en el mapa",
+  "appointment_signInRequired": "Se requiere iniciar sesión",
+  "appointment_categoryHealth": "Salud",
+  "appointment_categoryVehicle": "Vehículo",
+  "appointment_categoryBeauty": "Belleza",
+  "appointment_categoryWork": "Trabajo",
+  "appointment_categoryPersonal": "Personal",
+  "appointment_categoryOther": "Otro",
+
+  "bankAccount_goalsOnThisAccount": "Metas de esta cuenta",
+
+  "homes_coordinatesNote": "Coordenadas: {lat}, {lng}\nToca el mapa en la vista completa para elegir una ubicación precisa.",
+  "@homes_coordinatesNote": {
+    "placeholders": {
+      "lat": { "type": "String" },
+      "lng": { "type": "String" }
+    }
+  },
+
+  "card_addCard": "Añadir tarjeta",
+  "card_editCard": "Editar tarjeta",
+  "card_network": "Red",
+  "card_last4Digits": "Últimos 4 dígitos",
+  "card_cardholderName": "Nombre del titular",
+  "card_month": "Mes",
+  "card_year": "Año",
+  "card_cardholderOwner": "Titular de la tarjeta",
+  "card_primaryCard": "Tarjeta principal",
+  "card_virtualCard": "Tarjeta virtual",
+  "card_saveChanges": "Guardar cambios",
+  "card_none": "Ninguna",
+  "card_last4Error": "Los últimos 4 dígitos deben ser exactamente 4 números",
+  "card_cardholderRequired": "El nombre del titular es obligatorio",
+  "card_setAsPrimary": "Establecer como principal",
+
+  "transaction_relatedTo": "Relacionado con",
+  "transaction_createNewSource": "Crear nueva fuente",
+  "transaction_amountLabel": "IMPORTE · {currency}",
+  "@transaction_amountLabel": {
+    "placeholders": {
+      "currency": { "type": "String" }
+    }
+  },
+  "transaction_relatedToNone": "Ninguno",
+
+  "appointment_durationMinutes": "{n} min",
+  "@appointment_durationMinutes": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "appointment_durationHours": "{n}h",
+  "@appointment_durationHours": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "appointment_durationHoursMinutes": "{h}h {m}m",
+  "@appointment_durationHoursMinutes": {
+    "placeholders": {
+      "h": { "type": "int" },
+      "m": { "type": "int" }
+    }
+  },
+  "appointment_reminder1Day": "1 día",
+  "appointment_reminderDays": "{n} días",
+  "@appointment_reminderDays": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  }
 }

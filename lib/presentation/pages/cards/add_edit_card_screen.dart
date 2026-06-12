@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/enums.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/account_member.dart';
@@ -98,13 +99,14 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
       context.showToast(AppToastConfig(title: msg, type: ToastType.error));
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     final last4 = _last4.text.trim();
     if (last4.length != 4 || int.tryParse(last4) == null) {
-      _toast('Last 4 digits must be exactly 4 numbers');
+      _toast(l10n.card_last4Error);
       return;
     }
     if (_cardholderName.text.trim().isEmpty) {
-      _toast('Cardholder name is required');
+      _toast(l10n.card_cardholderRequired);
       return;
     }
 
@@ -156,7 +158,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
       navBackground: hexToColor(theme.surfaceColor),
       borderColor: hexToColor(theme.borderColor),
       foregroundColor: fg,
-      titleText: isEdit ? 'Edit Card' : 'Add Card',
+      titleText: isEdit ? AppLocalizations.of(context).card_editCard : AppLocalizations.of(context).card_addCard,
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
@@ -167,7 +169,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
           const SizedBox(height: 24),
 
           // Network picker
-          Text('Network', style: AppFonts.label(fontSize: 12, color: muted)),
+          Text(AppLocalizations.of(context).card_network, style: AppFonts.label(fontSize: 12, color: muted)),
           const SizedBox(height: 8),
           SizedBox(
             height: 44,
@@ -206,7 +208,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
 
           FTextField(
             controller: _last4,
-            hint: 'Last 4 digits',
+            hint: AppLocalizations.of(context).card_last4Digits,
             keyboardType: TextInputType.number,
             maxLength: 4,
             textCapitalization: TextCapitalization.none,
@@ -215,7 +217,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
 
           FTextField(
             controller: _cardholderName,
-            hint: 'Cardholder name',
+            hint: AppLocalizations.of(context).card_cardholderName,
             textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 16),
@@ -226,7 +228,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
             children: [
               Expanded(
                 child: _ExpiryPicker(
-                  label: 'Month',
+                  label: AppLocalizations.of(context).card_month,
                   value: _expiryMonth.toString().padLeft(2, '0'),
                   surface: surface,
                   fg: fg,
@@ -236,7 +238,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
               ),
               Expanded(
                 child: _ExpiryPicker(
-                  label: 'Year',
+                  label: AppLocalizations.of(context).card_year,
                   value: _expiryYear.toString(),
                   surface: surface,
                   fg: fg,
@@ -250,7 +252,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
 
           // Owner picker (only shown for shared accounts with members)
           if (widget.accountMembers.isNotEmpty) ...[
-            Text('Cardholder owner',
+            Text(AppLocalizations.of(context).card_cardholderOwner,
                 style: AppFonts.label(fontSize: 12, color: muted)),
             const SizedBox(height: 8),
             _OwnerPicker(
@@ -270,7 +272,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Primary card', style: AppFonts.body(color: fg)),
+              Text(AppLocalizations.of(context).card_primaryCard, style: AppFonts.body(color: fg)),
               CupertinoSwitch(
                 value: _isPrimary,
                 onChanged: (v) => setState(() => _isPrimary = v),
@@ -284,7 +286,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Virtual card', style: AppFonts.body(color: fg)),
+              Text(AppLocalizations.of(context).card_virtualCard, style: AppFonts.body(color: fg)),
               CupertinoSwitch(
                 value: _isVirtual,
                 onChanged: (v) => setState(() => _isVirtual = v),
@@ -295,7 +297,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
           const SizedBox(height: 32),
 
           PrimaryButton(
-            label: isEdit ? 'Save Changes' : 'Add Card',
+            label: isEdit ? AppLocalizations.of(context).card_saveChanges : AppLocalizations.of(context).card_addCard,
             loading: _saving,
             onPressed: _save,
           ),
@@ -394,7 +396,7 @@ class _OwnerPicker extends StatelessWidget {
                       color: selectedUserId == null ? fg : border),
                 ),
                 child: Text(
-                  'None',
+                  AppLocalizations.of(context).card_none,
                   style: AppFonts.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

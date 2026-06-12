@@ -71,7 +71,7 @@ class _AnalyticsView extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.all(32),
                     child: Center(
-                      child: Text('No data yet',
+                      child: Text(l10n.fuelAnalytics_noDataYet,
                           style: AppFonts.body(fontSize: 13, color: muted)),
                     ),
                   );
@@ -85,7 +85,7 @@ class _AnalyticsView extends StatelessWidget {
                         children: [
                           Expanded(
                             child: _Kpi(
-                              label: 'Avg L/100km',
+                              label: l10n.fuelAnalytics_avgL100km,
                               value: a.avgLPer100Km != null
                                   ? a.avgLPer100Km!.toStringAsFixed(1)
                                   : '—',
@@ -97,7 +97,7 @@ class _AnalyticsView extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: _Kpi(
-                              label: 'Cost / km',
+                              label: l10n.fuelAnalytics_costPerKm,
                               value: a.costPerKm != null
                                   ? '${a.costPerKm!.toStringAsFixed(3)} €'
                                   : '—',
@@ -110,14 +110,14 @@ class _AnalyticsView extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       _Kpi(
-                        label: 'Last 30 days',
+                        label: l10n.fuelAnalytics_last30Days,
                         value: '${a.last30dTotal.toStringAsFixed(2)} €',
                         surface: surface,
                         fg: fg,
                         muted: muted,
                       ),
                       const SizedBox(height: 18),
-                      Text('CONSUMPTION (L/100KM)',
+                      Text(l10n.fuelAnalytics_consumption,
                           style: AppFonts.sectionLabel(color: muted)),
                       const SizedBox(height: 8),
                       Container(
@@ -131,7 +131,7 @@ class _AnalyticsView extends StatelessWidget {
                           child: a.consumptionPoints.length < 2
                               ? Center(
                                   child: Text(
-                                    'Need at least 2 full tanks',
+                                    l10n.fuelAnalytics_needFullTanks,
                                     style: AppFonts.body(
                                         fontSize: 12, color: muted),
                                   ),
@@ -183,7 +183,7 @@ class _AnalyticsView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      Text('MONTHLY COST',
+                      Text(l10n.fuelAnalytics_monthlyCost,
                           style: AppFonts.sectionLabel(color: muted)),
                       const SizedBox(height: 8),
                       Container(

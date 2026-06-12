@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -69,9 +70,10 @@ class _HomesScreenState extends State<HomesScreen> {
   }
 
   void _openSheet(Home? existing) {
+    final l10n = AppLocalizations.of(context);
     showAppBottomSheet<void>(
       context: context,
-      title: existing == null ? 'Add home' : 'Edit home',
+      title: existing == null ? l10n.homes_addHome : l10n.homes_editHome,
       child: _HomeFormSheet(
         existing: existing,
         onSaved: (home) async {
@@ -110,7 +112,7 @@ class _HomesScreenState extends State<HomesScreen> {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: 'Homes',
+      titleText: AppLocalizations.of(context).homes_title,
       onRefresh: _load,
       trailing: GestureDetector(
         onTap: _openAddSheet,
@@ -145,7 +147,7 @@ class _HomesScreenState extends State<HomesScreen> {
                               width: 18,
                               height: 18,
                               color: CupertinoColors.white),
-                          label: 'Delete',
+                          label: AppLocalizations.of(context).homes_deleteLabel,
                           onTap: () => _delete(home),
                         ),
                       ],
@@ -156,7 +158,7 @@ class _HomesScreenState extends State<HomesScreen> {
                               width: 18,
                               height: 18,
                               color: CupertinoColors.white),
-                          label: 'Edit',
+                          label: AppLocalizations.of(context).homes_editLabel,
                           onTap: () => _openSheet(home),
                         ),
                       ],
@@ -289,13 +291,13 @@ class _Empty extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 16,
           children: [
-            Text('No homes yet',
+            Text(AppLocalizations.of(context).homes_noHomesYet,
                 style: AppFonts.body(fontSize: 16, color: muted)),
-            Text('Add your home to associate it with transactions.',
+            Text(AppLocalizations.of(context).homes_addHomeDescription,
                 textAlign: TextAlign.center,
                 style: AppFonts.body(fontSize: 13, color: muted)),
             PrimaryButton(
-              label: 'Add home',
+              label: AppLocalizations.of(context).homes_addHome,
               onPressed: onAdd,
               width: 200,
             ),
@@ -396,9 +398,9 @@ class _HomeFormSheetState extends State<_HomeFormSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16,
         children: [
-          _field(_name, 'Name', 'e.g. Main Apartment',
+          _field(_name, AppLocalizations.of(context).homes_name, AppLocalizations.of(context).homes_namePlaceholder,
               surface: surface, border: border, fg: fg, muted: muted),
-          _field(_address, 'Address', 'Full street address',
+          _field(_address, AppLocalizations.of(context).homes_address, AppLocalizations.of(context).homes_addressPlaceholder,
               surface: surface, border: border, fg: fg, muted: muted),
           // Location note
           Container(
@@ -414,8 +416,10 @@ class _HomeFormSheetState extends State<_HomeFormSheet> {
                     size: 14, color: CupertinoColors.activeBlue),
                 Expanded(
                   child: Text(
-                    'Coordinates: ${_lat.toStringAsFixed(4)}, ${_lng.toStringAsFixed(4)}\n'
-                    'Tap the map in the full map view to pick a precise location.',
+                    AppLocalizations.of(context).homes_coordinatesNote(
+                      _lat.toStringAsFixed(4),
+                      _lng.toStringAsFixed(4),
+                    ),
                     style: AppFonts.body(fontSize: 11, color: muted),
                   ),
                 ),
@@ -423,7 +427,7 @@ class _HomeFormSheetState extends State<_HomeFormSheet> {
             ),
           ),
           PrimaryButton(
-            label: widget.existing == null ? 'Add home' : 'Save changes',
+            label: widget.existing == null ? AppLocalizations.of(context).homes_addHome : AppLocalizations.of(context).homes_saveChanges,
             onPressed: _saving ? null : _save,
             loading: _saving,
           ),

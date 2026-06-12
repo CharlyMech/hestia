@@ -9,6 +9,7 @@ import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -68,6 +69,7 @@ class _RecurringTransactionsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
     final bg = hexToColor(theme.backgroundColor);
     final surface = hexToColor(theme.surfaceColor);
@@ -82,7 +84,7 @@ class _RecurringTransactionsScreenState
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: 'Recurring',
+      titleText: AppLocalizations.of(context).recurringTransactions_title,
       onRefresh: _load,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -120,7 +122,7 @@ class _RecurringTransactionsScreenState
                 : _recurring.isEmpty
                     ? Center(
                         child: Text(
-                          'No recurring transactions yet',
+                          AppLocalizations.of(context).recurringTransactions_noTransactionsYet,
                           style: AppFonts.body(fontSize: 13, color: muted),
                         ),
                       )
@@ -162,7 +164,7 @@ class _RecurringTransactionsScreenState
                                       Text(
                                         tx.note ??
                                             tx.categoryName ??
-                                            'Recurring',
+                                            l10n.recurringTransactions_recurring,
                                         style: AppFonts.body(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
@@ -170,7 +172,7 @@ class _RecurringTransactionsScreenState
                                         ),
                                       ),
                                       Text(
-                                        '${_freqLabel(tx.recurringRule)} · ${tx.categoryName ?? '—'}',
+                                        '${_freqLabel(tx.recurringRule, l10n)} · ${tx.categoryName ?? '—'}',
                                         style: AppFonts.body(
                                             fontSize: 11, color: muted),
                                       ),
@@ -196,10 +198,10 @@ class _RecurringTransactionsScreenState
     );
   }
 
-  String _freqLabel(Map<String, dynamic>? rule) {
-    if (rule == null) return 'Recurring';
+  String _freqLabel(Map<String, dynamic>? rule, AppLocalizations l10n) {
+    if (rule == null) return l10n.recurringTransactions_recurring;
     final freq = rule['frequency'] ?? rule['interval'] ?? rule['type'];
     if (freq is String && freq.isNotEmpty) return freq;
-    return 'Recurring';
+    return l10n.recurringTransactions_recurring;
   }
 }

@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get common_save;
 
+  /// No description provided for @common_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get common_ok;
+
   /// No description provided for @common_cancel.
   ///
   /// In en, this message translates to:
@@ -608,6 +614,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pet'**
   String get pets_title;
+
+  /// No description provided for @pets_sectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get pets_sectionTitle;
 
   /// No description provided for @pets_notFound.
   ///
@@ -1158,13 +1170,13 @@ abstract class AppLocalizations {
   /// No description provided for @notifications_markRead.
   ///
   /// In en, this message translates to:
-  /// **'Mark as read'**
+  /// **'Mark read'**
   String get notifications_markRead;
 
   /// No description provided for @notifications_markUnread.
   ///
   /// In en, this message translates to:
-  /// **'Mark as unread'**
+  /// **'Mark unread'**
   String get notifications_markUnread;
 
   /// No description provided for @transaction_new.
@@ -1550,6 +1562,1446 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vendors'**
   String get map_toggleVendors;
+
+  /// No description provided for @bankAccount_accountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Account not found'**
+  String get bankAccount_accountNotFound;
+
+  /// No description provided for @bankAccount_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get bankAccount_account;
+
+  /// No description provided for @bankAccount_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get bankAccount_period;
+
+  /// No description provided for @bankAccount_periodThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get bankAccount_periodThisMonth;
+
+  /// No description provided for @bankAccount_periodLast6Months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 months'**
+  String get bankAccount_periodLast6Months;
+
+  /// No description provided for @bankAccount_periodLast12Months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get bankAccount_periodLast12Months;
+
+  /// No description provided for @bankAccount_periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get bankAccount_periodMonth;
+
+  /// No description provided for @bankAccount_period6Months.
+  ///
+  /// In en, this message translates to:
+  /// **'6 months'**
+  String get bankAccount_period6Months;
+
+  /// No description provided for @bankAccount_period1Year.
+  ///
+  /// In en, this message translates to:
+  /// **'1 year'**
+  String get bankAccount_period1Year;
+
+  /// No description provided for @bankAccount_balancePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance · {period}'**
+  String bankAccount_balancePeriod(String period);
+
+  /// No description provided for @bankAccount_incomeVsExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Income vs expense · {period}'**
+  String bankAccount_incomeVsExpense(String period);
+
+  /// No description provided for @bankAccount_recurringTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transactions'**
+  String get bankAccount_recurringTransactions;
+
+  /// No description provided for @bankAccount_noGoalsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet — tap to add one'**
+  String get bankAccount_noGoalsYet;
+
+  /// No description provided for @bankAccount_actionLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Action logs'**
+  String get bankAccount_actionLogs;
+
+  /// No description provided for @bankAccount_noActivityInWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity in this window'**
+  String get bankAccount_noActivityInWindow;
+
+  /// No description provided for @bankAccount_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get bankAccount_income;
+
+  /// No description provided for @bankAccount_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get bankAccount_expense;
+
+  /// No description provided for @bankAccount_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get bankAccount_date;
+
+  /// No description provided for @bankAccount_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get bankAccount_action;
+
+  /// No description provided for @bankAccount_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get bankAccount_amount;
+
+  /// No description provided for @bankAccount_newTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'New transaction'**
+  String get bankAccount_newTransaction;
+
+  /// No description provided for @bankAccount_newGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'New goal'**
+  String get bankAccount_newGoal;
+
+  /// No description provided for @bankAccount_editGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit goal'**
+  String get bankAccount_editGoal;
+
+  /// No description provided for @bankAccount_addGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add goal'**
+  String get bankAccount_addGoal;
+
+  /// No description provided for @bankAccount_addCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Add card'**
+  String get bankAccount_addCard;
+
+  /// No description provided for @bankAccount_setAsPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as primary'**
+  String get bankAccount_setAsPrimary;
+
+  /// No description provided for @settings_homes.
+  ///
+  /// In en, this message translates to:
+  /// **'Homes'**
+  String get settings_homes;
+
+  /// No description provided for @settings_homesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage household locations'**
+  String get settings_homesSub;
+
+  /// No description provided for @settings_googleCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Calendar'**
+  String get settings_googleCalendar;
+
+  /// No description provided for @settings_googleCalendarSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a Google account to sync events'**
+  String get settings_googleCalendarSub;
+
+  /// No description provided for @settings_startDayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get settings_startDayMonday;
+
+  /// No description provided for @settings_startDaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get settings_startDaySaturday;
+
+  /// No description provided for @settings_startDaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get settings_startDaySunday;
+
+  /// No description provided for @settings_permissionAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{permission} access'**
+  String settings_permissionAccess(String permission);
+
+  /// No description provided for @settings_permissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hestia needs {permission} access. Tap \"Open Settings\" to enable it.'**
+  String settings_permissionMessage(String permission);
+
+  /// No description provided for @settings_disableLocationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To disable location access, open Settings → Hestia → Location and turn it off.'**
+  String get settings_disableLocationMessage;
+
+  /// No description provided for @settings_disableNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'To disable notifications, open Settings → Hestia → Notifications and turn them off.'**
+  String get settings_disableNotificationsMessage;
+
+  /// No description provided for @settings_openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get settings_openSettings;
+
+  /// No description provided for @settings_syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get settings_syncNow;
+
+  /// No description provided for @settings_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get settings_disconnect;
+
+  /// No description provided for @settings_calendarSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar synced'**
+  String get settings_calendarSynced;
+
+  /// No description provided for @settings_calendarDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Calendar disconnected'**
+  String get settings_calendarDisconnected;
+
+  /// No description provided for @settings_calendarConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Calendar connected'**
+  String get settings_calendarConnected;
+
+  /// No description provided for @healthRecord_addRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Record'**
+  String get healthRecord_addRecord;
+
+  /// No description provided for @healthRecord_editRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Record'**
+  String get healthRecord_editRecord;
+
+  /// No description provided for @healthRecord_saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get healthRecord_saveChanges;
+
+  /// No description provided for @healthRecord_couldNotSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save'**
+  String get healthRecord_couldNotSave;
+
+  /// No description provided for @healthRecord_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get healthRecord_type;
+
+  /// No description provided for @healthRecord_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get healthRecord_title;
+
+  /// No description provided for @healthRecord_titlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Annual vaccination'**
+  String get healthRecord_titlePlaceholder;
+
+  /// No description provided for @healthRecord_vetClinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet / Clinic'**
+  String get healthRecord_vetClinic;
+
+  /// No description provided for @healthRecord_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get healthRecord_optional;
+
+  /// No description provided for @healthRecord_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get healthRecord_date;
+
+  /// No description provided for @healthRecord_nextDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due date'**
+  String get healthRecord_nextDueDate;
+
+  /// No description provided for @healthRecord_costEuro.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost (€)'**
+  String get healthRecord_costEuro;
+
+  /// No description provided for @healthRecord_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get healthRecord_notes;
+
+  /// No description provided for @healthRecord_notesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional notes…'**
+  String get healthRecord_notesPlaceholder;
+
+  /// No description provided for @notifications_inbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get notifications_inbox;
+
+  /// No description provided for @notifications_markAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all'**
+  String get notifications_markAll;
+
+  /// No description provided for @notifications_allMarkedRead.
+  ///
+  /// In en, this message translates to:
+  /// **'All marked as read'**
+  String get notifications_allMarkedRead;
+
+  /// No description provided for @notifications_noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notifications_noNotificationsYet;
+
+  /// No description provided for @notifications_signInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to view notifications.'**
+  String get notifications_signInPrompt;
+
+  /// No description provided for @notifications_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notifications_delete;
+
+  /// No description provided for @notifications_deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete notification'**
+  String get notifications_deleteTitle;
+
+  /// No description provided for @notifications_deleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get notifications_deleteConfirm;
+
+  /// No description provided for @notifications_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification deleted'**
+  String get notifications_deleted;
+
+  /// No description provided for @notifications_markedRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as read'**
+  String get notifications_markedRead;
+
+  /// No description provided for @notifications_markedUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked unread'**
+  String get notifications_markedUnread;
+
+  /// No description provided for @notifications_allCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get notifications_allCaughtUp;
+
+  /// No description provided for @notifications_unreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unread'**
+  String notifications_unreadCount(int count);
+
+  /// No description provided for @notifications_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get notifications_yesterday;
+
+  /// No description provided for @notifications_daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String notifications_daysAgo(int count);
+
+  /// No description provided for @goals_goalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get goals_goalTitle;
+
+  /// No description provided for @goals_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVED'**
+  String get goals_saved;
+
+  /// No description provided for @goals_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get goals_remaining;
+
+  /// No description provided for @goals_monthlyNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly need'**
+  String get goals_monthlyNeed;
+
+  /// No description provided for @goals_daysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Days left'**
+  String get goals_daysLeft;
+
+  /// No description provided for @goals_linkedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked source'**
+  String get goals_linkedSource;
+
+  /// No description provided for @goals_contributions.
+  ///
+  /// In en, this message translates to:
+  /// **'Contributions'**
+  String get goals_contributions;
+
+  /// No description provided for @goals_addContribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contribution'**
+  String get goals_addContribution;
+
+  /// No description provided for @fuelEntry_addFillUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add fill-up'**
+  String get fuelEntry_addFillUp;
+
+  /// No description provided for @fuelEntry_editFillUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fill-up'**
+  String get fuelEntry_editFillUp;
+
+  /// No description provided for @fuelEntry_filledAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled at'**
+  String get fuelEntry_filledAt;
+
+  /// No description provided for @fuelEntry_odometerKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Odometer (km)'**
+  String get fuelEntry_odometerKm;
+
+  /// No description provided for @fuelEntry_liters.
+  ///
+  /// In en, this message translates to:
+  /// **'Liters'**
+  String get fuelEntry_liters;
+
+  /// No description provided for @fuelEntry_pricePerLiter.
+  ///
+  /// In en, this message translates to:
+  /// **'Price per liter (€)'**
+  String get fuelEntry_pricePerLiter;
+
+  /// No description provided for @fuelEntry_totalEuro.
+  ///
+  /// In en, this message translates to:
+  /// **'Total (€)'**
+  String get fuelEntry_totalEuro;
+
+  /// No description provided for @fuelEntry_station.
+  ///
+  /// In en, this message translates to:
+  /// **'STATION'**
+  String get fuelEntry_station;
+
+  /// No description provided for @fuelEntry_fullTank.
+  ///
+  /// In en, this message translates to:
+  /// **'Full tank'**
+  String get fuelEntry_fullTank;
+
+  /// No description provided for @fuelEntry_alsoCreateTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Also create transaction'**
+  String get fuelEntry_alsoCreateTransaction;
+
+  /// No description provided for @fuelEntry_comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get fuelEntry_comingSoon;
+
+  /// No description provided for @fuelEntry_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'NOTES'**
+  String get fuelEntry_notes;
+
+  /// No description provided for @fuelEntry_notesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional notes'**
+  String get fuelEntry_notesPlaceholder;
+
+  /// No description provided for @fuelEntry_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel entry added'**
+  String get fuelEntry_added;
+
+  /// No description provided for @fuelEntry_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel entry updated'**
+  String get fuelEntry_updated;
+
+  /// No description provided for @fuelEntry_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get fuelEntry_done;
+
+  /// No description provided for @car_newCar.
+  ///
+  /// In en, this message translates to:
+  /// **'New car'**
+  String get car_newCar;
+
+  /// No description provided for @car_editCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit car'**
+  String get car_editCar;
+
+  /// No description provided for @car_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get car_name;
+
+  /// No description provided for @car_make.
+  ///
+  /// In en, this message translates to:
+  /// **'Make'**
+  String get car_make;
+
+  /// No description provided for @car_model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get car_model;
+
+  /// No description provided for @car_year.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get car_year;
+
+  /// No description provided for @car_licensePlate.
+  ///
+  /// In en, this message translates to:
+  /// **'License plate'**
+  String get car_licensePlate;
+
+  /// No description provided for @car_gasoline.
+  ///
+  /// In en, this message translates to:
+  /// **'Gasoline'**
+  String get car_gasoline;
+
+  /// No description provided for @car_diesel.
+  ///
+  /// In en, this message translates to:
+  /// **'Diesel'**
+  String get car_diesel;
+
+  /// No description provided for @car_electric.
+  ///
+  /// In en, this message translates to:
+  /// **'Electric'**
+  String get car_electric;
+
+  /// No description provided for @car_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get car_hybrid;
+
+  /// No description provided for @car_tankCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Tank capacity (L)'**
+  String get car_tankCapacity;
+
+  /// No description provided for @car_currentOdometer.
+  ///
+  /// In en, this message translates to:
+  /// **'Current odometer (km)'**
+  String get car_currentOdometer;
+
+  /// No description provided for @car_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get car_status;
+
+  /// No description provided for @car_statusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get car_statusActive;
+
+  /// No description provided for @car_statusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get car_statusInactive;
+
+  /// No description provided for @car_drivers.
+  ///
+  /// In en, this message translates to:
+  /// **'DRIVERS'**
+  String get car_drivers;
+
+  /// No description provided for @fuelAnalytics_avgL100km.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg L/100km'**
+  String get fuelAnalytics_avgL100km;
+
+  /// No description provided for @fuelAnalytics_costPerKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost / km'**
+  String get fuelAnalytics_costPerKm;
+
+  /// No description provided for @fuelAnalytics_last30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get fuelAnalytics_last30Days;
+
+  /// No description provided for @fuelAnalytics_consumption.
+  ///
+  /// In en, this message translates to:
+  /// **'CONSUMPTION (L/100KM)'**
+  String get fuelAnalytics_consumption;
+
+  /// No description provided for @fuelAnalytics_monthlyCost.
+  ///
+  /// In en, this message translates to:
+  /// **'MONTHLY COST'**
+  String get fuelAnalytics_monthlyCost;
+
+  /// No description provided for @fuelAnalytics_noDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get fuelAnalytics_noDataYet;
+
+  /// No description provided for @fuelAnalytics_needFullTanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least 2 full tanks'**
+  String get fuelAnalytics_needFullTanks;
+
+  /// No description provided for @bankAccountForm_newAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'New account'**
+  String get bankAccountForm_newAccount;
+
+  /// No description provided for @bankAccountForm_editAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit account'**
+  String get bankAccountForm_editAccount;
+
+  /// No description provided for @bankAccountForm_bank.
+  ///
+  /// In en, this message translates to:
+  /// **'BANK'**
+  String get bankAccountForm_bank;
+
+  /// No description provided for @bankAccountForm_selectBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Select bank'**
+  String get bankAccountForm_selectBank;
+
+  /// No description provided for @bankAccountForm_accountName.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT NAME'**
+  String get bankAccountForm_accountName;
+
+  /// No description provided for @bankAccountForm_accountNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Main Checking'**
+  String get bankAccountForm_accountNamePlaceholder;
+
+  /// No description provided for @bankAccountForm_ibanOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'IBAN (OPTIONAL)'**
+  String get bankAccountForm_ibanOptional;
+
+  /// No description provided for @bankAccountForm_type.
+  ///
+  /// In en, this message translates to:
+  /// **'TYPE'**
+  String get bankAccountForm_type;
+
+  /// No description provided for @bankAccountForm_checking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking'**
+  String get bankAccountForm_checking;
+
+  /// No description provided for @bankAccountForm_savings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get bankAccountForm_savings;
+
+  /// No description provided for @bankAccountForm_credit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get bankAccountForm_credit;
+
+  /// No description provided for @bankAccountForm_cash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get bankAccountForm_cash;
+
+  /// No description provided for @bankAccountForm_investment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment'**
+  String get bankAccountForm_investment;
+
+  /// No description provided for @bankAccountForm_ownership.
+  ///
+  /// In en, this message translates to:
+  /// **'OWNERSHIP'**
+  String get bankAccountForm_ownership;
+
+  /// No description provided for @bankAccountForm_personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get bankAccountForm_personal;
+
+  /// No description provided for @bankAccountForm_shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get bankAccountForm_shared;
+
+  /// No description provided for @bankAccountForm_initialBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'INITIAL BALANCE'**
+  String get bankAccountForm_initialBalance;
+
+  /// No description provided for @bankAccountForm_createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get bankAccountForm_createAccount;
+
+  /// No description provided for @bankAccountForm_saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get bankAccountForm_saveChanges;
+
+  /// No description provided for @bankAccountForm_accountCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created'**
+  String get bankAccountForm_accountCreated;
+
+  /// No description provided for @bankAccountForm_accountUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account updated'**
+  String get bankAccountForm_accountUpdated;
+
+  /// No description provided for @bankAccountForm_couldNotSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save'**
+  String get bankAccountForm_couldNotSave;
+
+  /// No description provided for @bankAccountForm_enterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an account name'**
+  String get bankAccountForm_enterName;
+
+  /// No description provided for @bankAccountForm_searchBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Search bank…'**
+  String get bankAccountForm_searchBank;
+
+  /// No description provided for @bankAccountForm_noneEnterManually.
+  ///
+  /// In en, this message translates to:
+  /// **'None / enter manually'**
+  String get bankAccountForm_noneEnterManually;
+
+  /// No description provided for @bankAccountForm_selectBankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select bank'**
+  String get bankAccountForm_selectBankTitle;
+
+  /// No description provided for @recurringTransactions_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get recurringTransactions_title;
+
+  /// No description provided for @recurringTransactions_noTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring transactions yet'**
+  String get recurringTransactions_noTransactionsYet;
+
+  /// No description provided for @recurringTransactions_recurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get recurringTransactions_recurring;
+
+  /// No description provided for @homes_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Homes'**
+  String get homes_title;
+
+  /// No description provided for @homes_noHomesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No homes yet'**
+  String get homes_noHomesYet;
+
+  /// No description provided for @homes_addHomeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your home to associate it with transactions.'**
+  String get homes_addHomeDescription;
+
+  /// No description provided for @homes_addHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add home'**
+  String get homes_addHome;
+
+  /// No description provided for @homes_editHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit home'**
+  String get homes_editHome;
+
+  /// No description provided for @homes_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get homes_name;
+
+  /// No description provided for @homes_namePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Main Apartment'**
+  String get homes_namePlaceholder;
+
+  /// No description provided for @homes_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get homes_address;
+
+  /// No description provided for @homes_addressPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Full street address'**
+  String get homes_addressPlaceholder;
+
+  /// No description provided for @homes_saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get homes_saveChanges;
+
+  /// No description provided for @homes_deleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get homes_deleteLabel;
+
+  /// No description provided for @homes_editLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get homes_editLabel;
+
+  /// No description provided for @transaction_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transaction_expense;
+
+  /// No description provided for @transaction_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transaction_income;
+
+  /// No description provided for @transaction_transfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transaction_transfer;
+
+  /// No description provided for @transaction_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get transaction_category;
+
+  /// No description provided for @transaction_selectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get transaction_selectCategory;
+
+  /// No description provided for @transaction_bankAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank account'**
+  String get transaction_bankAccount;
+
+  /// No description provided for @transaction_fromAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'From account'**
+  String get transaction_fromAccount;
+
+  /// No description provided for @transaction_toAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'To account'**
+  String get transaction_toAccount;
+
+  /// No description provided for @transaction_card.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get transaction_card;
+
+  /// No description provided for @transaction_source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get transaction_source;
+
+  /// No description provided for @transaction_sourceOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get transaction_sourceOptional;
+
+  /// No description provided for @transaction_sourceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant, employer, service'**
+  String get transaction_sourceSub;
+
+  /// No description provided for @transaction_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get transaction_date;
+
+  /// No description provided for @transaction_repeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get transaction_repeat;
+
+  /// No description provided for @transaction_oneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time'**
+  String get transaction_oneTime;
+
+  /// No description provided for @transaction_recurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get transaction_recurring;
+
+  /// No description provided for @transaction_addNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note…'**
+  String get transaction_addNote;
+
+  /// No description provided for @transaction_attachLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach location'**
+  String get transaction_attachLocation;
+
+  /// No description provided for @transaction_locationOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get transaction_locationOn;
+
+  /// No description provided for @transaction_locationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get transaction_locationOff;
+
+  /// No description provided for @transaction_useGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Use GPS'**
+  String get transaction_useGps;
+
+  /// No description provided for @transaction_map.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get transaction_map;
+
+  /// No description provided for @transaction_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get transaction_today;
+
+  /// No description provided for @transaction_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get transaction_update;
+
+  /// No description provided for @transaction_saveTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save transaction'**
+  String get transaction_saveTransaction;
+
+  /// No description provided for @transaction_expenseSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense saved'**
+  String get transaction_expenseSaved;
+
+  /// No description provided for @transaction_incomeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Income saved'**
+  String get transaction_incomeSaved;
+
+  /// No description provided for @transaction_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction deleted'**
+  String get transaction_deleted;
+
+  /// No description provided for @transaction_somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get transaction_somethingWentWrong;
+
+  /// No description provided for @transaction_selectCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get transaction_selectCategoryTitle;
+
+  /// No description provided for @transaction_selectBankAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select bank account'**
+  String get transaction_selectBankAccount;
+
+  /// No description provided for @transaction_selectFromAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select from account'**
+  String get transaction_selectFromAccount;
+
+  /// No description provided for @transaction_selectDestinationAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select destination account'**
+  String get transaction_selectDestinationAccount;
+
+  /// No description provided for @transaction_selectCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Select card'**
+  String get transaction_selectCard;
+
+  /// No description provided for @transaction_noCard.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get transaction_noCard;
+
+  /// No description provided for @transaction_noCardSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No card'**
+  String get transaction_noCardSub;
+
+  /// No description provided for @transaction_currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get transaction_currency;
+
+  /// No description provided for @transaction_counterpartySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Counterparty source'**
+  String get transaction_counterpartySource;
+
+  /// No description provided for @transaction_selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get transaction_selectDate;
+
+  /// No description provided for @transaction_newSource.
+  ///
+  /// In en, this message translates to:
+  /// **'New source'**
+  String get transaction_newSource;
+
+  /// No description provided for @transaction_editSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit source'**
+  String get transaction_editSource;
+
+  /// No description provided for @card_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'PRIMARY'**
+  String get card_primary;
+
+  /// No description provided for @card_virtual.
+  ///
+  /// In en, this message translates to:
+  /// **'VIRTUAL'**
+  String get card_virtual;
+
+  /// No description provided for @card_expires.
+  ///
+  /// In en, this message translates to:
+  /// **'EXPIRES'**
+  String get card_expires;
+
+  /// No description provided for @appointment_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get appointment_duration;
+
+  /// No description provided for @appointment_pinLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin location on map'**
+  String get appointment_pinLocation;
+
+  /// No description provided for @appointment_signInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get appointment_signInRequired;
+
+  /// No description provided for @appointment_categoryHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get appointment_categoryHealth;
+
+  /// No description provided for @appointment_categoryVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get appointment_categoryVehicle;
+
+  /// No description provided for @appointment_categoryBeauty.
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty'**
+  String get appointment_categoryBeauty;
+
+  /// No description provided for @appointment_categoryWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get appointment_categoryWork;
+
+  /// No description provided for @appointment_categoryPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get appointment_categoryPersonal;
+
+  /// No description provided for @appointment_categoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get appointment_categoryOther;
+
+  /// No description provided for @bankAccount_goalsOnThisAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals on this account'**
+  String get bankAccount_goalsOnThisAccount;
+
+  /// No description provided for @homes_coordinatesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates: {lat}, {lng}\nTap the map in the full map view to pick a precise location.'**
+  String homes_coordinatesNote(String lat, String lng);
+
+  /// No description provided for @card_addCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Card'**
+  String get card_addCard;
+
+  /// No description provided for @card_editCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Card'**
+  String get card_editCard;
+
+  /// No description provided for @card_network.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get card_network;
+
+  /// No description provided for @card_last4Digits.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 4 digits'**
+  String get card_last4Digits;
+
+  /// No description provided for @card_cardholderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardholder name'**
+  String get card_cardholderName;
+
+  /// No description provided for @card_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get card_month;
+
+  /// No description provided for @card_year.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get card_year;
+
+  /// No description provided for @card_cardholderOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardholder owner'**
+  String get card_cardholderOwner;
+
+  /// No description provided for @card_primaryCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary card'**
+  String get card_primaryCard;
+
+  /// No description provided for @card_virtualCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual card'**
+  String get card_virtualCard;
+
+  /// No description provided for @card_saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get card_saveChanges;
+
+  /// No description provided for @card_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get card_none;
+
+  /// No description provided for @card_last4Error.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 4 digits must be exactly 4 numbers'**
+  String get card_last4Error;
+
+  /// No description provided for @card_cardholderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardholder name is required'**
+  String get card_cardholderRequired;
+
+  /// No description provided for @card_setAsPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as primary'**
+  String get card_setAsPrimary;
+
+  /// No description provided for @transaction_relatedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Related to'**
+  String get transaction_relatedTo;
+
+  /// No description provided for @transaction_createNewSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new source'**
+  String get transaction_createNewSource;
+
+  /// No description provided for @transaction_amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOUNT · {currency}'**
+  String transaction_amountLabel(String currency);
+
+  /// No description provided for @transaction_relatedToNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get transaction_relatedToNone;
+
+  /// No description provided for @appointment_durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String appointment_durationMinutes(int n);
+
+  /// No description provided for @appointment_durationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}h'**
+  String appointment_durationHours(int n);
+
+  /// No description provided for @appointment_durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{h}h {m}m'**
+  String appointment_durationHoursMinutes(int h, int m);
+
+  /// No description provided for @appointment_reminder1Day.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get appointment_reminder1Day;
+
+  /// No description provided for @appointment_reminderDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days'**
+  String appointment_reminderDays(int n);
 }
 
 class _AppLocalizationsDelegate

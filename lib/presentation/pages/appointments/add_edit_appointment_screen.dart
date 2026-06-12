@@ -265,7 +265,7 @@ class _Form extends StatelessWidget {
               if (!state.isAllDay) ...[
                 const SizedBox(height: 16),
                 _LabeledField(
-                  label: 'Duration',
+                  label: l10n.appointment_duration,
                   muted: muted,
                   child: _DurationPicker(
                     value: state.duration,
@@ -548,6 +548,7 @@ class _DurationPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -566,7 +567,7 @@ class _DurationPicker extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                _fmt(d),
+                _fmt(d, l10n),
                 style: AppFonts.body(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -579,10 +580,10 @@ class _DurationPicker extends StatelessWidget {
     );
   }
 
-  String _fmt(Duration d) {
-    if (d.inMinutes < 60) return '${d.inMinutes} min';
-    if (d.inMinutes % 60 == 0) return '${d.inHours}h';
-    return '${d.inHours}h ${d.inMinutes % 60}m';
+  String _fmt(Duration d, AppLocalizations l10n) {
+    if (d.inMinutes < 60) return l10n.appointment_durationMinutes(d.inMinutes);
+    if (d.inMinutes % 60 == 0) return l10n.appointment_durationHours(d.inHours);
+    return l10n.appointment_durationHoursMinutes(d.inHours, d.inMinutes % 60);
   }
 }
 
@@ -607,6 +608,7 @@ class _CategoryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -625,7 +627,7 @@ class _CategoryPicker extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                _label(c),
+                _label(c, l10n),
                 style: AppFonts.body(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -638,13 +640,13 @@ class _CategoryPicker extends StatelessWidget {
     );
   }
 
-  String _label(AppointmentCategory c) => switch (c) {
-        AppointmentCategory.health => 'Health',
-        AppointmentCategory.vehicle => 'Vehicle',
-        AppointmentCategory.beauty => 'Beauty',
-        AppointmentCategory.work => 'Work',
-        AppointmentCategory.personal => 'Personal',
-        AppointmentCategory.other => 'Other',
+  String _label(AppointmentCategory c, AppLocalizations l10n) => switch (c) {
+        AppointmentCategory.health => l10n.appointment_categoryHealth,
+        AppointmentCategory.vehicle => l10n.appointment_categoryVehicle,
+        AppointmentCategory.beauty => l10n.appointment_categoryBeauty,
+        AppointmentCategory.work => l10n.appointment_categoryWork,
+        AppointmentCategory.personal => l10n.appointment_categoryPersonal,
+        AppointmentCategory.other => l10n.appointment_categoryOther,
       };
 }
 
@@ -728,6 +730,7 @@ class _Reminders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -749,7 +752,7 @@ class _Reminders extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  _fmt(d),
+                  _fmt(d, l10n),
                   style: AppFonts.body(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -763,11 +766,11 @@ class _Reminders extends StatelessWidget {
     );
   }
 
-  String _fmt(Duration d) {
-    if (d.inMinutes < 60) return '${d.inMinutes} min';
-    if (d.inHours < 24) return '${d.inHours}h';
+  String _fmt(Duration d, AppLocalizations l10n) {
+    if (d.inMinutes < 60) return l10n.appointment_durationMinutes(d.inMinutes);
+    if (d.inHours < 24) return l10n.appointment_durationHours(d.inHours);
     final days = d.inDays;
-    return days == 1 ? '1 day' : '$days days';
+    return days == 1 ? l10n.appointment_reminder1Day : l10n.appointment_reminderDays(days);
   }
 }
 
@@ -815,7 +818,7 @@ class _MapField extends StatelessWidget {
               child: Text(
                 hasCoords
                     ? '${latitude!.toStringAsFixed(5)}, ${longitude!.toStringAsFixed(5)}'
-                    : 'Pin location on map',
+                    : AppLocalizations.of(context).appointment_pinLocation,
                 style: AppFonts.body(
                     fontSize: 14, color: hasCoords ? fg : muted),
               ),
@@ -837,8 +840,8 @@ class _NoAuth extends StatelessWidget {
   const _NoAuth();
   @override
   Widget build(BuildContext context) {
-    return const CupertinoPageScaffold(
-      child: Center(child: Text('Sign in required')),
+    return CupertinoPageScaffold(
+      child: Center(child: Text(AppLocalizations.of(context).appointment_signInRequired)),
     );
   }
 }

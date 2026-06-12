@@ -2,6 +2,7 @@
   "@@locale": "en",
 
   "common_save": "Save",
+  "common_ok": "OK",
   "common_cancel": "Cancel",
   "common_done": "Done",
   "common_delete": "Delete",
@@ -140,6 +141,7 @@
   "pets_genderMale": "M",
   "pets_genderFemale": "F",
   "pets_title": "Pet",
+  "pets_sectionTitle": "Pets",
   "pets_notFound": "Not found",
   "pets_deletePetTitle": "Delete pet",
   "pets_deletePetConfirm": "Remove {name}? This cannot be undone.",
@@ -357,5 +359,340 @@
 
   "map_toggleTransactions": "Expenses",
   "map_toggleHomes": "Homes",
-  "map_toggleVendors": "Vendors"
+  "map_toggleVendors": "Vendors",
+
+  "bankAccount_accountNotFound": "Account not found",
+  "bankAccount_account": "Account",
+  "bankAccount_period": "Period",
+  "bankAccount_periodThisMonth": "This month",
+  "bankAccount_periodLast6Months": "Last 6 months",
+  "bankAccount_periodLast12Months": "Last 12 months",
+  "bankAccount_periodMonth": "Month",
+  "bankAccount_period6Months": "6 months",
+  "bankAccount_period1Year": "1 year",
+  "bankAccount_balancePeriod": "Balance · {period}",
+  "@bankAccount_balancePeriod": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "bankAccount_incomeVsExpense": "Income vs expense · {period}",
+  "@bankAccount_incomeVsExpense": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "bankAccount_recurringTransactions": "Recurring transactions",
+  "bankAccount_noGoalsYet": "No goals yet — tap to add one",
+  "bankAccount_actionLogs": "Action logs",
+  "bankAccount_noActivityInWindow": "No activity in this window",
+  "bankAccount_income": "Income",
+  "bankAccount_expense": "Expense",
+  "bankAccount_date": "Date",
+  "bankAccount_action": "Action",
+  "bankAccount_amount": "Amount",
+  "bankAccount_newTransaction": "New transaction",
+  "bankAccount_newGoal": "New goal",
+  "bankAccount_editGoal": "Edit goal",
+  "bankAccount_addGoal": "Add goal",
+  "bankAccount_addCard": "Add card",
+  "bankAccount_setAsPrimary": "Set as primary",
+
+  "settings_homes": "Homes",
+  "settings_homesSub": "Manage household locations",
+  "settings_googleCalendar": "Google Calendar",
+  "settings_googleCalendarSub": "Connect a Google account to sync events",
+  "settings_startDayMonday": "Monday",
+  "settings_startDaySaturday": "Saturday",
+  "settings_startDaySunday": "Sunday",
+  "settings_permissionAccess": "{permission} access",
+  "@settings_permissionAccess": {
+    "placeholders": {
+      "permission": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_permissionMessage": "Hestia needs {permission} access. Tap \"Open Settings\" to enable it.",
+  "@settings_permissionMessage": {
+    "placeholders": {
+      "permission": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_disableLocationMessage": "To disable location access, open Settings → Hestia → Location and turn it off.",
+  "settings_disableNotificationsMessage": "To disable notifications, open Settings → Hestia → Notifications and turn them off.",
+  "settings_openSettings": "Open Settings",
+  "settings_syncNow": "Sync now",
+  "settings_disconnect": "Disconnect",
+  "settings_calendarSynced": "Calendar synced",
+  "settings_calendarDisconnected": "Google Calendar disconnected",
+  "settings_calendarConnected": "Google Calendar connected",
+
+  "healthRecord_addRecord": "Add Record",
+  "healthRecord_editRecord": "Edit Record",
+  "healthRecord_saveChanges": "Save Changes",
+  "healthRecord_couldNotSave": "Could not save",
+  "healthRecord_type": "Type",
+  "healthRecord_title": "Title",
+  "healthRecord_titlePlaceholder": "e.g. Annual vaccination",
+  "healthRecord_vetClinic": "Vet / Clinic",
+  "healthRecord_optional": "Optional",
+  "healthRecord_date": "Date",
+  "healthRecord_nextDueDate": "Next due date",
+  "healthRecord_costEuro": "Cost (€)",
+  "healthRecord_notes": "Notes",
+  "healthRecord_notesPlaceholder": "Optional notes…",
+
+  "notifications_inbox": "Inbox",
+  "notifications_markAll": "Mark all",
+  "notifications_allMarkedRead": "All marked as read",
+  "notifications_noNotificationsYet": "No notifications yet",
+  "notifications_signInPrompt": "Sign in to view notifications.",
+  "notifications_markUnread": "Mark unread",
+  "notifications_markRead": "Mark read",
+  "notifications_delete": "Delete",
+  "notifications_deleteTitle": "Delete notification",
+  "notifications_deleteConfirm": "This action cannot be undone.",
+  "notifications_deleted": "Notification deleted",
+  "notifications_markedRead": "Marked as read",
+  "notifications_markedUnread": "Marked unread",
+  "notifications_allCaughtUp": "All caught up",
+  "notifications_unreadCount": "{count} unread",
+  "@notifications_unreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifications_yesterday": "Yesterday",
+  "notifications_daysAgo": "{count} days ago",
+  "@notifications_daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "goals_goalTitle": "Goal",
+  "goals_saved": "SAVED",
+  "goals_remaining": "Remaining",
+  "goals_monthlyNeed": "Monthly need",
+  "goals_daysLeft": "Days left",
+  "goals_linkedSource": "Linked source",
+  "goals_contributions": "Contributions",
+  "goals_addContribution": "Add contribution",
+
+  "fuelEntry_addFillUp": "Add fill-up",
+  "fuelEntry_editFillUp": "Edit fill-up",
+  "fuelEntry_filledAt": "Filled at",
+  "fuelEntry_odometerKm": "Odometer (km)",
+  "fuelEntry_liters": "Liters",
+  "fuelEntry_pricePerLiter": "Price per liter (€)",
+  "fuelEntry_totalEuro": "Total (€)",
+  "fuelEntry_station": "STATION",
+  "fuelEntry_fullTank": "Full tank",
+  "fuelEntry_alsoCreateTransaction": "Also create transaction",
+  "fuelEntry_comingSoon": "Coming soon",
+  "fuelEntry_notes": "NOTES",
+  "fuelEntry_notesPlaceholder": "Optional notes",
+  "fuelEntry_added": "Fuel entry added",
+  "fuelEntry_updated": "Fuel entry updated",
+  "fuelEntry_done": "Done",
+
+  "car_newCar": "New car",
+  "car_editCar": "Edit car",
+  "car_name": "Name",
+  "car_make": "Make",
+  "car_model": "Model",
+  "car_year": "Year",
+  "car_licensePlate": "License plate",
+  "car_gasoline": "Gasoline",
+  "car_diesel": "Diesel",
+  "car_electric": "Electric",
+  "car_hybrid": "Hybrid",
+  "car_tankCapacity": "Tank capacity (L)",
+  "car_currentOdometer": "Current odometer (km)",
+  "car_status": "Status",
+  "car_statusActive": "Active",
+  "car_statusInactive": "Inactive",
+  "car_drivers": "DRIVERS",
+
+  "fuelAnalytics_avgL100km": "Avg L/100km",
+  "fuelAnalytics_costPerKm": "Cost / km",
+  "fuelAnalytics_last30Days": "Last 30 days",
+  "fuelAnalytics_consumption": "CONSUMPTION (L/100KM)",
+  "fuelAnalytics_monthlyCost": "MONTHLY COST",
+  "fuelAnalytics_noDataYet": "No data yet",
+  "fuelAnalytics_needFullTanks": "Need at least 2 full tanks",
+
+  "bankAccountForm_newAccount": "New account",
+  "bankAccountForm_editAccount": "Edit account",
+  "bankAccountForm_bank": "BANK",
+  "bankAccountForm_selectBank": "Select bank",
+  "bankAccountForm_accountName": "ACCOUNT NAME",
+  "bankAccountForm_accountNamePlaceholder": "e.g. Main Checking",
+  "bankAccountForm_ibanOptional": "IBAN (OPTIONAL)",
+  "bankAccountForm_type": "TYPE",
+  "bankAccountForm_checking": "Checking",
+  "bankAccountForm_savings": "Savings",
+  "bankAccountForm_credit": "Credit",
+  "bankAccountForm_cash": "Cash",
+  "bankAccountForm_investment": "Investment",
+  "bankAccountForm_ownership": "OWNERSHIP",
+  "bankAccountForm_personal": "Personal",
+  "bankAccountForm_shared": "Shared",
+  "bankAccountForm_initialBalance": "INITIAL BALANCE",
+  "bankAccountForm_createAccount": "Create account",
+  "bankAccountForm_saveChanges": "Save changes",
+  "bankAccountForm_accountCreated": "Account created",
+  "bankAccountForm_accountUpdated": "Account updated",
+  "bankAccountForm_couldNotSave": "Could not save",
+  "bankAccountForm_enterName": "Enter an account name",
+  "bankAccountForm_searchBank": "Search bank…",
+  "bankAccountForm_noneEnterManually": "None / enter manually",
+  "bankAccountForm_selectBankTitle": "Select bank",
+
+  "recurringTransactions_title": "Recurring",
+  "recurringTransactions_noTransactionsYet": "No recurring transactions yet",
+  "recurringTransactions_recurring": "Recurring",
+
+  "homes_title": "Homes",
+  "homes_noHomesYet": "No homes yet",
+  "homes_addHomeDescription": "Add your home to associate it with transactions.",
+  "homes_addHome": "Add home",
+  "homes_editHome": "Edit home",
+  "homes_name": "Name",
+  "homes_namePlaceholder": "e.g. Main Apartment",
+  "homes_address": "Address",
+  "homes_addressPlaceholder": "Full street address",
+  "homes_saveChanges": "Save changes",
+  "homes_deleteLabel": "Delete",
+  "homes_editLabel": "Edit",
+
+  "transaction_expense": "Expense",
+  "transaction_income": "Income",
+  "transaction_transfer": "Transfer",
+  "transaction_category": "Category",
+  "transaction_selectCategory": "Select",
+  "transaction_bankAccount": "Bank account",
+  "transaction_fromAccount": "From account",
+  "transaction_toAccount": "To account",
+  "transaction_card": "Card",
+  "transaction_source": "Source",
+  "transaction_sourceOptional": "Optional",
+  "transaction_sourceSub": "Merchant, employer, service",
+  "transaction_date": "Date",
+  "transaction_repeat": "Repeat",
+  "transaction_oneTime": "One-time",
+  "transaction_recurring": "Recurring",
+  "transaction_addNote": "Add a note…",
+  "transaction_attachLocation": "Attach location",
+  "transaction_locationOn": "On",
+  "transaction_locationOff": "Off",
+  "transaction_useGps": "Use GPS",
+  "transaction_map": "Map",
+  "transaction_today": "Today",
+  "transaction_update": "Update",
+  "transaction_saveTransaction": "Save transaction",
+  "transaction_expenseSaved": "Expense saved",
+  "transaction_incomeSaved": "Income saved",
+  "transaction_deleted": "Transaction deleted",
+  "transaction_somethingWentWrong": "Something went wrong",
+  "transaction_selectCategoryTitle": "Select category",
+  "transaction_selectBankAccount": "Select bank account",
+  "transaction_selectFromAccount": "Select from account",
+  "transaction_selectDestinationAccount": "Select destination account",
+  "transaction_selectCard": "Select card",
+  "transaction_noCard": "None",
+  "transaction_noCardSub": "No card",
+  "transaction_currency": "Currency",
+  "transaction_counterpartySource": "Counterparty source",
+  "transaction_selectDate": "Select date",
+  "transaction_newSource": "New source",
+  "transaction_editSource": "Edit source",
+
+  "card_primary": "PRIMARY",
+  "card_virtual": "VIRTUAL",
+  "card_expires": "EXPIRES",
+
+  "appointment_duration": "Duration",
+  "appointment_pinLocation": "Pin location on map",
+  "appointment_signInRequired": "Sign in required",
+  "appointment_categoryHealth": "Health",
+  "appointment_categoryVehicle": "Vehicle",
+  "appointment_categoryBeauty": "Beauty",
+  "appointment_categoryWork": "Work",
+  "appointment_categoryPersonal": "Personal",
+  "appointment_categoryOther": "Other",
+
+  "bankAccount_goalsOnThisAccount": "Goals on this account",
+
+  "homes_coordinatesNote": "Coordinates: {lat}, {lng}\nTap the map in the full map view to pick a precise location.",
+  "@homes_coordinatesNote": {
+    "placeholders": {
+      "lat": { "type": "String" },
+      "lng": { "type": "String" }
+    }
+  },
+
+  "card_addCard": "Add Card",
+  "card_editCard": "Edit Card",
+  "card_network": "Network",
+  "card_last4Digits": "Last 4 digits",
+  "card_cardholderName": "Cardholder name",
+  "card_month": "Month",
+  "card_year": "Year",
+  "card_cardholderOwner": "Cardholder owner",
+  "card_primaryCard": "Primary card",
+  "card_virtualCard": "Virtual card",
+  "card_saveChanges": "Save Changes",
+  "card_none": "None",
+  "card_last4Error": "Last 4 digits must be exactly 4 numbers",
+  "card_cardholderRequired": "Cardholder name is required",
+  "card_setAsPrimary": "Set as primary",
+
+  "transaction_relatedTo": "Related to",
+  "transaction_createNewSource": "Create new source",
+  "transaction_amountLabel": "AMOUNT · {currency}",
+  "@transaction_amountLabel": {
+    "placeholders": {
+      "currency": { "type": "String" }
+    }
+  },
+  "transaction_relatedToNone": "None",
+
+  "appointment_durationMinutes": "{n} min",
+  "@appointment_durationMinutes": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "appointment_durationHours": "{n}h",
+  "@appointment_durationHours": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "appointment_durationHoursMinutes": "{h}h {m}m",
+  "@appointment_durationHoursMinutes": {
+    "placeholders": {
+      "h": { "type": "int" },
+      "m": { "type": "int" }
+    }
+  },
+  "appointment_reminder1Day": "1 day",
+  "appointment_reminderDays": "{n} days",
+  "@appointment_reminderDays": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  }
 }

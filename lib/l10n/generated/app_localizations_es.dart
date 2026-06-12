@@ -12,6 +12,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get common_save => 'Guardar';
 
   @override
+  String get common_ok => 'Aceptar';
+
+  @override
   String get common_cancel => 'Cancelar';
 
   @override
@@ -281,6 +284,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pets_title => 'Mascota';
+
+  @override
+  String get pets_sectionTitle => 'Mascotas';
 
   @override
   String get pets_notFound => 'No encontrado';
@@ -569,10 +575,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifications_empty => 'Sin notificaciones';
 
   @override
-  String get notifications_markRead => 'Marcar como leída';
+  String get notifications_markRead => 'Marcar leída';
 
   @override
-  String get notifications_markUnread => 'Marcar como no leída';
+  String get notifications_markUnread => 'Marcar no leída';
 
   @override
   String get transaction_new => 'Nueva transacción';
@@ -772,4 +778,759 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get map_toggleVendors => 'Locales';
+
+  @override
+  String get bankAccount_accountNotFound => 'Cuenta no encontrada';
+
+  @override
+  String get bankAccount_account => 'Cuenta';
+
+  @override
+  String get bankAccount_period => 'Período';
+
+  @override
+  String get bankAccount_periodThisMonth => 'Este mes';
+
+  @override
+  String get bankAccount_periodLast6Months => 'Últimos 6 meses';
+
+  @override
+  String get bankAccount_periodLast12Months => 'Últimos 12 meses';
+
+  @override
+  String get bankAccount_periodMonth => 'Mes';
+
+  @override
+  String get bankAccount_period6Months => '6 meses';
+
+  @override
+  String get bankAccount_period1Year => '1 año';
+
+  @override
+  String bankAccount_balancePeriod(String period) {
+    return 'Saldo · $period';
+  }
+
+  @override
+  String bankAccount_incomeVsExpense(String period) {
+    return 'Ingresos vs gastos · $period';
+  }
+
+  @override
+  String get bankAccount_recurringTransactions => 'Transacciones recurrentes';
+
+  @override
+  String get bankAccount_noGoalsYet => 'Sin objetivos — toca para añadir uno';
+
+  @override
+  String get bankAccount_actionLogs => 'Registro de acciones';
+
+  @override
+  String get bankAccount_noActivityInWindow => 'Sin actividad en este período';
+
+  @override
+  String get bankAccount_income => 'Ingreso';
+
+  @override
+  String get bankAccount_expense => 'Gasto';
+
+  @override
+  String get bankAccount_date => 'Fecha';
+
+  @override
+  String get bankAccount_action => 'Acción';
+
+  @override
+  String get bankAccount_amount => 'Importe';
+
+  @override
+  String get bankAccount_newTransaction => 'Nueva transacción';
+
+  @override
+  String get bankAccount_newGoal => 'Nuevo objetivo';
+
+  @override
+  String get bankAccount_editGoal => 'Editar objetivo';
+
+  @override
+  String get bankAccount_addGoal => 'Añadir objetivo';
+
+  @override
+  String get bankAccount_addCard => 'Añadir tarjeta';
+
+  @override
+  String get bankAccount_setAsPrimary => 'Establecer como principal';
+
+  @override
+  String get settings_homes => 'Casas';
+
+  @override
+  String get settings_homesSub => 'Gestionar ubicaciones del hogar';
+
+  @override
+  String get settings_googleCalendar => 'Google Calendar';
+
+  @override
+  String get settings_googleCalendarSub =>
+      'Conecta una cuenta de Google para sincronizar eventos';
+
+  @override
+  String get settings_startDayMonday => 'Lunes';
+
+  @override
+  String get settings_startDaySaturday => 'Sábado';
+
+  @override
+  String get settings_startDaySunday => 'Domingo';
+
+  @override
+  String settings_permissionAccess(String permission) {
+    return 'Acceso a $permission';
+  }
+
+  @override
+  String settings_permissionMessage(String permission) {
+    return 'Hestia necesita acceso a $permission. Toca \"Abrir ajustes\" para habilitarlo.';
+  }
+
+  @override
+  String get settings_disableLocationMessage =>
+      'Para desactivar el acceso a la ubicación, ve a Ajustes → Hestia → Ubicación y desactívalo.';
+
+  @override
+  String get settings_disableNotificationsMessage =>
+      'Para desactivar las notificaciones, ve a Ajustes → Hestia → Notificaciones y desactívalas.';
+
+  @override
+  String get settings_openSettings => 'Abrir ajustes';
+
+  @override
+  String get settings_syncNow => 'Sincronizar ahora';
+
+  @override
+  String get settings_disconnect => 'Desconectar';
+
+  @override
+  String get settings_calendarSynced => 'Calendario sincronizado';
+
+  @override
+  String get settings_calendarDisconnected => 'Google Calendar desconectado';
+
+  @override
+  String get settings_calendarConnected => 'Google Calendar conectado';
+
+  @override
+  String get healthRecord_addRecord => 'Añadir registro';
+
+  @override
+  String get healthRecord_editRecord => 'Editar registro';
+
+  @override
+  String get healthRecord_saveChanges => 'Guardar cambios';
+
+  @override
+  String get healthRecord_couldNotSave => 'No se pudo guardar';
+
+  @override
+  String get healthRecord_type => 'Tipo';
+
+  @override
+  String get healthRecord_title => 'Título';
+
+  @override
+  String get healthRecord_titlePlaceholder => 'p. ej. Vacunación anual';
+
+  @override
+  String get healthRecord_vetClinic => 'Veterinario / Clínica';
+
+  @override
+  String get healthRecord_optional => 'Opcional';
+
+  @override
+  String get healthRecord_date => 'Fecha';
+
+  @override
+  String get healthRecord_nextDueDate => 'Próxima fecha';
+
+  @override
+  String get healthRecord_costEuro => 'Coste (€)';
+
+  @override
+  String get healthRecord_notes => 'Notas';
+
+  @override
+  String get healthRecord_notesPlaceholder => 'Notas opcionales…';
+
+  @override
+  String get notifications_inbox => 'Bandeja';
+
+  @override
+  String get notifications_markAll => 'Marcar todo';
+
+  @override
+  String get notifications_allMarkedRead => 'Todo marcado como leído';
+
+  @override
+  String get notifications_noNotificationsYet => 'Aún no hay notificaciones';
+
+  @override
+  String get notifications_signInPrompt =>
+      'Inicia sesión para ver las notificaciones.';
+
+  @override
+  String get notifications_delete => 'Eliminar';
+
+  @override
+  String get notifications_deleteTitle => 'Eliminar notificación';
+
+  @override
+  String get notifications_deleteConfirm => 'Esta acción no se puede deshacer.';
+
+  @override
+  String get notifications_deleted => 'Notificación eliminada';
+
+  @override
+  String get notifications_markedRead => 'Marcada como leída';
+
+  @override
+  String get notifications_markedUnread => 'Marcada como no leída';
+
+  @override
+  String get notifications_allCaughtUp => 'Todo al día';
+
+  @override
+  String notifications_unreadCount(int count) {
+    return '$count sin leer';
+  }
+
+  @override
+  String get notifications_yesterday => 'Ayer';
+
+  @override
+  String notifications_daysAgo(int count) {
+    return 'Hace $count días';
+  }
+
+  @override
+  String get goals_goalTitle => 'Objetivo';
+
+  @override
+  String get goals_saved => 'AHORRADO';
+
+  @override
+  String get goals_remaining => 'Restante';
+
+  @override
+  String get goals_monthlyNeed => 'Necesario/mes';
+
+  @override
+  String get goals_daysLeft => 'Días restantes';
+
+  @override
+  String get goals_linkedSource => 'Cuenta vinculada';
+
+  @override
+  String get goals_contributions => 'Aportaciones';
+
+  @override
+  String get goals_addContribution => 'Añadir aportación';
+
+  @override
+  String get fuelEntry_addFillUp => 'Añadir repostaje';
+
+  @override
+  String get fuelEntry_editFillUp => 'Editar repostaje';
+
+  @override
+  String get fuelEntry_filledAt => 'Repostado el';
+
+  @override
+  String get fuelEntry_odometerKm => 'Odómetro (km)';
+
+  @override
+  String get fuelEntry_liters => 'Litros';
+
+  @override
+  String get fuelEntry_pricePerLiter => 'Precio por litro (€)';
+
+  @override
+  String get fuelEntry_totalEuro => 'Total (€)';
+
+  @override
+  String get fuelEntry_station => 'GASOLINERA';
+
+  @override
+  String get fuelEntry_fullTank => 'Depósito lleno';
+
+  @override
+  String get fuelEntry_alsoCreateTransaction => 'Crear también transacción';
+
+  @override
+  String get fuelEntry_comingSoon => 'Próximamente';
+
+  @override
+  String get fuelEntry_notes => 'NOTAS';
+
+  @override
+  String get fuelEntry_notesPlaceholder => 'Notas opcionales';
+
+  @override
+  String get fuelEntry_added => 'Repostaje añadido';
+
+  @override
+  String get fuelEntry_updated => 'Repostaje actualizado';
+
+  @override
+  String get fuelEntry_done => 'Listo';
+
+  @override
+  String get car_newCar => 'Nuevo coche';
+
+  @override
+  String get car_editCar => 'Editar coche';
+
+  @override
+  String get car_name => 'Nombre';
+
+  @override
+  String get car_make => 'Marca';
+
+  @override
+  String get car_model => 'Modelo';
+
+  @override
+  String get car_year => 'Año';
+
+  @override
+  String get car_licensePlate => 'Matrícula';
+
+  @override
+  String get car_gasoline => 'Gasolina';
+
+  @override
+  String get car_diesel => 'Diésel';
+
+  @override
+  String get car_electric => 'Eléctrico';
+
+  @override
+  String get car_hybrid => 'Híbrido';
+
+  @override
+  String get car_tankCapacity => 'Capacidad del depósito (L)';
+
+  @override
+  String get car_currentOdometer => 'Odómetro actual (km)';
+
+  @override
+  String get car_status => 'Estado';
+
+  @override
+  String get car_statusActive => 'Activo';
+
+  @override
+  String get car_statusInactive => 'Inactivo';
+
+  @override
+  String get car_drivers => 'CONDUCTORES';
+
+  @override
+  String get fuelAnalytics_avgL100km => 'Media L/100km';
+
+  @override
+  String get fuelAnalytics_costPerKm => 'Coste / km';
+
+  @override
+  String get fuelAnalytics_last30Days => 'Últimos 30 días';
+
+  @override
+  String get fuelAnalytics_consumption => 'CONSUMO (L/100KM)';
+
+  @override
+  String get fuelAnalytics_monthlyCost => 'COSTE MENSUAL';
+
+  @override
+  String get fuelAnalytics_noDataYet => 'Aún no hay datos';
+
+  @override
+  String get fuelAnalytics_needFullTanks =>
+      'Se necesitan al menos 2 depósitos llenos';
+
+  @override
+  String get bankAccountForm_newAccount => 'Nueva cuenta';
+
+  @override
+  String get bankAccountForm_editAccount => 'Editar cuenta';
+
+  @override
+  String get bankAccountForm_bank => 'BANCO';
+
+  @override
+  String get bankAccountForm_selectBank => 'Seleccionar banco';
+
+  @override
+  String get bankAccountForm_accountName => 'NOMBRE DE CUENTA';
+
+  @override
+  String get bankAccountForm_accountNamePlaceholder =>
+      'p. ej. Cuenta corriente principal';
+
+  @override
+  String get bankAccountForm_ibanOptional => 'IBAN (OPCIONAL)';
+
+  @override
+  String get bankAccountForm_type => 'TIPO';
+
+  @override
+  String get bankAccountForm_checking => 'Corriente';
+
+  @override
+  String get bankAccountForm_savings => 'Ahorro';
+
+  @override
+  String get bankAccountForm_credit => 'Crédito';
+
+  @override
+  String get bankAccountForm_cash => 'Efectivo';
+
+  @override
+  String get bankAccountForm_investment => 'Inversión';
+
+  @override
+  String get bankAccountForm_ownership => 'TITULARIDAD';
+
+  @override
+  String get bankAccountForm_personal => 'Personal';
+
+  @override
+  String get bankAccountForm_shared => 'Compartida';
+
+  @override
+  String get bankAccountForm_initialBalance => 'SALDO INICIAL';
+
+  @override
+  String get bankAccountForm_createAccount => 'Crear cuenta';
+
+  @override
+  String get bankAccountForm_saveChanges => 'Guardar cambios';
+
+  @override
+  String get bankAccountForm_accountCreated => 'Cuenta creada';
+
+  @override
+  String get bankAccountForm_accountUpdated => 'Cuenta actualizada';
+
+  @override
+  String get bankAccountForm_couldNotSave => 'No se pudo guardar';
+
+  @override
+  String get bankAccountForm_enterName => 'Introduce un nombre de cuenta';
+
+  @override
+  String get bankAccountForm_searchBank => 'Buscar banco…';
+
+  @override
+  String get bankAccountForm_noneEnterManually =>
+      'Ninguno / introducir manualmente';
+
+  @override
+  String get bankAccountForm_selectBankTitle => 'Seleccionar banco';
+
+  @override
+  String get recurringTransactions_title => 'Recurrentes';
+
+  @override
+  String get recurringTransactions_noTransactionsYet =>
+      'Aún no hay transacciones recurrentes';
+
+  @override
+  String get recurringTransactions_recurring => 'Recurrente';
+
+  @override
+  String get homes_title => 'Casas';
+
+  @override
+  String get homes_noHomesYet => 'Aún no hay casas';
+
+  @override
+  String get homes_addHomeDescription =>
+      'Añade tu casa para asociarla a transacciones.';
+
+  @override
+  String get homes_addHome => 'Añadir casa';
+
+  @override
+  String get homes_editHome => 'Editar casa';
+
+  @override
+  String get homes_name => 'Nombre';
+
+  @override
+  String get homes_namePlaceholder => 'p. ej. Piso principal';
+
+  @override
+  String get homes_address => 'Dirección';
+
+  @override
+  String get homes_addressPlaceholder => 'Dirección completa';
+
+  @override
+  String get homes_saveChanges => 'Guardar cambios';
+
+  @override
+  String get homes_deleteLabel => 'Eliminar';
+
+  @override
+  String get homes_editLabel => 'Editar';
+
+  @override
+  String get transaction_expense => 'Gasto';
+
+  @override
+  String get transaction_income => 'Ingreso';
+
+  @override
+  String get transaction_transfer => 'Transferencia';
+
+  @override
+  String get transaction_category => 'Categoría';
+
+  @override
+  String get transaction_selectCategory => 'Seleccionar';
+
+  @override
+  String get transaction_bankAccount => 'Cuenta bancaria';
+
+  @override
+  String get transaction_fromAccount => 'Cuenta origen';
+
+  @override
+  String get transaction_toAccount => 'Cuenta destino';
+
+  @override
+  String get transaction_card => 'Tarjeta';
+
+  @override
+  String get transaction_source => 'Origen';
+
+  @override
+  String get transaction_sourceOptional => 'Opcional';
+
+  @override
+  String get transaction_sourceSub => 'Comerciante, empleador, servicio';
+
+  @override
+  String get transaction_date => 'Fecha';
+
+  @override
+  String get transaction_repeat => 'Repetir';
+
+  @override
+  String get transaction_oneTime => 'Una vez';
+
+  @override
+  String get transaction_recurring => 'Recurrente';
+
+  @override
+  String get transaction_addNote => 'Añadir una nota…';
+
+  @override
+  String get transaction_attachLocation => 'Adjuntar ubicación';
+
+  @override
+  String get transaction_locationOn => 'Activado';
+
+  @override
+  String get transaction_locationOff => 'Desactivado';
+
+  @override
+  String get transaction_useGps => 'Usar GPS';
+
+  @override
+  String get transaction_map => 'Mapa';
+
+  @override
+  String get transaction_today => 'Hoy';
+
+  @override
+  String get transaction_update => 'Actualizar';
+
+  @override
+  String get transaction_saveTransaction => 'Guardar transacción';
+
+  @override
+  String get transaction_expenseSaved => 'Gasto guardado';
+
+  @override
+  String get transaction_incomeSaved => 'Ingreso guardado';
+
+  @override
+  String get transaction_deleted => 'Transacción eliminada';
+
+  @override
+  String get transaction_somethingWentWrong => 'Algo salió mal';
+
+  @override
+  String get transaction_selectCategoryTitle => 'Seleccionar categoría';
+
+  @override
+  String get transaction_selectBankAccount => 'Seleccionar cuenta bancaria';
+
+  @override
+  String get transaction_selectFromAccount => 'Seleccionar cuenta origen';
+
+  @override
+  String get transaction_selectDestinationAccount =>
+      'Seleccionar cuenta destino';
+
+  @override
+  String get transaction_selectCard => 'Seleccionar tarjeta';
+
+  @override
+  String get transaction_noCard => 'Ninguna';
+
+  @override
+  String get transaction_noCardSub => 'Sin tarjeta';
+
+  @override
+  String get transaction_currency => 'Moneda';
+
+  @override
+  String get transaction_counterpartySource => 'Origen de la contraparte';
+
+  @override
+  String get transaction_selectDate => 'Seleccionar fecha';
+
+  @override
+  String get transaction_newSource => 'Nueva fuente';
+
+  @override
+  String get transaction_editSource => 'Editar fuente';
+
+  @override
+  String get card_primary => 'PRINCIPAL';
+
+  @override
+  String get card_virtual => 'VIRTUAL';
+
+  @override
+  String get card_expires => 'CADUCA';
+
+  @override
+  String get appointment_duration => 'Duración';
+
+  @override
+  String get appointment_pinLocation => 'Marcar ubicación en el mapa';
+
+  @override
+  String get appointment_signInRequired => 'Se requiere iniciar sesión';
+
+  @override
+  String get appointment_categoryHealth => 'Salud';
+
+  @override
+  String get appointment_categoryVehicle => 'Vehículo';
+
+  @override
+  String get appointment_categoryBeauty => 'Belleza';
+
+  @override
+  String get appointment_categoryWork => 'Trabajo';
+
+  @override
+  String get appointment_categoryPersonal => 'Personal';
+
+  @override
+  String get appointment_categoryOther => 'Otro';
+
+  @override
+  String get bankAccount_goalsOnThisAccount => 'Metas de esta cuenta';
+
+  @override
+  String homes_coordinatesNote(String lat, String lng) {
+    return 'Coordenadas: $lat, $lng\nToca el mapa en la vista completa para elegir una ubicación precisa.';
+  }
+
+  @override
+  String get card_addCard => 'Añadir tarjeta';
+
+  @override
+  String get card_editCard => 'Editar tarjeta';
+
+  @override
+  String get card_network => 'Red';
+
+  @override
+  String get card_last4Digits => 'Últimos 4 dígitos';
+
+  @override
+  String get card_cardholderName => 'Nombre del titular';
+
+  @override
+  String get card_month => 'Mes';
+
+  @override
+  String get card_year => 'Año';
+
+  @override
+  String get card_cardholderOwner => 'Titular de la tarjeta';
+
+  @override
+  String get card_primaryCard => 'Tarjeta principal';
+
+  @override
+  String get card_virtualCard => 'Tarjeta virtual';
+
+  @override
+  String get card_saveChanges => 'Guardar cambios';
+
+  @override
+  String get card_none => 'Ninguna';
+
+  @override
+  String get card_last4Error =>
+      'Los últimos 4 dígitos deben ser exactamente 4 números';
+
+  @override
+  String get card_cardholderRequired => 'El nombre del titular es obligatorio';
+
+  @override
+  String get card_setAsPrimary => 'Establecer como principal';
+
+  @override
+  String get transaction_relatedTo => 'Relacionado con';
+
+  @override
+  String get transaction_createNewSource => 'Crear nueva fuente';
+
+  @override
+  String transaction_amountLabel(String currency) {
+    return 'IMPORTE · $currency';
+  }
+
+  @override
+  String get transaction_relatedToNone => 'Ninguno';
+
+  @override
+  String appointment_durationMinutes(int n) {
+    return '$n min';
+  }
+
+  @override
+  String appointment_durationHours(int n) {
+    return '${n}h';
+  }
+
+  @override
+  String appointment_durationHoursMinutes(int h, int m) {
+    return '${h}h ${m}m';
+  }
+
+  @override
+  String get appointment_reminder1Day => '1 día';
+
+  @override
+  String appointment_reminderDays(int n) {
+    return '$n días';
+  }
 }

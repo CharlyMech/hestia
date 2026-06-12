@@ -9,6 +9,7 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/pet_health_record.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
@@ -19,9 +20,10 @@ Future<void> showHealthRecordSheet(
   String? petId,
   PetHealthRecord? existing,
 }) {
+  final l10n = AppLocalizations.of(context);
   return showAppBottomSheet<void>(
     context: context,
-    title: existing == null ? 'Add Record' : 'Edit Record',
+    title: existing == null ? l10n.healthRecord_addRecord : l10n.healthRecord_editRecord,
     heightFactor: 0.92,
     expand: true,
     child: _AddEditHealthRecordView(
@@ -124,15 +126,16 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
       final (_, failure) = await repo.createHealthRecord(record);
       if (!mounted) return;
       if (failure != null) {
+        final l10n = AppLocalizations.of(context);
         showCupertinoDialog<void>(
           context: context,
           builder: (c) => CupertinoAlertDialog(
-            title: const Text('Could not save'),
+            title: Text(l10n.healthRecord_couldNotSave),
             content: Text(failure.message),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(c),
-                child: const Text('OK'),
+                child: Text(l10n.common_ok),
               ),
             ],
           ),
@@ -143,15 +146,16 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
       final failure = await repo.updateHealthRecord(record);
       if (!mounted) return;
       if (failure != null) {
+        final l10n = AppLocalizations.of(context);
         showCupertinoDialog<void>(
           context: context,
           builder: (c) => CupertinoAlertDialog(
-            title: const Text('Could not save'),
+            title: Text(l10n.healthRecord_couldNotSave),
             content: Text(failure.message),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(c),
-                child: const Text('OK'),
+                child: Text(l10n.common_ok),
               ),
             ],
           ),
@@ -173,19 +177,20 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
 
+    final l10n = AppLocalizations.of(context);
     final form = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _label('Type', fg),
+            _label(l10n.healthRecord_type, fg),
             _typePicker(surface, border, fg, muted),
             const SizedBox(height: 12),
-            _label('Title', fg),
-            _field(_title, 'e.g. Annual vaccination', fg, surface, border),
+            _label(l10n.healthRecord_title, fg),
+            _field(_title, l10n.healthRecord_titlePlaceholder, fg, surface, border),
             const SizedBox(height: 12),
-            _label('Vet / Clinic', fg),
-            _field(_vet, 'Optional', fg, surface, border),
+            _label(l10n.healthRecord_vetClinic, fg),
+            _field(_vet, l10n.healthRecord_optional, fg, surface, border),
             const SizedBox(height: 12),
-            _label('Date', fg),
+            _label(l10n.healthRecord_date, fg),
             _datePicker(
               value: _recordedAt,
               onChanged: (d) => setState(() => _recordedAt = d),
@@ -195,9 +200,10 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
               muted: muted,
               accent: accent,
               allowClear: false,
+              l10n: l10n,
             ),
             const SizedBox(height: 12),
-            _label('Next due date', fg),
+            _label(l10n.healthRecord_nextDueDate, fg),
             _datePicker(
               value: _nextDueAt,
               onChanged: (d) => setState(() => _nextDueAt = d),
@@ -207,20 +213,21 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
               muted: muted,
               accent: accent,
               allowClear: true,
+              l10n: l10n,
             ),
             const SizedBox(height: 12),
-            _label('Cost (€)', fg),
+            _label(l10n.healthRecord_costEuro, fg),
             _field(_cost, '0.00', fg, surface, border, numeric: true),
             const SizedBox(height: 12),
-            _label('Notes', fg),
-            _field(_notes, 'Optional notes…', fg, surface, border, maxLines: 3),
+            _label(l10n.healthRecord_notes, fg),
+            _field(_notes, l10n.healthRecord_notesPlaceholder, fg, surface, border, maxLines: 3),
             const SizedBox(height: 28),
             SizedBox(
               width: double.infinity,
               child: AnimatedButton(
                 onTap: _save,
                 child: Text(
-                  widget.existing == null ? 'Add Record' : 'Save Changes',
+                  widget.existing == null ? l10n.healthRecord_addRecord : l10n.healthRecord_saveChanges,
                   style: AppFonts.body(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -244,13 +251,13 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: widget.existing == null ? 'Add Record' : 'Edit Record',
+      titleText: widget.existing == null ? l10n.healthRecord_addRecord : l10n.healthRecord_editRecord,
       trailing: GestureDetector(
         onTap: _save,
         child: Padding(
           padding: const EdgeInsets.only(right: 12),
           child: Text(
-            'Save',
+            l10n.common_save,
             style: AppFonts.body(
                 fontSize: 15, fontWeight: FontWeight.w600, color: accent),
           ),
@@ -291,28 +298,31 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
       );
 
   Widget _typePicker(Color surface, Color border, Color fg, Color muted) =>
-      Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: border),
-        ),
-        child: AnimatedButton(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          onTap: () => _pickType(fg, surface),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _typeLabel(_type),
-                  style: AppFonts.body(fontSize: 14, color: fg),
-                ),
-              ),
-              Icon(CupertinoIcons.chevron_down, size: 14, color: muted),
-            ],
+      Builder(builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return Container(
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(AppRadii.md),
+            border: Border.all(color: border),
           ),
-        ),
-      );
+          child: AnimatedButton(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            onTap: () => _pickType(fg, surface, l10n),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _typeLabel(_type, l10n),
+                    style: AppFonts.body(fontSize: 14, color: fg),
+                  ),
+                ),
+                Icon(CupertinoIcons.chevron_down, size: 14, color: muted),
+              ],
+            ),
+          ),
+        );
+      });
 
   Widget _datePicker({
     required DateTime? value,
@@ -323,11 +333,12 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     required Color muted,
     required Color accent,
     required bool allowClear,
+    required AppLocalizations l10n,
   }) {
     final hasValue = value != null;
     final label = hasValue
         ? '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}'
-        : 'Not set';
+        : l10n.common_notSet;
 
     return GestureDetector(
       onTap: () => _pickDate(
@@ -337,6 +348,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
         fg: fg,
         surface: surface,
         accent: accent,
+        l10n: l10n,
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -362,7 +374,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     );
   }
 
-  void _pickType(Color fg, Color surface) {
+  void _pickType(Color fg, Color surface, AppLocalizations l10n) {
     final options = HealthRecordType.values;
     showCupertinoModalPopup(
       context: context,
@@ -377,7 +389,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
           onSelectedItemChanged: (i) => setState(() => _type = options[i]),
           children: options
               .map((t) => Center(
-                    child: Text(_typeLabel(t),
+                    child: Text(_typeLabel(t, l10n),
                         style: AppFonts.body(fontSize: 16, color: fg)),
                   ))
               .toList(),
@@ -393,6 +405,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     required Color fg,
     required Color surface,
     required Color accent,
+    required AppLocalizations l10n,
   }) {
     DateTime temp = initial;
     showCupertinoModalPopup(
@@ -414,7 +427,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
                         onClear();
                         Navigator.pop(context);
                       },
-                      child: Text('Clear',
+                      child: Text(l10n.common_cancel,
                           style: AppFonts.body(fontSize: 15, color: fg)),
                     )
                   else
@@ -425,7 +438,7 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
                       setState(() => onChanged(temp));
                       Navigator.pop(context);
                     },
-                    child: Text('Done',
+                    child: Text(l10n.common_done,
                         style: AppFonts.body(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -447,12 +460,12 @@ class _AddEditHealthRecordViewState extends State<_AddEditHealthRecordView> {
     );
   }
 
-  String _typeLabel(HealthRecordType t) => switch (t) {
-        HealthRecordType.vaccine => 'Vaccine',
-        HealthRecordType.vet => 'Vet visit',
-        HealthRecordType.medication => 'Medication',
-        HealthRecordType.grooming => 'Grooming',
-        HealthRecordType.deworming => 'Deworming',
-        HealthRecordType.other => 'Other',
+  String _typeLabel(HealthRecordType t, AppLocalizations l10n) => switch (t) {
+        HealthRecordType.vaccine => l10n.pets_healthTypeVaccine,
+        HealthRecordType.vet => l10n.pets_healthTypeVet,
+        HealthRecordType.medication => l10n.pets_healthTypeMedication,
+        HealthRecordType.grooming => l10n.pets_healthTypeGrooming,
+        HealthRecordType.deworming => l10n.pets_healthTypeDeworming,
+        HealthRecordType.other => l10n.pets_healthTypeOther,
       };
 }

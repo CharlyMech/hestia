@@ -12,6 +12,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/primary_button.dart';
@@ -51,12 +52,12 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
     AccountType.investment,
   ];
 
-  static const _typeLabels = [
-    'Checking',
-    'Savings',
-    'Credit',
-    'Cash',
-    'Investment',
+  List<String> _typeLabels(AppLocalizations l10n) => [
+    l10n.bankAccountForm_checking,
+    l10n.bankAccountForm_savings,
+    l10n.bankAccountForm_credit,
+    l10n.bankAccountForm_cash,
+    l10n.bankAccountForm_investment,
   ];
 
   @override
@@ -119,9 +120,10 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     if (_name.text.trim().isEmpty) {
-      context.showToast(const AppToastConfig(
-          type: ToastType.error, title: 'Enter an account name'));
+      context.showToast(AppToastConfig(
+          type: ToastType.error, title: l10n.bankAccountForm_enterName));
       return;
     }
     final auth = context.read<AuthBloc>().state;
@@ -169,22 +171,23 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
     if (failure != null) {
       context.showToast(AppToastConfig(
           type: ToastType.error,
-          title: 'Could not save',
+          title: l10n.bankAccountForm_couldNotSave,
           description: failure.message));
       return;
     }
 
     context.showToast(AppToastConfig(
       type: ToastType.success,
-      title: widget.existing == null ? 'Account created' : 'Account updated',
+      title: widget.existing == null ? l10n.bankAccountForm_accountCreated : l10n.bankAccountForm_accountUpdated,
     ));
     Navigator.of(context).pop(true);
   }
 
   void _openBankPicker() {
+    final l10n = AppLocalizations.of(context);
     showAppBottomSheet<void>(
       context: context,
-      title: 'Select bank',
+      title: l10n.bankAccountForm_selectBankTitle,
       heightFactor: 0.85,
       expand: true,
       child: _BankPickerSheet(
@@ -219,13 +222,14 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
             : 'EUR';
 
     _currency ??= preferredCurrency;
+    final l10n = AppLocalizations.of(context);
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
       navBackground: surface,
       borderColor: border,
       foregroundColor: fg,
-      titleText: widget.existing == null ? 'New account' : 'Edit account',
+      titleText: widget.existing == null ? l10n.bankAccountForm_newAccount : l10n.bankAccountForm_editAccount,
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
@@ -243,10 +247,10 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           ),
           const SizedBox(height: 28),
 
-          _sectionLabel('BANK', muted),
+          _sectionLabel(l10n.bankAccountForm_bank, muted),
           const SizedBox(height: 8),
           _PickerTile(
-            label: _selectedBank?.displayName ?? 'Select bank',
+            label: _selectedBank?.displayName ?? l10n.bankAccountForm_selectBank,
             isPlaceholder: _selectedBank == null,
             surface: surface,
             border: border,
@@ -256,11 +260,11 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           ),
           const SizedBox(height: 20),
 
-          _sectionLabel('ACCOUNT NAME', muted),
+          _sectionLabel(l10n.bankAccountForm_accountName, muted),
           const SizedBox(height: 8),
           CupertinoTextField(
             controller: _name,
-            placeholder: 'e.g. Main Checking',
+            placeholder: l10n.bankAccountForm_accountNamePlaceholder,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
             style: AppFonts.body(fontSize: 15, color: fg),
@@ -274,7 +278,7 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           ),
           const SizedBox(height: 20),
 
-          _sectionLabel('IBAN (OPTIONAL)', muted),
+          _sectionLabel(l10n.bankAccountForm_ibanOptional, muted),
           const SizedBox(height: 8),
           CupertinoTextField(
             controller: _iban,
@@ -295,10 +299,10 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           ),
           const SizedBox(height: 20),
 
-          _sectionLabel('TYPE', muted),
+          _sectionLabel(l10n.bankAccountForm_type, muted),
           const SizedBox(height: 8),
           _SegmentedRow(
-            labels: _typeLabels,
+            labels: _typeLabels(l10n),
             selected: _typeIdx,
             onChanged: (i) => setState(() => _typeIdx = i),
             surface: surface,
@@ -309,10 +313,10 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           ),
           const SizedBox(height: 20),
 
-          _sectionLabel('OWNERSHIP', muted),
+          _sectionLabel(l10n.bankAccountForm_ownership, muted),
           const SizedBox(height: 8),
           _SegmentedRow(
-            labels: const ['Personal', 'Shared'],
+            labels: [l10n.bankAccountForm_personal, l10n.bankAccountForm_shared],
             selected: _ownerIdx,
             onChanged: (i) => setState(() => _ownerIdx = i),
             surface: surface,
@@ -323,7 +327,7 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           ),
           const SizedBox(height: 20),
 
-          _sectionLabel('INITIAL BALANCE', muted),
+          _sectionLabel(l10n.bankAccountForm_initialBalance, muted),
           const SizedBox(height: 8),
           CupertinoTextField(
             controller: _balance,
@@ -351,7 +355,7 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
           const SizedBox(height: 32),
 
           PrimaryButton(
-            label: widget.existing == null ? 'Create account' : 'Save changes',
+            label: widget.existing == null ? l10n.bankAccountForm_createAccount : l10n.bankAccountForm_saveChanges,
             onPressed: _saving ? null : _save,
             loading: _saving,
           ),
@@ -427,7 +431,7 @@ class _BankPickerSheetState extends State<_BankPickerSheet> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: CupertinoSearchTextField(
               controller: _search,
-              placeholder: 'Search bank…',
+              placeholder: AppLocalizations.of(context).bankAccountForm_searchBank,
               style: AppFonts.body(fontSize: 15, color: fg),
               onChanged: (v) => setState(() => _query = v),
             ),
@@ -530,7 +534,7 @@ class _BankPickerSheetState extends State<_BankPickerSheet> {
                   border: Border.all(color: border, width: 0.8),
                 ),
                 child: Text(
-                  'None / enter manually',
+                  AppLocalizations.of(context).bankAccountForm_noneEnterManually,
                   style: AppFonts.body(fontSize: 14, color: muted),
                 ),
               ),

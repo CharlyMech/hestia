@@ -200,27 +200,31 @@ class _FormBody extends StatelessWidget {
       listener: (context, state) {
         if (state.status == TransactionFormStatus.success) {
           final t = state.submittedTransaction;
+          final l10n = AppLocalizations.of(context);
           if (t != null) {
             onSubmitted?.call(t);
             context.showToast(AppToastConfig(
               type: ToastType.success,
-              title: t.isExpense ? 'Expense saved' : 'Income saved',
+              title: t.isExpense
+                  ? l10n.transaction_expenseSaved
+                  : l10n.transaction_incomeSaved,
               description: t.note ?? t.categoryName,
               position: ToastPosition.bottom,
             ));
           } else {
-            context.showToast(const AppToastConfig(
+            context.showToast(AppToastConfig(
               type: ToastType.neutral,
-              title: 'Transaction deleted',
+              title: l10n.transaction_deleted,
               position: ToastPosition.bottom,
             ));
           }
           onClose?.call();
           Navigator.of(context).maybePop();
         } else if (state.status == TransactionFormStatus.error) {
+          final l10n = AppLocalizations.of(context);
           context.showToast(AppToastConfig(
             type: ToastType.error,
-            title: 'Something went wrong',
+            title: l10n.transaction_somethingWentWrong,
             description: state.failure?.message,
             position: ToastPosition.bottom,
           ));
@@ -239,7 +243,7 @@ class _FormBody extends StatelessWidget {
         final selectedTo = bankAccounts
             .where((s) => s.id == state.toBankAccountId)
             .firstOrNull;
-        final dateLabel = _formatDate(state.date);
+        final dateLabel = _formatDate(state.date, l10n);
 
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -247,7 +251,7 @@ class _FormBody extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedPillTabs(
-                labels: const ['Expense', 'Income', 'Transfer'],
+                labels: [l10n.transaction_expense, l10n.transaction_income, l10n.transaction_transfer],
                 selectedIndex: state.kind.index,
                 onChanged: (i) => bloc.add(
                   TransactionFormKindChanged(TransactionKind.values[i]),
@@ -267,7 +271,7 @@ class _FormBody extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 4,
                   children: [
-                    Text('AMOUNT · ${state.currency}',
+                    Text(l10n.transaction_amountLabel(state.currency),
                         style: AppFonts.sectionLabel(color: muted)),
                     Icon(CupertinoIcons.chevron_down, size: 11, color: muted),
                   ],
@@ -328,8 +332,8 @@ class _FormBody extends StatelessWidget {
                   _PickerTile(
                     icon: Cart(width: 18, height: 18, color: tints[0]),
                     iconColor: tints[0],
-                    label: 'Category',
-                    value: selectedCategory?.name ?? 'Select',
+                    label: l10n.transaction_category,
+                    value: selectedCategory?.name ?? l10n.transaction_selectCategory,
                     sub: selectedCategory?.type.name,
                     error: state.errors['category'],
                     errorColor: expense,
@@ -347,8 +351,8 @@ class _FormBody extends StatelessWidget {
                           fallbackColor: tints[2])
                       : CreditCard(width: 18, height: 18, color: tints[2]),
                   iconColor: tints[2],
-                  label: isTransfer ? 'From account' : 'Bank account',
-                  value: selectedAccount?.name ?? 'Select',
+                  label: isTransfer ? l10n.transaction_fromAccount : l10n.transaction_bankAccount,
+                  value: selectedAccount?.name ?? l10n.transaction_selectCategory,
                   sub: selectedAccount == null
                       ? null
                       : 'Balance ${selectedAccount.currentBalance.toStringAsFixed(2)} ${selectedAccount.currency}',
@@ -370,12 +374,12 @@ class _FormBody extends StatelessWidget {
                         height: 18,
                         color: tints[6 % tints.length]),
                     iconColor: tints[6 % tints.length],
-                    label: 'Card',
+                    label: l10n.transaction_card,
                     value: () {
                       final c = cards
                           .where((c) => c.id == state.paymentCardId)
                           .firstOrNull;
-                      return c != null ? '•••• ${c.last4}' : 'Optional';
+                      return c != null ? '•••• ${c.last4}' : l10n.transaction_sourceOptional;
                     }(),
                     sub: cards
                         .where((c) => c.id == state.paymentCardId)
@@ -398,8 +402,8 @@ class _FormBody extends StatelessWidget {
                             fallbackColor: tints[3])
                         : CreditCard(width: 18, height: 18, color: tints[3]),
                     iconColor: tints[3],
-                    label: 'To account',
-                    value: selectedTo?.name ?? 'Select',
+                    label: l10n.transaction_toAccount,
+                    value: selectedTo?.name ?? l10n.transaction_selectCategory,
                     sub: selectedTo == null
                         ? null
                         : 'Balance ${selectedTo.currentBalance.toStringAsFixed(2)} ${selectedTo.currency}',
@@ -418,14 +422,14 @@ class _FormBody extends StatelessWidget {
                   _PickerTile(
                     icon: Shop(width: 18, height: 18, color: tints[5]),
                     iconColor: tints[5],
-                    label: 'Source',
+                    label: l10n.transaction_source,
                     value: txSources
                             .where((s) => s.id == state.transactionSourceId)
                             .firstOrNull
                             ?.name ??
-                        'Optional',
+                        l10n.transaction_sourceOptional,
                     sub: state.transactionSourceId == null
-                        ? 'Merchant, employer, service'
+                        ? l10n.transaction_sourceSub
                         : null,
                     errorColor: expense,
                     surface: surface,
@@ -443,7 +447,7 @@ class _FormBody extends StatelessWidget {
                 _PickerTile(
                   icon: Calendar(width: 18, height: 18, color: tints[1]),
                   iconColor: tints[1],
-                  label: 'Date',
+                  label: l10n.transaction_date,
                   value: dateLabel,
                   errorColor: expense,
                   surface: surface,
@@ -457,8 +461,8 @@ class _FormBody extends StatelessWidget {
                   _ToggleTile(
                     icon: Refresh(width: 18, height: 18, color: tints[4]),
                     iconColor: tints[4],
-                    label: 'Repeat',
-                    value: state.isRecurring ? 'Recurring' : 'One-time',
+                    label: l10n.transaction_repeat,
+                    value: state.isRecurring ? l10n.transaction_recurring : l10n.transaction_oneTime,
                     surface: surface,
                     border: border,
                     fg: fg,
@@ -488,7 +492,7 @@ class _FormBody extends StatelessWidget {
                       Expanded(
                         child: CupertinoTextField(
                           controller: noteCtrl,
-                          placeholder: 'Add a note…',
+                          placeholder: l10n.transaction_addNote,
                           textCapitalization: TextCapitalization.sentences,
                           maxLines: 3,
                           minLines: 1,
@@ -509,8 +513,8 @@ class _FormBody extends StatelessWidget {
                   _ToggleTile(
                     icon: Plus(width: 18, height: 18, color: tints[3]),
                     iconColor: tints[3],
-                    label: 'Attach location',
-                    value: state.attachLocation ? 'On' : 'Off',
+                    label: l10n.transaction_attachLocation,
+                    value: state.attachLocation ? l10n.transaction_locationOn : l10n.transaction_locationOff,
                     surface: surface,
                     border: border,
                     fg: fg,
@@ -535,7 +539,7 @@ class _FormBody extends StatelessWidget {
                             child: state.locationLoading
                                 ? const CupertinoActivityIndicator()
                                 : Text(
-                                    'Use GPS',
+                                    l10n.transaction_useGps,
                                     style: AppFonts.body(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -551,7 +555,7 @@ class _FormBody extends StatelessWidget {
                                 ? null
                                 : () => _openLocationMap(context, bloc, state),
                             child: Text(
-                              'Map',
+                              l10n.transaction_map,
                               style: AppFonts.body(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -640,7 +644,7 @@ class _FormBody extends StatelessWidget {
                         child: state.status == TransactionFormStatus.submitting
                             ? const CupertinoActivityIndicator()
                             : Text(
-                                isEditing ? 'Update' : 'Save transaction',
+                                isEditing ? l10n.transaction_update : l10n.transaction_saveTransaction,
                                 style: AppFonts.body(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -686,7 +690,7 @@ class _FormBody extends StatelessWidget {
     final filtered = categories.where((c) => c.type == type).toList();
     showAppBottomSheet<void>(
       context: context,
-      title: 'Select category',
+      title: AppLocalizations.of(context).transaction_selectCategoryTitle,
       heightFactor: 0.6,
       child: CategoryPicker(
         categories: filtered,
@@ -698,11 +702,12 @@ class _FormBody extends StatelessWidget {
 
   void _openBankAccountPicker(BuildContext context, TransactionFormBloc bloc,
       TransactionFormState state, bool isTo) {
+    final l10n = AppLocalizations.of(context);
     final title = isTo
-        ? 'Select destination account'
+        ? l10n.transaction_selectDestinationAccount
         : (state.kind == TransactionKind.transfer
-            ? 'Select from account'
-            : 'Select bank account');
+            ? l10n.transaction_selectFromAccount
+            : l10n.transaction_selectBankAccount);
     showAppBottomSheet<void>(
       context: context,
       title: title,
@@ -732,30 +737,35 @@ class _FormBody extends StatelessWidget {
       TransactionFormState state) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Select card',
+      title: AppLocalizations.of(context).transaction_selectCard,
       heightFactor: 0.5,
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: [
-          _CardPickerRow(
-            label: 'None',
-            sub: 'No card',
-            selected: state.paymentCardId == null,
-            onTap: () {
-              bloc.add(const TransactionFormCardChanged(null));
-              Navigator.of(context).maybePop();
-            },
-          ),
-          ...cards.map((c) => _CardPickerRow(
-                label: '•••• ${c.last4}',
-                sub: c.cardholderName,
-                selected: c.id == state.paymentCardId,
+      child: Builder(
+        builder: (ctx) {
+          final l10n = AppLocalizations.of(ctx);
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            children: [
+              _CardPickerRow(
+                label: l10n.transaction_noCard,
+                sub: l10n.transaction_noCardSub,
+                selected: state.paymentCardId == null,
                 onTap: () {
-                  bloc.add(TransactionFormCardChanged(c.id));
+                  bloc.add(const TransactionFormCardChanged(null));
                   Navigator.of(context).maybePop();
                 },
-              )),
-        ],
+              ),
+              ...cards.map((c) => _CardPickerRow(
+                    label: '•••• ${c.last4}',
+                    sub: c.cardholderName,
+                    selected: c.id == state.paymentCardId,
+                    onTap: () {
+                      bloc.add(TransactionFormCardChanged(c.id));
+                      Navigator.of(context).maybePop();
+                    },
+                  )),
+            ],
+          );
+        },
       ),
     );
   }
@@ -764,7 +774,7 @@ class _FormBody extends StatelessWidget {
       TransactionFormBloc bloc, TransactionFormState state) async {
     await showAppBottomSheet<void>(
       context: context,
-      title: 'Counterparty source',
+      title: AppLocalizations.of(context).transaction_counterpartySource,
       heightFactor: 0.72,
       expand: true,
       child: _TransactionSourcePickerSheet(
@@ -789,7 +799,7 @@ class _FormBody extends StatelessWidget {
     final accent = hexToColor(theme.primaryColor);
     showAppBottomSheet<void>(
       context: context,
-      title: 'Currency',
+      title: AppLocalizations.of(context).transaction_currency,
       heightFactor: 0.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -831,7 +841,7 @@ class _FormBody extends StatelessWidget {
       TransactionFormState state) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Select date',
+      title: AppLocalizations.of(context).transaction_selectDate,
       heightFactor: 0.55,
       child: TransactionDatePicker(
         initialDate: state.date,
@@ -840,10 +850,10 @@ class _FormBody extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
+  String _formatDate(DateTime d, AppLocalizations l10n) {
     final today = DateTime.now();
     if (d.year == today.year && d.month == today.month && d.day == today.day) {
-      return 'Today';
+      return l10n.transaction_today;
     }
     return DateFormat('dd MMM yyyy').format(d);
   }
@@ -874,7 +884,9 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
     await showAppBottomSheet<void>(
       context: context,
       expand: true,
-      title: existing == null ? 'New source' : 'Edit source',
+      title: existing == null
+          ? AppLocalizations.of(context).transaction_newSource
+          : AppLocalizations.of(context).transaction_editSource,
       heightFactor: 0.85,
       child: BlocProvider(
         create: (_) => TransactionSourcesBloc(
@@ -892,6 +904,7 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
@@ -913,7 +926,7 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
               children: [
                 Plus(width: 18, height: 18, color: CupertinoColors.white),
                 Text(
-                  'Create new source',
+                  AppLocalizations.of(context).transaction_createNewSource,
                   style: AppFonts.body(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -940,7 +953,7 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'None',
+                      l10n.transaction_relatedToNone,
                       style: AppFonts.body(
                         fontSize: 15,
                         fontWeight:
@@ -1274,16 +1287,17 @@ class _ActorPickerState extends State<_ActorPicker> {
   void _openPicker() async {
     if (_pets.isEmpty && _cars.isEmpty && _homes.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context);
     await showAppBottomSheet<void>(
       context: context,
-      title: 'Related to',
+      title: l10n.transaction_relatedTo,
       heightFactor: 0.6,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           _row(
-            label: 'None',
+            label: l10n.transaction_relatedToNone,
             selected:
                 widget.petId == null && widget.carId == null && widget.homeId == null,
             onTap: () {
@@ -1292,17 +1306,17 @@ class _ActorPickerState extends State<_ActorPicker> {
             },
           ),
           if (_pets.isNotEmpty)
-            _section('Pets', _pets, (id) => widget.petId == id, (id) {
+            _section(l10n.pets_sectionTitle, _pets, (id) => widget.petId == id, (id) {
               widget.onChanged(id, null, null);
               Navigator.of(context).pop();
             }),
           if (_cars.isNotEmpty)
-            _section('Cars', _cars, (id) => widget.carId == id, (id) {
+            _section(l10n.cars_title, _cars, (id) => widget.carId == id, (id) {
               widget.onChanged(null, id, null);
               Navigator.of(context).pop();
             }),
           if (_homes.isNotEmpty)
-            _section('Homes', _homes, (id) => widget.homeId == id, (id) {
+            _section(l10n.homes_title, _homes, (id) => widget.homeId == id, (id) {
               widget.onChanged(null, null, id);
               Navigator.of(context).pop();
             }),
@@ -1370,6 +1384,7 @@ class _ActorPickerState extends State<_ActorPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasActor =
         widget.petId != null || widget.carId != null || widget.homeId != null;
     final label = _activeLabel;
@@ -1395,14 +1410,14 @@ class _ActorPickerState extends State<_ActorPicker> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 2,
                 children: [
-                  Text('Related to',
+                  Text(l10n.transaction_relatedTo,
                       style: AppFonts.body(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: widget.muted,
                           letterSpacing: 0.5)),
                   Text(
-                    label ?? 'None',
+                    label ?? l10n.transaction_relatedToNone,
                     style: AppFonts.body(
                       fontSize: 14,
                       color: hasActor ? widget.fg : widget.muted,
