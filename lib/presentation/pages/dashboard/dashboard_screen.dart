@@ -8,6 +8,7 @@ import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/services/location_service.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/user_avatar_button.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -591,62 +592,49 @@ class _Header extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(
           20, MediaQuery.viewPaddingOf(context).top + 12, 20, 0),
       child: Row(
+        spacing: 8,
         children: [
           if (profile != null)
             UserAvatarButton(
               profile: profile,
-              size: 40,
+              size: 44,
               onTap: () => context.push(AppRoutes.profile),
             )
           else
-            const SizedBox(width: 40),
+            const SizedBox(width: 44),
           const Spacer(),
-          GestureDetector(
+          AnimatedButton(
             onTap: () => context.push(AppRoutes.notifications),
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Center(child: Bell(width: 18, height: 18, color: fg)),
-                  if (unreadCount > 0)
-                    Positioned(
-                      top: 6,
-                      right: 7,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: accent,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: surface, width: 2),
-                        ),
+            size: 44,
+            borderRadius: AppRadii.full,
+            backgroundColor: surface,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Center(child: Bell(width: 18, height: 18, color: fg)),
+                if (unreadCount > 0)
+                  Positioned(
+                    top: 6,
+                    right: 7,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: accent,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: surface, width: 2),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(width: 10),
-          GestureDetector(
+          AnimatedButton(
             onTap: () => context.push(AppRoutes.settings),
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              alignment: Alignment.center,
-              child: Settings(width: 18, height: 18, color: fg),
-            ),
+            size: 44,
+            borderRadius: AppRadii.full,
+            backgroundColor: surface,
+            child: Settings(width: 18, height: 18, color: fg),
           ),
         ],
       ),
