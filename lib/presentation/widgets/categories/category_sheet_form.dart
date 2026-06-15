@@ -10,14 +10,14 @@ import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
 /// Bottom-sheet form for creating / editing / deleting a [Category].
-class CategoryFormContent extends StatefulWidget {
+class CategorySheetForm extends StatefulWidget {
   final Category? existing;
   final String householdId;
 
   /// Used when [existing] is null.
   final TransactionType initialType;
 
-  const CategoryFormContent({
+  const CategorySheetForm({
     super.key,
     this.existing,
     required this.householdId,
@@ -25,10 +25,10 @@ class CategoryFormContent extends StatefulWidget {
   });
 
   @override
-  State<CategoryFormContent> createState() => _CategoryFormContentState();
+  State<CategorySheetForm> createState() => _CategorySheetFormState();
 }
 
-class _CategoryFormContentState extends State<CategoryFormContent> {
+class _CategorySheetFormState extends State<CategorySheetForm> {
   late final TextEditingController _name;
   late TransactionType _type;
   late int _colorIdx;

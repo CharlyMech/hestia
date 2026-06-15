@@ -13,12 +13,12 @@ import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
 import 'package:uuid/uuid.dart';
 
 /// Bottom-sheet form for creating / editing / deleting a [TransactionSource].
-class TransactionSourceForm extends StatefulWidget {
+class TransactionSourceSheetForm extends StatefulWidget {
   final TransactionSource? existing;
   final String householdId;
   final String userId;
 
-  const TransactionSourceForm({
+  const TransactionSourceSheetForm({
     super.key,
     this.existing,
     required this.householdId,
@@ -26,10 +26,10 @@ class TransactionSourceForm extends StatefulWidget {
   });
 
   @override
-  State<TransactionSourceForm> createState() => _TransactionSourceFormState();
+  State<TransactionSourceSheetForm> createState() => _TransactionSourceSheetFormState();
 }
 
-class _TransactionSourceFormState extends State<TransactionSourceForm> {
+class _TransactionSourceSheetFormState extends State<TransactionSourceSheetForm> {
   late final TextEditingController _name;
   late TransactionSourceKind _kind;
   late int _colorIdx;

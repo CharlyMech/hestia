@@ -12,7 +12,7 @@ import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
 /// Bottom-sheet body: confirm name, scope, optional bank/source, then start a
 /// shopping session (optionally seeded from [template]).
-class StartShoppingSessionContent extends StatefulWidget {
+class StartShoppingSessionSheet extends StatefulWidget {
   final String householdId;
   final String userId;
   final ShoppingList? template;
@@ -24,7 +24,7 @@ class StartShoppingSessionContent extends StatefulWidget {
     String? templateListId,
   }) onStart;
 
-  const StartShoppingSessionContent({
+  const StartShoppingSessionSheet({
     super.key,
     required this.householdId,
     required this.userId,
@@ -33,12 +33,12 @@ class StartShoppingSessionContent extends StatefulWidget {
   });
 
   @override
-  State<StartShoppingSessionContent> createState() =>
-      _StartShoppingSessionContentState();
+  State<StartShoppingSessionSheet> createState() =>
+      _StartShoppingSessionSheetState();
 }
 
-class _StartShoppingSessionContentState
-    extends State<StartShoppingSessionContent> {
+class _StartShoppingSessionSheetState
+    extends State<StartShoppingSessionSheet> {
   late final TextEditingController _name;
   late ShoppingListScope _scope;
   String? _bankAccountId;

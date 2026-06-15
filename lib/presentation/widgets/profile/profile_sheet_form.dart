@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:forui/forui.dart';
+import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/core/constants/currencies.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
@@ -9,48 +11,60 @@ import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
+import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
 
 /// Edit-profile bottom sheet body. Lets the user change avatar, display name,
 /// birth date, preferred currency and calendar color.
-class EditProfileForm extends StatefulWidget {
+class ProfileSheetForm extends StatefulWidget {
   final Profile profile;
   final List<Color> tints;
 
-  const EditProfileForm({
+  const ProfileSheetForm({
     super.key,
     required this.profile,
     required this.tints,
   });
 
   @override
-  State<EditProfileForm> createState() => _EditProfileFormState();
+  State<ProfileSheetForm> createState() => _ProfileSheetFormState();
 }
 
-class _EditProfileFormState extends State<EditProfileForm> {
+class _ProfileSheetFormState extends State<ProfileSheetForm>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _name;
+  late final FRadioSelectGroupController<AppCurrency> _currencyCtrl;
+  late final FPopoverController _currencyPopover;
   late String? _avatarUrl;
   late DateTime? _birthDate;
-  late String _currency;
   late String? _calendarColor;
   bool _saving = false;
 
-  static const _currencies = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD'];
+  AppCurrency get _currency =>
+      _currencyCtrl.values.firstOrNull ??
+      AppCurrencies.fromCode(widget.profile.preferredCurrency) ??
+      AppCurrencies.eur;
 
   @override
   void initState() {
     super.initState();
     _name = TextEditingController(text: widget.profile.displayName ?? '');
+    _currencyCtrl = FRadioSelectGroupController<AppCurrency>(
+      value: AppCurrencies.fromCode(widget.profile.preferredCurrency) ??
+          AppCurrencies.eur,
+    );
+    _currencyPopover = FPopoverController(vsync: this);
     _avatarUrl = widget.profile.avatarUrl;
     _birthDate = widget.profile.birthDate;
-    _currency = widget.profile.preferredCurrency;
     _calendarColor = widget.profile.calendarColor;
   }
 
   @override
   void dispose() {
     _name.dispose();
+    _currencyCtrl.dispose();
+    _currencyPopover.dispose();
     super.dispose();
   }
 
@@ -64,12 +78,20 @@ class _EditProfileFormState extends State<EditProfileForm> {
   Future<void> _pickBirthDate() async {
     final theme = context.myTheme;
     final fg = hexToColor(theme.onBackgroundColor);
+    final primary = hexToColor(theme.primaryColor);
+
     DateTime tmp = _birthDate ?? DateTime(2000, 1, 1);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => Container(
-        height: 280,
-        color: hexToColor(theme.surfaceColor),
+        height: 300,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: hexToColor(theme.surfaceColor),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadii.xxl),
+          ),
+        ),
         child: SafeArea(
           top: false,
           child: Column(
@@ -91,7 +113,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
                         style: AppFonts.body(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: fg)),
+                            color: primary)),
                   ),
                 ],
               ),
@@ -111,56 +133,6 @@ class _EditProfileFormState extends State<EditProfileForm> {
     );
   }
 
-  Future<void> _pickCurrency() async {
-    final theme = context.myTheme;
-    final fg = hexToColor(theme.onBackgroundColor);
-    final accent = hexToColor(theme.primaryColor);
-    final picked = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) => Container(
-        color: hexToColor(theme.surfaceColor),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final c in _currencies)
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => Navigator.of(ctx).pop(c),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            c,
-                            style: AppFonts.body(
-                              fontSize: 15,
-                              fontWeight: c == _currency
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: c == _currency ? accent : fg,
-                            ),
-                          ),
-                        ),
-                        if (c == _currency)
-                          Icon(CupertinoIcons.check_mark,
-                              size: 16, color: accent),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (picked != null) setState(() => _currency = picked);
-  }
-
   Future<void> _save() async {
     setState(() => _saving = true);
     final updated = widget.profile.copyWith(
@@ -169,14 +141,19 @@ class _EditProfileFormState extends State<EditProfileForm> {
       clearAvatar: _avatarUrl == null,
       birthDate: _birthDate,
       clearBirthDate: _birthDate == null,
-      preferredCurrency: _currency,
+      preferredCurrency: _currency.code,
       calendarColor: _calendarColor,
       lastUpdate: DateTime.now(),
     );
     if (!mounted) return;
-    context.read<AuthBloc>().add(AuthUpdateProfile(updated));
+    final bloc = context.read<AuthBloc>();
+    bloc.add(AuthUpdateProfile(updated));
+    // Wait for bloc to emit updated AuthAuthenticated state before closing.
+    await bloc.stream.firstWhere((s) => s is AuthAuthenticated);
+    if (!mounted) return;
     Navigator.of(context).maybePop();
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
@@ -207,7 +184,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
 
     BoxDecoration field() => BoxDecoration(
           color: surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadii.lg),
         );
 
     return Padding(
@@ -223,7 +200,8 @@ class _EditProfileFormState extends State<EditProfileForm> {
               onChanged: (v) => setState(() => _avatarUrl = v),
               size: 110,
               circle: true,
-              fallbackColor: accent,
+              fallbackColor:
+                  _calendarColor != null ? hexToColor(_calendarColor!) : accent,
               fallbackText: _initials,
             ),
           ),
@@ -273,22 +251,91 @@ class _EditProfileFormState extends State<EditProfileForm> {
           const SizedBox(height: 16),
           _label(AppLocalizations.of(context).profile_preferredCurrency, muted),
           const SizedBox(height: 6),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _pickCurrency,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              decoration: field(),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _currency,
-                      style: AppFonts.body(fontSize: 15, color: fg),
+          ListenableBuilder(
+            listenable: _currencyCtrl,
+            builder: (context, _) => FPopover(
+              controller: _currencyPopover,
+              followerAnchor: Alignment.topCenter,
+              targetAnchor: Alignment.bottomCenter,
+              followerBuilder: (context, style, _) => DecoratedBox(
+                decoration: style.decoration,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 340,
+                    maxHeight: 240,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadii.lg),
+                    child: ListView.separated(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: AppCurrencies.all.length,
+                      separatorBuilder: (_, __) => Container(
+                        height: 0.8,
+                        color: hexToColor(context.myTheme.borderColor)
+                            .withValues(alpha: 0.5),
+                      ),
+                      itemBuilder: (context, i) {
+                        final c = AppCurrencies.all[i];
+                        final selected = _currencyCtrl.values.contains(c);
+                        return AnimatedButton(
+                          onTap: () {
+                            _currencyCtrl.select(c, true);
+                            _currencyPopover.hide();
+                          },
+                          backgroundColor: surface,
+                          borderRadius: AppRadii.none,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 13),
+                          child: Row(
+                            spacing: 12,
+                            children: [
+                              if (selected)
+                                Icon(CupertinoIcons.check_mark,
+                                    size: 14,
+                                    color: hexToColor(
+                                        context.myTheme.primaryColor))
+                              else
+                                const SizedBox(width: 14),
+                              Text(
+                                '${c.code} ${c.symbol}',
+                                style: AppFonts.body(
+                                  fontSize: 15,
+                                  fontWeight: selected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: selected
+                                      ? hexToColor(context.myTheme.primaryColor)
+                                      : fg,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  Icon(CupertinoIcons.chevron_down, size: 14, color: muted),
-                ],
+                ),
+              ),
+              target: AnimatedButton(
+                onTap: _currencyPopover.toggle,
+                backgroundColor: surface,
+                borderRadius: AppRadii.lg,
+                borderColor: hexToColor(context.myTheme.borderColor),
+                borderWidth: 0.8,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${_currency.code} ${_currency.symbol}',
+                        style: AppFonts.body(fontSize: 15, color: fg),
+                      ),
+                    ),
+                    Icon(CupertinoIcons.chevron_down, size: 14, color: muted),
+                  ],
+                ),
               ),
             ),
           ),
@@ -310,18 +357,22 @@ class _EditProfileFormState extends State<EditProfileForm> {
             width: double.infinity,
             height: 50,
             child: AnimatedButton(
+              backgroundColor: accent,
+              borderRadius: AppRadii.lg,
               padding: EdgeInsets.zero,
               onTap: _saving ? null : _save,
-              child: _saving
-                  ? const CupertinoActivityIndicator()
-                  : Text(
-                      AppLocalizations.of(context).common_save,
-                      style: AppFonts.body(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: onPrimary,
+              child: Center(
+                child: _saving
+                    ? const CupertinoActivityIndicator()
+                    : Text(
+                        AppLocalizations.of(context).common_save,
+                        style: AppFonts.body(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: onPrimary,
+                        ),
                       ),
-                    ),
+              ),
             ),
           ),
         ],

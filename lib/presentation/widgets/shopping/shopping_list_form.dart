@@ -12,7 +12,7 @@ import 'package:hestia/domain/entities/transaction_source.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
 /// Create / edit shopping list form for a bottom sheet or pushed route.
-class ShoppingListFormContent extends StatefulWidget {
+class ShoppingListForm extends StatefulWidget {
   final String householdId;
   final String userId;
   final ShoppingList? existing;
@@ -21,7 +21,7 @@ class ShoppingListFormContent extends StatefulWidget {
   final bool asTemplate;
   final VoidCallback onSuccess;
 
-  const ShoppingListFormContent({
+  const ShoppingListForm({
     super.key,
     required this.householdId,
     required this.userId,
@@ -31,11 +31,11 @@ class ShoppingListFormContent extends StatefulWidget {
   });
 
   @override
-  State<ShoppingListFormContent> createState() =>
-      ShoppingListFormContentState();
+  State<ShoppingListForm> createState() =>
+      ShoppingListFormState();
 }
 
-class ShoppingListFormContentState extends State<ShoppingListFormContent> {
+class ShoppingListFormState extends State<ShoppingListForm> {
   late final TextEditingController _name;
   late ShoppingListScope _scope;
   String? _bankAccountId;

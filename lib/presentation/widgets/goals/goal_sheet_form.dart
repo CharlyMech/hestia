@@ -17,14 +17,14 @@ import 'package:hestia/presentation/widgets/common/primary_button.dart';
 /// Reusable goal form. Opens inside `showAppBottomSheet` from goals screen,
 /// money source detail, or anywhere else. Handles create/edit/delete via the
 /// surrounding [GoalsBloc] (must be provided in context).
-class GoalFormContent extends StatefulWidget {
+class GoalSheetForm extends StatefulWidget {
   final FinancialGoal? existing;
   final String householdId;
   final String userId;
   final String? prefilledBankAccountId;
   final List<BankAccount> bankAccounts;
 
-  const GoalFormContent({
+  const GoalSheetForm({
     super.key,
     this.existing,
     required this.householdId,
@@ -34,10 +34,10 @@ class GoalFormContent extends StatefulWidget {
   });
 
   @override
-  State<GoalFormContent> createState() => _GoalFormContentState();
+  State<GoalSheetForm> createState() => _GoalSheetFormState();
 }
 
-class _GoalFormContentState extends State<GoalFormContent> {
+class _GoalSheetFormState extends State<GoalSheetForm> {
   late final TextEditingController _name;
   late final TextEditingController _target;
   late final TextEditingController _monthly;

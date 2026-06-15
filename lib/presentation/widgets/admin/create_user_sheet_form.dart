@@ -4,14 +4,14 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 
-class CreateUserForm extends StatefulWidget {
-  const CreateUserForm({super.key});
+class CreateUserSheetForm extends StatefulWidget {
+  const CreateUserSheetForm({super.key});
 
   @override
-  State<CreateUserForm> createState() => _CreateUserFormState();
+  State<CreateUserSheetForm> createState() => _CreateUserSheetFormState();
 }
 
-class _CreateUserFormState extends State<CreateUserForm> {
+class _CreateUserSheetFormState extends State<CreateUserSheetForm> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();

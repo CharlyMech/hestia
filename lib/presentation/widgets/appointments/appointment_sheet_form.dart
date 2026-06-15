@@ -15,7 +15,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
-class AppointmentFormContent extends StatefulWidget {
+class AppointmentSheetForm extends StatefulWidget {
   final DateTime defaultDate;
   final String userId;
   final String? householdId;
@@ -23,7 +23,7 @@ class AppointmentFormContent extends StatefulWidget {
   final int startDayOfWeek;
   final void Function(String appointmentId, bool isAllDay) onSaved;
 
-  const AppointmentFormContent({
+  const AppointmentSheetForm({
     super.key,
     required this.defaultDate,
     required this.userId,
@@ -34,10 +34,10 @@ class AppointmentFormContent extends StatefulWidget {
   });
 
   @override
-  State<AppointmentFormContent> createState() => _AppointmentFormContentState();
+  State<AppointmentSheetForm> createState() => _AppointmentSheetFormState();
 }
 
-class _AppointmentFormContentState extends State<AppointmentFormContent> {
+class _AppointmentSheetFormState extends State<AppointmentSheetForm> {
   List<Pet> _pets = const [];
   List<Car> _cars = const [];
 
