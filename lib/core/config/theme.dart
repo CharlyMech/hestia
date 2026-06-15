@@ -49,6 +49,42 @@ FThemeData buildForuiTheme(MyTheme theme, {required Brightness brightness}) {
   );
 
   final surface = hexToColor(theme.surfaceColor);
+  final fieldFg = hexToColor(theme.foregroundColor);
+  final fieldMuted = hexToColor(theme.onInactiveColor);
+  final fieldBorder = hexToColor(theme.borderColor);
+  final fieldPrimary = hexToColor(theme.primaryColor);
+  final fieldError = hexToColor(theme.errorColor);
+
+  const fieldRadius = BorderRadius.all(Radius.circular(AppRadii.lg));
+  const fieldBorderWidth = 0.8;
+
+  final fieldContentStyle = AppFonts.body(fontSize: 15, color: fieldFg);
+  final fieldHintStyle = AppFonts.body(fontSize: 15, color: fieldMuted);
+
+  FTextFieldStateStyle fieldState({
+    required Color borderColor,
+    required Color focusBorderColor,
+    Color? contentColor,
+  }) =>
+      FTextFieldStateStyle(
+        labelTextStyle: base.textFieldStyle.enabledStyle.labelTextStyle,
+        contentTextStyle: contentColor != null
+            ? fieldContentStyle.copyWith(color: contentColor)
+            : fieldContentStyle,
+        hintTextStyle: fieldHintStyle,
+        descriptionTextStyle:
+            base.textFieldStyle.enabledStyle.descriptionTextStyle,
+        focusedStyle: FTextFieldBorderStyle(
+          color: focusBorderColor,
+          width: fieldBorderWidth,
+          radius: fieldRadius,
+        ),
+        unfocusedStyle: FTextFieldBorderStyle(
+          color: borderColor,
+          width: fieldBorderWidth,
+          radius: fieldRadius,
+        ),
+      );
 
   final popoverDecoration = BoxDecoration(
     color: surface,
@@ -63,10 +99,71 @@ FThemeData buildForuiTheme(MyTheme theme, {required Brightness brightness}) {
     ],
   );
 
+  // Shared tile style: surface bg, AppRadii.lg, foreground text.
+  // Used for both the FSelectMenuTile trigger and the dropdown items.
+  final tileTitleStyle = AppFonts.body(fontSize: 15, color: fieldFg);
+  final tileStyle = base.selectMenuTileStyle.tileStyle.copyWith(
+    borderRadius: fieldRadius,
+    enabledBackgroundColor: surface,
+    enabledHoveredBackgroundColor: surface.withValues(alpha: 0.85),
+    disabledBackgroundColor: surface.withValues(alpha: 0.5),
+    border: Border.all(color: fieldBorder, width: fieldBorderWidth),
+    focusedBorder: Border.all(color: fieldPrimary, width: fieldBorderWidth),
+    contentStyle: base.selectMenuTileStyle.tileStyle.contentStyle.copyWith(
+      enabledStyle: base.selectMenuTileStyle.tileStyle.contentStyle.enabledStyle
+          .copyWith(titleTextStyle: tileTitleStyle),
+      enabledHoveredStyle: base
+          .selectMenuTileStyle.tileStyle.contentStyle.enabledHoveredStyle
+          .copyWith(titleTextStyle: tileTitleStyle),
+      disabledStyle: base
+          .selectMenuTileStyle.tileStyle.contentStyle.disabledStyle
+          .copyWith(
+              titleTextStyle:
+                  tileTitleStyle.copyWith(color: fieldMuted)),
+    ),
+  );
+
   // Forui buttons wrap child icons with FIconStyle, so icon colors come from
   // button styles (not the icon widget color). Keep these explicit and aligned
   // with app foreground for reliable contrast in custom surfaces.
   return base.copyWith(
+    textFieldStyle: base.textFieldStyle.copyWith(
+      enabledStyle: fieldState(
+        borderColor: fieldBorder,
+        focusBorderColor: fieldPrimary,
+      ),
+      disabledStyle: fieldState(
+        borderColor: fieldBorder.withValues(alpha: 0.4),
+        focusBorderColor: fieldBorder.withValues(alpha: 0.4),
+        contentColor: fieldMuted,
+      ),
+      errorStyle: FTextFieldErrorStyle(
+        errorTextStyle: base.textFieldStyle.errorStyle.errorTextStyle,
+        labelTextStyle: base.textFieldStyle.errorStyle.labelTextStyle,
+        contentTextStyle: fieldContentStyle,
+        hintTextStyle: fieldHintStyle,
+        descriptionTextStyle:
+            base.textFieldStyle.errorStyle.descriptionTextStyle,
+        focusedStyle: FTextFieldBorderStyle(
+          color: fieldError,
+          width: fieldBorderWidth,
+          radius: fieldRadius,
+        ),
+        unfocusedStyle: FTextFieldBorderStyle(
+          color: fieldError,
+          width: fieldBorderWidth,
+          radius: fieldRadius,
+        ),
+      ),
+    ),
+    selectMenuTileStyle: base.selectMenuTileStyle.copyWith(
+      tileStyle: tileStyle,
+      menuStyle: base.selectMenuTileStyle.menuStyle.copyWith(
+        decoration: popoverDecoration,
+        tileGroupStyle: base.selectMenuTileStyle.menuStyle.tileGroupStyle
+            .copyWith(tileStyle: tileStyle),
+      ),
+    ),
     popoverMenuStyle: base.popoverMenuStyle.copyWith(
       decoration: popoverDecoration,
     ),

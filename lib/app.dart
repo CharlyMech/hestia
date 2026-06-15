@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show InputDecorationTheme, Theme, ThemeData;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
@@ -148,11 +149,19 @@ class _HestiaAppState extends State<HestiaApp> {
                 : (prefs.themeType == ThemeType.light
                     ? Brightness.light
                     : Brightness.dark);
+            final surfaceColor = hexToColor(myTheme.surfaceColor);
             return InheritedMyTheme(
               theme: myTheme,
               child: FTheme(
                 data: buildForuiTheme(myTheme, brightness: brightness),
-                child: CupertinoApp.router(
+                child: Theme(
+                  data: ThemeData(
+                    inputDecorationTheme: InputDecorationTheme(
+                      filled: true,
+                      fillColor: surfaceColor,
+                    ),
+                  ),
+                  child: CupertinoApp.router(
                   title: 'Hestia',
                   theme: buildCupertinoTheme(myTheme, brightness: brightness),
                   routerConfig: appRouter,
@@ -178,6 +187,7 @@ class _HestiaAppState extends State<HestiaApp> {
                     return const Locale('en');
                   },
                   debugShowCheckedModeBanner: false,
+                ),
                 ),
               ),
             );
