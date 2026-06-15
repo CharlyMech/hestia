@@ -18,9 +18,9 @@ import 'package:hestia/presentation/blocs/google_sync/google_sync_cubit.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 import 'package:hestia/presentation/blocs/app_update/app_update_cubit.dart';
 import 'package:hestia/presentation/widgets/common/app_update_dialog.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
@@ -609,6 +609,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       borderColor: border,
       foregroundColor: fg,
       titleText: l10n.settings_title,
+      childIsScrollable: true,
       child: ScreenShell(
         bg: bg,
         slivers: [

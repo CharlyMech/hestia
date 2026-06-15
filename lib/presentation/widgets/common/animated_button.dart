@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/spring_physics.dart';
-import 'package:hestia/core/utils/theme_utils.dart';
 
 /// Agnostic pressable container with Apple liquid-glass spring-bounce physics.
 ///
@@ -22,7 +21,8 @@ class AnimatedButton extends StatefulWidget {
   /// Border stroke width. Default 2.
   final double borderWidth;
 
-  /// Background fill. Defaults to the theme primary color when null.
+  /// Background fill. Defaults to transparent when null (bare hit-target).
+  /// Pass explicitly (e.g. `hexToColor(theme.primaryColor)`) for filled buttons.
   final Color? backgroundColor;
 
   /// How far the widget compresses on press. Default 0.92.
@@ -75,8 +75,8 @@ class _AnimatedButtonState extends State<AnimatedButton>
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(widget.borderRadius);
-    final backgroundColor = widget.backgroundColor ??
-        hexToColor(context.myTheme.primaryColor);
+    final backgroundColor =
+        widget.backgroundColor ?? CupertinoColors.transparent;
     final Widget content = widget.size != null
         ? SizedBox(
             width: widget.size,

@@ -2,7 +2,9 @@
 // segmented controls, form fields, icon buttons, chevrons.
 import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
-import 'package:iconoir_flutter/regular/nav_arrow_right.dart';
+import 'package:hestia/core/utils/theme_utils.dart';
+import 'package:iconoir_flutter/iconoir_flutter.dart'
+    show NavArrowRight, CheckCircle;
 
 // ── Section label ──────────────────────────────────────────────────────────
 
@@ -312,6 +314,9 @@ class ColorSwatchRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.myTheme;
+    final onStatus = hexToColor(theme.onStatusColor);
+
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -341,12 +346,9 @@ class ColorSwatchRow extends StatelessWidget {
                     : null,
               ),
               child: i == selected
-                  ? const Center(
-                      child: Icon(
-                        CupertinoIcons.checkmark,
-                        color: CupertinoColors.white,
-                        size: 14,
-                      ),
+                  ? Center(
+                      child:
+                          CheckCircle(width: 24, height: 24, color: onStatus),
                     )
                   : null,
             ),
