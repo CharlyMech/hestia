@@ -4,8 +4,8 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
-import 'package:hestia/presentation/widgets/shopping/shopping_list_form_content.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/shopping/shopping_list_form.dart';
 
 /// New / edit shopping list (stack route). Tab "+" uses the same form in
 /// [showAppBottomSheet] from [ShoppingScreen].
@@ -27,8 +27,8 @@ class AddEditShoppingListScreen extends StatefulWidget {
 }
 
 class _AddEditShoppingListScreenState extends State<AddEditShoppingListScreen> {
-  final GlobalKey<ShoppingListFormContentState> _formKey =
-      GlobalKey<ShoppingListFormContentState>();
+  final GlobalKey<ShoppingListFormState> _formKey =
+      GlobalKey<ShoppingListFormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class _AddEditShoppingListScreenState extends State<AddEditShoppingListScreen> {
           ),
         ),
       ),
-      child: ShoppingListFormContent(
+      child: ShoppingListForm(
         key: _formKey,
         householdId: widget.householdId,
         userId: widget.userId,

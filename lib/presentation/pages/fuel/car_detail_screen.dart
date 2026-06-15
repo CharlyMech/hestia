@@ -16,7 +16,7 @@ import 'package:hestia/presentation/blocs/cars/car_detail_bloc.dart';
 import 'package:hestia/presentation/blocs/cars/car_maintenance_bloc.dart';
 import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
-import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/sliver_pushed_route_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' as iconoir;
 import 'package:skeletonizer/skeletonizer.dart';
 

@@ -15,7 +15,7 @@ import 'package:hestia/presentation/blocs/pets/pet_detail_bloc.dart';
 import 'package:hestia/presentation/blocs/pets/pets_bloc.dart';
 import 'package:hestia/presentation/pages/pets/add_edit_health_record_screen.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
-import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/sliver_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/pets/paw_icon.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' as iconoir;
 import 'package:skeletonizer/skeletonizer.dart';

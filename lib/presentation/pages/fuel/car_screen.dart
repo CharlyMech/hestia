@@ -59,6 +59,8 @@ class _CarViewState extends State<_CarView> {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
     final tints = theme.categoryTints.map(hexToColor).toList();
     final showFuelModule = context.watch<UserPrefsBloc>().state.showFuelModule;
 
@@ -97,6 +99,7 @@ class _CarViewState extends State<_CarView> {
                         if (showFuelModule)
                           AnimatedButton(
                             size: 32,
+                            backgroundColor: primary,
                             padding: const EdgeInsets.all(4),
                             onTap: () async {
                               await context.push(AppRoutes.addCar);
@@ -106,8 +109,8 @@ class _CarViewState extends State<_CarView> {
                                     .add(const CarsRefresh());
                               }
                             },
-                            child:
-                                iconoir.Plus(width: 22, height: 22, color: fg),
+                            child: iconoir.Plus(
+                                width: 22, height: 22, color: onPrimary),
                           ),
                       ],
                     ),

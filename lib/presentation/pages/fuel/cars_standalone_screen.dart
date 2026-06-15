@@ -10,7 +10,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
 import 'package:hestia/presentation/pages/fuel/car_screen.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 
 /// Cars list outside the tab shell (e.g. when the cars tab is hidden).
@@ -60,6 +60,8 @@ class _CarsStandaloneScreenState extends State<CarsStandaloneScreen> {
     final bg = hexToColor(theme.backgroundColor);
     final surface = hexToColor(theme.surfaceColor);
     final fg = hexToColor(theme.onBackgroundColor);
+    final primary = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
     final border = hexToColor(theme.borderColor);
 
     return BlocProvider.value(
@@ -71,12 +73,14 @@ class _CarsStandaloneScreenState extends State<CarsStandaloneScreen> {
         foregroundColor: fg,
         titleText: l10n.cars_title,
         trailing: AnimatedButton(
+          size: 32,
+          backgroundColor: primary,
           padding: const EdgeInsets.all(4),
           onTap: () async {
             await context.push(AppRoutes.addCar);
             if (context.mounted) _carsBloc.add(const CarsRefresh());
           },
-          child: Plus(width: 22, height: 22, color: fg),
+          child: Plus(width: 22, height: 22, color: onPrimary),
         ),
         child: _loading
             ? const Center(child: CupertinoActivityIndicator())

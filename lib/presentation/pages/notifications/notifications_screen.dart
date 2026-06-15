@@ -11,10 +11,10 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/notif_row.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 import 'package:hestia/presentation/widgets/notifications/notification_icon.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 

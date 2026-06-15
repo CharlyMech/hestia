@@ -16,8 +16,8 @@ import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_list_bloc.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
-import 'package:hestia/presentation/widgets/shopping/start_shopping_session_content.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/shopping/start_shopping_session_sheet.dart';
 import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus, Trash, Check;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -203,7 +203,7 @@ class _BodyState extends State<_Body> {
       title: 'Start from template',
       heightFactor: 0.88,
       expand: true,
-      child: StartShoppingSessionContent(
+      child: StartShoppingSessionSheet(
         householdId: household.id,
         userId: auth.profile.id,
         template: template,

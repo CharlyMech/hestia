@@ -16,8 +16,8 @@ import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 
 import 'package:hestia/presentation/widgets/common/dotted_border.dart';
-import 'package:hestia/presentation/widgets/shopping/shopping_list_form_content.dart';
-import 'package:hestia/presentation/widgets/shopping/start_shopping_session_content.dart';
+import 'package:hestia/presentation/widgets/shopping/shopping_list_form.dart';
+import 'package:hestia/presentation/widgets/shopping/start_shopping_session_sheet.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show CartAlt, PlaySolid;
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -35,7 +35,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthBloc>().state;
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
+    final bg = hexToColor(theme.backgroundColor);
     if (auth is! AuthAuthenticated) {
       return ColoredBox(
         color: bg,
@@ -47,8 +47,6 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     }
     return _Body(userId: auth.profile.id);
   }
-
-  Color _c(String hex) => hexToColor(hex);
 }
 
 class _Body extends StatefulWidget {
@@ -122,7 +120,7 @@ class _BodyState extends State<_Body> {
           : AppLocalizations.of(context).shopping_startFromTemplate,
       heightFactor: 0.88,
       expand: true,
-      child: StartShoppingSessionContent(
+      child: StartShoppingSessionSheet(
         householdId: household.id,
         userId: widget.userId,
         template: template,
@@ -159,7 +157,7 @@ class _BodyState extends State<_Body> {
       title: AppLocalizations.of(context).shopping_newTemplate,
       heightFactor: 0.88,
       expand: true,
-      child: ShoppingListFormContent(
+      child: ShoppingListForm(
         householdId: household.id,
         userId: widget.userId,
         asTemplate: true,
@@ -175,12 +173,12 @@ class _BodyState extends State<_Body> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
-    final bg = _c(theme.backgroundColor);
-    final surface = _c(theme.surfaceColor);
-    final border = _c(theme.borderColor);
-    final fg = _c(theme.onBackgroundColor);
-    final muted = _c(theme.onInactiveColor);
-    final accent = _c(theme.primaryColor);
+    final bg = hexToColor(theme.backgroundColor);
+    final surface = hexToColor(theme.surfaceColor);
+    final border = hexToColor(theme.borderColor);
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
 
     final topInset = MediaQuery.viewPaddingOf(context).top;
     return ColoredBox(
@@ -378,7 +376,7 @@ class _BodyState extends State<_Body> {
             itemBuilder: (_, i) {
               if (i == templates.length) {
                 return _CreateTemplateTile(
-                  border: border,
+                  border: accent.withValues(alpha: 0.7),
                   muted: muted,
                   onTap: () => _openCreateTemplate(context),
                 );
@@ -445,8 +443,6 @@ class _BodyState extends State<_Body> {
       ),
     ];
   }
-
-  Color _c(String hex) => hexToColor(hex);
 }
 
 class _ActiveSessionBanner extends StatelessWidget {
@@ -491,7 +487,8 @@ class _ActiveSessionBanner extends StatelessWidget {
                 spacing: 2,
                 children: [
                   Text(
-                    AppLocalizations.of(context).dashboard_activeShoppingSession,
+                    AppLocalizations.of(context)
+                        .dashboard_activeShoppingSession,
                     style: AppFonts.body(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

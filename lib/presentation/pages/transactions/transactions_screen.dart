@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 import 'package:hestia/presentation/widgets/dashboard/tx_row.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Search, FilterAlt, Cart, Cutlery, GraphUp, Tools, Car, Group;

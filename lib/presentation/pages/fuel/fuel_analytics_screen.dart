@@ -7,8 +7,8 @@ import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/fuel/fuel_bloc.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 
 class FuelAnalyticsScreen extends StatelessWidget {
   final String carId;

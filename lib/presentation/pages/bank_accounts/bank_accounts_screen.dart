@@ -14,12 +14,12 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/bank_accounts/bank_accounts_bloc.dart';
 import 'package:hestia/presentation/blocs/cards/cards_bloc.dart';
-import 'package:hestia/presentation/widgets/cards/payment_card_widget.dart';
+import 'package:hestia/presentation/widgets/bank_accounts/payment_card_widget.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/dotted_border.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 import 'package:skeletonizer/skeletonizer.dart';
@@ -162,6 +162,7 @@ class _BodyState extends State<_Body> {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
     final border = hexToColor(theme.borderColor);
 
     return _wrapPageChrome(
@@ -189,8 +190,8 @@ class _BodyState extends State<_Body> {
                   slivers: [
                     if (widget.embeddedInTabShell)
                       SliverToBoxAdapter(
-                        child: _LargeTitle(
-                            label: l10n.bankAccounts_title, fg: fg),
+                        child:
+                            _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
                       ),
                     const SliverToBoxAdapter(child: SizedBox(height: 20)),
                     SliverPadding(
@@ -246,16 +247,14 @@ class _BodyState extends State<_Body> {
               slivers: [
                 if (widget.embeddedInTabShell)
                   SliverToBoxAdapter(
-                    child:
-                        _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
+                    child: _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
                   ),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
                 // ── Shared accounts ───────────────────────────────────────
                 if (loaded.shared.isNotEmpty) ...[
                   SliverToBoxAdapter(
-                    child: SectionLabel(l10n.bankAccounts_shared,
-                        color: muted),
+                    child: SectionLabel(l10n.bankAccounts_shared, color: muted),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 10)),
                   _AccountSectionList(
@@ -288,7 +287,7 @@ class _BodyState extends State<_Body> {
                 // ── Add account placeholder ───────────────────────────────
                 SliverToBoxAdapter(
                   child: _AddAccountPlaceholder(
-                    border: border,
+                    border: primary.withValues(alpha: 0.7),
                     muted: muted,
                     label: l10n.bankAccounts_addCard,
                     onTap: () async {
@@ -309,8 +308,7 @@ class _BodyState extends State<_Body> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: GestureDetector(
-                        onTap: () =>
-                            setState(() => _showOthers = !_showOthers),
+                        onTap: () => setState(() => _showOthers = !_showOthers),
                         behavior: HitTestBehavior.opaque,
                         child: Row(
                           spacing: 6,
@@ -342,8 +340,8 @@ class _BodyState extends State<_Body> {
                   if (_showOthers) ...[
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
                     SliverToBoxAdapter(
-                      child: SectionLabel(l10n.bankAccounts_others,
-                          color: muted),
+                      child:
+                          SectionLabel(l10n.bankAccounts_others, color: muted),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
                     _AccountSectionList(
@@ -717,6 +715,7 @@ class _AddAccountPlaceholder extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: AnimatedButton(
         onTap: onTap,
+        backgroundColor: CupertinoColors.transparent,
         borderRadius: AppRadii.xl,
         child: AspectRatio(
           aspectRatio: 1.586,
@@ -728,11 +727,11 @@ class _AddAccountPlaceholder extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 spacing: 8,
                 children: [
-                  Plus(width: 22, height: 22, color: muted),
+                  Plus(width: 32, height: 32, color: muted),
                   Text(
                     label,
                     style: AppFonts.body(
-                      fontSize: 13,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: muted,
                     ),

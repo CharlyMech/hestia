@@ -10,9 +10,9 @@ import 'package:hestia/domain/entities/account_member.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/domain/entities/payment_card.dart';
 import 'package:hestia/presentation/blocs/cards/cards_bloc.dart';
-import 'package:hestia/presentation/widgets/cards/payment_card_widget.dart';
+import 'package:hestia/presentation/widgets/bank_accounts/payment_card_widget.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/primary_button.dart';
 import 'package:uuid/uuid.dart';
 

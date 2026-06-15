@@ -21,7 +21,7 @@ import 'package:hestia/presentation/pages/categories/categories_screen.dart';
 import 'package:hestia/presentation/pages/goals/add_edit_goals_screen.dart';
 import 'package:hestia/presentation/pages/goals/goal_detail_screen.dart';
 import 'package:hestia/presentation/pages/goals/goals_screen.dart';
-import 'package:hestia/presentation/pages/main_tab_shell.dart';
+import 'package:hestia/presentation/widgets/layout/main_tab_shell.dart';
 import 'package:hestia/domain/entities/account_member.dart';
 import 'package:hestia/domain/entities/bank_account.dart' show BankAccount;
 import 'package:hestia/domain/entities/payment_card.dart';

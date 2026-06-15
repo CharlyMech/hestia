@@ -14,7 +14,7 @@ import 'package:hestia/domain/entities/transaction_source.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 
 class AddEditFuelEntryScreen extends StatelessWidget {
   /// Either existing entry (edit) or carId (create).

@@ -12,7 +12,7 @@ import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 
 /// Opens the add/edit health-record form in an app bottom sheet (bug #7).
 Future<void> showHealthRecordSheet(

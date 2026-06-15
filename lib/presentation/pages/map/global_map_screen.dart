@@ -350,42 +350,7 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
                             iconoir.Position(width: 40, height: 40, color: fg),
                       ),
                     ],
-                  )
-                  // child: Column(
-                  //   spacing: 8,
-                  //   children: [
-                  //     AnimatedButton(
-                  //       onTap: _centerOnUser,
-                  //       borderRadius: 14,
-                  //       backgroundColor: surface.withValues(alpha: 0.82),
-                  //       borderColor: border,
-                  //       borderWidth: 0.8,
-                  //       padding: const EdgeInsets.all(10),
-                  //       child: iconoir.Position(width: 20, height: 20, color: fg),
-                  //     ),
-                  //     AnimatedButton(
-                  //       onTap: () => _mapCtrl.animatedZoomIn(
-                  //           customId: 'zoom', duration: _kAnimDuration),
-                  //       borderRadius: 14,
-                  //       backgroundColor: surface.withValues(alpha: 0.82),
-                  //       borderColor: border,
-                  //       borderWidth: 0.8,
-                  //       padding: const EdgeInsets.all(10),
-                  //       child: iconoir.Plus(width: 20, height: 20, color: fg),
-                  //     ),
-                  //     AnimatedButton(
-                  //       onTap: () => _mapCtrl.animatedZoomOut(
-                  //           customId: 'zoom', duration: _kAnimDuration),
-                  //       borderRadius: 14,
-                  //       backgroundColor: surface.withValues(alpha: 0.82),
-                  //       borderColor: border,
-                  //       borderWidth: 0.8,
-                  //       padding: const EdgeInsets.all(10),
-                  //       child: iconoir.Minus(width: 20, height: 20, color: fg),
-                  //     ),
-                  //   ],
-                  // ),
-                  ),
+                  )),
 
             // ── Bottom sheet ──────────────────────────────────────────────────
             DraggableScrollableSheet(

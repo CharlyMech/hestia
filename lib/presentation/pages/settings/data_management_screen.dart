@@ -3,7 +3,7 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/pages/categories/categories_screen.dart';
 import 'package:hestia/presentation/pages/transaction_sources/transaction_sources_screen.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 
 class DataManagementScreen extends StatefulWidget {

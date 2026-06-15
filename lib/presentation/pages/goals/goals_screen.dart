@@ -10,11 +10,11 @@ import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/goals/goals_bloc.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 import 'package:hestia/presentation/widgets/dashboard/progress_ring.dart';
-import 'package:hestia/presentation/widgets/goals/goal_form_content.dart';
+import 'package:hestia/presentation/widgets/goals/goal_sheet_form.dart';
 import 'package:hestia/presentation/widgets/goals/goal_progress_card.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 import 'package:skeletonizer/skeletonizer.dart';
@@ -152,7 +152,7 @@ class _BodyState extends State<_Body> {
       heightFactor: 0.92,
       child: BlocProvider.value(
         value: context.read<GoalsBloc>(),
-        child: GoalFormContent(
+        child: GoalSheetForm(
           existing: existing,
           householdId: widget.householdId,
           userId: widget.userId,

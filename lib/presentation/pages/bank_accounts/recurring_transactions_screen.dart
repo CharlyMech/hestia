@@ -10,7 +10,7 @@ import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 /// Sub-screen of money source detail. Lists every recurring transaction tied
