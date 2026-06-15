@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/app_constants.dart';
+import 'package:hestia/core/constants/currencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/profile.dart';
@@ -12,10 +13,11 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/core/config/dependencies.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/sliver_pushed_route_shell.dart';
-import 'package:hestia/presentation/widgets/profile/edit_profile_form.dart';
+import 'package:hestia/presentation/widgets/layout/sliver_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/profile/profile_sheet_form.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show EditPencil, LogOut, Trash;
 import 'package:intl/intl.dart';
@@ -30,7 +32,9 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _onRefresh() async {
-    context.read<AuthBloc>().add(const AuthCheckSession());
+    // Silent profile refresh — does NOT clear the authenticated state or
+    // re-gate biometrics (that flow is for app launch only).
+    context.read<AuthBloc>().add(const AuthRefreshProfile());
     // Wait briefly so the refresh indicator has time to show.
     await Future<void>.delayed(const Duration(milliseconds: 600));
   }
@@ -69,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       title: AppLocalizations.of(context).profile_editProfile,
       heightFactor: 0.92,
-      child: EditProfileForm(profile: profile, tints: tints),
+      child: ProfileSheetForm(profile: profile, tints: tints),
     );
   }
 
@@ -83,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final accent = hexToColor(theme.primaryColor);
     final tints = theme.categoryTints.map(hexToColor).toList();
     final logoutBg = hexToColor(theme.colorRed);
-    final logoutFg = hexToColor(theme.onDestructiveColor);
+    final logoutFg = hexToColor(theme.onRedColor);
 
     final state = context.watch<AuthBloc>().state;
     final isLoading = state is AuthLoading;
@@ -175,7 +179,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               (
                                 l10n.profile_preferredCurrency,
-                                profile.preferredCurrency
+                                () {
+                                  final c = AppCurrencies.fromCode(
+                                      profile.preferredCurrency);
+                                  return c != null
+                                      ? '${c.code} ${c.symbol}'
+                                      : profile.preferredCurrency;
+                                }(),
                               ),
                               (
                                 l10n.profile_memberSince,
@@ -193,35 +203,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: logoutBg.withValues(alpha: 0.7),
-                              borderRadius: BorderRadius.circular(AppRadii.md),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => context
-                                  .read<AuthBloc>()
-                                  .add(const AuthSignOut()),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 12,
-                                  children: [
-                                    Text(l10n.common_signOut,
-                                        style: AppFonts.body(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: logoutFg)),
-                                    LogOut(
-                                        width: 20, height: 20, color: logoutFg),
-                                  ],
+                          AnimatedButton(
+                            onTap: () => context
+                                .read<AuthBloc>()
+                                .add(const AuthSignOut()),
+                            borderRadius: AppRadii.md,
+                            backgroundColor: logoutBg.withValues(alpha: 0.7),
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 12,
+                              children: [
+                                Text(
+                                  l10n.common_signOut,
+                                  style: AppFonts.body(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: logoutFg,
+                                  ),
                                 ),
-                              ),
+                                LogOut(width: 20, height: 20, color: logoutFg),
+                              ],
                             ),
                           ),
                         ],
