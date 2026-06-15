@@ -4,18 +4,21 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hestia/core/config/router.dart';
+import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/home.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
-import 'package:hestia/presentation/widgets/common/primary_button.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/swipeable_card.dart';
+import 'package:hestia/presentation/widgets/homes/add_edit_home_sheet_form.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
     show Trash, EditPencil, Plus;
+import 'package:iconoir_flutter/regular/home.dart' as icon_home;
 import 'package:latlong2/latlong.dart';
 
 class HomesScreen extends StatefulWidget {
@@ -74,7 +77,7 @@ class _HomesScreenState extends State<HomesScreen> {
     showAppBottomSheet<void>(
       context: context,
       title: existing == null ? l10n.homes_addHome : l10n.homes_editHome,
-      child: _HomeFormSheet(
+      child: AddEditHomeSheetForm(
         existing: existing,
         onSaved: (home) async {
           final deps = AppDependencies.instance;
@@ -106,6 +109,8 @@ class _HomesScreenState extends State<HomesScreen> {
     final fg = hexToColor(theme.foregroundColor);
     final muted = hexToColor(theme.mutedColor);
     final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
 
     return CupertinoPushedRouteShell(
       backgroundColor: bg,
@@ -114,19 +119,36 @@ class _HomesScreenState extends State<HomesScreen> {
       foregroundColor: fg,
       titleText: AppLocalizations.of(context).homes_title,
       onRefresh: _load,
-      trailing: GestureDetector(
+      // Pull-to-refresh ⇒ shell-owned Skeletonizer shimmer (no bare spinner).
+      isLoading: _loading,
+      trailing: AnimatedButton(
         onTap: _openAddSheet,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: Plus(width: 22, height: 22, color: accent),
-        ),
+        padding: const EdgeInsets.all(4),
+        borderRadius: AppRadii.full,
+        backgroundColor: primary,
+        child: Plus(width: 22, height: 22, color: onPrimary),
       ),
       child: _loading
-          ? const Center(child: CupertinoActivityIndicator())
+          // Placeholder cards give the Skeletonizer shimmer a real shape.
+          ? ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: 4,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (_, __) => Container(
+                height: 90,
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: border, width: 0.8),
+                ),
+              ),
+            )
           : _homes.isEmpty
               ? _Empty(
                   muted: muted,
                   accent: accent,
+                  onPrimary: onPrimary,
                   onAdd: _openAddSheet,
                 )
               : ListView.separated(
@@ -167,55 +189,56 @@ class _HomesScreenState extends State<HomesScreen> {
                         // Open the full map to inspect / re-pick the location.
                         onTap: () => context.push(AppRoutes.globalMap),
                         child: Container(
-                        decoration: BoxDecoration(
-                          color: surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: border, width: 0.8),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Row(
-                          children: [
-                            // Mini-map
-                            SizedBox(
-                              width: 90,
-                              height: 90,
-                              child: _MiniMap(
-                                latitude: home.latitude,
-                                longitude: home.longitude,
-                                accent: accent,
-                              ),
-                            ),
-                            // Info
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 4,
-                                  children: [
-                                    Text(
-                                      home.name,
-                                      style: AppFonts.body(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: fg),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      home.address,
-                                      style: AppFonts.body(
-                                          fontSize: 12, color: muted),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                          decoration: BoxDecoration(
+                            color: surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: border, width: 0.8),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Row(
+                            children: [
+                              // Mini-map
+                              SizedBox(
+                                width: 90,
+                                height: 90,
+                                child: _MiniMap(
+                                  latitude: home.latitude,
+                                  longitude: home.longitude,
+                                  accent: accent,
                                 ),
                               ),
-                            ),
-                          ],
+                              // Info
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        home.name,
+                                        style: AppFonts.body(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: fg),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        home.address,
+                                        style: AppFonts.body(
+                                            fontSize: 12, color: muted),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       ),
                     );
                   },
@@ -276,14 +299,19 @@ class _MiniMapState extends State<_MiniMap> {
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 class _Empty extends StatelessWidget {
-  final Color muted, accent;
+  final Color muted, accent, onPrimary;
   final VoidCallback onAdd;
 
-  const _Empty(
-      {required this.muted, required this.accent, required this.onAdd});
+  const _Empty({
+    required this.muted,
+    required this.accent,
+    required this.onPrimary,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -291,15 +319,34 @@ class _Empty extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 16,
           children: [
-            Text(AppLocalizations.of(context).homes_noHomesYet,
-                style: AppFonts.body(fontSize: 16, color: muted)),
-            Text(AppLocalizations.of(context).homes_addHomeDescription,
+            icon_home.Home(width: 48, height: 48, color: muted),
+            Text(l10n.homes_noHomesYet,
+                style: AppFonts.body(
+                    fontSize: 16, fontWeight: FontWeight.w600, color: muted)),
+            Text(l10n.homes_addHomeDescription,
                 textAlign: TextAlign.center,
                 style: AppFonts.body(fontSize: 13, color: muted)),
-            PrimaryButton(
-              label: AppLocalizations.of(context).homes_addHome,
-              onPressed: onAdd,
-              width: 200,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                Text(l10n.homes_addHomeHint,
+                    style: AppFonts.body(fontSize: 12, color: muted)),
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Plus(width: 14, height: 14, color: onPrimary),
+                  ),
+                ),
+                Text(l10n.homes_addHomeHintSuffix,
+                    style: AppFonts.body(fontSize: 12, color: muted)),
+              ],
             ),
           ],
         ),
@@ -308,164 +355,3 @@ class _Empty extends StatelessWidget {
   }
 }
 
-// ── Add/Edit sheet ────────────────────────────────────────────────────────────
-
-class _HomeFormSheet extends StatefulWidget {
-  final Home? existing;
-  final void Function(Home) onSaved;
-
-  const _HomeFormSheet({required this.onSaved, this.existing});
-
-  @override
-  State<_HomeFormSheet> createState() => _HomeFormSheetState();
-}
-
-class _HomeFormSheetState extends State<_HomeFormSheet> {
-  late final TextEditingController _name;
-  late final TextEditingController _address;
-  late double _lat;
-  late double _lng;
-  bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _name = TextEditingController(text: widget.existing?.name ?? '');
-    _address = TextEditingController(text: widget.existing?.address ?? '');
-    _lat = widget.existing?.latitude ?? 40.4168;
-    _lng = widget.existing?.longitude ?? -3.7038;
-  }
-
-  @override
-  void dispose() {
-    _name.dispose();
-    _address.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (_name.text.trim().isEmpty || _address.text.trim().isEmpty) return;
-    setState(() => _saving = true);
-
-    final auth = context.read<AuthBloc>().state;
-    final householdId = auth is AuthAuthenticated
-        ? (await AppDependencies.instance.householdRepository
-                .getCurrentHousehold(auth.profile.id))
-            .$1
-            ?.id
-        : null;
-    if (householdId == null) return;
-
-    final home = Home(
-      id: widget.existing?.id ?? '',
-      householdId: householdId,
-      name: _name.text.trim(),
-      address: _address.text.trim(),
-      latitude: _lat,
-      longitude: _lng,
-      description: widget.existing?.description,
-      imageUrl: widget.existing?.imageUrl,
-      isActive: widget.existing?.isActive ?? true,
-      createdAt: widget.existing?.createdAt ?? DateTime.now(),
-    );
-
-    widget.onSaved(home);
-    if (mounted) Navigator.of(context).pop(true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.myTheme;
-    final surface =
-        hexToColor(theme.surfaceColor);
-    final border =
-        hexToColor(theme.outlineColor);
-    final fg =
-        hexToColor(theme.foregroundColor);
-    final muted = hexToColor(theme.mutedColor);
-    final accent =
-        hexToColor(theme.primaryColor);
-
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
-        left: 20,
-        right: 20,
-        top: 8,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 16,
-        children: [
-          _field(_name, AppLocalizations.of(context).homes_name, AppLocalizations.of(context).homes_namePlaceholder,
-              surface: surface, border: border, fg: fg, muted: muted),
-          _field(_address, AppLocalizations.of(context).homes_address, AppLocalizations.of(context).homes_addressPlaceholder,
-              surface: surface, border: border, fg: fg, muted: muted),
-          // Location note
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              spacing: 8,
-              children: [
-                const Icon(CupertinoIcons.location_fill,
-                    size: 14, color: CupertinoColors.activeBlue),
-                Expanded(
-                  child: Text(
-                    AppLocalizations.of(context).homes_coordinatesNote(
-                      _lat.toStringAsFixed(4),
-                      _lng.toStringAsFixed(4),
-                    ),
-                    style: AppFonts.body(fontSize: 11, color: muted),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          PrimaryButton(
-            label: widget.existing == null ? AppLocalizations.of(context).homes_addHome : AppLocalizations.of(context).homes_saveChanges,
-            onPressed: _saving ? null : _save,
-            loading: _saving,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _field(
-    TextEditingController ctrl,
-    String label,
-    String placeholder, {
-    required Color surface,
-    required Color border,
-    required Color fg,
-    required Color muted,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 6,
-      children: [
-        Text(label,
-            style: AppFonts.body(
-                fontSize: 12, fontWeight: FontWeight.w600, color: muted)),
-        CupertinoTextField(
-          controller: ctrl,
-          placeholder: placeholder,
-          textCapitalization: TextCapitalization.sentences,
-          style: AppFonts.body(fontSize: 15, color: fg),
-          placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: border, width: 0.8),
-          ),
-        ),
-      ],
-    );
-  }
-}
