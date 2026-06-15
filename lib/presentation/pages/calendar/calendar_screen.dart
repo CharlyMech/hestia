@@ -13,11 +13,11 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/calendar/calendar_bloc.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
-import 'package:hestia/presentation/widgets/calendar/appointment_form_content.dart';
+import 'package:hestia/presentation/widgets/appointments/appointment_sheet_form.dart';
 import 'package:hestia/presentation/widgets/calendar/day_view.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -64,7 +64,7 @@ class _Body extends StatelessWidget {
       title: AppLocalizations.of(context).calendar_newAppointment,
       heightFactor: 0.92,
       expand: true,
-      child: AppointmentFormContent(
+      child: AppointmentSheetForm(
         defaultDate: defaultDate,
         userId: userId,
         use24h: prefs.use24h,
@@ -89,6 +89,8 @@ class _Body extends StatelessWidget {
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
     final income = hexToColor(theme.colorGreen);
+    final primary = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
     final l10n = AppLocalizations.of(context);
 
     return CupertinoPushedRouteShell(
@@ -97,32 +99,53 @@ class _Body extends StatelessWidget {
       borderColor: border,
       foregroundColor: fg,
       titleText: l10n.calendar_title,
+      // Caller owns the scroll view (custom CustomScrollView with its own
+      // refresh control + Skeletonizer driven by the inner CalendarBloc state).
+      childIsScrollable: true,
       trailing: Padding(
         padding: const EdgeInsets.only(right: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 4,
           children: [
-            // Jump back to today's view.
-            AnimatedButton(
-              size: 32,
-              padding: const EdgeInsets.all(4),
-              onTap: () {
+            // Today-jump button: only visible when the selected date is not today.
+            BlocSelector<CalendarBloc, CalendarState, bool>(
+              selector: (s) {
                 final today = DateTime.now();
-                final bloc = context.read<CalendarBloc>();
-                bloc.add(CalendarSelectDate(today));
-                bloc.add(CalendarMonthChanged(DateTime(today.year, today.month)));
+                final sel = s.selectedDate;
+                return sel.year == today.year &&
+                    sel.month == today.month &&
+                    sel.day == today.day;
               },
-              child: Calendar(width: 20, height: 20, color: fg),
+              builder: (context, isToday) => AnimatedOpacity(
+                opacity: isToday ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: IgnorePointer(
+                  ignoring: isToday,
+                  child: AnimatedButton(
+                    size: 32,
+                    padding: const EdgeInsets.all(4),
+                    onTap: () {
+                      final today = DateTime.now();
+                      final bloc = context.read<CalendarBloc>();
+                      bloc.add(CalendarSelectDate(today));
+                      bloc.add(CalendarMonthChanged(
+                          DateTime(today.year, today.month)));
+                    },
+                    child: Calendar(width: 20, height: 20, color: fg),
+                  ),
+                ),
+              ),
             ),
             AnimatedButton(
               size: 32,
               padding: const EdgeInsets.all(4),
+              backgroundColor: primary,
               onTap: () {
                 final state = context.read<CalendarBloc>().state;
                 _openAddSheet(context, state.selectedDate);
               },
-              child: Plus(width: 22, height: 22, color: fg),
+              child: Plus(width: 22, height: 22, color: onPrimary),
             ),
           ],
         ),
@@ -178,6 +201,7 @@ class _Body extends StatelessWidget {
                         startDayOfWeek: prefs.startDay,
                         surface: surface,
                         fg: fg,
+                        onPrimary: onPrimary,
                         muted: muted,
                         accent: accent,
                         income: income,
@@ -265,6 +289,7 @@ class _MonthGrid extends StatefulWidget {
   final int startDayOfWeek;
   final Color surface;
   final Color fg;
+  final Color onPrimary;
   final Color muted;
   final Color accent;
   final Color income;
@@ -276,6 +301,7 @@ class _MonthGrid extends StatefulWidget {
     required this.startDayOfWeek,
     required this.surface,
     required this.fg,
+    required this.onPrimary,
     required this.muted,
     required this.accent,
     required this.income,
@@ -525,9 +551,11 @@ class _MonthGridState extends State<_MonthGrid> {
                               fontWeight: isSelected
                                   ? FontWeight.w800
                                   : FontWeight.w600,
-                              color: !inMonth
-                                  ? widget.muted.withValues(alpha: 0.2)
-                                  : widget.fg,
+                              color: isSelected
+                                  ? widget.onPrimary
+                                  : !inMonth
+                                      ? widget.muted.withValues(alpha: 0.2)
+                                      : widget.fg,
                             ),
                           ),
                           SizedBox(height: cell * 0.06),
@@ -568,7 +596,6 @@ class _MonthGridState extends State<_MonthGrid> {
       },
     );
   }
-
 }
 
 class _EventDot extends StatelessWidget {
