@@ -42,6 +42,9 @@ app.*.map.json
 # Android Studio will place build artifacts here
 /android/app/debug
 
+# Supabase local CLI cache
+supabase/.temp/
+
 # Environment and secret files
 .env
 .env.dart
