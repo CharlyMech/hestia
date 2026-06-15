@@ -8,43 +8,68 @@ Firebase project for push notifications.
 ## A. Supabase backend recreate
 
 ### Prerequisites
+
 - `supabase` CLI installed (`brew install supabase/tap/supabase`)
 - Project ref, DB password, and the **service-role** key (dashboard → Settings → API)
 
 ### Steps
 
 1. **Link the project**
+
    ```bash
    supabase link --project-ref <PROJECT_REF>
    ```
 
 2. **Nuke existing objects** (⚠️ preserves only `auth.users` + `profiles`)
    Run `supabase/nuke.sql` in the dashboard SQL editor, or:
+
    ```bash
    supabase db execute --file supabase/nuke.sql
    ```
 
 3. **Apply migrations in order**
+
    ```bash
    for f in 0001_extensions 0002_tables 0003_functions_triggers 0004_rls 0005_seed; do
      supabase db execute --file "supabase/migrations/$f.sql"
    done
    ```
 
-4. **Enable extensions** (dashboard → Database → Extensions)
+4. **Bootstrap superadmin + household**
+   In the dashboard go to **Authentication → Users → Add user**, create your
+   account (email + password, tick *Auto Confirm*). Then run the seed in the
+   **SQL editor**:
+
+   ```bash
+   # CLI (if linked):
+   supabase db execute --file supabase/sql/superadmin_seed.sql
+   ```
+
+   Or paste the contents of `supabase/sql/superadmin_seed.sql` directly into
+   the dashboard **SQL editor** and click Run. The `NOTICE` output prints the
+   household UUID — copy it for the smoke-test curl in section C.
+
+5. **Enable extensions** (dashboard → Database → Extensions)
    - `pgcrypto` (usually on)
    - `pg_net`
    - `pg_cron` — if unavailable on your plan, skip and use the client-scheduled
      local-notification fallback (the app still shows reminders; only the
      server push fan-out is deferred).
 
-5. **Deploy edge functions**
+6. **Deploy edge functions**
+
    ```bash
-   supabase functions deploy notify create-transaction delete-transaction \
-     create-transfer process-reminders
+   supabase functions deploy --no-verify-jwt \
+     create-transaction delete-transaction create-transfer \
+     create-fuel-entry create-health-record create-maintenance-record \
+     start-shopping-session complete-shopping-session \
+     upsert-appointment delete-appointment \
+     google-oauth-exchange google-calendar-sync \
+     notify process-reminders
    ```
 
-6. **Set function secrets**
+7. **Set function secrets**
+
    ```bash
    supabase secrets set \
      SUPABASE_URL="https://<ref>.supabase.co" \
@@ -52,11 +77,13 @@ Firebase project for push notifications.
      FIREBASE_PROJECT_ID="<firebase-project-id>" \
      FIREBASE_SERVICE_ACCOUNT_JSON='<single-line service account json>'
    ```
+
    (`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are auto-injected at runtime,
    but setting them explicitly keeps local `serve` working.)
 
-7. **Schedule reminder delivery** (requires `pg_cron` + `pg_net`)
+8. **Schedule reminder delivery** (requires `pg_cron` + `pg_net`)
    In the SQL editor:
+
    ```sql
    select cron.schedule(
      'process-reminders',
@@ -72,6 +99,7 @@ Firebase project for push notifications.
      $$
    );
    ```
+
    No `pg_cron`? Trigger `process-reminders` from any external scheduler
    (GitHub Actions cron, Upstash, etc.) hitting the same URL.
 
@@ -104,10 +132,12 @@ Firebase project for push notifications.
    Set both as Supabase secrets (step A.6).
 
 6. **Flutter wiring**
+
    ```bash
    flutterfire configure        # regenerates lib/firebase_options.dart if used
    flutter pub get
    ```
+
    Confirm `firebase_core` initializes before
    `PushNotificationService.initialize(userId)` runs.
 
@@ -117,6 +147,7 @@ Firebase project for push notifications.
 
 1. Register a device: launch the app signed-in → a row appears in `device_tokens`.
 2. Manual push:
+
    ```bash
    curl -X POST 'https://<ref>.supabase.co/functions/v1/notify' \
      -H "Authorization: Bearer <service-role-key>" \
@@ -124,6 +155,7 @@ Firebase project for push notifications.
      -d '{"type":"test","household_id":"<hh>","user_ids":["<uid>"],
           "title":"Hello","body":"It works"}'
    ```
+
    → inbox row in `notifications` + push on device.
 3. Create a transaction in the app → `create-transaction` updates
    `bank_accounts.current_balance` (verify in dashboard).

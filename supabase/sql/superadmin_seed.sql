@@ -16,8 +16,8 @@
 
 do $$
 declare
-  v_email          text := '<SUPERADMIN_EMAIL>';   -- ← EDIT
-  v_household_name text := 'Casa';                 -- ← EDIT (display name only)
+  v_email          text := 'sanchezreciocarlos99@outlook.com';
+  v_household_name text := 'Mari&Carlos';
   v_user_id        uuid;
   v_household_id   uuid;
 begin
