@@ -48,4 +48,5 @@ abstract final class AppRadii {
   static const double xxl = 32;
   static const double xxxl = 40;
   static const double full = 9999;
+  static const double none = 0;
 }
