@@ -42,7 +42,8 @@ begin
     returning id into v_household_id;
 
     insert into household_members (household_id, user_id, role)
-    values (v_household_id, v_user_id, 'owner');
+    values (v_household_id, v_user_id, 'owner')
+    on conflict (household_id, user_id) do nothing;
     -- on_household_created (0005) auto-seeds default categories.
   end if;
 
