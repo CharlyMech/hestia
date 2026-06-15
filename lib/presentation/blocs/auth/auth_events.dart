@@ -11,6 +11,13 @@ class AuthCheckSession extends AuthEvent {
   const AuthCheckSession();
 }
 
+/// Silently re-fetches the current user's profile without clearing the
+/// authenticated state or re-gating biometrics. Used for pull-to-refresh.
+/// If there is no valid session, transitions to [AuthUnauthenticated].
+class AuthRefreshProfile extends AuthEvent {
+  const AuthRefreshProfile();
+}
+
 class AuthSignInWithApple extends AuthEvent {
   const AuthSignInWithApple();
 }

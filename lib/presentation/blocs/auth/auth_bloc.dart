@@ -9,6 +9,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc(this._authRepository) : super(const AuthInitial()) {
     on<AuthCheckSession>(_onCheckSession);
+    on<AuthRefreshProfile>(_onRefreshProfile);
     on<AuthSignInWithApple>(_onSignInWithApple);
     on<AuthSignInWithEmail>(_onSignInWithEmail);
     on<AuthSignOut>(_onSignOut);
@@ -32,6 +33,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthError(failure ?? const AuthFailure('Dev bypass failed')));
       return;
     }
+    emit(AuthAuthenticated(profile));
+  }
+
+  Future<void> _onRefreshProfile(
+      AuthRefreshProfile event, Emitter<AuthState> emit) async {
+    // Silent refresh: keep the current authenticated state on screen (no
+    // AuthLoading, no biometric re-gate) while we re-fetch. Only fall back to
+    // unauthenticated if the session is genuinely gone/expired beyond refresh.
+    final hasSession = await _authRepository.hasValidSession();
+    if (!hasSession) {
+      emit(const AuthUnauthenticated());
+      return;
+    }
+
+    final (profile, failure) = await _authRepository.getCurrentProfile();
+    if (failure != null || profile == null) {
+      // Transient fetch error — keep the existing profile rather than logging
+      // the user out over a flaky network call.
+      return;
+    }
+
     emit(AuthAuthenticated(profile));
   }
 
