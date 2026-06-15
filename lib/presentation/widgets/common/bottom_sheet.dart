@@ -63,14 +63,14 @@ class AppSheetShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final surface = hexToColor(theme.surfaceColor);
+    final bg = hexToColor(theme.backgroundColor);
     final fg = hexToColor(theme.foregroundColor);
     final border = hexToColor(theme.borderColor);
     final safeBottom = MediaQuery.paddingOf(context).bottom;
 
     return Container(
       decoration: BoxDecoration(
-        color: surface,
+        color: bg,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppRadii.xxl),
         ),
@@ -98,80 +98,88 @@ class AppSheetShell extends StatelessWidget {
           );
           final showBody = !bounded || maxH > handleHeight + 2 * vPad + spacing;
 
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: vPad),
-            child: Column(
-              mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-              spacing: spacing,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: handleHeight,
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: fg.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppRadii.xs),
-                          ),
-                        ),
-                      ),
-                      if (showCloseButton)
-                        Positioned(
-                          right: 8,
-                          top: compact ? 2 : 7,
-                          child: FButton.icon(
-                            style: FButtonStyle.ghost,
-                            onPress: () => Navigator.of(context).pop(),
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: fg.withValues(alpha: 0.1),
-                                border: Border.all(
-                                  color: border.withValues(alpha: 0.95),
-                                  width: 0.8,
-                                ),
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              child: Xmark(color: fg, width: 18, height: 18),
+          return GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            behavior: HitTestBehavior.translucent,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: vPad),
+              child: Column(
+                mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+                spacing: spacing,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: handleHeight,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: fg.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(AppRadii.xs),
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                if (title != null && showBody)
-                  Text(
-                    title!,
-                    style: AppFonts.body(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: fg,
+                        if (showCloseButton)
+                          Positioned(
+                            right: 8,
+                            top: compact ? 2 : 7,
+                            child: FButton.icon(
+                              style: FButtonStyle.ghost,
+                              onPress: () => Navigator.of(context).pop(),
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: fg.withValues(alpha: 0.1),
+                                  border: Border.all(
+                                    color: border.withValues(alpha: 0.95),
+                                    width: 0.8,
+                                  ),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: Xmark(color: fg, width: 18, height: 18),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                if (showBody)
-                  if (expand)
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: EdgeInsets.only(bottom: 12 + safeBottom),
-                        child: child,
-                      ),
-                    )
-                  else
-                    Flexible(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        padding: EdgeInsets.only(bottom: 12 + safeBottom),
-                        child: child,
+                  if (title != null && showBody)
+                    Text(
+                      title!,
+                      style: AppFonts.body(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: fg,
                       ),
                     ),
-              ],
+                  if (showBody)
+                    if (expand)
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: EdgeInsets.only(bottom: 12 + safeBottom),
+                          child: child,
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: EdgeInsets.only(bottom: 12 + safeBottom),
+                          child: child,
+                        ),
+                      ),
+                ],
+              ),
             ),
           );
         },
