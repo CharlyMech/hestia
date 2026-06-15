@@ -590,6 +590,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get transaction_fallbackAccount => 'Cuenta';
 
   @override
+  String get selectLocation_title => 'Seleccionar ubicación';
+
+  @override
+  String get selectLocation_setButton => 'Establecer ubicación';
+
+  @override
   String get transactionLocation_mapTitle => 'Elegir ubicación';
 
   @override
@@ -1257,6 +1263,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Añade tu casa para asociarla a transacciones.';
 
   @override
+  String get homes_addHomeHint => 'Pulsa';
+
+  @override
+  String get homes_addHomeHintSuffix => 'arriba para añadir tu primera casa.';
+
+  @override
   String get homes_addHome => 'Añadir casa';
 
   @override
@@ -1273,6 +1285,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homes_addressPlaceholder => 'Dirección completa';
+
+  @override
+  String get homes_nameRequired => 'El nombre es obligatorio';
+
+  @override
+  String get homes_addressRequired => 'La dirección es obligatoria';
 
   @override
   String get homes_saveChanges => 'Guardar cambios';

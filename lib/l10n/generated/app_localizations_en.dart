@@ -491,10 +491,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar_filterMine => 'Only mine';
 
   @override
-  String get calendar_eventos => 'Eventos';
+  String get calendar_eventos => 'Events';
 
   @override
-  String get calendar_movimientos => 'Movimientos';
+  String get calendar_movimientos => 'Transactions';
 
   @override
   String get shopping_title => 'Shopping';
@@ -588,6 +588,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_fallbackAccount => 'Account';
+
+  @override
+  String get selectLocation_title => 'Select location';
+
+  @override
+  String get selectLocation_setButton => 'Set location';
 
   @override
   String get transactionLocation_mapTitle => 'Pick location';
@@ -1251,6 +1257,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add your home to associate it with transactions.';
 
   @override
+  String get homes_addHomeHint => 'Tap';
+
+  @override
+  String get homes_addHomeHintSuffix => 'above to add your first home.';
+
+  @override
   String get homes_addHome => 'Add home';
 
   @override
@@ -1267,6 +1279,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homes_addressPlaceholder => 'Full street address';
+
+  @override
+  String get homes_nameRequired => 'Name is required';
+
+  @override
+  String get homes_addressRequired => 'Address is required';
 
   @override
   String get homes_saveChanges => 'Save changes';

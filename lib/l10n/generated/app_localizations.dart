@@ -1008,13 +1008,13 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_eventos.
   ///
   /// In en, this message translates to:
-  /// **'Eventos'**
+  /// **'Events'**
   String get calendar_eventos;
 
   /// No description provided for @calendar_movimientos.
   ///
   /// In en, this message translates to:
-  /// **'Movimientos'**
+  /// **'Transactions'**
   String get calendar_movimientos;
 
   /// No description provided for @shopping_title.
@@ -1196,6 +1196,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get transaction_fallbackAccount;
+
+  /// No description provided for @selectLocation_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Select location'**
+  String get selectLocation_title;
+
+  /// No description provided for @selectLocation_setButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Set location'**
+  String get selectLocation_setButton;
 
   /// No description provided for @transactionLocation_mapTitle.
   ///
@@ -2475,6 +2487,18 @@ abstract class AppLocalizations {
   /// **'Add your home to associate it with transactions.'**
   String get homes_addHomeDescription;
 
+  /// No description provided for @homes_addHomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap'**
+  String get homes_addHomeHint;
+
+  /// No description provided for @homes_addHomeHintSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'above to add your first home.'**
+  String get homes_addHomeHintSuffix;
+
   /// No description provided for @homes_addHome.
   ///
   /// In en, this message translates to:
@@ -2510,6 +2534,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full street address'**
   String get homes_addressPlaceholder;
+
+  /// No description provided for @homes_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get homes_nameRequired;
+
+  /// No description provided for @homes_addressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Address is required'**
+  String get homes_addressRequired;
 
   /// No description provided for @homes_saveChanges.
   ///
