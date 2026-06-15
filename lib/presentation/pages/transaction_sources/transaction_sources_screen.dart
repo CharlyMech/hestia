@@ -11,9 +11,9 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/transaction_sources/transaction_sources_bloc.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/transaction_sources/transaction_source_form.dart';
+import 'package:hestia/presentation/widgets/transaction_sources/transaction_source_sheet_form.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -130,7 +130,7 @@ class _Body extends StatelessWidget {
       heightFactor: 0.8,
       child: BlocProvider.value(
         value: context.read<TransactionSourcesBloc>(),
-        child: TransactionSourceForm(
+        child: TransactionSourceSheetForm(
           existing: existing,
           householdId: householdId,
           userId: userId,

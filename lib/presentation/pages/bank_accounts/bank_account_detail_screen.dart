@@ -16,10 +16,10 @@ import 'package:hestia/presentation/blocs/goals/goals_bloc.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/transactions/transaction_form.dart';
-import 'package:hestia/presentation/widgets/goals/goal_form_content.dart';
+import 'package:hestia/presentation/widgets/goals/goal_sheet_form.dart';
 import 'package:hestia/presentation/widgets/goals/goal_progress_card.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/balance_line_chart.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/income_expense_summary.dart';
@@ -192,7 +192,7 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
       heightFactor: 0.92,
       child: BlocProvider.value(
         value: _goalsBloc!,
-        child: GoalFormContent(
+        child: GoalSheetForm(
           existing: existing,
           householdId: _householdId!,
           userId: _userId!,

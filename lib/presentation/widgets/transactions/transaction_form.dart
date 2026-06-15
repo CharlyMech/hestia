@@ -24,7 +24,7 @@ import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
 import 'package:hestia/presentation/widgets/common/toggle_switch.dart';
-import 'package:hestia/presentation/widgets/transaction_sources/transaction_source_form.dart';
+import 'package:hestia/presentation/widgets/transaction_sources/transaction_source_sheet_form.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/bank_account_picker.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/category_picker.dart';
 import 'package:hestia/presentation/widgets/transactions/pickers/date_picker.dart';
@@ -892,7 +892,7 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
         create: (_) => TransactionSourcesBloc(
           AppDependencies.instance.transactionSourceRepository,
         )..add(TransactionSourcesLoad(householdId: householdId)),
-        child: TransactionSourceForm(
+        child: TransactionSourceSheetForm(
           existing: existing,
           householdId: householdId,
           userId: userId,

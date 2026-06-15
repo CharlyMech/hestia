@@ -8,12 +8,12 @@ import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/category.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
-import 'package:hestia/presentation/widgets/categories/category_form_content.dart';
+import 'package:hestia/presentation/widgets/categories/category_sheet_form.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
-import 'package:hestia/presentation/widgets/common/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/design_widgets.dart';
-import 'package:hestia/presentation/widgets/common/screen_shell.dart';
+import 'package:hestia/presentation/widgets/layout/screen_shell.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart' show Plus;
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -96,7 +96,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       title: existing == null ? 'New category' : 'Edit category',
       heightFactor: 0.72,
       expand: true,
-      child: CategoryFormContent(
+      child: CategorySheetForm(
         existing: existing,
         householdId: _householdId!,
         initialType: _selectedType,
