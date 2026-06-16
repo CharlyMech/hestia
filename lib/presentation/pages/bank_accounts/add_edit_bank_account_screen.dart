@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/error/failures.dart';
@@ -188,8 +189,6 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
     showAppBottomSheet<void>(
       context: context,
       title: l10n.bankAccountForm_selectBankTitle,
-      heightFactor: 0.85,
-      expand: true,
       child: _BankPickerSheet(
         selected: _selectedBank,
         onPicked: (bank) {
@@ -262,40 +261,24 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
 
           _sectionLabel(l10n.bankAccountForm_accountName, muted),
           const SizedBox(height: 8),
-          CupertinoTextField(
+          FTextField(
             controller: _name,
-            placeholder: l10n.bankAccountForm_accountNamePlaceholder,
+            hint: l10n.bankAccountForm_accountNamePlaceholder,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            style: AppFonts.body(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: border, width: 0.8),
-            ),
           ),
           const SizedBox(height: 20),
 
           _sectionLabel(l10n.bankAccountForm_ibanOptional, muted),
           const SizedBox(height: 8),
-          CupertinoTextField(
+          FTextField(
             controller: _iban,
-            placeholder: 'ES00 0000 0000 0000 0000 0000',
+            hint: 'ES00 0000 0000 0000 0000 0000',
             textCapitalization: TextCapitalization.characters,
             autocorrect: false,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
             ],
-            style: AppFonts.numeric(fontSize: 14, color: fg),
-            placeholderStyle: AppFonts.numeric(fontSize: 14, color: muted),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: border, width: 0.8),
-            ),
           ),
           const SizedBox(height: 20),
 
@@ -329,27 +312,19 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
 
           _sectionLabel(l10n.bankAccountForm_initialBalance, muted),
           const SizedBox(height: 8),
-          CupertinoTextField(
+          FTextField(
             controller: _balance,
-            placeholder: '0.00',
+            hint: '0.00',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
             ],
             suffix: Padding(
-              padding: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.only(right: 4),
               child: Text(
                 _currency ?? preferredCurrency,
                 style: AppFonts.body(fontSize: 13, color: muted),
               ),
-            ),
-            style: AppFonts.numeric(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.numeric(fontSize: 15, color: muted),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: border, width: 0.8),
             ),
           ),
           const SizedBox(height: 32),

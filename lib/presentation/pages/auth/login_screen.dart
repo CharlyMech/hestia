@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/router.dart';
-import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
@@ -42,8 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final onPrimary = hexToColor(theme.onPrimaryColor);
     final textPrimary = hexToColor(theme.onBackgroundColor);
     final textMuted = hexToColor(theme.onInactiveColor);
-    final surface = hexToColor(theme.surfaceColor);
-    final border = hexToColor(theme.borderColor);
     final l10n = AppLocalizations.of(context);
 
     return BlocListener<AuthBloc, AuthState>(
@@ -123,10 +120,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         passwordCtrl: _passwordCtrl,
                         primary: primary,
                         onPrimary: onPrimary,
-                        surface: surface,
-                        border: border,
-                        fg: textPrimary,
-                        muted: textMuted,
                       ),
                     ],
                   ),
@@ -145,20 +138,12 @@ class _SupabaseAuth extends StatefulWidget {
   final TextEditingController passwordCtrl;
   final Color primary;
   final Color onPrimary;
-  final Color surface;
-  final Color border;
-  final Color fg;
-  final Color muted;
 
   const _SupabaseAuth({
     required this.emailCtrl,
     required this.passwordCtrl,
     required this.primary,
     required this.onPrimary,
-    required this.surface,
-    required this.border,
-    required this.fg,
-    required this.muted,
   });
 
   @override
@@ -171,41 +156,28 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = context.myTheme;
+    final muted = hexToColor(theme.onInactiveColor);
+    final border = hexToColor(theme.borderColor);
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         final isLoading = state is AuthLoading;
         return Column(
           spacing: 8,
           children: [
-            CupertinoTextField(
+            FTextField.email(
               controller: widget.emailCtrl,
-              placeholder: l10n.auth_email,
-              keyboardType: TextInputType.emailAddress,
+              hint: l10n.auth_email,
+              label: null,
               autocorrect: false,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              style: AppFonts.body(fontSize: 15, color: widget.fg),
-              placeholderStyle:
-                  AppFonts.body(fontSize: 15, color: widget.muted),
-              decoration: BoxDecoration(
-                color: widget.surface,
-                border: Border.all(color: widget.border, width: 1),
-                borderRadius: BorderRadius.circular(AppRadii.lg),
-              ),
+              enabled: !isLoading,
             ),
-            CupertinoTextField(
+            FTextField.password(
               controller: widget.passwordCtrl,
-              placeholder: l10n.auth_password,
+              hint: l10n.auth_password,
+              label: null,
               obscureText: !_showPassword,
-              autocorrect: false,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              style: AppFonts.body(fontSize: 15, color: widget.fg),
-              placeholderStyle:
-                  AppFonts.body(fontSize: 15, color: widget.muted),
-              decoration: BoxDecoration(
-                color: widget.surface,
-                border: Border.all(color: widget.border, width: 1),
-                borderRadius: BorderRadius.circular(AppRadii.lg),
-              ),
+              enabled: !isLoading,
             ),
             Row(
               children: [
@@ -219,7 +191,7 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
                   behavior: HitTestBehavior.opaque,
                   child: Text(
                     l10n.auth_showPassword,
-                    style: AppFonts.body(fontSize: 14, color: widget.muted),
+                    style: AppFonts.body(fontSize: 14, color: muted),
                   ),
                 ),
               ],
@@ -257,15 +229,15 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Row(
                 children: [
-                  Expanded(child: Container(height: 1, color: widget.border)),
+                  Expanded(child: Container(height: 1, color: border)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       l10n.auth_or,
-                      style: AppFonts.body(fontSize: 12, color: widget.muted),
+                      style: AppFonts.body(fontSize: 12, color: muted),
                     ),
                   ),
-                  Expanded(child: Container(height: 1, color: widget.border)),
+                  Expanded(child: Container(height: 1, color: border)),
                 ],
               ),
             ),

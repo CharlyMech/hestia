@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
-import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/fuel_entry.dart';
@@ -445,19 +444,12 @@ class _AddEditFuelViewState extends State<_AddEditFuelView> {
           const SizedBox(height: 12),
           Text(l10n.fuelEntry_notes, style: AppFonts.sectionLabel(color: muted)),
           const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(AppRadii.xl),
-            ),
-            child: CupertinoTextField(
-              controller: _notes,
-              maxLines: 3,
-              decoration: const BoxDecoration(),
-              placeholder: l10n.fuelEntry_notesPlaceholder,
-              style: AppFonts.body(fontSize: 13, color: fg),
-            ),
+          FTextField.multiline(
+            controller: _notes,
+            hint: l10n.fuelEntry_notesPlaceholder,
+            textCapitalization: TextCapitalization.sentences,
+            minLines: 3,
+            maxLines: 3,
           ),
         ],
       ),

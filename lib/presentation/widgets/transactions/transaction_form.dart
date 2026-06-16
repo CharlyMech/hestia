@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/known_banks.dart';
 import 'package:flutter/services.dart';
@@ -474,39 +475,13 @@ class _FormBody extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  decoration: BoxDecoration(
-                    color: surface,
-                    border: Border.all(color: border, width: 1),
-                    borderRadius: BorderRadius.circular(AppRadii.xl),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: EditPencil(width: 16, height: 16, color: muted),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: CupertinoTextField(
-                          controller: noteCtrl,
-                          placeholder: l10n.transaction_addNote,
-                          textCapitalization: TextCapitalization.sentences,
-                          maxLines: 3,
-                          minLines: 1,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          style: AppFonts.body(fontSize: 13, color: fg),
-                          placeholderStyle:
-                              AppFonts.body(fontSize: 13, color: muted),
-                          decoration: const BoxDecoration(),
-                          onChanged: (v) =>
-                              bloc.add(TransactionFormNoteChanged(v)),
-                        ),
-                      ),
-                    ],
-                  ),
+                FTextField.multiline(
+                  controller: noteCtrl,
+                  hint: l10n.transaction_addNote,
+                  textCapitalization: TextCapitalization.sentences,
+                  minLines: 1,
+                  maxLines: 3,
+                  onChange: (v) => bloc.add(TransactionFormNoteChanged(v)),
                 ),
                 if (!isTransfer) ...[
                   const SizedBox(height: 8),
@@ -691,7 +666,6 @@ class _FormBody extends StatelessWidget {
     showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).transaction_selectCategoryTitle,
-      heightFactor: 0.6,
       child: CategoryPicker(
         categories: filtered,
         selectedId: state.categoryId,
@@ -711,7 +685,6 @@ class _FormBody extends StatelessWidget {
     showAppBottomSheet<void>(
       context: context,
       title: title,
-      heightFactor: 0.6,
       child: BankAccountPicker(
         accounts: bankAccounts,
         selectedId: isTo ? state.toBankAccountId : state.bankAccountId,
@@ -738,7 +711,6 @@ class _FormBody extends StatelessWidget {
     showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).transaction_selectCard,
-      heightFactor: 0.5,
       child: Builder(
         builder: (ctx) {
           final l10n = AppLocalizations.of(ctx);
@@ -775,8 +747,6 @@ class _FormBody extends StatelessWidget {
     await showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).transaction_counterpartySource,
-      heightFactor: 0.72,
-      expand: true,
       child: _TransactionSourcePickerSheet(
         sources: txSources,
         selectedId: state.transactionSourceId,
@@ -800,7 +770,6 @@ class _FormBody extends StatelessWidget {
     showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).transaction_currency,
-      heightFactor: 0.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -842,7 +811,6 @@ class _FormBody extends StatelessWidget {
     showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).transaction_selectDate,
-      heightFactor: 0.55,
       child: TransactionDatePicker(
         initialDate: state.date,
         onConfirm: (d) => bloc.add(TransactionFormDateChanged(d)),
@@ -883,11 +851,9 @@ class _TransactionSourcePickerSheet extends StatelessWidget {
   }) async {
     await showAppBottomSheet<void>(
       context: context,
-      expand: true,
       title: existing == null
           ? AppLocalizations.of(context).transaction_newSource
           : AppLocalizations.of(context).transaction_editSource,
-      heightFactor: 0.85,
       child: BlocProvider(
         create: (_) => TransactionSourcesBloc(
           AppDependencies.instance.transactionSourceRepository,
@@ -1291,7 +1257,6 @@ class _ActorPickerState extends State<_ActorPicker> {
     await showAppBottomSheet<void>(
       context: context,
       title: l10n.transaction_relatedTo,
-      heightFactor: 0.6,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

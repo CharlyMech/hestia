@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -51,54 +52,32 @@ class _CreateUserSheetFormState extends State<CreateUserSheetForm> {
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final fg = hexToColor(theme.onBackgroundColor);
-    final muted = hexToColor(theme.onInactiveColor);
     final onPrimary = hexToColor(theme.onPrimaryColor);
-    final surface = hexToColor(theme.surfaceColor);
-    final border = hexToColor(theme.borderColor);
     final expense = hexToColor(theme.colorRed);
-
-    BoxDecoration field() => BoxDecoration(
-          color: surface,
-          border: Border.all(color: border, width: 1),
-          borderRadius: BorderRadius.circular(12),
-        );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CupertinoTextField(
+          FTextField.email(
             controller: _emailCtrl,
-            placeholder: 'Email',
-            keyboardType: TextInputType.emailAddress,
+            hint: 'Email',
             autocorrect: false,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            style: AppFonts.body(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-            decoration: field(),
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 10),
-          CupertinoTextField(
+          FTextField.password(
             controller: _passwordCtrl,
-            placeholder: 'Temporary password',
-            obscureText: true,
+            hint: 'Temporary password',
             autocorrect: false,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            style: AppFonts.body(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-            decoration: field(),
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 10),
-          CupertinoTextField(
+          FTextField(
             controller: _nameCtrl,
-            placeholder: 'Display name (optional)',
+            hint: 'Display name (optional)',
             textCapitalization: TextCapitalization.words,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            style: AppFonts.body(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-            decoration: field(),
           ),
           if (_error != null) ...[
             const SizedBox(height: 10),
