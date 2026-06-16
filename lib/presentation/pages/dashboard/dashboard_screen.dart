@@ -21,8 +21,7 @@ import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/map/map_bloc.dart';
 import 'package:hestia/presentation/blocs/notifications/notifications_bloc.dart';
-import 'package:hestia/domain/entities/shopping_list.dart';
-import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
+
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/bank_accounts/wallet_card.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
@@ -33,7 +32,7 @@ import 'package:hestia/presentation/widgets/dashboard/tx_row.dart';
 
 import 'package:hestia/presentation/widgets/dashboard/week_calendar_strip.dart';
 import 'package:iconoir_flutter/iconoir_flutter.dart'
-    show Bell, Bank, CreditCard, Settings, CartAlt;
+    show Bell, Bank, CreditCard, Settings;
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -376,73 +375,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                             ),
                           ),
                         ),
-                      // Active shopping session banner
-                      Builder(builder: (ctx) {
-                        final shState = ctx.watch<ShoppingListsBloc>().state;
-                        final sessions = shState is ShoppingListsLoaded
-                            ? shState.activeSessions
-                            : <ShoppingList>[];
-                        if (sessions.isEmpty) return const SizedBox.shrink();
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: accent.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(AppRadii.lg),
-                              border: Border.all(
-                                  color: accent.withValues(alpha: 0.25),
-                                  width: 0.8),
-                            ),
-                            child: Row(
-                              spacing: 10,
-                              children: [
-                                CartAlt(width: 18, height: 18, color: fg),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    spacing: 2,
-                                    children: [
-                                      Text(
-                                        sessions.length == 1
-                                            ? l10n
-                                                .dashboard_activeShoppingSession
-                                            : l10n
-                                                .dashboard_activeShoppingSessions(
-                                                sessions.length,
-                                              ),
-                                        style: AppFonts.body(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                            color: fg),
-                                      ),
-                                      Text(
-                                        sessions.first.name,
-                                        style: AppFonts.body(
-                                            fontSize: 12, color: muted),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => context.push(
-                                      AppRoutes.shoppingListDetail,
-                                      extra: sessions.first.id),
-                                  child: Text(l10n.common_viewAll,
-                                      style: AppFonts.body(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: accent)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
                       const SizedBox(height: 20),
                       _CalendarSectionLabel(accent: accent, muted: muted),
                       const SizedBox(height: 8),
