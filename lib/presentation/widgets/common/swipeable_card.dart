@@ -15,7 +15,7 @@ class SwipeAction {
     required this.icon,
     required this.onTap,
     this.label,
-    this.width = 72,
+    this.width = 100,
   });
 }
 
@@ -97,16 +97,26 @@ class _SwipeableCardState extends State<SwipeableCard>
 
   void _onDragEnd(DragEndDetails d) {
     final offset = _currentOffset;
-    const threshold = 0.3;
+    const threshold = 0.35;
 
-    double target = 0;
     if (_maxRight > 0 && offset > _maxRight * threshold) {
-      target = _maxRight;
-    } else if (_maxLeft > 0 && offset < -_maxLeft * threshold) {
-      target = -_maxLeft;
+      // Full swipe right: trigger the first right action, then spring back.
+      _animateTo(0);
+      if (widget.rightActions.isNotEmpty) {
+        widget.rightActions.first.onTap();
+      }
+      return;
+    }
+    if (_maxLeft > 0 && offset < -_maxLeft * threshold) {
+      // Full swipe left: trigger the first left action, then spring back.
+      _animateTo(0);
+      if (widget.leftActions.isNotEmpty) {
+        widget.leftActions.first.onTap();
+      }
+      return;
     }
 
-    _animateTo(target);
+    _animateTo(0);
   }
 
   void _animateTo(double target) {
