@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -53,16 +52,10 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
   LatLng? _userLocation;
   StreamSubscription<Position>? _locationSub;
 
-  Object? _selectedItem;
-  final DraggableScrollableController _sheetCtrl =
-      DraggableScrollableController();
-  bool _sheetOpen = false;
-
   @override
   void initState() {
     super.initState();
     _mapCtrl = AnimatedMapController(vsync: this);
-    _sheetCtrl.addListener(_onSheetScroll);
     // Seed render cache from whatever the shared bloc already has.
     _onMapData(context.read<MapBloc>().state);
     _maybeStartLocationStream();
@@ -72,22 +65,7 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
   void dispose() {
     _locationSub?.cancel();
     _mapCtrl.dispose();
-    _sheetCtrl.removeListener(_onSheetScroll);
-    _sheetCtrl.dispose();
     super.dispose();
-  }
-
-  // ── Sheet ───────────────────────────────────────────────────────────────────
-
-  void _onSheetScroll() {
-    final isOpen = _sheetCtrl.isAttached && _sheetCtrl.size > 0.15;
-    if (isOpen != _sheetOpen && mounted) setState(() => _sheetOpen = isOpen);
-  }
-
-  void _clearSelection() {
-    setState(() => _selectedItem = null);
-    _sheetCtrl.animateTo(0.12,
-        duration: const Duration(milliseconds: 250), curve: Curves.easeIn);
   }
 
   // ── Location stream ─────────────────────────────────────────────────────────
@@ -124,7 +102,15 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
       _vendors = s.nearbyVendors;
     }
     if (s.hasUserLocation) {
-      _userLocation = LatLng(s.userLat!, s.userLng!);
+      final loc = LatLng(s.userLat!, s.userLng!);
+      final isFirst = _userLocation == null;
+      _userLocation = loc;
+      // First fix after map is mounted: fly to user location.
+      if (isFirst && mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _mapCtrl.animateTo(dest: loc, zoom: _kLocateZoom);
+        });
+      }
     }
   }
 
@@ -139,9 +125,16 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
     }
 
     final svc = LocationService();
-    final granted = await svc.ensureWhenInUsePermission();
-    if (!granted) {
+    var permission = await svc.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await svc.requestPermission();
+    }
+    if (permission == LocationPermission.deniedForever) {
       await svc.openSystemAppSettings();
+      return;
+    }
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
       return;
     }
     if (!mounted) return;
@@ -180,9 +173,14 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
   // ── Marker tap ──────────────────────────────────────────────────────────────
 
   void _onMarkerTap(Object item) {
-    setState(() => _selectedItem = item);
-    _sheetCtrl.animateTo(0.40,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+    final theme = context.myTheme;
+    final fg = hexToColor(theme.onBackgroundColor);
+    final muted = hexToColor(theme.onInactiveColor);
+    final accent = hexToColor(theme.primaryColor);
+    showAppBottomSheet(
+      context: context,
+      child: _SelectedContent(item: item, fg: fg, muted: muted, accent: accent),
+    );
   }
 
   // ── Build ────────────────────────────────────────────────────────────────────
@@ -197,6 +195,8 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
     final onStatus = hexToColor(theme.onStatusColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
+    final onPrimary = hexToColor(theme.onPrimaryColor);
     final errorColor = hexToColor(theme.errorColor);
     final successColor = hexToColor(theme.successColor);
     final top = MediaQuery.viewPaddingOf(context).top;
@@ -256,7 +256,7 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
             ),
 
             StatusBarBlurOverlay(
-                tint: surface, peakOpacity: 0.92, fadeExtent: 20),
+                tint: surface, peakOpacity: 0.12, fadeExtent: 28),
 
             // ── Back ─────────────────────────────────────────────────────────
             Positioned(
@@ -323,51 +323,35 @@ class _GlobalMapViewState extends State<GlobalMapScreen>
             ),
 
             // ── Right side: locate + zoom ─────────────────────────────────────
-            if (!_sheetOpen)
-              Positioned(
-                  right: 12,
-                  bottom: bottom + 90,
-                  child: Column(
-                    spacing: 8,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      AnimatedButton(
-                        size: 45,
-                        onTap: () => _mapCtrl.animatedZoomIn(
-                            customId: 'zoom', duration: _kAnimDuration),
-                        child: iconoir.Plus(width: 20, height: 20, color: fg),
-                      ),
-                      AnimatedButton(
-                        size: 45,
-                        onTap: () => _mapCtrl.animatedZoomOut(
-                            customId: 'zoom', duration: _kAnimDuration),
-                        child: iconoir.Minus(width: 20, height: 20, color: fg),
-                      ),
-                      AnimatedButton(
-                        onTap: _centerOnUser,
-                        size: 65,
-                        child:
-                            iconoir.Position(width: 40, height: 40, color: fg),
-                      ),
-                    ],
-                  )),
-
-            // ── Bottom sheet ──────────────────────────────────────────────────
-            DraggableScrollableSheet(
-              controller: _sheetCtrl,
-              initialChildSize: 0.12,
-              minChildSize: 0.12,
-              maxChildSize: 0.55,
-              snap: true,
-              snapSizes: const [0.12, 0.40],
-              builder: (ctx, scrollCtrl) => _BottomPanel(
-                scrollController: scrollCtrl,
-                selected: _selectedItem,
-                onDismiss: _clearSelection,
-                surface: surface,
-                fg: fg,
-                muted: muted,
-                accent: accent,
+            Positioned(
+              right: 12,
+              bottom: bottom + 12,
+              child: Column(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AnimatedButton(
+                    size: 45,
+                    backgroundColor: surface,
+                    onTap: () => _mapCtrl.animatedZoomIn(
+                        customId: 'zoom', duration: _kAnimDuration),
+                    child: iconoir.Plus(width: 20, height: 20, color: fg),
+                  ),
+                  AnimatedButton(
+                    size: 45,
+                    backgroundColor: surface,
+                    onTap: () => _mapCtrl.animatedZoomOut(
+                        customId: 'zoom', duration: _kAnimDuration),
+                    child: iconoir.Minus(width: 20, height: 20, color: fg),
+                  ),
+                  AnimatedButton(
+                    onTap: _centerOnUser,
+                    backgroundColor: primary,
+                    size: 65,
+                    child: iconoir.Position(
+                        width: 40, height: 40, color: onPrimary),
+                  ),
+                ],
               ),
             ),
           ],
@@ -494,70 +478,14 @@ class _LayerBadge extends StatelessWidget {
   }
 }
 
-// ── Bottom panel ──────────────────────────────────────────────────────────────
-
-class _BottomPanel extends StatelessWidget {
-  final ScrollController scrollController;
-  final Object? selected;
-  final VoidCallback onDismiss;
-  final Color surface, fg, muted, accent;
-
-  const _BottomPanel({
-    required this.scrollController,
-    required this.selected,
-    required this.onDismiss,
-    required this.surface,
-    required this.fg,
-    required this.muted,
-    required this.accent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: MediaQuery.paddingOf(context).bottom + 40,
-          child: ColoredBox(color: surface),
-        ),
-        AppSheetShell(
-          expand: true,
-          scrollController: scrollController,
-          child: selected == null
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                  child: Text(
-                    'Tap a pin for details',
-                    style: AppFonts.body(fontSize: 13, color: muted),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : _SelectedContent(
-                  item: selected!,
-                  onDismiss: onDismiss,
-                  fg: fg,
-                  muted: muted,
-                  accent: accent,
-                ),
-        ),
-      ],
-    );
-  }
-}
-
 // ── Selected item content ─────────────────────────────────────────────────────
 
 class _SelectedContent extends StatelessWidget {
   final Object item;
-  final VoidCallback onDismiss;
   final Color fg, muted, accent;
 
   const _SelectedContent({
     required this.item,
-    required this.onDismiss,
     required this.fg,
     required this.muted,
     required this.accent,
@@ -566,21 +494,12 @@ class _SelectedContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 12,
         children: [
-          Row(
-            children: [
-              _TypeChip(item: item, accent: accent, muted: muted),
-              const Spacer(),
-              GestureDetector(
-                onTap: onDismiss,
-                child: Icon(CupertinoIcons.xmark, size: 18, color: muted),
-              ),
-            ],
-          ),
+          _TypeChip(item: item, accent: accent, muted: muted),
           ..._buildBody(),
         ],
       ),

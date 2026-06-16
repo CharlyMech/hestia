@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/error/error_handler.dart';
+import 'package:hestia/core/services/location_service.dart';
 import 'package:hestia/domain/entities/home.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
@@ -205,16 +206,19 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   final HomeRepository _homeRepo;
   final TransactionRepository _txRepo;
   final TransactionSourceRepository _vendorRepo;
+  final LocationService _location;
 
   MapBloc({
     required HouseholdRepository householdRepository,
     required HomeRepository homeRepository,
     required TransactionRepository transactionRepository,
     required TransactionSourceRepository transactionSourceRepository,
+    LocationService? locationService,
   })  : _householdRepo = householdRepository,
         _homeRepo = homeRepository,
         _txRepo = transactionRepository,
         _vendorRepo = transactionSourceRepository,
+        _location = locationService ?? LocationService(),
         super(const MapInitial()) {
     on<MapLoad>(_onLoad);
     on<MapCameraMoved>(_onCameraMoved);
@@ -296,6 +300,28 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       userLat: state.userLat,
       userLng: state.userLng,
     ));
+
+    // Silently centre on the device location when permission is already
+    // granted and we don't have a fix yet. Madrid stays the fallback.
+    if (!state.hasUserLocation) {
+      await _maybeCenterOnDevice(emit);
+    }
+  }
+
+  /// Best-effort: when location permission is already granted (no prompt),
+  /// fetch the current position and recentre the shared camera on it.
+  Future<void> _maybeCenterOnDevice(Emitter<MapState> emit) async {
+    try {
+      if (!await _location.hasPermission()) return;
+      if (!await _location.isLocationServiceEnabled()) return;
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+      ).timeout(const Duration(seconds: 5));
+      if (state.hasUserLocation) return; // a live fix already arrived
+      add(MapUserLocationUpdated(pos.latitude, pos.longitude, recenter: true));
+    } catch (_) {
+      // No permission / timeout / plugin missing → keep the fallback centre.
+    }
   }
 
   void _onCameraMoved(MapCameraMoved e, Emitter<MapState> emit) {
