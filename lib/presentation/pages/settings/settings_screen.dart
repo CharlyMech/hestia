@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hestia/core/config/dependencies.dart';
@@ -167,31 +169,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     }
   }
 
-  Future<void> _pickStartDay(
-      BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
-    final options = <({int v, String label})>[
-      (v: DateTime.monday, label: l10n.settings_startDayMonday),
-      (v: DateTime.saturday, label: l10n.settings_startDaySaturday),
-      (v: DateTime.sunday, label: l10n.settings_startDaySunday),
-    ];
-    final picked = await _showOptionSheet<int>(
-      context: context,
-      title: l10n.settings_startDay,
-      current: prefs.startDay,
-      options: options,
-    );
-    if (picked != null && context.mounted) {
-      context.read<UserPrefsBloc>().add(UserPrefsSetStartDay(picked));
-    }
-  }
-
-  String _startDayLabel(int day, AppLocalizations l10n) => switch (day) {
-        DateTime.monday => l10n.settings_startDayMonday,
-        DateTime.saturday => l10n.settings_startDaySaturday,
-        DateTime.sunday => l10n.settings_startDaySunday,
-        _ => l10n.settings_startDayMonday,
-      };
-
   Future<void> _pickLanguage(
       BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
     final options = <({String v, String label})>[
@@ -206,24 +183,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
     if (picked != null && context.mounted) {
       context.read<UserPrefsBloc>().add(UserPrefsSetLanguageCode(picked));
-    }
-  }
-
-  Future<void> _pickTheme(
-      BuildContext context, UserPrefsState prefs, AppLocalizations l10n) async {
-    final options = <({ThemeType v, String label})>[
-      (v: ThemeType.system, label: l10n.settings_themeSystem),
-      (v: ThemeType.light, label: l10n.settings_themeLight),
-      (v: ThemeType.dark, label: l10n.settings_themeDark),
-    ];
-    final picked = await _showOptionSheet<ThemeType>(
-      context: context,
-      title: l10n.settings_theme,
-      current: prefs.themeType,
-      options: options,
-    );
-    if (picked != null && context.mounted) {
-      context.read<UserPrefsBloc>().add(UserPrefsSetThemeType(picked));
     }
   }
 
@@ -401,12 +360,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     context.read<UserPrefsBloc>().add(UserPrefsSetFaceIdUnlock(value));
   }
 
-  String _themeLabel(ThemeType t, AppLocalizations l10n) => switch (t) {
-        ThemeType.light => l10n.settings_themeLight,
-        ThemeType.dark => l10n.settings_themeDark,
-        ThemeType.system => l10n.settings_themeSystem,
-      };
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -474,12 +427,35 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
       ]),
       _Section(l10n.settings_general, [
-        _Tile.chevron(
+        // Theme: Light/Dark pills + "match device" checkbox (System).
+        _Tile.pills(
           icon: HalfMoon(width: 16, height: 16, color: tints[2]),
           color: tints[2],
           label: l10n.settings_appearance,
-          sub: _themeLabel(prefs.themeType, l10n),
-          onTap: () => _pickTheme(context, prefs, l10n),
+          pillLabels: [l10n.settings_themeLight, l10n.settings_themeDark],
+          pillIndex: prefs.themeType == ThemeType.light ? 0 : 1,
+          pillsEnabled: prefs.themeType != ThemeType.system,
+          onPillChanged: (i) => context.read<UserPrefsBloc>().add(
+                UserPrefsSetThemeType(
+                    i == 0 ? ThemeType.light : ThemeType.dark),
+              ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              Text(
+                l10n.settings_matchDevice,
+                style: AppFonts.body(fontSize: 12, color: muted),
+              ),
+              FCheckbox(
+                value: prefs.themeType == ThemeType.system,
+                onChange: (on) => context.read<UserPrefsBloc>().add(
+                      UserPrefsSetThemeType(
+                          on ? ThemeType.system : ThemeType.dark),
+                    ),
+              ),
+            ],
+          ),
         ),
         _Tile.chevron(
           icon: Globe(width: 16, height: 16, color: tints[3]),
@@ -490,20 +466,27 @@ class _SettingsScreenState extends State<SettingsScreen>
               : l10n.settings_languageEn,
           onTap: () => _pickLanguage(context, prefs, l10n),
         ),
-        _Tile.chevron(
+        // First day of week: Monday / Sunday pills.
+        _Tile.pills(
           icon: CalendarPlus(width: 16, height: 16, color: tints[0]),
           color: tints[0],
           label: l10n.settings_startDay,
-          sub: _startDayLabel(prefs.startDay, l10n),
-          onTap: () => _pickStartDay(context, prefs, l10n),
+          pillLabels: [l10n.settings_startDayMonday, l10n.settings_startDaySunday],
+          pillIndex: prefs.startDay == DateTime.sunday ? 1 : 0,
+          onPillChanged: (i) => context.read<UserPrefsBloc>().add(
+                UserPrefsSetStartDay(
+                    i == 0 ? DateTime.monday : DateTime.sunday),
+              ),
         ),
-        _Tile.toggle(
+        // Time format: 24h / AM-PM pills.
+        _Tile.pills(
           icon: Clock(width: 16, height: 16, color: tints[1]),
           color: tints[1],
-          label: l10n.settings_use24h,
-          value: prefs.use24h,
-          onChanged: (v) =>
-              context.read<UserPrefsBloc>().add(UserPrefsSetUse24h(v)),
+          label: l10n.settings_timeFormat,
+          pillLabels: [l10n.settings_timeFormat24h, l10n.settings_timeFormatAmPm],
+          pillIndex: prefs.use24h ? 0 : 1,
+          onPillChanged: (i) =>
+              context.read<UserPrefsBloc>().add(UserPrefsSetUse24h(i == 0)),
         ),
         _Tile.chevron(
           icon: CalendarPlus(
@@ -537,6 +520,47 @@ class _SettingsScreenState extends State<SettingsScreen>
       ]),
     ];
 
+    Widget labelRow(_Tile t) => Row(
+          children: [
+            CatTile(icon: t.icon, color: t.color, size: 34),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    t.label,
+                    style: AppFonts.body(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: fg,
+                    ),
+                  ),
+                  if (t.sub != null) ...[
+                    const SizedBox(height: 1),
+                    Text(
+                      t.sub!,
+                      style: AppFonts.body(fontSize: 12, color: muted),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (t.kind == _TileKind.toggle)
+              CupertinoSwitch(
+                value: t.value!,
+                onChanged: t.onChanged!,
+                activeTrackColor: hexToColor(theme.primaryColor),
+                inactiveTrackColor: hexToColor(theme.backgroundColor),
+                thumbColor: CupertinoColors.white,
+              )
+            else if (t.kind == _TileKind.chevron)
+              ChevronIcon(color: muted)
+            else if (t.kind == _TileKind.pills && t.trailing != null)
+              t.trailing!,
+          ],
+        );
+
     Widget tileWidget(_Tile t, {required bool last}) => GestureDetector(
           onTap: t.onTap,
           behavior: HitTestBehavior.opaque,
@@ -547,44 +571,31 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ? null
                   : Border(bottom: BorderSide(color: border, width: 1)),
             ),
-            child: Row(
-              children: [
-                CatTile(icon: t.icon, color: t.color, size: 34),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: t.kind == _TileKind.pills
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        t.label,
-                        style: AppFonts.body(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: fg,
+                      labelRow(t),
+                      const SizedBox(height: 10),
+                      IgnorePointer(
+                        ignoring: !t.pillsEnabled,
+                        child: Opacity(
+                          opacity: t.pillsEnabled ? 1.0 : 0.4,
+                          child: AnimatedPillTabs(
+                            labels: t.pillLabels!,
+                            selectedIndex: t.pillIndex!,
+                            onChanged: t.onPillChanged!,
+                            surface: hexToColor(theme.backgroundColor),
+                            border: border,
+                            fg: fg,
+                            muted: muted,
+                            pillColor: hexToColor(theme.primaryColor),
+                          ),
                         ),
                       ),
-                      if (t.sub != null) ...[
-                        const SizedBox(height: 1),
-                        Text(
-                          t.sub!,
-                          style: AppFonts.body(fontSize: 12, color: muted),
-                        ),
-                      ],
                     ],
-                  ),
-                ),
-                if (t.kind == _TileKind.toggle)
-                  CupertinoSwitch(
-                    value: t.value!,
-                    onChanged: t.onChanged!,
-                    activeTrackColor: hexToColor(theme.primaryColor),
-                    inactiveTrackColor: hexToColor(theme.backgroundColor),
-                    thumbColor: CupertinoColors.white,
                   )
-                else if (t.kind == _TileKind.chevron)
-                  ChevronIcon(color: muted),
-              ],
-            ),
+                : labelRow(t),
           ),
         );
 
@@ -651,7 +662,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 }
 
-enum _TileKind { chevron, toggle }
+enum _TileKind { chevron, toggle, pills }
 
 class _Tile {
   final Widget icon;
@@ -663,6 +674,19 @@ class _Tile {
   final ValueChanged<bool>? onChanged;
   final VoidCallback? onTap;
 
+  // Pills control.
+  final List<String>? pillLabels;
+  final int? pillIndex;
+  final ValueChanged<int>? onPillChanged;
+
+  /// Whether pills are interactive (e.g. theme pills disabled while "match
+  /// device" is on).
+  final bool pillsEnabled;
+
+  /// Optional trailing control rendered on the label row (e.g. the
+  /// match-device checkbox alongside theme pills).
+  final Widget? trailing;
+
   const _Tile._({
     required this.icon,
     required this.color,
@@ -672,6 +696,11 @@ class _Tile {
     this.value,
     this.onChanged,
     this.onTap,
+    this.pillLabels,
+    this.pillIndex,
+    this.onPillChanged,
+    this.pillsEnabled = true,
+    this.trailing,
   });
 
   factory _Tile.chevron({
@@ -704,6 +733,28 @@ class _Tile {
         kind: _TileKind.toggle,
         value: value,
         onChanged: onChanged,
+      );
+
+  factory _Tile.pills({
+    required Widget icon,
+    required Color color,
+    required String label,
+    required List<String> pillLabels,
+    required int pillIndex,
+    required ValueChanged<int> onPillChanged,
+    bool pillsEnabled = true,
+    Widget? trailing,
+  }) =>
+      _Tile._(
+        icon: icon,
+        color: color,
+        label: label,
+        kind: _TileKind.pills,
+        pillLabels: pillLabels,
+        pillIndex: pillIndex,
+        onPillChanged: onPillChanged,
+        pillsEnabled: pillsEnabled,
+        trailing: trailing,
       );
 }
 
