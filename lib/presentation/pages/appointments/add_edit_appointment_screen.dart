@@ -344,7 +344,6 @@ class _Form extends StatelessWidget {
     final picked = await showAppBottomSheet<DateTime>(
       context: context,
       title: dateOnly ? l10n.appointments_date : null,
-      heightFactor: 0.5,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

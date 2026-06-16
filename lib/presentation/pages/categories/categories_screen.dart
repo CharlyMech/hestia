@@ -94,8 +94,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     await showAppBottomSheet<void>(
       context: context,
       title: existing == null ? 'New category' : 'Edit category',
-      heightFactor: 0.72,
-      expand: true,
       child: CategorySheetForm(
         existing: existing,
         householdId: _householdId!,

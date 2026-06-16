@@ -37,8 +37,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     await showAppBottomSheet<void>(
       context: context,
       title: 'Edit transaction',
-      heightFactor: 0.92,
-      expand: true,
       child: TransactionForm(
         householdId: _tx.householdId,
         userId: _tx.userId,

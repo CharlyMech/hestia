@@ -7,15 +7,13 @@ import 'package:iconoir_flutter/iconoir_flutter.dart' show Xmark;
 
 /// App-wide bottom sheet. Theme-aware, drag handle, keyboard-safe.
 ///
-/// Default: hugs content (intrinsic height). When content exceeds
-/// `heightFactor * screen`, the body becomes scrollable.
-/// Set `expand=true` to force the sheet to fill the cap regardless.
+/// Height is automatic: hugs content, capped at
+/// (screen height − top safe area − 32). When content exceeds that cap the
+/// body scrolls. No height params needed.
 Future<T?> showAppBottomSheet<T>({
   required BuildContext context,
   required Widget child,
   String? title,
-  double heightFactor = 0.9,
-  bool expand = false,
 }) {
   final scrim = hexToColor(context.myTheme.shadow).withValues(alpha: 0.6);
 
@@ -28,8 +26,6 @@ Future<T?> showAppBottomSheet<T>({
         alignment: Alignment.bottomCenter,
         child: _SheetContainer(
           title: title,
-          heightFactor: heightFactor,
-          expand: expand,
           child: child,
         ),
       );
@@ -48,7 +44,6 @@ class AppSheetShell extends StatelessWidget {
   final Widget child;
   final String? title;
   final bool showCloseButton;
-  final bool expand;
   final ScrollController? scrollController;
 
   const AppSheetShell({
@@ -56,7 +51,6 @@ class AppSheetShell extends StatelessWidget {
     required this.child,
     this.title,
     this.showCloseButton = false,
-    this.expand = false,
     this.scrollController,
   });
 
@@ -104,7 +98,7 @@ class AppSheetShell extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: vPad),
               child: Column(
-                mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+                mainAxisSize: MainAxisSize.min,
                 spacing: spacing,
                 children: [
                   SizedBox(
@@ -158,26 +152,15 @@ class AppSheetShell extends StatelessWidget {
                       ),
                     ),
                   if (showBody)
-                    if (expand)
-                      Expanded(
-                        child: SingleChildScrollView(
-                          controller: scrollController,
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          padding: EdgeInsets.only(bottom: 12 + safeBottom),
-                          child: child,
-                        ),
-                      )
-                    else
-                      Flexible(
-                        child: SingleChildScrollView(
-                          controller: scrollController,
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          padding: EdgeInsets.only(bottom: 12 + safeBottom),
-                          child: child,
-                        ),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsets.only(bottom: 12 + safeBottom),
+                        child: child,
                       ),
+                    ),
                 ],
               ),
             ),
@@ -211,13 +194,9 @@ class AppSheetShell extends StatelessWidget {
 
 class _SheetContainer extends StatelessWidget {
   final String? title;
-  final double heightFactor;
-  final bool expand;
   final Widget child;
 
   const _SheetContainer({
-    required this.heightFactor,
-    required this.expand,
     required this.child,
     this.title,
   });
@@ -226,10 +205,8 @@ class _SheetContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final keyboard = media.viewInsets.bottom;
-    final safeBottom = media.padding.bottom;
-    final available =
-        media.size.height - media.padding.top - keyboard - safeBottom;
-    final maxHeight = (media.size.height * heightFactor).clamp(0.0, available);
+    // Cap: stops 32 pts below the top safe area, giving visual breathing room.
+    final maxHeight = media.size.height - media.padding.top - 32;
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 180),
@@ -240,7 +217,6 @@ class _SheetContainer extends StatelessWidget {
           constraints: BoxConstraints(maxHeight: maxHeight),
           child: AppSheetShell(
             title: title,
-            expand: expand,
             showCloseButton: true,
             child: child,
           ),

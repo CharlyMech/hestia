@@ -132,8 +132,6 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
     await showAppBottomSheet<void>(
       context: context,
       title: l10nSheet.bankAccount_newTransaction,
-      heightFactor: 0.92,
-      expand: true,
       child: TransactionForm(
         householdId: _householdId!,
         userId: _userId!,
@@ -189,7 +187,6 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
     await showAppBottomSheet<void>(
       context: context,
       title: existing == null ? l10n.bankAccount_newGoal : l10n.bankAccount_editGoal,
-      heightFactor: 0.92,
       child: BlocProvider.value(
         value: _goalsBloc!,
         child: GoalSheetForm(

@@ -149,7 +149,6 @@ class _BodyState extends State<_Body> {
     return showAppBottomSheet<void>(
       context: context,
       title: existing == null ? 'New goal' : 'Edit goal',
-      heightFactor: 0.92,
       child: BlocProvider.value(
         value: context.read<GoalsBloc>(),
         child: GoalSheetForm(

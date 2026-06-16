@@ -127,7 +127,6 @@ class _Body extends StatelessWidget {
     return showAppBottomSheet<void>(
       context: context,
       title: existing == null ? 'New source' : 'Edit source',
-      heightFactor: 0.8,
       child: BlocProvider.value(
         value: context.read<TransactionSourcesBloc>(),
         child: TransactionSourceSheetForm(
