@@ -73,7 +73,7 @@ Future<void> _startApp() async {
   }
 
   final database = await openDatabase();
-  await AppDependencies.initialize(FlavorConfig.current);
+  await AppDependencies.initialize(FlavorConfig.current, database: database);
 
   logger.i('App initialized');
   runApp(HestiaApp(database: database));
