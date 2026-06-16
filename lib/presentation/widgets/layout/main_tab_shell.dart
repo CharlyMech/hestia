@@ -11,6 +11,7 @@ import 'package:hestia/presentation/blocs/bank_accounts/bank_accounts_bloc.dart'
 import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
 import 'package:hestia/presentation/blocs/pets/pets_bloc.dart';
 import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
+import 'package:hestia/presentation/blocs/shopping/shopping_sessions_bloc.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/pages/bank_accounts/bank_accounts_screen.dart';
 import 'package:hestia/presentation/pages/dashboard/dashboard_screen.dart';
@@ -47,6 +48,7 @@ class _MainTabShellState extends State<MainTabShell> {
   late final PetsBloc _petsBloc;
   late final CarsBloc _carsBloc;
   late final ShoppingListsBloc _shoppingBloc;
+  late final ShoppingSessionsBloc _shoppingSessionsBloc;
 
   late List<Widget> _cachedPages;
   late final Widget _dashboardPage;
@@ -69,6 +71,8 @@ class _MainTabShellState extends State<MainTabShell> {
     _carsBloc = CarsBloc(AppDependencies.instance.carRepository);
     _shoppingBloc =
         ShoppingListsBloc(AppDependencies.instance.shoppingRepository);
+    _shoppingSessionsBloc = ShoppingSessionsBloc(
+        AppDependencies.instance.shoppingSessionRepository);
 
     _dashboardPage = DashboardScreen(
       onOpenMoneySource: (id) =>
@@ -120,6 +124,17 @@ class _MainTabShellState extends State<MainTabShell> {
       householdId: hid,
       userId: profile.id,
     ));
+    _shoppingSessionsBloc.add(ShoppingSessionsLoad(
+      householdId: hid,
+      userId: profile.id,
+    ));
+
+    // Flush any personal sessions that were finished while offline.
+    deps.shoppingSessionRepository.retryDirtySessions().then((flushed) {
+      if (flushed > 0 && mounted) {
+        _shoppingSessionsBloc.add(ShoppingSessionsRefresh());
+      }
+    });
   }
 
   void _onScroll() {
@@ -137,6 +152,7 @@ class _MainTabShellState extends State<MainTabShell> {
     _petsBloc.close();
     _carsBloc.close();
     _shoppingBloc.close();
+    _shoppingSessionsBloc.close();
     super.dispose();
   }
 
@@ -175,8 +191,6 @@ class _MainTabShellState extends State<MainTabShell> {
     await showAppBottomSheet<void>(
       context: context,
       title: 'New transaction',
-      heightFactor: 0.92,
-      expand: true,
       child: TransactionForm(
         householdId: household.id,
         userId: authState.profile.id,
@@ -220,6 +234,7 @@ class _MainTabShellState extends State<MainTabShell> {
         BlocProvider.value(value: _petsBloc),
         BlocProvider.value(value: _carsBloc),
         BlocProvider.value(value: _shoppingBloc),
+        BlocProvider.value(value: _shoppingSessionsBloc),
       ],
       child: MainTabScope(
         selectTab: _goTo,

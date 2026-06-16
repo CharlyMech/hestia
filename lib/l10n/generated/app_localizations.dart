@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get common_delete;
 
+  /// No description provided for @common_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get common_clear;
+
   /// No description provided for @common_edit.
   ///
   /// In en, this message translates to:
@@ -813,6 +819,30 @@ abstract class AppLocalizations {
   /// **'24-hour clock'**
   String get settings_use24h;
 
+  /// No description provided for @settings_matchDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Match device'**
+  String get settings_matchDevice;
+
+  /// No description provided for @settings_timeFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Time format'**
+  String get settings_timeFormat;
+
+  /// No description provided for @settings_timeFormat24h.
+  ///
+  /// In en, this message translates to:
+  /// **'24h'**
+  String get settings_timeFormat24h;
+
+  /// No description provided for @settings_timeFormatAmPm.
+  ///
+  /// In en, this message translates to:
+  /// **'AM/PM'**
+  String get settings_timeFormatAmPm;
+
   /// No description provided for @settings_biometric.
   ///
   /// In en, this message translates to:
@@ -1017,6 +1047,48 @@ abstract class AppLocalizations {
   /// **'Transactions'**
   String get calendar_movimientos;
 
+  /// No description provided for @calendar_showFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all filters'**
+  String get calendar_showFilters;
+
+  /// No description provided for @calendar_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get calendar_filters;
+
+  /// No description provided for @calendar_clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get calendar_clearFilters;
+
+  /// No description provided for @calendar_filterPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get calendar_filterPeople;
+
+  /// No description provided for @calendar_filterType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get calendar_filterType;
+
+  /// No description provided for @calendar_filterPets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get calendar_filterPets;
+
+  /// No description provided for @calendar_filterVehicles.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicles'**
+  String get calendar_filterVehicles;
+
   /// No description provided for @shopping_title.
   ///
   /// In en, this message translates to:
@@ -1116,7 +1188,7 @@ abstract class AppLocalizations {
   /// No description provided for @shopping_createTemplate.
   ///
   /// In en, this message translates to:
-  /// **'Create new template'**
+  /// **'Create template'**
   String get shopping_createTemplate;
 
   /// No description provided for @shopping_kindTemplate.
@@ -1142,6 +1214,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancelled'**
   String get shopping_statusCancelled;
+
+  /// No description provided for @shopping_activeSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Active sessions'**
+  String get shopping_activeSessions;
+
+  /// No description provided for @shopping_finishSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish session'**
+  String get shopping_finishSession;
+
+  /// No description provided for @shopping_finishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish this session?'**
+  String get shopping_finishConfirmTitle;
+
+  /// No description provided for @shopping_finishConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can record what you paid, or just close the session.'**
+  String get shopping_finishConfirmBody;
+
+  /// No description provided for @shopping_keepShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep shopping'**
+  String get shopping_keepShopping;
+
+  /// No description provided for @shopping_finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get shopping_finish;
+
+  /// No description provided for @shopping_addTransactionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a payment?'**
+  String get shopping_addTransactionTitle;
+
+  /// No description provided for @shopping_addTransactionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a transaction for this shopping trip?'**
+  String get shopping_addTransactionBody;
+
+  /// No description provided for @shopping_addTransactionYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, add payment'**
+  String get shopping_addTransactionYes;
+
+  /// No description provided for @shopping_addTransactionNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, just finish'**
+  String get shopping_addTransactionNo;
+
+  /// No description provided for @shopping_deleteSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this session?'**
+  String get shopping_deleteSessionTitle;
+
+  /// No description provided for @shopping_deleteSessionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The session and its items will be permanently removed.'**
+  String get shopping_deleteSessionBody;
+
+  /// No description provided for @shopping_markDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark done'**
+  String get shopping_markDone;
+
+  /// No description provided for @shopping_addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item…'**
+  String get shopping_addItem;
+
+  /// No description provided for @shopping_quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get shopping_quantity;
+
+  /// No description provided for @shopping_uncheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncheck'**
+  String get shopping_uncheck;
+
+  /// No description provided for @shopping_check.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get shopping_check;
+
+  /// No description provided for @shopping_updateTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the template?'**
+  String get shopping_updateTemplateTitle;
+
+  /// No description provided for @shopping_updateTemplateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This session changed since it started. Update the template to match?'**
+  String get shopping_updateTemplateBody;
+
+  /// No description provided for @shopping_updateTemplateYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Update template'**
+  String get shopping_updateTemplateYes;
+
+  /// No description provided for @shopping_updateTemplateNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep template'**
+  String get shopping_updateTemplateNo;
+
+  /// No description provided for @shopping_saveAsTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as template?'**
+  String get shopping_saveAsTemplateTitle;
+
+  /// No description provided for @shopping_saveAsTemplateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this shopping list as a reusable template?'**
+  String get shopping_saveAsTemplateBody;
+
+  /// No description provided for @shopping_saveAsTemplateYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Save template'**
+  String get shopping_saveAsTemplateYes;
+
+  /// No description provided for @shopping_saveAsTemplateNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No thanks'**
+  String get shopping_saveAsTemplateNo;
+
+  /// No description provided for @shopping_shareWithUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Share session with users'**
+  String get shopping_shareWithUsers;
+
+  /// No description provided for @shopping_sessionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Session name'**
+  String get shopping_sessionName;
+
+  /// No description provided for @shopping_sessionNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Saturday groceries'**
+  String get shopping_sessionNamePlaceholder;
+
+  /// No description provided for @shopping_scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get shopping_scope;
+
+  /// No description provided for @shopping_scopePersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get shopping_scopePersonal;
+
+  /// No description provided for @shopping_scopeHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get shopping_scopeHousehold;
+
+  /// No description provided for @shopping_source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source (optional)'**
+  String get shopping_source;
+
+  /// No description provided for @shopping_sourcePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Mercadona, Lidl, …'**
+  String get shopping_sourcePlaceholder;
+
+  /// No description provided for @shopping_startSessionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start session'**
+  String get shopping_startSessionAction;
+
+  /// No description provided for @shopping_shareWithMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with members'**
+  String get shopping_shareWithMembers;
+
+  /// No description provided for @shopping_lastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {date}'**
+  String shopping_lastUpdated(String date);
+
+  /// No description provided for @shopping_unsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get shopping_unsavedChanges;
+
+  /// No description provided for @shopping_saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get shopping_saveChanges;
+
+  /// No description provided for @shopping_templateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get shopping_templateName;
+
+  /// No description provided for @shopping_templateNamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Mercadona staples'**
+  String get shopping_templateNamePlaceholder;
+
+  /// No description provided for @shopping_defaultSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Default source (optional)'**
+  String get shopping_defaultSource;
+
+  /// No description provided for @shopping_linkedAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked account (optional)'**
+  String get shopping_linkedAccount;
+
+  /// No description provided for @shopping_editTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit template'**
+  String get shopping_editTemplate;
+
+  /// No description provided for @shopping_shareTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Share template with members'**
+  String get shopping_shareTemplate;
+
+  /// No description provided for @shopping_shareAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All household members'**
+  String get shopping_shareAll;
+
+  /// No description provided for @shopping_itemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
+  String shopping_itemCount(int count);
 
   /// No description provided for @notifications_title.
   ///
@@ -1574,6 +1922,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vendors'**
   String get map_toggleVendors;
+
+  /// No description provided for @map_tapPinForDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a pin for details'**
+  String get map_tapPinForDetails;
 
   /// No description provided for @bankAccount_accountNotFound.
   ///
@@ -2228,6 +2582,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current odometer (km)'**
   String get car_currentOdometer;
+
+  /// No description provided for @car_acquisitionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Acquisition date'**
+  String get car_acquisitionDate;
 
   /// No description provided for @car_status.
   ///

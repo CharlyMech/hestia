@@ -5288,6 +5288,1303 @@ class LocalAccountMembersCompanion extends UpdateCompanion<LocalAccountMember> {
   }
 }
 
+class $LocalShoppingSessionsTable extends LocalShoppingSessions
+    with TableInfo<$LocalShoppingSessionsTable, LocalShoppingSession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalShoppingSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _ownerIdMeta =
+      const VerificationMeta('ownerId');
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+      'owner_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _scopeMeta = const VerificationMeta('scope');
+  @override
+  late final GeneratedColumn<String> scope = GeneratedColumn<String>(
+      'scope', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _templateIdMeta =
+      const VerificationMeta('templateId');
+  @override
+  late final GeneratedColumn<String> templateId = GeneratedColumn<String>(
+      'template_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _bankAccountIdMeta =
+      const VerificationMeta('bankAccountId');
+  @override
+  late final GeneratedColumn<String> bankAccountId = GeneratedColumn<String>(
+      'bank_account_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _transactionSourceIdMeta =
+      const VerificationMeta('transactionSourceId');
+  @override
+  late final GeneratedColumn<String> transactionSourceId =
+      GeneratedColumn<String>('transaction_source_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _transactionIdMeta =
+      const VerificationMeta('transactionId');
+  @override
+  late final GeneratedColumn<String> transactionId = GeneratedColumn<String>(
+      'transaction_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _startedAtMeta =
+      const VerificationMeta('startedAt');
+  @override
+  late final GeneratedColumn<int> startedAt = GeneratedColumn<int>(
+      'started_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _endedAtMeta =
+      const VerificationMeta('endedAt');
+  @override
+  late final GeneratedColumn<int> endedAt = GeneratedColumn<int>(
+      'ended_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _paidAtMeta = const VerificationMeta('paidAt');
+  @override
+  late final GeneratedColumn<int> paidAt = GeneratedColumn<int>(
+      'paid_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lastUpdateMeta =
+      const VerificationMeta('lastUpdate');
+  @override
+  late final GeneratedColumn<int> lastUpdate = GeneratedColumn<int>(
+      'last_update', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _isSyncedMeta =
+      const VerificationMeta('isSynced');
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+      'is_synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_synced" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _isDirtyMeta =
+      const VerificationMeta('isDirty');
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+      'is_dirty', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_dirty" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        householdId,
+        ownerId,
+        name,
+        scope,
+        status,
+        templateId,
+        bankAccountId,
+        transactionSourceId,
+        transactionId,
+        startedAt,
+        endedAt,
+        paidAt,
+        createdAt,
+        lastUpdate,
+        isSynced,
+        isDirty
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_shopping_sessions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalShoppingSession> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(_ownerIdMeta,
+          ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta));
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('scope')) {
+      context.handle(
+          _scopeMeta, scope.isAcceptableOrUnknown(data['scope']!, _scopeMeta));
+    } else if (isInserting) {
+      context.missing(_scopeMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('template_id')) {
+      context.handle(
+          _templateIdMeta,
+          templateId.isAcceptableOrUnknown(
+              data['template_id']!, _templateIdMeta));
+    }
+    if (data.containsKey('bank_account_id')) {
+      context.handle(
+          _bankAccountIdMeta,
+          bankAccountId.isAcceptableOrUnknown(
+              data['bank_account_id']!, _bankAccountIdMeta));
+    }
+    if (data.containsKey('transaction_source_id')) {
+      context.handle(
+          _transactionSourceIdMeta,
+          transactionSourceId.isAcceptableOrUnknown(
+              data['transaction_source_id']!, _transactionSourceIdMeta));
+    }
+    if (data.containsKey('transaction_id')) {
+      context.handle(
+          _transactionIdMeta,
+          transactionId.isAcceptableOrUnknown(
+              data['transaction_id']!, _transactionIdMeta));
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(_startedAtMeta,
+          startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta));
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(_endedAtMeta,
+          endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta));
+    }
+    if (data.containsKey('paid_at')) {
+      context.handle(_paidAtMeta,
+          paidAt.isAcceptableOrUnknown(data['paid_at']!, _paidAtMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('last_update')) {
+      context.handle(
+          _lastUpdateMeta,
+          lastUpdate.isAcceptableOrUnknown(
+              data['last_update']!, _lastUpdateMeta));
+    } else if (isInserting) {
+      context.missing(_lastUpdateMeta);
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(_isSyncedMeta,
+          isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta));
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(_isDirtyMeta,
+          isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalShoppingSession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalShoppingSession(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
+      ownerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}owner_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      scope: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scope'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      templateId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}template_id']),
+      bankAccountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}bank_account_id']),
+      transactionSourceId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}transaction_source_id']),
+      transactionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}transaction_id']),
+      startedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}started_at'])!,
+      endedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ended_at']),
+      paidAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}paid_at']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      lastUpdate: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_update'])!,
+      isSynced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_synced'])!,
+      isDirty: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_dirty'])!,
+    );
+  }
+
+  @override
+  $LocalShoppingSessionsTable createAlias(String alias) {
+    return $LocalShoppingSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalShoppingSession extends DataClass
+    implements Insertable<LocalShoppingSession> {
+  final String id;
+  final String householdId;
+  final String ownerId;
+  final String name;
+  final String scope;
+  final String status;
+  final String? templateId;
+  final String? bankAccountId;
+  final String? transactionSourceId;
+  final String? transactionId;
+  final int startedAt;
+  final int? endedAt;
+  final int? paidAt;
+  final int createdAt;
+  final int lastUpdate;
+  final bool isSynced;
+  final bool isDirty;
+  const LocalShoppingSession(
+      {required this.id,
+      required this.householdId,
+      required this.ownerId,
+      required this.name,
+      required this.scope,
+      required this.status,
+      this.templateId,
+      this.bankAccountId,
+      this.transactionSourceId,
+      this.transactionId,
+      required this.startedAt,
+      this.endedAt,
+      this.paidAt,
+      required this.createdAt,
+      required this.lastUpdate,
+      required this.isSynced,
+      required this.isDirty});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['name'] = Variable<String>(name);
+    map['scope'] = Variable<String>(scope);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || templateId != null) {
+      map['template_id'] = Variable<String>(templateId);
+    }
+    if (!nullToAbsent || bankAccountId != null) {
+      map['bank_account_id'] = Variable<String>(bankAccountId);
+    }
+    if (!nullToAbsent || transactionSourceId != null) {
+      map['transaction_source_id'] = Variable<String>(transactionSourceId);
+    }
+    if (!nullToAbsent || transactionId != null) {
+      map['transaction_id'] = Variable<String>(transactionId);
+    }
+    map['started_at'] = Variable<int>(startedAt);
+    if (!nullToAbsent || endedAt != null) {
+      map['ended_at'] = Variable<int>(endedAt);
+    }
+    if (!nullToAbsent || paidAt != null) {
+      map['paid_at'] = Variable<int>(paidAt);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['last_update'] = Variable<int>(lastUpdate);
+    map['is_synced'] = Variable<bool>(isSynced);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    return map;
+  }
+
+  LocalShoppingSessionsCompanion toCompanion(bool nullToAbsent) {
+    return LocalShoppingSessionsCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      ownerId: Value(ownerId),
+      name: Value(name),
+      scope: Value(scope),
+      status: Value(status),
+      templateId: templateId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(templateId),
+      bankAccountId: bankAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bankAccountId),
+      transactionSourceId: transactionSourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionSourceId),
+      transactionId: transactionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionId),
+      startedAt: Value(startedAt),
+      endedAt: endedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endedAt),
+      paidAt:
+          paidAt == null && nullToAbsent ? const Value.absent() : Value(paidAt),
+      createdAt: Value(createdAt),
+      lastUpdate: Value(lastUpdate),
+      isSynced: Value(isSynced),
+      isDirty: Value(isDirty),
+    );
+  }
+
+  factory LocalShoppingSession.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalShoppingSession(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      name: serializer.fromJson<String>(json['name']),
+      scope: serializer.fromJson<String>(json['scope']),
+      status: serializer.fromJson<String>(json['status']),
+      templateId: serializer.fromJson<String?>(json['templateId']),
+      bankAccountId: serializer.fromJson<String?>(json['bankAccountId']),
+      transactionSourceId:
+          serializer.fromJson<String?>(json['transactionSourceId']),
+      transactionId: serializer.fromJson<String?>(json['transactionId']),
+      startedAt: serializer.fromJson<int>(json['startedAt']),
+      endedAt: serializer.fromJson<int?>(json['endedAt']),
+      paidAt: serializer.fromJson<int?>(json['paidAt']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      lastUpdate: serializer.fromJson<int>(json['lastUpdate']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'name': serializer.toJson<String>(name),
+      'scope': serializer.toJson<String>(scope),
+      'status': serializer.toJson<String>(status),
+      'templateId': serializer.toJson<String?>(templateId),
+      'bankAccountId': serializer.toJson<String?>(bankAccountId),
+      'transactionSourceId': serializer.toJson<String?>(transactionSourceId),
+      'transactionId': serializer.toJson<String?>(transactionId),
+      'startedAt': serializer.toJson<int>(startedAt),
+      'endedAt': serializer.toJson<int?>(endedAt),
+      'paidAt': serializer.toJson<int?>(paidAt),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'lastUpdate': serializer.toJson<int>(lastUpdate),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'isDirty': serializer.toJson<bool>(isDirty),
+    };
+  }
+
+  LocalShoppingSession copyWith(
+          {String? id,
+          String? householdId,
+          String? ownerId,
+          String? name,
+          String? scope,
+          String? status,
+          Value<String?> templateId = const Value.absent(),
+          Value<String?> bankAccountId = const Value.absent(),
+          Value<String?> transactionSourceId = const Value.absent(),
+          Value<String?> transactionId = const Value.absent(),
+          int? startedAt,
+          Value<int?> endedAt = const Value.absent(),
+          Value<int?> paidAt = const Value.absent(),
+          int? createdAt,
+          int? lastUpdate,
+          bool? isSynced,
+          bool? isDirty}) =>
+      LocalShoppingSession(
+        id: id ?? this.id,
+        householdId: householdId ?? this.householdId,
+        ownerId: ownerId ?? this.ownerId,
+        name: name ?? this.name,
+        scope: scope ?? this.scope,
+        status: status ?? this.status,
+        templateId: templateId.present ? templateId.value : this.templateId,
+        bankAccountId:
+            bankAccountId.present ? bankAccountId.value : this.bankAccountId,
+        transactionSourceId: transactionSourceId.present
+            ? transactionSourceId.value
+            : this.transactionSourceId,
+        transactionId:
+            transactionId.present ? transactionId.value : this.transactionId,
+        startedAt: startedAt ?? this.startedAt,
+        endedAt: endedAt.present ? endedAt.value : this.endedAt,
+        paidAt: paidAt.present ? paidAt.value : this.paidAt,
+        createdAt: createdAt ?? this.createdAt,
+        lastUpdate: lastUpdate ?? this.lastUpdate,
+        isSynced: isSynced ?? this.isSynced,
+        isDirty: isDirty ?? this.isDirty,
+      );
+  LocalShoppingSession copyWithCompanion(LocalShoppingSessionsCompanion data) {
+    return LocalShoppingSession(
+      id: data.id.present ? data.id.value : this.id,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      name: data.name.present ? data.name.value : this.name,
+      scope: data.scope.present ? data.scope.value : this.scope,
+      status: data.status.present ? data.status.value : this.status,
+      templateId:
+          data.templateId.present ? data.templateId.value : this.templateId,
+      bankAccountId: data.bankAccountId.present
+          ? data.bankAccountId.value
+          : this.bankAccountId,
+      transactionSourceId: data.transactionSourceId.present
+          ? data.transactionSourceId.value
+          : this.transactionSourceId,
+      transactionId: data.transactionId.present
+          ? data.transactionId.value
+          : this.transactionId,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+      paidAt: data.paidAt.present ? data.paidAt.value : this.paidAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastUpdate:
+          data.lastUpdate.present ? data.lastUpdate.value : this.lastUpdate,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalShoppingSession(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('name: $name, ')
+          ..write('scope: $scope, ')
+          ..write('status: $status, ')
+          ..write('templateId: $templateId, ')
+          ..write('bankAccountId: $bankAccountId, ')
+          ..write('transactionSourceId: $transactionSourceId, ')
+          ..write('transactionId: $transactionId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDirty: $isDirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      householdId,
+      ownerId,
+      name,
+      scope,
+      status,
+      templateId,
+      bankAccountId,
+      transactionSourceId,
+      transactionId,
+      startedAt,
+      endedAt,
+      paidAt,
+      createdAt,
+      lastUpdate,
+      isSynced,
+      isDirty);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalShoppingSession &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.ownerId == this.ownerId &&
+          other.name == this.name &&
+          other.scope == this.scope &&
+          other.status == this.status &&
+          other.templateId == this.templateId &&
+          other.bankAccountId == this.bankAccountId &&
+          other.transactionSourceId == this.transactionSourceId &&
+          other.transactionId == this.transactionId &&
+          other.startedAt == this.startedAt &&
+          other.endedAt == this.endedAt &&
+          other.paidAt == this.paidAt &&
+          other.createdAt == this.createdAt &&
+          other.lastUpdate == this.lastUpdate &&
+          other.isSynced == this.isSynced &&
+          other.isDirty == this.isDirty);
+}
+
+class LocalShoppingSessionsCompanion
+    extends UpdateCompanion<LocalShoppingSession> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> ownerId;
+  final Value<String> name;
+  final Value<String> scope;
+  final Value<String> status;
+  final Value<String?> templateId;
+  final Value<String?> bankAccountId;
+  final Value<String?> transactionSourceId;
+  final Value<String?> transactionId;
+  final Value<int> startedAt;
+  final Value<int?> endedAt;
+  final Value<int?> paidAt;
+  final Value<int> createdAt;
+  final Value<int> lastUpdate;
+  final Value<bool> isSynced;
+  final Value<bool> isDirty;
+  final Value<int> rowid;
+  const LocalShoppingSessionsCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.scope = const Value.absent(),
+    this.status = const Value.absent(),
+    this.templateId = const Value.absent(),
+    this.bankAccountId = const Value.absent(),
+    this.transactionSourceId = const Value.absent(),
+    this.transactionId = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.paidAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastUpdate = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalShoppingSessionsCompanion.insert({
+    required String id,
+    required String householdId,
+    required String ownerId,
+    required String name,
+    required String scope,
+    required String status,
+    this.templateId = const Value.absent(),
+    this.bankAccountId = const Value.absent(),
+    this.transactionSourceId = const Value.absent(),
+    this.transactionId = const Value.absent(),
+    required int startedAt,
+    this.endedAt = const Value.absent(),
+    this.paidAt = const Value.absent(),
+    required int createdAt,
+    required int lastUpdate,
+    this.isSynced = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        householdId = Value(householdId),
+        ownerId = Value(ownerId),
+        name = Value(name),
+        scope = Value(scope),
+        status = Value(status),
+        startedAt = Value(startedAt),
+        createdAt = Value(createdAt),
+        lastUpdate = Value(lastUpdate);
+  static Insertable<LocalShoppingSession> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? ownerId,
+    Expression<String>? name,
+    Expression<String>? scope,
+    Expression<String>? status,
+    Expression<String>? templateId,
+    Expression<String>? bankAccountId,
+    Expression<String>? transactionSourceId,
+    Expression<String>? transactionId,
+    Expression<int>? startedAt,
+    Expression<int>? endedAt,
+    Expression<int>? paidAt,
+    Expression<int>? createdAt,
+    Expression<int>? lastUpdate,
+    Expression<bool>? isSynced,
+    Expression<bool>? isDirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (name != null) 'name': name,
+      if (scope != null) 'scope': scope,
+      if (status != null) 'status': status,
+      if (templateId != null) 'template_id': templateId,
+      if (bankAccountId != null) 'bank_account_id': bankAccountId,
+      if (transactionSourceId != null)
+        'transaction_source_id': transactionSourceId,
+      if (transactionId != null) 'transaction_id': transactionId,
+      if (startedAt != null) 'started_at': startedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (paidAt != null) 'paid_at': paidAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastUpdate != null) 'last_update': lastUpdate,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalShoppingSessionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? householdId,
+      Value<String>? ownerId,
+      Value<String>? name,
+      Value<String>? scope,
+      Value<String>? status,
+      Value<String?>? templateId,
+      Value<String?>? bankAccountId,
+      Value<String?>? transactionSourceId,
+      Value<String?>? transactionId,
+      Value<int>? startedAt,
+      Value<int?>? endedAt,
+      Value<int?>? paidAt,
+      Value<int>? createdAt,
+      Value<int>? lastUpdate,
+      Value<bool>? isSynced,
+      Value<bool>? isDirty,
+      Value<int>? rowid}) {
+    return LocalShoppingSessionsCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      ownerId: ownerId ?? this.ownerId,
+      name: name ?? this.name,
+      scope: scope ?? this.scope,
+      status: status ?? this.status,
+      templateId: templateId ?? this.templateId,
+      bankAccountId: bankAccountId ?? this.bankAccountId,
+      transactionSourceId: transactionSourceId ?? this.transactionSourceId,
+      transactionId: transactionId ?? this.transactionId,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      paidAt: paidAt ?? this.paidAt,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+      isSynced: isSynced ?? this.isSynced,
+      isDirty: isDirty ?? this.isDirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (scope.present) {
+      map['scope'] = Variable<String>(scope.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (templateId.present) {
+      map['template_id'] = Variable<String>(templateId.value);
+    }
+    if (bankAccountId.present) {
+      map['bank_account_id'] = Variable<String>(bankAccountId.value);
+    }
+    if (transactionSourceId.present) {
+      map['transaction_source_id'] =
+          Variable<String>(transactionSourceId.value);
+    }
+    if (transactionId.present) {
+      map['transaction_id'] = Variable<String>(transactionId.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<int>(startedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<int>(endedAt.value);
+    }
+    if (paidAt.present) {
+      map['paid_at'] = Variable<int>(paidAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (lastUpdate.present) {
+      map['last_update'] = Variable<int>(lastUpdate.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalShoppingSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('name: $name, ')
+          ..write('scope: $scope, ')
+          ..write('status: $status, ')
+          ..write('templateId: $templateId, ')
+          ..write('bankAccountId: $bankAccountId, ')
+          ..write('transactionSourceId: $transactionSourceId, ')
+          ..write('transactionId: $transactionId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalShoppingSessionItemsTable extends LocalShoppingSessionItems
+    with TableInfo<$LocalShoppingSessionItemsTable, LocalShoppingSessionItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalShoppingSessionItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sessionIdMeta =
+      const VerificationMeta('sessionId');
+  @override
+  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
+      'session_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_shopping_sessions (id)'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _qtyMeta = const VerificationMeta('qty');
+  @override
+  late final GeneratedColumn<int> qty = GeneratedColumn<int>(
+      'qty', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(1));
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _isCheckedMeta =
+      const VerificationMeta('isChecked');
+  @override
+  late final GeneratedColumn<bool> isChecked = GeneratedColumn<bool>(
+      'is_checked', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_checked" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _checkedAtMeta =
+      const VerificationMeta('checkedAt');
+  @override
+  late final GeneratedColumn<int> checkedAt = GeneratedColumn<int>(
+      'checked_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lastUpdateMeta =
+      const VerificationMeta('lastUpdate');
+  @override
+  late final GeneratedColumn<int> lastUpdate = GeneratedColumn<int>(
+      'last_update', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        sessionId,
+        name,
+        qty,
+        sortOrder,
+        isChecked,
+        checkedAt,
+        createdAt,
+        lastUpdate
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_shopping_session_items';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalShoppingSessionItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(_sessionIdMeta,
+          sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta));
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('qty')) {
+      context.handle(
+          _qtyMeta, qty.isAcceptableOrUnknown(data['qty']!, _qtyMeta));
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('is_checked')) {
+      context.handle(_isCheckedMeta,
+          isChecked.isAcceptableOrUnknown(data['is_checked']!, _isCheckedMeta));
+    }
+    if (data.containsKey('checked_at')) {
+      context.handle(_checkedAtMeta,
+          checkedAt.isAcceptableOrUnknown(data['checked_at']!, _checkedAtMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('last_update')) {
+      context.handle(
+          _lastUpdateMeta,
+          lastUpdate.isAcceptableOrUnknown(
+              data['last_update']!, _lastUpdateMeta));
+    } else if (isInserting) {
+      context.missing(_lastUpdateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalShoppingSessionItem map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalShoppingSessionItem(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      sessionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}session_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      qty: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}qty'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      isChecked: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_checked'])!,
+      checkedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}checked_at']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      lastUpdate: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_update'])!,
+    );
+  }
+
+  @override
+  $LocalShoppingSessionItemsTable createAlias(String alias) {
+    return $LocalShoppingSessionItemsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalShoppingSessionItem extends DataClass
+    implements Insertable<LocalShoppingSessionItem> {
+  final String id;
+  final String sessionId;
+  final String name;
+  final int qty;
+  final int sortOrder;
+  final bool isChecked;
+  final int? checkedAt;
+  final int createdAt;
+  final int lastUpdate;
+  const LocalShoppingSessionItem(
+      {required this.id,
+      required this.sessionId,
+      required this.name,
+      required this.qty,
+      required this.sortOrder,
+      required this.isChecked,
+      this.checkedAt,
+      required this.createdAt,
+      required this.lastUpdate});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['session_id'] = Variable<String>(sessionId);
+    map['name'] = Variable<String>(name);
+    map['qty'] = Variable<int>(qty);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_checked'] = Variable<bool>(isChecked);
+    if (!nullToAbsent || checkedAt != null) {
+      map['checked_at'] = Variable<int>(checkedAt);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['last_update'] = Variable<int>(lastUpdate);
+    return map;
+  }
+
+  LocalShoppingSessionItemsCompanion toCompanion(bool nullToAbsent) {
+    return LocalShoppingSessionItemsCompanion(
+      id: Value(id),
+      sessionId: Value(sessionId),
+      name: Value(name),
+      qty: Value(qty),
+      sortOrder: Value(sortOrder),
+      isChecked: Value(isChecked),
+      checkedAt: checkedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(checkedAt),
+      createdAt: Value(createdAt),
+      lastUpdate: Value(lastUpdate),
+    );
+  }
+
+  factory LocalShoppingSessionItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalShoppingSessionItem(
+      id: serializer.fromJson<String>(json['id']),
+      sessionId: serializer.fromJson<String>(json['sessionId']),
+      name: serializer.fromJson<String>(json['name']),
+      qty: serializer.fromJson<int>(json['qty']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isChecked: serializer.fromJson<bool>(json['isChecked']),
+      checkedAt: serializer.fromJson<int?>(json['checkedAt']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      lastUpdate: serializer.fromJson<int>(json['lastUpdate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sessionId': serializer.toJson<String>(sessionId),
+      'name': serializer.toJson<String>(name),
+      'qty': serializer.toJson<int>(qty),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isChecked': serializer.toJson<bool>(isChecked),
+      'checkedAt': serializer.toJson<int?>(checkedAt),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'lastUpdate': serializer.toJson<int>(lastUpdate),
+    };
+  }
+
+  LocalShoppingSessionItem copyWith(
+          {String? id,
+          String? sessionId,
+          String? name,
+          int? qty,
+          int? sortOrder,
+          bool? isChecked,
+          Value<int?> checkedAt = const Value.absent(),
+          int? createdAt,
+          int? lastUpdate}) =>
+      LocalShoppingSessionItem(
+        id: id ?? this.id,
+        sessionId: sessionId ?? this.sessionId,
+        name: name ?? this.name,
+        qty: qty ?? this.qty,
+        sortOrder: sortOrder ?? this.sortOrder,
+        isChecked: isChecked ?? this.isChecked,
+        checkedAt: checkedAt.present ? checkedAt.value : this.checkedAt,
+        createdAt: createdAt ?? this.createdAt,
+        lastUpdate: lastUpdate ?? this.lastUpdate,
+      );
+  LocalShoppingSessionItem copyWithCompanion(
+      LocalShoppingSessionItemsCompanion data) {
+    return LocalShoppingSessionItem(
+      id: data.id.present ? data.id.value : this.id,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      name: data.name.present ? data.name.value : this.name,
+      qty: data.qty.present ? data.qty.value : this.qty,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isChecked: data.isChecked.present ? data.isChecked.value : this.isChecked,
+      checkedAt: data.checkedAt.present ? data.checkedAt.value : this.checkedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastUpdate:
+          data.lastUpdate.present ? data.lastUpdate.value : this.lastUpdate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalShoppingSessionItem(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('name: $name, ')
+          ..write('qty: $qty, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isChecked: $isChecked, ')
+          ..write('checkedAt: $checkedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, sessionId, name, qty, sortOrder,
+      isChecked, checkedAt, createdAt, lastUpdate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalShoppingSessionItem &&
+          other.id == this.id &&
+          other.sessionId == this.sessionId &&
+          other.name == this.name &&
+          other.qty == this.qty &&
+          other.sortOrder == this.sortOrder &&
+          other.isChecked == this.isChecked &&
+          other.checkedAt == this.checkedAt &&
+          other.createdAt == this.createdAt &&
+          other.lastUpdate == this.lastUpdate);
+}
+
+class LocalShoppingSessionItemsCompanion
+    extends UpdateCompanion<LocalShoppingSessionItem> {
+  final Value<String> id;
+  final Value<String> sessionId;
+  final Value<String> name;
+  final Value<int> qty;
+  final Value<int> sortOrder;
+  final Value<bool> isChecked;
+  final Value<int?> checkedAt;
+  final Value<int> createdAt;
+  final Value<int> lastUpdate;
+  final Value<int> rowid;
+  const LocalShoppingSessionItemsCompanion({
+    this.id = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.qty = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isChecked = const Value.absent(),
+    this.checkedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastUpdate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalShoppingSessionItemsCompanion.insert({
+    required String id,
+    required String sessionId,
+    required String name,
+    this.qty = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isChecked = const Value.absent(),
+    this.checkedAt = const Value.absent(),
+    required int createdAt,
+    required int lastUpdate,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        sessionId = Value(sessionId),
+        name = Value(name),
+        createdAt = Value(createdAt),
+        lastUpdate = Value(lastUpdate);
+  static Insertable<LocalShoppingSessionItem> custom({
+    Expression<String>? id,
+    Expression<String>? sessionId,
+    Expression<String>? name,
+    Expression<int>? qty,
+    Expression<int>? sortOrder,
+    Expression<bool>? isChecked,
+    Expression<int>? checkedAt,
+    Expression<int>? createdAt,
+    Expression<int>? lastUpdate,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sessionId != null) 'session_id': sessionId,
+      if (name != null) 'name': name,
+      if (qty != null) 'qty': qty,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isChecked != null) 'is_checked': isChecked,
+      if (checkedAt != null) 'checked_at': checkedAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastUpdate != null) 'last_update': lastUpdate,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalShoppingSessionItemsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? sessionId,
+      Value<String>? name,
+      Value<int>? qty,
+      Value<int>? sortOrder,
+      Value<bool>? isChecked,
+      Value<int?>? checkedAt,
+      Value<int>? createdAt,
+      Value<int>? lastUpdate,
+      Value<int>? rowid}) {
+    return LocalShoppingSessionItemsCompanion(
+      id: id ?? this.id,
+      sessionId: sessionId ?? this.sessionId,
+      name: name ?? this.name,
+      qty: qty ?? this.qty,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isChecked: isChecked ?? this.isChecked,
+      checkedAt: checkedAt ?? this.checkedAt,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<String>(sessionId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (qty.present) {
+      map['qty'] = Variable<int>(qty.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isChecked.present) {
+      map['is_checked'] = Variable<bool>(isChecked.value);
+    }
+    if (checkedAt.present) {
+      map['checked_at'] = Variable<int>(checkedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (lastUpdate.present) {
+      map['last_update'] = Variable<int>(lastUpdate.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalShoppingSessionItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('name: $name, ')
+          ..write('qty: $qty, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isChecked: $isChecked, ')
+          ..write('checkedAt: $checkedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastUpdate: $lastUpdate, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5305,6 +6602,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalCardsTable localCards = $LocalCardsTable(this);
   late final $LocalAccountMembersTable localAccountMembers =
       $LocalAccountMembersTable(this);
+  late final $LocalShoppingSessionsTable localShoppingSessions =
+      $LocalShoppingSessionsTable(this);
+  late final $LocalShoppingSessionItemsTable localShoppingSessionItems =
+      $LocalShoppingSessionItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5317,7 +6618,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         localNotifications,
         localFinancialInstitutions,
         localCards,
-        localAccountMembers
+        localAccountMembers,
+        localShoppingSessions,
+        localShoppingSessionItems
       ];
 }
 
@@ -8126,6 +9429,812 @@ typedef $$LocalAccountMembersTableProcessedTableManager = ProcessedTableManager<
     (LocalAccountMember, $$LocalAccountMembersTableReferences),
     LocalAccountMember,
     PrefetchHooks Function({bool accountId})>;
+typedef $$LocalShoppingSessionsTableCreateCompanionBuilder
+    = LocalShoppingSessionsCompanion Function({
+  required String id,
+  required String householdId,
+  required String ownerId,
+  required String name,
+  required String scope,
+  required String status,
+  Value<String?> templateId,
+  Value<String?> bankAccountId,
+  Value<String?> transactionSourceId,
+  Value<String?> transactionId,
+  required int startedAt,
+  Value<int?> endedAt,
+  Value<int?> paidAt,
+  required int createdAt,
+  required int lastUpdate,
+  Value<bool> isSynced,
+  Value<bool> isDirty,
+  Value<int> rowid,
+});
+typedef $$LocalShoppingSessionsTableUpdateCompanionBuilder
+    = LocalShoppingSessionsCompanion Function({
+  Value<String> id,
+  Value<String> householdId,
+  Value<String> ownerId,
+  Value<String> name,
+  Value<String> scope,
+  Value<String> status,
+  Value<String?> templateId,
+  Value<String?> bankAccountId,
+  Value<String?> transactionSourceId,
+  Value<String?> transactionId,
+  Value<int> startedAt,
+  Value<int?> endedAt,
+  Value<int?> paidAt,
+  Value<int> createdAt,
+  Value<int> lastUpdate,
+  Value<bool> isSynced,
+  Value<bool> isDirty,
+  Value<int> rowid,
+});
+
+final class $$LocalShoppingSessionsTableReferences extends BaseReferences<
+    _$AppDatabase, $LocalShoppingSessionsTable, LocalShoppingSession> {
+  $$LocalShoppingSessionsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$LocalShoppingSessionItemsTable,
+      List<LocalShoppingSessionItem>> _localShoppingSessionItemsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.localShoppingSessionItems,
+          aliasName: $_aliasNameGenerator(db.localShoppingSessions.id,
+              db.localShoppingSessionItems.sessionId));
+
+  $$LocalShoppingSessionItemsTableProcessedTableManager
+      get localShoppingSessionItemsRefs {
+    final manager = $$LocalShoppingSessionItemsTableTableManager(
+            $_db, $_db.localShoppingSessionItems)
+        .filter((f) => f.sessionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_localShoppingSessionItemsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$LocalShoppingSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalShoppingSessionsTable> {
+  $$LocalShoppingSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+      column: $table.ownerId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scope => $composableBuilder(
+      column: $table.scope, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get templateId => $composableBuilder(
+      column: $table.templateId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get transactionSourceId => $composableBuilder(
+      column: $table.transactionSourceId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get transactionId => $composableBuilder(
+      column: $table.transactionId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get startedAt => $composableBuilder(
+      column: $table.startedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get endedAt => $composableBuilder(
+      column: $table.endedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get paidAt => $composableBuilder(
+      column: $table.paidAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+      column: $table.isDirty, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> localShoppingSessionItemsRefs(
+      Expression<bool> Function(
+              $$LocalShoppingSessionItemsTableFilterComposer f)
+          f) {
+    final $$LocalShoppingSessionItemsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.localShoppingSessionItems,
+            getReferencedColumn: (t) => t.sessionId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalShoppingSessionItemsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.localShoppingSessionItems,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$LocalShoppingSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalShoppingSessionsTable> {
+  $$LocalShoppingSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+      column: $table.ownerId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get scope => $composableBuilder(
+      column: $table.scope, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get templateId => $composableBuilder(
+      column: $table.templateId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get transactionSourceId => $composableBuilder(
+      column: $table.transactionSourceId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get transactionId => $composableBuilder(
+      column: $table.transactionId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get startedAt => $composableBuilder(
+      column: $table.startedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get endedAt => $composableBuilder(
+      column: $table.endedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get paidAt => $composableBuilder(
+      column: $table.paidAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+      column: $table.isDirty, builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocalShoppingSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalShoppingSessionsTable> {
+  $$LocalShoppingSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get scope =>
+      $composableBuilder(column: $table.scope, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get templateId => $composableBuilder(
+      column: $table.templateId, builder: (column) => column);
+
+  GeneratedColumn<String> get bankAccountId => $composableBuilder(
+      column: $table.bankAccountId, builder: (column) => column);
+
+  GeneratedColumn<String> get transactionSourceId => $composableBuilder(
+      column: $table.transactionSourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get transactionId => $composableBuilder(
+      column: $table.transactionId, builder: (column) => column);
+
+  GeneratedColumn<int> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get paidAt =>
+      $composableBuilder(column: $table.paidAt, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  Expression<T> localShoppingSessionItemsRefs<T extends Object>(
+      Expression<T> Function(
+              $$LocalShoppingSessionItemsTableAnnotationComposer a)
+          f) {
+    final $$LocalShoppingSessionItemsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.localShoppingSessionItems,
+            getReferencedColumn: (t) => t.sessionId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalShoppingSessionItemsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localShoppingSessionItems,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$LocalShoppingSessionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalShoppingSessionsTable,
+    LocalShoppingSession,
+    $$LocalShoppingSessionsTableFilterComposer,
+    $$LocalShoppingSessionsTableOrderingComposer,
+    $$LocalShoppingSessionsTableAnnotationComposer,
+    $$LocalShoppingSessionsTableCreateCompanionBuilder,
+    $$LocalShoppingSessionsTableUpdateCompanionBuilder,
+    (LocalShoppingSession, $$LocalShoppingSessionsTableReferences),
+    LocalShoppingSession,
+    PrefetchHooks Function({bool localShoppingSessionItemsRefs})> {
+  $$LocalShoppingSessionsTableTableManager(
+      _$AppDatabase db, $LocalShoppingSessionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalShoppingSessionsTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalShoppingSessionsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalShoppingSessionsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> householdId = const Value.absent(),
+            Value<String> ownerId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> scope = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String?> templateId = const Value.absent(),
+            Value<String?> bankAccountId = const Value.absent(),
+            Value<String?> transactionSourceId = const Value.absent(),
+            Value<String?> transactionId = const Value.absent(),
+            Value<int> startedAt = const Value.absent(),
+            Value<int?> endedAt = const Value.absent(),
+            Value<int?> paidAt = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> lastUpdate = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            Value<bool> isDirty = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalShoppingSessionsCompanion(
+            id: id,
+            householdId: householdId,
+            ownerId: ownerId,
+            name: name,
+            scope: scope,
+            status: status,
+            templateId: templateId,
+            bankAccountId: bankAccountId,
+            transactionSourceId: transactionSourceId,
+            transactionId: transactionId,
+            startedAt: startedAt,
+            endedAt: endedAt,
+            paidAt: paidAt,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            isSynced: isSynced,
+            isDirty: isDirty,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String householdId,
+            required String ownerId,
+            required String name,
+            required String scope,
+            required String status,
+            Value<String?> templateId = const Value.absent(),
+            Value<String?> bankAccountId = const Value.absent(),
+            Value<String?> transactionSourceId = const Value.absent(),
+            Value<String?> transactionId = const Value.absent(),
+            required int startedAt,
+            Value<int?> endedAt = const Value.absent(),
+            Value<int?> paidAt = const Value.absent(),
+            required int createdAt,
+            required int lastUpdate,
+            Value<bool> isSynced = const Value.absent(),
+            Value<bool> isDirty = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalShoppingSessionsCompanion.insert(
+            id: id,
+            householdId: householdId,
+            ownerId: ownerId,
+            name: name,
+            scope: scope,
+            status: status,
+            templateId: templateId,
+            bankAccountId: bankAccountId,
+            transactionSourceId: transactionSourceId,
+            transactionId: transactionId,
+            startedAt: startedAt,
+            endedAt: endedAt,
+            paidAt: paidAt,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            isSynced: isSynced,
+            isDirty: isDirty,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalShoppingSessionsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({localShoppingSessionItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (localShoppingSessionItemsRefs) db.localShoppingSessionItems
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (localShoppingSessionItemsRefs)
+                    await $_getPrefetchedData<
+                            LocalShoppingSession,
+                            $LocalShoppingSessionsTable,
+                            LocalShoppingSessionItem>(
+                        currentTable: table,
+                        referencedTable: $$LocalShoppingSessionsTableReferences
+                            ._localShoppingSessionItemsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LocalShoppingSessionsTableReferences(
+                                    db, table, p0)
+                                .localShoppingSessionItemsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.sessionId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocalShoppingSessionsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LocalShoppingSessionsTable,
+        LocalShoppingSession,
+        $$LocalShoppingSessionsTableFilterComposer,
+        $$LocalShoppingSessionsTableOrderingComposer,
+        $$LocalShoppingSessionsTableAnnotationComposer,
+        $$LocalShoppingSessionsTableCreateCompanionBuilder,
+        $$LocalShoppingSessionsTableUpdateCompanionBuilder,
+        (LocalShoppingSession, $$LocalShoppingSessionsTableReferences),
+        LocalShoppingSession,
+        PrefetchHooks Function({bool localShoppingSessionItemsRefs})>;
+typedef $$LocalShoppingSessionItemsTableCreateCompanionBuilder
+    = LocalShoppingSessionItemsCompanion Function({
+  required String id,
+  required String sessionId,
+  required String name,
+  Value<int> qty,
+  Value<int> sortOrder,
+  Value<bool> isChecked,
+  Value<int?> checkedAt,
+  required int createdAt,
+  required int lastUpdate,
+  Value<int> rowid,
+});
+typedef $$LocalShoppingSessionItemsTableUpdateCompanionBuilder
+    = LocalShoppingSessionItemsCompanion Function({
+  Value<String> id,
+  Value<String> sessionId,
+  Value<String> name,
+  Value<int> qty,
+  Value<int> sortOrder,
+  Value<bool> isChecked,
+  Value<int?> checkedAt,
+  Value<int> createdAt,
+  Value<int> lastUpdate,
+  Value<int> rowid,
+});
+
+final class $$LocalShoppingSessionItemsTableReferences extends BaseReferences<
+    _$AppDatabase, $LocalShoppingSessionItemsTable, LocalShoppingSessionItem> {
+  $$LocalShoppingSessionItemsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocalShoppingSessionsTable _sessionIdTable(_$AppDatabase db) =>
+      db.localShoppingSessions.createAlias($_aliasNameGenerator(
+          db.localShoppingSessionItems.sessionId, db.localShoppingSessions.id));
+
+  $$LocalShoppingSessionsTableProcessedTableManager get sessionId {
+    final $_column = $_itemColumn<String>('session_id')!;
+
+    final manager = $$LocalShoppingSessionsTableTableManager(
+            $_db, $_db.localShoppingSessions)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sessionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$LocalShoppingSessionItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalShoppingSessionItemsTable> {
+  $$LocalShoppingSessionItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get qty => $composableBuilder(
+      column: $table.qty, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isChecked => $composableBuilder(
+      column: $table.isChecked, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checkedAt => $composableBuilder(
+      column: $table.checkedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnFilters(column));
+
+  $$LocalShoppingSessionsTableFilterComposer get sessionId {
+    final $$LocalShoppingSessionsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.sessionId,
+            referencedTable: $db.localShoppingSessions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalShoppingSessionsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.localShoppingSessions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalShoppingSessionItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalShoppingSessionItemsTable> {
+  $$LocalShoppingSessionItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get qty => $composableBuilder(
+      column: $table.qty, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isChecked => $composableBuilder(
+      column: $table.isChecked, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checkedAt => $composableBuilder(
+      column: $table.checkedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => ColumnOrderings(column));
+
+  $$LocalShoppingSessionsTableOrderingComposer get sessionId {
+    final $$LocalShoppingSessionsTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.sessionId,
+            referencedTable: $db.localShoppingSessions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalShoppingSessionsTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.localShoppingSessions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalShoppingSessionItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalShoppingSessionItemsTable> {
+  $$LocalShoppingSessionItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get qty =>
+      $composableBuilder(column: $table.qty, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isChecked =>
+      $composableBuilder(column: $table.isChecked, builder: (column) => column);
+
+  GeneratedColumn<int> get checkedAt =>
+      $composableBuilder(column: $table.checkedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastUpdate => $composableBuilder(
+      column: $table.lastUpdate, builder: (column) => column);
+
+  $$LocalShoppingSessionsTableAnnotationComposer get sessionId {
+    final $$LocalShoppingSessionsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.sessionId,
+            referencedTable: $db.localShoppingSessions,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalShoppingSessionsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localShoppingSessions,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalShoppingSessionItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalShoppingSessionItemsTable,
+    LocalShoppingSessionItem,
+    $$LocalShoppingSessionItemsTableFilterComposer,
+    $$LocalShoppingSessionItemsTableOrderingComposer,
+    $$LocalShoppingSessionItemsTableAnnotationComposer,
+    $$LocalShoppingSessionItemsTableCreateCompanionBuilder,
+    $$LocalShoppingSessionItemsTableUpdateCompanionBuilder,
+    (LocalShoppingSessionItem, $$LocalShoppingSessionItemsTableReferences),
+    LocalShoppingSessionItem,
+    PrefetchHooks Function({bool sessionId})> {
+  $$LocalShoppingSessionItemsTableTableManager(
+      _$AppDatabase db, $LocalShoppingSessionItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalShoppingSessionItemsTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalShoppingSessionItemsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalShoppingSessionItemsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> sessionId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> qty = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<bool> isChecked = const Value.absent(),
+            Value<int?> checkedAt = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> lastUpdate = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalShoppingSessionItemsCompanion(
+            id: id,
+            sessionId: sessionId,
+            name: name,
+            qty: qty,
+            sortOrder: sortOrder,
+            isChecked: isChecked,
+            checkedAt: checkedAt,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String sessionId,
+            required String name,
+            Value<int> qty = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<bool> isChecked = const Value.absent(),
+            Value<int?> checkedAt = const Value.absent(),
+            required int createdAt,
+            required int lastUpdate,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalShoppingSessionItemsCompanion.insert(
+            id: id,
+            sessionId: sessionId,
+            name: name,
+            qty: qty,
+            sortOrder: sortOrder,
+            isChecked: isChecked,
+            checkedAt: checkedAt,
+            createdAt: createdAt,
+            lastUpdate: lastUpdate,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalShoppingSessionItemsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({sessionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (sessionId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.sessionId,
+                    referencedTable: $$LocalShoppingSessionItemsTableReferences
+                        ._sessionIdTable(db),
+                    referencedColumn: $$LocalShoppingSessionItemsTableReferences
+                        ._sessionIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocalShoppingSessionItemsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LocalShoppingSessionItemsTable,
+        LocalShoppingSessionItem,
+        $$LocalShoppingSessionItemsTableFilterComposer,
+        $$LocalShoppingSessionItemsTableOrderingComposer,
+        $$LocalShoppingSessionItemsTableAnnotationComposer,
+        $$LocalShoppingSessionItemsTableCreateCompanionBuilder,
+        $$LocalShoppingSessionItemsTableUpdateCompanionBuilder,
+        (LocalShoppingSessionItem, $$LocalShoppingSessionItemsTableReferences),
+        LocalShoppingSessionItem,
+        PrefetchHooks Function({bool sessionId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8148,4 +10257,9 @@ class $AppDatabaseManager {
       $$LocalCardsTableTableManager(_db, _db.localCards);
   $$LocalAccountMembersTableTableManager get localAccountMembers =>
       $$LocalAccountMembersTableTableManager(_db, _db.localAccountMembers);
+  $$LocalShoppingSessionsTableTableManager get localShoppingSessions =>
+      $$LocalShoppingSessionsTableTableManager(_db, _db.localShoppingSessions);
+  $$LocalShoppingSessionItemsTableTableManager get localShoppingSessionItems =>
+      $$LocalShoppingSessionItemsTableTableManager(
+          _db, _db.localShoppingSessionItems);
 }

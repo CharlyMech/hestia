@@ -34,42 +34,6 @@ class ShoppingListsCreate extends ShoppingListsEvent {
   List<Object?> get props => [list];
 }
 
-class ShoppingListsStartSession extends ShoppingListsEvent {
-  final String name;
-  final ShoppingListScope scope;
-  final String? bankAccountId;
-  final String? transactionSourceId;
-  final String? templateListId;
-
-  const ShoppingListsStartSession({
-    required this.name,
-    required this.scope,
-    this.bankAccountId,
-    this.transactionSourceId,
-    this.templateListId,
-  });
-
-  @override
-  List<Object?> get props =>
-      [name, scope, bankAccountId, transactionSourceId, templateListId];
-}
-
-class ShoppingListsCancel extends ShoppingListsEvent {
-  final String listId;
-  const ShoppingListsCancel(this.listId);
-  @override
-  List<Object?> get props => [listId];
-}
-
-class ShoppingListsMarkPaid extends ShoppingListsEvent {
-  final String listId;
-  final String transactionId;
-  const ShoppingListsMarkPaid(
-      {required this.listId, required this.transactionId});
-  @override
-  List<Object?> get props => [listId, transactionId];
-}
-
 /// Remote peer changed lists/sessions — refetch in the background.
 class ShoppingListsRemoteSync extends ShoppingListsEvent {
   const ShoppingListsRemoteSync();
@@ -92,31 +56,32 @@ class ShoppingListsLoading extends ShoppingListsState {
 class ShoppingListsLoaded extends ShoppingListsState {
   final List<ShoppingList> lists;
 
+  /// Item count per list id (templates + legacy sessions).
+  final Map<String, int> itemCounts;
+
   /// Increments on every successful list fetch so pull-to-refresh can await completion.
   final int revision;
-  const ShoppingListsLoaded(this.lists, {this.revision = 0});
-
-  List<ShoppingList> get activeSessions => lists
-      .where((l) =>
-          l.kind == ShoppingListKind.session &&
-          l.status == ShoppingListStatus.active)
-      .toList();
+  const ShoppingListsLoaded(
+    this.lists, {
+    this.itemCounts = const {},
+    this.revision = 0,
+  });
 
   List<ShoppingList> get templates =>
       lists.where((l) => l.kind == ShoppingListKind.template).toList();
 
+  /// Legacy finished sessions still stored as `shopping_lists(kind=session)`.
+  /// New finished sessions live in `shopping_sessions` (not shown here yet).
   List<ShoppingList> get sessionHistory => lists
       .where((l) =>
           l.kind == ShoppingListKind.session &&
           l.status != ShoppingListStatus.active)
       .toList();
 
-  /// Backwards-compatible names.
-  List<ShoppingList> get active => activeSessions;
   List<ShoppingList> get history => sessionHistory;
 
   @override
-  List<Object?> get props => [lists, revision];
+  List<Object?> get props => [lists, itemCounts, revision];
 }
 
 class ShoppingListsError extends ShoppingListsState {
@@ -138,9 +103,6 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
     on<ShoppingListsLoad>(_onLoad);
     on<ShoppingListsRefresh>(_onRefresh);
     on<ShoppingListsCreate>(_onCreate);
-    on<ShoppingListsStartSession>(_onStartSession);
-    on<ShoppingListsCancel>(_onCancel);
-    on<ShoppingListsMarkPaid>(_onMarkPaid);
     on<ShoppingListsRemoteSync>(_onRemoteSync);
   }
 
@@ -157,7 +119,7 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
     if (_householdId == null || _userId == null) {
       final cur = state;
       if (cur is ShoppingListsLoaded) {
-        _emitLoaded(emit, cur.lists);
+        _emitLoaded(emit, cur.lists, cur.itemCounts);
       }
       return;
     }
@@ -170,60 +132,21 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
     await _fetch(emit);
   }
 
-  Future<void> _onStartSession(
-      ShoppingListsStartSession e, Emitter<ShoppingListsState> emit) async {
-    if (_householdId == null || _userId == null) return;
-    await _repo.startShoppingSession(
-      householdId: _householdId!,
-      userId: _userId!,
-      name: e.name,
-      scope: e.scope,
-      bankAccountId: e.bankAccountId,
-      transactionSourceId: e.transactionSourceId,
-      templateListId: e.templateListId,
-    );
-    await _fetch(emit);
-  }
-
-  Future<void> _onCancel(
-      ShoppingListsCancel e, Emitter<ShoppingListsState> emit) async {
-    final cur = state;
-    if (cur is! ShoppingListsLoaded) return;
-    final l = cur.lists.where((x) => x.id == e.listId).firstOrNull;
-    if (l == null) return;
-    await _repo.updateList(l.copyWith(
-      status: ShoppingListStatus.cancelled,
-      sessionEndedAt: DateTime.now(),
-    ));
-    await _fetch(emit);
-  }
-
   Future<void> _onRemoteSync(
       ShoppingListsRemoteSync e, Emitter<ShoppingListsState> emit) async {
     if (_householdId == null || _userId == null) return;
     await _fetch(emit);
   }
 
-  Future<void> _onMarkPaid(
-      ShoppingListsMarkPaid e, Emitter<ShoppingListsState> emit) async {
-    final cur = state;
-    if (cur is! ShoppingListsLoaded) return;
-    final l = cur.lists.where((x) => x.id == e.listId).firstOrNull;
-    if (l == null) return;
-    final now = DateTime.now();
-    await _repo.updateList(l.copyWith(
-      status: ShoppingListStatus.paid,
-      transactionId: e.transactionId,
-      paidAt: now,
-      sessionEndedAt: now,
-    ));
-    await _fetch(emit);
-  }
-
-  void _emitLoaded(Emitter<ShoppingListsState> emit, List<ShoppingList> lists) {
+  void _emitLoaded(
+    Emitter<ShoppingListsState> emit,
+    List<ShoppingList> lists,
+    Map<String, int> counts,
+  ) {
     _listRevision++;
     emit(ShoppingListsLoaded(
       List<ShoppingList>.from(lists),
+      itemCounts: counts,
       revision: _listRevision,
     ));
   }
@@ -237,6 +160,8 @@ class ShoppingListsBloc extends Bloc<ShoppingListsEvent, ShoppingListsState> {
       emit(ShoppingListsError(failure.message));
       return;
     }
-    _emitLoaded(emit, lists);
+    final (counts, _) =
+        await _repo.getListItemCounts(householdId: _householdId!);
+    _emitLoaded(emit, lists, counts);
   }
 }

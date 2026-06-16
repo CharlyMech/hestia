@@ -25,6 +25,24 @@ class ShoppingService extends SupabaseService {
     }
   }
 
+  /// Lists for a household with a cheap item count
+  /// (`shopping_list_items(count)`). Returns rows with a nested count aggregate.
+  Future<List<Map<String, dynamic>>> getListsWithCounts({
+    required String householdId,
+    String? kind,
+  }) async {
+    try {
+      var query = from(SupabaseTables.shoppingLists)
+          .select('*, ${SupabaseTables.shoppingListItems}(count)')
+          .eq('household_id', householdId);
+      if (kind != null) query = query.eq('kind', kind);
+      final res = await query.order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e) {
+      throw ServerException('Failed to fetch shopping lists: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> createList(Map<String, dynamic> data) async {
     try {
       return await from(SupabaseTables.shoppingLists)
@@ -49,6 +67,37 @@ class ShoppingService extends SupabaseService {
       await from(SupabaseTables.shoppingLists).delete().eq('id', id);
     } catch (e) {
       throw ServerException('Failed to delete shopping list: $e');
+    }
+  }
+
+  // ── per-member sharing ───────────────────────────────────────────────────
+  /// Replaces the member share-list for a template. Empty [userIds] = whole
+  /// household ("All").
+  Future<void> setMembers({
+    required String listId,
+    required List<String> userIds,
+  }) async {
+    try {
+      await from(SupabaseTables.shoppingListMembers)
+          .delete()
+          .eq('list_id', listId);
+      if (userIds.isEmpty) return;
+      await from(SupabaseTables.shoppingListMembers).insert([
+        for (final uid in userIds) {'list_id': listId, 'user_id': uid},
+      ]);
+    } catch (e) {
+      throw ServerException('Failed to set list members: $e');
+    }
+  }
+
+  Future<List<String>> getMembers(String listId) async {
+    try {
+      final res = await from(SupabaseTables.shoppingListMembers)
+          .select('user_id')
+          .eq('list_id', listId);
+      return [for (final r in res) r['user_id'] as String];
+    } catch (e) {
+      throw ServerException('Failed to fetch list members: $e');
     }
   }
 

@@ -2,13 +2,15 @@ import 'package:hestia/core/error/error_handler.dart';
 import 'package:hestia/core/error/failures.dart';
 import 'package:hestia/core/utils/date_utils.dart';
 import 'package:hestia/data/services/shopping_service.dart';
+import 'package:hestia/data/services/shopping_session_service.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
 import 'package:hestia/domain/entities/shopping_list_item.dart';
 import 'package:hestia/domain/repositories/shopping_repository.dart';
 
 class ShoppingRepositoryImpl implements ShoppingRepository {
   final ShoppingService _service;
-  ShoppingRepositoryImpl(this._service);
+  final ShoppingSessionService _sessionService;
+  ShoppingRepositoryImpl(this._service, this._sessionService);
 
   DateTime? _ts(dynamic v) => v == null ? null : parseSupabaseTimestamp(v);
 
@@ -103,6 +105,51 @@ class ShoppingRepositoryImpl implements ShoppingRepository {
   }
 
   @override
+  Future<(Map<String, int>, Failure?)> getListItemCounts({
+    required String householdId,
+  }) async {
+    if (householdId.isEmpty) return (const <String, int>{}, null);
+    try {
+      final rows = await _service.getListsWithCounts(householdId: householdId);
+      final counts = <String, int>{};
+      for (final r in rows) {
+        final nested = r['shopping_list_items'];
+        if (nested is List && nested.isNotEmpty) {
+          final first = nested.first;
+          if (first is Map && first['count'] is num) {
+            counts[r['id'] as String] = (first['count'] as num).toInt();
+          }
+        }
+      }
+      return (counts, null);
+    } catch (e, st) {
+      return (<String, int>{}, reportError(e, st, reason: 'getListItemCounts'));
+    }
+  }
+
+  @override
+  Future<Failure?> setListMembers({
+    required String listId,
+    required List<String> userIds,
+  }) async {
+    try {
+      await _service.setMembers(listId: listId, userIds: userIds);
+      return null;
+    } catch (e, st) {
+      return reportError(e, st, reason: 'setListMembers');
+    }
+  }
+
+  @override
+  Future<(List<String>, Failure?)> getListMembers(String listId) async {
+    try {
+      return (await _service.getMembers(listId), null);
+    } catch (e, st) {
+      return (<String>[], reportError(e, st, reason: 'getListMembers'));
+    }
+  }
+
+  @override
   Future<(ShoppingList?, Failure?)> createList(ShoppingList list) async {
     try {
       final data = await _service.createList(_listToJson(list));
@@ -158,9 +205,49 @@ class ShoppingRepositoryImpl implements ShoppingRepository {
             .toList();
         await _service.createItems(rows);
       }
+
+      // Best-effort: notify the household (shared sessions) via edge fn. The
+      // list already exists; a push failure must not fail session creation.
+      try {
+        await _sessionService.startSession(
+          listId: created.id,
+          userId: userId,
+        );
+      } catch (_) {/* push is non-fatal */}
+
       return (created, null);
     } catch (e, st) {
       return (null, reportError(e, st, reason: 'startShoppingSession'));
+    }
+  }
+
+  @override
+  Future<(ShoppingList?, Failure?)> completeSession({
+    required String listId,
+    Map<String, dynamic>? transactionJson,
+    bool cancelled = false,
+  }) async {
+    try {
+      final listJson = await _sessionService.completeSession(
+        listId: listId,
+        transaction: transactionJson,
+        cancelled: cancelled,
+      );
+      return (_listFromJson(listJson), null);
+    } catch (e, st) {
+      return (null, reportError(e, st, reason: 'completeSession'));
+    }
+  }
+
+  @override
+  Future<Failure?> reorderItems(List<String> orderedItemIds) async {
+    try {
+      for (var i = 0; i < orderedItemIds.length; i++) {
+        await _service.updateItem(orderedItemIds[i], {'sort_order': i});
+      }
+      return null;
+    } catch (e, st) {
+      return reportError(e, st, reason: 'reorderItems');
     }
   }
 

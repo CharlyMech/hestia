@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_delete => 'Delete';
 
   @override
+  String get common_clear => 'Clear';
+
+  @override
   String get common_edit => 'Edit';
 
   @override
@@ -393,6 +396,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_use24h => '24-hour clock';
 
   @override
+  String get settings_matchDevice => 'Match device';
+
+  @override
+  String get settings_timeFormat => 'Time format';
+
+  @override
+  String get settings_timeFormat24h => '24h';
+
+  @override
+  String get settings_timeFormatAmPm => 'AM/PM';
+
+  @override
   String get settings_biometric => 'Face ID';
 
   @override
@@ -497,6 +512,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar_movimientos => 'Transactions';
 
   @override
+  String get calendar_showFilters => 'Show all filters';
+
+  @override
+  String get calendar_filters => 'Filters';
+
+  @override
+  String get calendar_clearFilters => 'Clear';
+
+  @override
+  String get calendar_filterPeople => 'People';
+
+  @override
+  String get calendar_filterType => 'Type';
+
+  @override
+  String get calendar_filterPets => 'Pets';
+
+  @override
+  String get calendar_filterVehicles => 'Vehicles';
+
+  @override
   String get shopping_title => 'Shopping';
 
   @override
@@ -548,7 +584,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shared · anyone in the household can collaborate';
 
   @override
-  String get shopping_createTemplate => 'Create new template';
+  String get shopping_createTemplate => 'Create template';
 
   @override
   String get shopping_kindTemplate => 'Template';
@@ -561,6 +597,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shopping_statusCancelled => 'Cancelled';
+
+  @override
+  String get shopping_activeSessions => 'Active sessions';
+
+  @override
+  String get shopping_finishSession => 'Finish session';
+
+  @override
+  String get shopping_finishConfirmTitle => 'Finish this session?';
+
+  @override
+  String get shopping_finishConfirmBody =>
+      'You can record what you paid, or just close the session.';
+
+  @override
+  String get shopping_keepShopping => 'Keep shopping';
+
+  @override
+  String get shopping_finish => 'Finish';
+
+  @override
+  String get shopping_addTransactionTitle => 'Record a payment?';
+
+  @override
+  String get shopping_addTransactionBody =>
+      'Create a transaction for this shopping trip?';
+
+  @override
+  String get shopping_addTransactionYes => 'Yes, add payment';
+
+  @override
+  String get shopping_addTransactionNo => 'No, just finish';
+
+  @override
+  String get shopping_deleteSessionTitle => 'Delete this session?';
+
+  @override
+  String get shopping_deleteSessionBody =>
+      'The session and its items will be permanently removed.';
+
+  @override
+  String get shopping_markDone => 'Mark done';
+
+  @override
+  String get shopping_addItem => 'Add an item…';
+
+  @override
+  String get shopping_quantity => 'Qty';
+
+  @override
+  String get shopping_uncheck => 'Uncheck';
+
+  @override
+  String get shopping_check => 'Check';
+
+  @override
+  String get shopping_updateTemplateTitle => 'Update the template?';
+
+  @override
+  String get shopping_updateTemplateBody =>
+      'This session changed since it started. Update the template to match?';
+
+  @override
+  String get shopping_updateTemplateYes => 'Update template';
+
+  @override
+  String get shopping_updateTemplateNo => 'Keep template';
+
+  @override
+  String get shopping_saveAsTemplateTitle => 'Save as template?';
+
+  @override
+  String get shopping_saveAsTemplateBody =>
+      'Save this shopping list as a reusable template?';
+
+  @override
+  String get shopping_saveAsTemplateYes => 'Save template';
+
+  @override
+  String get shopping_saveAsTemplateNo => 'No thanks';
+
+  @override
+  String get shopping_shareWithUsers => 'Share session with users';
+
+  @override
+  String get shopping_sessionName => 'Session name';
+
+  @override
+  String get shopping_sessionNamePlaceholder => 'e.g. Saturday groceries';
+
+  @override
+  String get shopping_scope => 'Scope';
+
+  @override
+  String get shopping_scopePersonal => 'Personal';
+
+  @override
+  String get shopping_scopeHousehold => 'Household';
+
+  @override
+  String get shopping_source => 'Source (optional)';
+
+  @override
+  String get shopping_sourcePlaceholder => 'Mercadona, Lidl, …';
+
+  @override
+  String get shopping_startSessionAction => 'Start session';
+
+  @override
+  String get shopping_shareWithMembers => 'Share with members';
+
+  @override
+  String shopping_lastUpdated(String date) {
+    return 'Updated $date';
+  }
+
+  @override
+  String get shopping_unsavedChanges => 'Unsaved changes';
+
+  @override
+  String get shopping_saveChanges => 'Save changes';
+
+  @override
+  String get shopping_templateName => 'Template name';
+
+  @override
+  String get shopping_templateNamePlaceholder => 'e.g. Mercadona staples';
+
+  @override
+  String get shopping_defaultSource => 'Default source (optional)';
+
+  @override
+  String get shopping_linkedAccount => 'Linked account (optional)';
+
+  @override
+  String get shopping_editTemplate => 'Edit template';
+
+  @override
+  String get shopping_shareTemplate => 'Share template with members';
+
+  @override
+  String get shopping_shareAll => 'All household members';
+
+  @override
+  String shopping_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+      zero: 'No items',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get notifications_title => 'Notifications';
@@ -782,6 +972,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get map_toggleVendors => 'Vendors';
+
+  @override
+  String get map_tapPinForDetails => 'Tap a pin for details';
 
   @override
   String get bankAccount_accountNotFound => 'Account not found';
@@ -1124,6 +1317,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get car_currentOdometer => 'Current odometer (km)';
+
+  @override
+  String get car_acquisitionDate => 'Acquisition date';
 
   @override
   String get car_status => 'Status';

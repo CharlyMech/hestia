@@ -24,7 +24,7 @@ Household money and household logistics usually live in a dozen disconnected app
 
 - **Finances** — shared and personal bank accounts, cards, transactions, transfers, categories, balances, and savings goals.
 - **Homes & members** — one or more homes, the people in each, and what they can see.
-- **Shopping** — shopping lists plus live shopping *sessions*, so a trip to the store is tracked as it happens.
+- **Shopping** — reusable list *templates* plus live shopping *sessions*, so a trip to the store is tracked as it happens and can be paid in one tap.
 - **Pets** — health records and measurements per pet.
 - **Cars** — vehicles, fuel entries, and per-car members.
 - **Planning** — calendar, appointments, reminders, maps, and notifications.

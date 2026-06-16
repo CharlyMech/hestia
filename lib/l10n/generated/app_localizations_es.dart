@@ -24,6 +24,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get common_delete => 'Eliminar';
 
   @override
+  String get common_clear => 'Borrar';
+
+  @override
   String get common_edit => 'Editar';
 
   @override
@@ -393,6 +396,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_use24h => 'Reloj 24 horas';
 
   @override
+  String get settings_matchDevice => 'Sincronizar con dispositivo';
+
+  @override
+  String get settings_timeFormat => 'Formato de hora';
+
+  @override
+  String get settings_timeFormat24h => '24h';
+
+  @override
+  String get settings_timeFormatAmPm => 'AM/PM';
+
+  @override
   String get settings_biometric => 'Face ID';
 
   @override
@@ -497,6 +512,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get calendar_movimientos => 'Movimientos';
 
   @override
+  String get calendar_showFilters => 'Mostrar todos los filtros';
+
+  @override
+  String get calendar_filters => 'Filtros';
+
+  @override
+  String get calendar_clearFilters => 'Limpiar';
+
+  @override
+  String get calendar_filterPeople => 'Personas';
+
+  @override
+  String get calendar_filterType => 'Tipo';
+
+  @override
+  String get calendar_filterPets => 'Mascotas';
+
+  @override
+  String get calendar_filterVehicles => 'Vehículos';
+
+  @override
   String get shopping_title => 'Compras';
 
   @override
@@ -548,7 +584,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Compartida · cualquiera del hogar puede colaborar';
 
   @override
-  String get shopping_createTemplate => 'Crear nueva plantilla';
+  String get shopping_createTemplate => 'Crear plantilla';
 
   @override
   String get shopping_kindTemplate => 'Plantilla';
@@ -561,6 +597,160 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get shopping_statusCancelled => 'Cancelada';
+
+  @override
+  String get shopping_activeSessions => 'Sesiones activas';
+
+  @override
+  String get shopping_finishSession => 'Finalizar sesión';
+
+  @override
+  String get shopping_finishConfirmTitle => '¿Finalizar esta sesión?';
+
+  @override
+  String get shopping_finishConfirmBody =>
+      'Puedes registrar lo que pagaste o simplemente cerrar la sesión.';
+
+  @override
+  String get shopping_keepShopping => 'Seguir comprando';
+
+  @override
+  String get shopping_finish => 'Finalizar';
+
+  @override
+  String get shopping_addTransactionTitle => '¿Registrar un pago?';
+
+  @override
+  String get shopping_addTransactionBody =>
+      '¿Crear una transacción para esta compra?';
+
+  @override
+  String get shopping_addTransactionYes => 'Sí, añadir pago';
+
+  @override
+  String get shopping_addTransactionNo => 'No, solo finalizar';
+
+  @override
+  String get shopping_deleteSessionTitle => '¿Eliminar esta sesión?';
+
+  @override
+  String get shopping_deleteSessionBody =>
+      'La sesión y sus artículos se eliminarán permanentemente.';
+
+  @override
+  String get shopping_markDone => 'Marcar hecho';
+
+  @override
+  String get shopping_addItem => 'Añadir un artículo…';
+
+  @override
+  String get shopping_quantity => 'Cant.';
+
+  @override
+  String get shopping_uncheck => 'Desmarcar';
+
+  @override
+  String get shopping_check => 'Marcar';
+
+  @override
+  String get shopping_updateTemplateTitle => '¿Actualizar la plantilla?';
+
+  @override
+  String get shopping_updateTemplateBody =>
+      'Esta sesión cambió desde que empezó. ¿Actualizar la plantilla para que coincida?';
+
+  @override
+  String get shopping_updateTemplateYes => 'Actualizar plantilla';
+
+  @override
+  String get shopping_updateTemplateNo => 'Mantener plantilla';
+
+  @override
+  String get shopping_saveAsTemplateTitle => '¿Guardar como plantilla?';
+
+  @override
+  String get shopping_saveAsTemplateBody =>
+      '¿Guardar esta lista de la compra como plantilla reutilizable?';
+
+  @override
+  String get shopping_saveAsTemplateYes => 'Guardar plantilla';
+
+  @override
+  String get shopping_saveAsTemplateNo => 'No, gracias';
+
+  @override
+  String get shopping_shareWithUsers => 'Compartir sesión con usuarios';
+
+  @override
+  String get shopping_sessionName => 'Nombre de la sesión';
+
+  @override
+  String get shopping_sessionNamePlaceholder => 'p. ej. Compra del sábado';
+
+  @override
+  String get shopping_scope => 'Alcance';
+
+  @override
+  String get shopping_scopePersonal => 'Personal';
+
+  @override
+  String get shopping_scopeHousehold => 'Hogar';
+
+  @override
+  String get shopping_source => 'Origen (opcional)';
+
+  @override
+  String get shopping_sourcePlaceholder => 'Mercadona, Lidl, …';
+
+  @override
+  String get shopping_startSessionAction => 'Empezar sesión';
+
+  @override
+  String get shopping_shareWithMembers => 'Compartir con miembros';
+
+  @override
+  String shopping_lastUpdated(String date) {
+    return 'Actualizado $date';
+  }
+
+  @override
+  String get shopping_unsavedChanges => 'Cambios sin guardar';
+
+  @override
+  String get shopping_saveChanges => 'Guardar cambios';
+
+  @override
+  String get shopping_templateName => 'Nombre de plantilla';
+
+  @override
+  String get shopping_templateNamePlaceholder => 'p. ej. Básicos Mercadona';
+
+  @override
+  String get shopping_defaultSource => 'Origen predeterminado (opcional)';
+
+  @override
+  String get shopping_linkedAccount => 'Cuenta vinculada (opcional)';
+
+  @override
+  String get shopping_editTemplate => 'Editar plantilla';
+
+  @override
+  String get shopping_shareTemplate => 'Compartir plantilla con miembros';
+
+  @override
+  String get shopping_shareAll => 'Todos los miembros del hogar';
+
+  @override
+  String shopping_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count artículos',
+      one: '1 artículo',
+      zero: 'Sin artículos',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get notifications_title => 'Notificaciones';
@@ -784,6 +974,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get map_toggleVendors => 'Locales';
+
+  @override
+  String get map_tapPinForDetails => 'Toca un punto para ver detalles';
 
   @override
   String get bankAccount_accountNotFound => 'Cuenta no encontrada';
@@ -1127,6 +1320,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get car_currentOdometer => 'Odómetro actual (km)';
+
+  @override
+  String get car_acquisitionDate => 'Fecha de adquisición';
 
   @override
   String get car_status => 'Estado';

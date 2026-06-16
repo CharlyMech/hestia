@@ -39,6 +39,34 @@ class ShoppingRealtimeService extends SupabaseService {
     }
   }
 
+  /// Item-level changes for a single SHARED session (detail screen).
+  RealtimeChannel? subscribeToSessionItems({
+    required String sessionId,
+    required void Function() onChanged,
+  }) {
+    if (!_enabled) return null;
+    try {
+      return client
+          .channel('shopping-session-items-$sessionId')
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'shopping_session_items',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'session_id',
+              value: sessionId,
+            ),
+            callback: (_) => onChanged(),
+          )
+          .subscribe();
+    } catch (e, st) {
+      logger.w('shopping_session_items realtime subscribe failed',
+          error: e, stackTrace: st);
+      return null;
+    }
+  }
+
   /// List metadata + session rows for the shopping index screen.
   RealtimeChannel? subscribeToHouseholdShopping({
     required String householdId,

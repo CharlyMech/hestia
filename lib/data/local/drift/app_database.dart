@@ -9,6 +9,8 @@ import 'tables/local_notifications.dart';
 import 'tables/local_financial_institutions.dart';
 import 'tables/local_cards.dart';
 import 'tables/local_account_members.dart';
+import 'tables/local_shopping_sessions.dart';
+import 'tables/local_shopping_session_items.dart';
 
 part 'app_database.g.dart';
 
@@ -21,12 +23,14 @@ part 'app_database.g.dart';
   LocalFinancialInstitutions,
   LocalCards,
   LocalAccountMembers,
+  LocalShoppingSessions,
+  LocalShoppingSessionItems,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -110,6 +114,43 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'ALTER TABLE local_cards ADD COLUMN owner_profile_id TEXT',
           );
+        }
+        if (from < 6) {
+          // v5 → v6: local-first shopping sessions + their items.
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS local_shopping_sessions (
+              id TEXT NOT NULL PRIMARY KEY,
+              household_id TEXT NOT NULL,
+              owner_id TEXT NOT NULL,
+              name TEXT NOT NULL,
+              scope TEXT NOT NULL,
+              status TEXT NOT NULL,
+              template_id TEXT,
+              bank_account_id TEXT,
+              transaction_source_id TEXT,
+              transaction_id TEXT,
+              started_at INTEGER NOT NULL,
+              ended_at INTEGER,
+              paid_at INTEGER,
+              created_at INTEGER NOT NULL,
+              last_update INTEGER NOT NULL,
+              is_synced INTEGER NOT NULL DEFAULT 0,
+              is_dirty INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS local_shopping_session_items (
+              id TEXT NOT NULL PRIMARY KEY,
+              session_id TEXT NOT NULL REFERENCES local_shopping_sessions(id),
+              name TEXT NOT NULL,
+              qty INTEGER NOT NULL DEFAULT 1,
+              sort_order INTEGER NOT NULL DEFAULT 0,
+              is_checked INTEGER NOT NULL DEFAULT 0,
+              checked_at INTEGER,
+              created_at INTEGER NOT NULL,
+              last_update INTEGER NOT NULL
+            )
+          ''');
         }
       },
       beforeOpen: (details) async {

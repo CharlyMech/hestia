@@ -1,4 +1,6 @@
 import 'package:hestia/core/config/flavor.dart';
+import 'package:hestia/data/local/drift/app_database.dart';
+import 'package:hestia/data/local/drift/daos/shopping_session_dao.dart';
 import 'package:hestia/core/services/location_service.dart';
 import 'package:hestia/core/services/user_preferences_service.dart';
 import 'package:hestia/data/repositories/account_member_repository_impl.dart';
@@ -95,6 +97,9 @@ class AppDependencies {
   late final LocationService locationService;
   late final ShoppingRealtimeService shoppingRealtimeService;
 
+  // Local database (Drift)
+  late final AppDatabase appDatabase;
+
   // Repositories
   late final AuthRepository authRepository;
   late final TransactionRepository transactionRepository;
@@ -119,9 +124,13 @@ class AppDependencies {
 
   AppDependencies._();
 
-  static Future<void> initialize(AppFlavor flavor) async {
+  static Future<void> initialize(
+    AppFlavor flavor, {
+    required AppDatabase database,
+  }) async {
     final deps = AppDependencies._();
 
+    deps.appDatabase = database;
     deps.userPreferencesService = await UserPreferencesService.create();
     deps.imageUploadService = SupabaseImageUploadService();
     deps.locationService = LocationService();
@@ -161,9 +170,15 @@ class AppDependencies {
         PetMeasurementRepositoryImpl(PetMeasurementService());
     deps.transactionSourceRepository =
         TransactionSourceRepositoryImpl(TransactionSourceService());
-    deps.shoppingRepository = ShoppingRepositoryImpl(ShoppingService());
-    deps.shoppingSessionRepository =
-        ShoppingSessionRepositoryImpl(ShoppingSessionService());
+    final shoppingService = ShoppingService();
+    final shoppingSessionService = ShoppingSessionService();
+    deps.shoppingRepository =
+        ShoppingRepositoryImpl(shoppingService, shoppingSessionService);
+    deps.shoppingSessionRepository = ShoppingSessionRepositoryImpl(
+      shoppingService,
+      shoppingSessionService,
+      ShoppingSessionDao(deps.appDatabase),
+    );
     deps.homeRepository = HomeRepositoryImpl(HomeService());
     deps.goalRepository = GoalRepositoryImpl(deps.goalService!);
     deps.householdRepository = HouseholdRepositoryImpl(SupabaseService());

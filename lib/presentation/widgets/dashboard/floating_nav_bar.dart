@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
-import 'package:hestia/presentation/blocs/shopping/shopping_lists_bloc.dart';
+import 'package:hestia/presentation/blocs/shopping/shopping_sessions_bloc.dart';
 import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/pets/paw_icon.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
@@ -44,9 +44,9 @@ class FloatingNavBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // Shopping badge — number of active sessions
-    final shoppingState = context.watch<ShoppingListsBloc>().state;
-    final shoppingBadge = shoppingState is ShoppingListsLoaded
-        ? shoppingState.activeSessions.length
+    final shoppingState = context.watch<ShoppingSessionsBloc>().state;
+    final shoppingBadge = shoppingState is ShoppingSessionsLoaded
+        ? shoppingState.activeCount
         : 0;
 
     return Padding(
@@ -107,6 +107,8 @@ class _GlassNavPill extends StatelessWidget {
     final border = hexToColor(theme.borderColor);
     final primary = hexToColor(theme.primaryColor);
     final onPrimary = hexToColor(theme.onPrimaryColor);
+    final red = hexToColor(theme.colorRed);
+    final onRed = hexToColor(theme.onRedColor);
 
     final navRadius = height / 2;
     return ClipRRect(
@@ -166,7 +168,8 @@ class _GlassNavPill extends StatelessWidget {
                             // Active item sits on the primary pill → use
                             // onPrimary so it reads on light themes too.
                             activeColor: onPrimary,
-                            badgeColor: primary,
+                            badgeColor: red,
+                            badgeFg: onRed,
                             muted: muted,
                             l10n: l10n,
                             badge:
@@ -194,6 +197,7 @@ class _NavItem extends StatelessWidget {
   final Color activeColor;
   final Color muted;
   final Color badgeColor;
+  final Color badgeFg;
   final AppLocalizations l10n;
   final VoidCallback onTap;
   final int badge;
@@ -204,6 +208,7 @@ class _NavItem extends StatelessWidget {
     required this.activeColor,
     required this.muted,
     required this.badgeColor,
+    required this.badgeFg,
     required this.l10n,
     required this.onTap,
     this.badge = 0,
@@ -256,17 +261,12 @@ class _NavItem extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: badgeColor,
                         borderRadius: BorderRadius.circular(7),
-                        border: Border.all(
-                          color: CupertinoColors.systemBackground
-                              .resolveFrom(context),
-                          width: 1.5,
-                        ),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         '$badge',
-                        style: const TextStyle(
-                          color: CupertinoColors.white,
+                        style: TextStyle(
+                          color: badgeFg,
                           fontSize: 8,
                           fontWeight: FontWeight.w700,
                           height: 1.0,

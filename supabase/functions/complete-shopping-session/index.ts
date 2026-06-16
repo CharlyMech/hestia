@@ -5,7 +5,7 @@
 // POST body: {
 //   list_id: string,
 //   transaction?: { ...transactions row... },  // optional expense to create+link
-//   cancelled?: boolean                        // true → no payment, back to active
+//   cancelled?: boolean                        // true → no payment, status=cancelled
 // }
 
 import { adminClient, CORS, insertTransaction, json, nowUnix } from "../_shared/client.ts";
@@ -37,9 +37,9 @@ Deno.serve(async (req) => {
   }
 
   const patch: Record<string, unknown> = input.cancelled
-    ? { status: "active", session_started_at: null, last_update: ts }
+    ? { status: "cancelled", session_ended_at: ts, last_update: ts }
     : {
-        status: "completed",
+        status: "paid",
         session_ended_at: ts,
         last_update: ts,
         ...(createdTx

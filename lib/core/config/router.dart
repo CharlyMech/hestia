@@ -48,7 +48,10 @@ import 'package:hestia/domain/entities/notification.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/presentation/pages/shopping/add_edit_shopping_list_screen.dart';
 import 'package:hestia/presentation/pages/shopping/shopping_list_detail_screen.dart';
+import 'package:hestia/presentation/pages/shopping/active_shopping_sessions_screen.dart';
+import 'package:hestia/presentation/blocs/shopping/shopping_sessions_bloc.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
+import 'package:hestia/domain/entities/shopping_session.dart';
 import 'package:hestia/presentation/pages/transaction_sources/transaction_sources_screen.dart';
 import 'package:hestia/presentation/pages/transactions/add_edit_transaction_screen.dart';
 import 'package:hestia/presentation/pages/transactions/transaction_detail_screen.dart';
@@ -86,6 +89,7 @@ abstract final class AppRoutes {
   static const transactionSources = '/transaction-sources';
   static const addShoppingList = '/shopping/list/add';
   static const shoppingListDetail = '/shopping/list';
+  static const activeShoppingSessions = '/shopping/active';
   static const categories = '/categories';
   static const bankAccounts = '/bank-accounts';
   static const addBankAccount = '/bank-accounts/add';
@@ -334,9 +338,23 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.shoppingListDetail,
       pageBuilder: (context, state) {
-        final list = state.extra as ShoppingList;
+        final extra = state.extra;
         return CupertinoPage(
-          child: ShoppingListDetailScreen(list: list),
+          child: extra is ShoppingSession
+              ? ShoppingListDetailScreen.session(session: extra)
+              : ShoppingListDetailScreen(list: extra as ShoppingList),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.activeShoppingSessions,
+      pageBuilder: (context, state) {
+        final bloc = state.extra as ShoppingSessionsBloc;
+        return CupertinoPage(
+          child: BlocProvider.value(
+            value: bloc,
+            child: const ActiveShoppingSessionsScreen(),
+          ),
         );
       },
     ),

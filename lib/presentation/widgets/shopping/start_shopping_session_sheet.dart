@@ -1,17 +1,20 @@
 import 'package:flutter/cupertino.dart';
+import 'package:forui/forui.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
+import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/core/constants/app_constants.dart';
-import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
-import 'package:hestia/domain/entities/bank_account.dart';
+import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/entities/shopping_list.dart';
 import 'package:hestia/domain/entities/transaction_source.dart';
-import 'package:hestia/presentation/widgets/common/design_widgets.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
+import 'package:hestia/presentation/widgets/shopping/member_share_accordion.dart';
 
-/// Bottom-sheet body: confirm name, scope, optional bank/source, then start a
-/// shopping session (optionally seeded from [template]).
+/// Bottom-sheet body: confirm name, scope, optional source, and which household
+/// members to share with, then start a shopping session (optionally seeded from
+/// [template]).
 class StartShoppingSessionSheet extends StatefulWidget {
   final String householdId;
   final String userId;
@@ -22,6 +25,7 @@ class StartShoppingSessionSheet extends StatefulWidget {
     String? bankAccountId,
     String? transactionSourceId,
     String? templateListId,
+    List<String> sharedWithUserIds,
   }) onStart;
 
   const StartShoppingSessionSheet({
@@ -40,11 +44,13 @@ class StartShoppingSessionSheet extends StatefulWidget {
 class _StartShoppingSessionSheetState
     extends State<StartShoppingSessionSheet> {
   late final TextEditingController _name;
+  late final FRadioSelectGroupController<String?> _sourceCtrl;
   late ShoppingListScope _scope;
-  String? _bankAccountId;
   String? _sourceId;
-  List<BankAccount> _accounts = const [];
+  final Set<String> _shareWith = {};
+  bool _shareAll = true;
   List<TransactionSource> _sources = const [];
+  List<Profile> _members = const [];
   bool _busy = false;
 
   @override
@@ -53,31 +59,38 @@ class _StartShoppingSessionSheetState
     final t = widget.template;
     _name = TextEditingController(text: t?.name ?? '');
     _scope = t?.scope ?? ShoppingListScope.shared;
-    _bankAccountId = t?.bankAccountId;
     _sourceId = t?.transactionSourceId;
+    _sourceCtrl = FRadioSelectGroupController<String?>(value: _sourceId);
+    _sourceCtrl.addListener(_onSourceChanged);
     _load();
+  }
+
+  void _onSourceChanged() {
+    final value = _sourceCtrl.values.firstOrNull;
+    if (value != _sourceId) setState(() => _sourceId = value);
   }
 
   @override
   void dispose() {
     _name.dispose();
+    _sourceCtrl.removeListener(_onSourceChanged);
+    _sourceCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
     final deps = AppDependencies.instance;
-    final (accounts, _) = await deps.bankAccountRepository.getBankAccounts(
-      householdId: widget.householdId,
-      viewMode: ViewMode.household,
-      userId: widget.userId,
-    );
     final (sources, _) = await deps.transactionSourceRepository.getAll(
       householdId: widget.householdId,
     );
+    final (members, _) = await deps.householdRepository.getMemberProfiles(
+      widget.householdId,
+    );
     if (!mounted) return;
     setState(() {
-      _accounts = accounts;
       _sources = sources;
+      // Exclude the current user — they own the session.
+      _members = members.where((m) => m.id != widget.userId).toList();
     });
   }
 
@@ -85,216 +98,110 @@ class _StartShoppingSessionSheetState
     final n = _name.text.trim();
     if (n.isEmpty || _busy) return;
     setState(() => _busy = true);
+    // Empty list => whole household ("All"). Only meaningful for shared scope.
+    final members = _scope == ShoppingListScope.shared && !_shareAll
+        ? _shareWith.toList()
+        : const <String>[];
     widget.onStart(
       name: n,
       scope: _scope,
-      bankAccountId: _bankAccountId,
       transactionSourceId: _sourceId,
       templateListId: widget.template?.id,
-    );
-  }
-  Future<void> _pickSource() async {
-    final theme = context.myTheme;
-    final surface = hexToColor(theme.surfaceColor);
-    final fg = hexToColor(theme.onBackgroundColor);
-    final accent = hexToColor(theme.primaryColor);
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (_) => Container(
-        color: surface,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedButton(
-                onTap: () {
-                  setState(() => _sourceId = null);
-                  Navigator.of(context).pop();
-                },
-                child:
-                    Text('None', style: AppFonts.body(fontSize: 15, color: fg)),
-              ),
-              for (final s in _sources)
-                AnimatedButton(
-                  onTap: () {
-                    setState(() => _sourceId = s.id);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    s.name,
-                    style: AppFonts.body(
-                      fontSize: 15,
-                      fontWeight:
-                          s.id == _sourceId ? FontWeight.w700 : FontWeight.w400,
-                      color: s.id == _sourceId ? accent : fg,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickBank() async {
-    final theme = context.myTheme;
-    final surface = hexToColor(theme.surfaceColor);
-    final fg = hexToColor(theme.onBackgroundColor);
-    final accent = hexToColor(theme.primaryColor);
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (_) => Container(
-        color: surface,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedButton(
-                onTap: () {
-                  setState(() => _bankAccountId = null);
-                  Navigator.of(context).pop();
-                },
-                child:
-                    Text('None', style: AppFonts.body(fontSize: 15, color: fg)),
-              ),
-              for (final a in _accounts)
-                AnimatedButton(
-                  onTap: () {
-                    setState(() => _bankAccountId = a.id);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    a.name,
-                    style: AppFonts.body(
-                      fontSize: 15,
-                      fontWeight: a.id == _bankAccountId
-                          ? FontWeight.w700
-                          : FontWeight.w400,
-                      color: a.id == _bankAccountId ? accent : fg,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+      sharedWithUserIds: members,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = context.myTheme;
     final surface = hexToColor(theme.surfaceColor);
     final border = hexToColor(theme.borderColor);
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
-    final selectedBank =
-        _accounts.where((a) => a.id == _bankAccountId).firstOrNull;
-    final selectedSrc = _sources.where((s) => s.id == _sourceId).firstOrNull;
+    final onPrimary = hexToColor(theme.onPrimaryColor);
+    final isShared = _scope == ShoppingListScope.shared;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 14,
         children: [
-          Text('SESSION NAME', style: AppFonts.sectionLabel(color: muted)),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: surface,
-              border: Border.all(color: border, width: 1),
-              borderRadius: BorderRadius.circular(AppRadii.lg),
-            ),
-            child: CupertinoTextField(
-              controller: _name,
-              placeholder: 'e.g. Saturday groceries',
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const BoxDecoration(),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              style: AppFonts.body(fontSize: 14, color: fg),
-            ),
+          _Label(text: l10n.shopping_sessionName, color: muted),
+          FTextField(
+            controller: _name,
+            hint: l10n.shopping_sessionNamePlaceholder,
+            textCapitalization: TextCapitalization.sentences,
           ),
-          const SizedBox(height: 14),
-          Text('SCOPE', style: AppFonts.sectionLabel(color: muted)),
-          const SizedBox(height: 6),
-          SegmentedControl(
-            options: const ['Personal', 'Household'],
-            active: _scope == ShoppingListScope.personal ? 0 : 1,
-            onChanged: (i) => setState(() => _scope =
-                i == 0 ? ShoppingListScope.personal : ShoppingListScope.shared),
+          _Label(text: l10n.shopping_scope, color: muted),
+          AnimatedPillTabs(
+            labels: [l10n.shopping_scopePersonal, l10n.shopping_scopeHousehold],
+            selectedIndex: _scope == ShoppingListScope.personal ? 0 : 1,
+            onChanged: (i) => setState(() {
+              _scope = i == 0
+                  ? ShoppingListScope.personal
+                  : ShoppingListScope.shared;
+              if (_scope == ShoppingListScope.personal) _shareWith.clear();
+            }),
             surface: surface,
             border: border,
             fg: fg,
             muted: muted,
-            activeColor: accent,
-            activeFg: CupertinoColors.white,
+            pillColor: accent,
           ),
-          const SizedBox(height: 14),
-          Text('SOURCE (OPTIONAL)', style: AppFonts.sectionLabel(color: muted)),
-          const SizedBox(height: 6),
-          GestureDetector(
-            onTap: _pickSource,
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(AppRadii.lg),
-              ),
-              child: Text(
-                selectedSrc?.name ?? 'Mercadona, Lidl, …',
-                style: AppFonts.body(fontSize: 14, color: fg),
-              ),
+          _Label(text: l10n.shopping_source, color: muted),
+          FSelectMenuTile<String?>(
+            groupController: _sourceCtrl,
+            autoHide: true,
+            title: Text(
+              _sources.where((s) => s.id == _sourceId).firstOrNull?.name ??
+                  l10n.shopping_sourcePlaceholder,
+              style: AppFonts.body(fontSize: 14, color: fg),
             ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'LINKED ACCOUNT (OPTIONAL)',
-            style: AppFonts.sectionLabel(color: muted),
-          ),
-          const SizedBox(height: 6),
-          GestureDetector(
-            onTap: _pickBank,
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(AppRadii.lg),
+            menu: [
+              FSelectTile<String?>(
+                title: Text(l10n.common_none),
+                value: null,
               ),
-              child: Text(
-                selectedBank?.name ?? 'None',
-                style: AppFonts.body(fontSize: 14, color: fg),
-              ),
+              for (final s in _sources)
+                FSelectTile<String?>(title: Text(s.name), value: s.id),
+            ],
+          ),
+          if (isShared && _members.isNotEmpty)
+            MemberShareAccordion(
+              title: l10n.shopping_shareWithUsers,
+              members: _members,
+              selected: _shareWith,
+              shareAll: _shareAll,
+              onShareAllChanged: (v) => setState(() {
+                _shareAll = v;
+                if (v) _shareWith.clear();
+              }),
+              onMemberChanged: (id, v) => setState(() {
+                if (v) {
+                  _shareWith.add(id);
+                } else {
+                  _shareWith.remove(id);
+                }
+              }),
             ),
-          ),
-          const SizedBox(height: 22),
-          GestureDetector(
+          AnimatedButton(
+            backgroundColor: accent,
+            borderRadius: AppRadii.xl,
+            padding: const EdgeInsets.symmetric(vertical: 14),
             onTap: _busy ? null : _submit,
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: accent,
-                borderRadius: BorderRadius.circular(AppRadii.xl),
-              ),
-              alignment: Alignment.center,
+            child: Center(
               child: _busy
                   ? const CupertinoActivityIndicator(
                       color: CupertinoColors.white)
                   : Text(
-                      'Start session',
+                      l10n.shopping_startSessionAction,
                       style: AppFonts.body(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: CupertinoColors.white,
+                        color: onPrimary,
                       ),
                     ),
             ),
@@ -303,4 +210,14 @@ class _StartShoppingSessionSheetState
       ),
     );
   }
+}
+
+class _Label extends StatelessWidget {
+  final String text;
+  final Color color;
+  const _Label({required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text.toUpperCase(), style: AppFonts.sectionLabel(color: color));
 }
