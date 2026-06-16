@@ -22,7 +22,15 @@ import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:iconoir_flutter/iconoir_flutter.dart' show Bell, Calendar, Plus;
+import 'package:iconoir_flutter/iconoir_flutter.dart'
+    show
+        Bell,
+        Calendar,
+        Plus,
+        NavArrowLeft,
+        NavArrowRight,
+        ArrowSeparateVertical,
+        ArrowUnionVertical;
 
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
@@ -42,6 +50,8 @@ class CalendarScreen extends StatelessWidget {
           appointmentRepository: deps.appointmentRepository,
           transactionRepository: deps.transactionRepository,
           householdRepository: deps.householdRepository,
+          petRepository: deps.petRepository,
+          carRepository: deps.carRepository,
         )..add(CalendarLoad(
             userId: profile.id,
             householdId: '',
@@ -62,8 +72,6 @@ class _Body extends StatelessWidget {
     showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).calendar_newAppointment,
-      heightFactor: 0.92,
-      expand: true,
       child: AppointmentSheetForm(
         defaultDate: defaultDate,
         userId: userId,
@@ -163,7 +171,11 @@ class _Body extends StatelessWidget {
               p.allDayAppointmentIds != n.allDayAppointmentIds ||
               p.visibleUserIds != n.visibleUserIds ||
               p.memberProfiles != n.memberProfiles ||
-              p.ownerColors != n.ownerColors,
+              p.ownerColors != n.ownerColors ||
+              p.filterPetIds != n.filterPetIds ||
+              p.filterCarIds != n.filterCarIds ||
+              p.availablePets != n.availablePets ||
+              p.availableCars != n.availableCars,
           builder: (context, state) {
             final dayItems = state.itemsForDayFor(state.selectedDate, userId);
             final dayAppts = dayItems.whereType<AppointmentItem>().toList();
@@ -209,31 +221,15 @@ class _Body extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Filters
+                  // Filter row
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(0),
-                      child: _Filters(
-                        showAppointments: state.showAppointments,
-                        showTransactions: state.showTransactions,
-                        memberProfiles: state.memberProfiles,
-                        visibleUserIds: state.visibleUserIds,
-                        ownerColors: state.ownerColors,
-                        accent: accent,
-                        surface: surface,
-                        border: border,
-                        fg: fg,
-                        muted: muted,
-                        onToggleAppointments: () => context
-                            .read<CalendarBloc>()
-                            .add(const CalendarToggleEventos()),
-                        onToggleTransactions: () => context
-                            .read<CalendarBloc>()
-                            .add(const CalendarToggleMovimientos()),
-                        onToggleUser: (id) => context
-                            .read<CalendarBloc>()
-                            .add(CalendarToggleUser(id)),
-                      ),
+                    child: _FilterRow(
+                      state: state,
+                      accent: accent,
+                      fg: fg,
+                      muted: muted,
+                      surface: surface,
+                      border: border,
                     ),
                   ),
                   // Day view
@@ -386,6 +382,8 @@ class _MonthGridState extends State<_MonthGrid> {
     final selected = _dayOnly(state.selectedDate);
     final allCells = _cellsForMonth(_viewMonth, widget.startDayOfWeek);
     final cells = _visibleCells(allCells, state.selectedDate);
+    final theme = context.myTheme;
+    final surface = hexToColor(theme.surfaceColor);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -400,14 +398,15 @@ class _MonthGridState extends State<_MonthGrid> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
-                spacing: 4,
+                spacing: 8,
                 children: [
                   AnimatedButton(
-                    padding: EdgeInsets.zero,
+                    padding: EdgeInsets.all(6),
+                    backgroundColor: surface,
                     onTap: state.loading ? null : () => _shiftMonth(-1),
-                    child: Icon(
-                      CupertinoIcons.chevron_back,
-                      size: 20,
+                    child: NavArrowLeft(
+                      width: 24,
+                      height: 24,
                       color: state.loading ? widget.muted : widget.fg,
                     ),
                   ),
@@ -430,24 +429,24 @@ class _MonthGridState extends State<_MonthGrid> {
                     ),
                   ),
                   AnimatedButton(
-                    padding: EdgeInsets.zero,
+                    padding: EdgeInsets.all(6),
+                    backgroundColor: surface,
                     onTap: state.loading ? null : () => _shiftMonth(1),
-                    child: Icon(
-                      CupertinoIcons.chevron_forward,
-                      size: 20,
+                    child: NavArrowRight(
+                      width: 24,
+                      height: 24,
                       color: state.loading ? widget.muted : widget.fg,
                     ),
                   ),
                   AnimatedButton(
-                    padding: EdgeInsets.zero,
+                    padding: EdgeInsets.all(6),
+                    backgroundColor: surface,
                     onTap: () => setState(() => _expanded = !_expanded),
-                    child: Icon(
-                      _expanded
-                          ? CupertinoIcons.chevron_up
-                          : CupertinoIcons.chevron_down,
-                      size: 20,
-                      color: widget.fg,
-                    ),
+                    child: _expanded
+                        ? ArrowUnionVertical(
+                            width: 24, height: 24, color: widget.fg)
+                        : ArrowSeparateVertical(
+                            width: 24, height: 24, color: widget.fg),
                   ),
                 ],
               ),
@@ -617,134 +616,316 @@ class _EventDot extends StatelessWidget {
   }
 }
 
-// ── Filters ───────────────────────────────────────────────────────────────────
+// ── Filter row (replaces inline filter chips) ─────────────────────────────────
 
-class _Filters extends StatelessWidget {
-  final bool showAppointments;
-  final bool showTransactions;
-  final List<Profile> memberProfiles;
-  final Set<String>? visibleUserIds;
-  final Map<String, String> ownerColors;
-  final Color accent;
-  final Color surface;
-  final Color border;
-  final Color fg;
-  final Color muted;
-  final VoidCallback onToggleAppointments;
-  final VoidCallback onToggleTransactions;
-  final ValueChanged<String> onToggleUser;
+class _FilterRow extends StatelessWidget {
+  final CalendarState state;
+  final Color accent, fg, muted, surface, border;
 
-  const _Filters({
-    required this.showAppointments,
-    required this.showTransactions,
-    required this.memberProfiles,
-    required this.visibleUserIds,
-    required this.ownerColors,
+  const _FilterRow({
+    required this.state,
     required this.accent,
-    required this.surface,
-    required this.border,
     required this.fg,
     required this.muted,
-    required this.onToggleAppointments,
-    required this.onToggleTransactions,
-    required this.onToggleUser,
+    required this.surface,
+    required this.border,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final count = state.activeFilterCount;
+    final hasFilters = state.hasActiveFilters;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          AnimatedButton(
+            onTap: () => _openSheet(context),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            backgroundColor:
+                hasFilters ? accent.withValues(alpha: 0.12) : surface,
+            borderColor: hasFilters ? accent : border,
+            borderWidth: hasFilters ? 1.2 : 0.8,
+            borderRadius: AppRadii.full,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                if (count > 0)
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$count',
+                      style: AppFonts.body(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                Text(
+                  l10n.calendar_showFilters,
+                  style: AppFonts.body(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: hasFilters ? accent : muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (hasFilters) ...[
+            const Spacer(),
+            AnimatedButton(
+              onTap: () => context
+                  .read<CalendarBloc>()
+                  .add(const CalendarClearFilters()),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              borderRadius: AppRadii.full,
+              child: Text(
+                l10n.calendar_clearFilters,
+                style: AppFonts.body(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: muted,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _openSheet(BuildContext context) {
+    final bloc = context.read<CalendarBloc>();
+    showAppBottomSheet(
+      context: context,
+      title: AppLocalizations.of(context).calendar_filters,
+      child: BlocProvider.value(
+        value: bloc,
+        child: _CalendarFilterSheet(
+          accent: accent,
+          fg: fg,
+          muted: muted,
+          surface: surface,
+          border: border,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Filter sheet content ──────────────────────────────────────────────────────
+
+class _CalendarFilterSheet extends StatelessWidget {
+  final Color accent, fg, muted, surface, border;
+
+  const _CalendarFilterSheet({
+    required this.accent,
+    required this.fg,
+    required this.muted,
+    required this.surface,
+    required this.border,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CalendarBloc, CalendarState>(
+      builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
+        final bloc = context.read<CalendarBloc>();
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 20,
+            children: [
+              // ── Type ──────────────────────────────────────────────────────
+              _SheetSection(
+                label: l10n.calendar_filterType,
+                fg: fg,
+                muted: muted,
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: _ToggleChip(
+                        label: l10n.calendar_eventos,
+                        icon: Calendar(
+                            width: 13,
+                            height: 13,
+                            color: state.showAppointments ? accent : muted),
+                        active: state.showAppointments,
+                        accent: accent,
+                        surface: surface,
+                        border: border,
+                        muted: muted,
+                        onTap: () => bloc.add(const CalendarToggleEventos()),
+                      ),
+                    ),
+                    Expanded(
+                      child: _ToggleChip(
+                        label: l10n.calendar_movimientos,
+                        icon: Bell(
+                            width: 13,
+                            height: 13,
+                            color: state.showTransactions ? accent : muted),
+                        active: state.showTransactions,
+                        accent: accent,
+                        surface: surface,
+                        border: border,
+                        muted: muted,
+                        onTap: () =>
+                            bloc.add(const CalendarToggleMovimientos()),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── People ────────────────────────────────────────────────────
+              if (state.memberProfiles.length > 1)
+                _SheetSection(
+                  label: l10n.calendar_filterPeople,
+                  fg: fg,
+                  muted: muted,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final p in state.memberProfiles)
+                        _MemberChip(
+                          profile: p,
+                          active: state.visibleUserIds == null ||
+                              state.visibleUserIds!.contains(p.id),
+                          ownerColor: state.ownerColors[p.id] != null
+                              ? hexToColor(state.ownerColors[p.id]!)
+                              : accent,
+                          surface: surface,
+                          border: border,
+                          muted: muted,
+                          onTap: () => bloc.add(CalendarToggleUser(p.id)),
+                        ),
+                    ],
+                  ),
+                ),
+
+              // ── Pets ──────────────────────────────────────────────────────
+              if (state.availablePets.isNotEmpty)
+                _SheetSection(
+                  label: l10n.calendar_filterPets,
+                  fg: fg,
+                  muted: muted,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final pet in state.availablePets)
+                        _ToggleChip(
+                          label: pet.name,
+                          active: state.filterPetIds.contains(pet.id),
+                          accent: accent,
+                          surface: surface,
+                          border: border,
+                          muted: muted,
+                          onTap: () => bloc.add(CalendarTogglePet(pet.id)),
+                        ),
+                    ],
+                  ),
+                ),
+
+              // ── Cars ──────────────────────────────────────────────────────
+              if (state.availableCars.isNotEmpty)
+                _SheetSection(
+                  label: l10n.calendar_filterVehicles,
+                  fg: fg,
+                  muted: muted,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final car in state.availableCars)
+                        _ToggleChip(
+                          label: car.name,
+                          active: state.filterCarIds.contains(car.id),
+                          accent: accent,
+                          surface: surface,
+                          border: border,
+                          muted: muted,
+                          onTap: () => bloc.add(CalendarToggleCar(car.id)),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SheetSection extends StatelessWidget {
+  final String label;
+  final Widget child;
+  final Color fg, muted;
+
+  const _SheetSection({
+    required this.label,
+    required this.child,
+    required this.fg,
+    required this.muted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        // Type filters row
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            spacing: 8,
-            children: [
-              Expanded(
-                child: _FilterChip(
-                  label: l10n.calendar_eventos,
-                  icon: Calendar(
-                      width: 13,
-                      height: 13,
-                      color: showAppointments ? accent : muted),
-                  active: showAppointments,
-                  accent: accent,
-                  surface: surface,
-                  border: border,
-                  fg: fg,
-                  muted: muted,
-                  onTap: onToggleAppointments,
-                ),
-              ),
-              Expanded(
-                child: _FilterChip(
-                  label: l10n.calendar_movimientos,
-                  icon: Bell(
-                      width: 13,
-                      height: 13,
-                      color: showTransactions ? accent : muted),
-                  active: showTransactions,
-                  accent: accent,
-                  surface: surface,
-                  border: border,
-                  fg: fg,
-                  muted: muted,
-                  onTap: onToggleTransactions,
-                ),
-              ),
-            ],
+        Text(
+          label.toUpperCase(),
+          style: AppFonts.body(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: muted,
+            letterSpacing: 0.8,
           ),
         ),
-        // Per-member chips — only shown when household has >1 member
-        if (memberProfiles.length > 1)
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              for (final p in memberProfiles)
-                _MemberChip(
-                  profile: p,
-                  active:
-                      visibleUserIds == null || visibleUserIds!.contains(p.id),
-                  ownerColor: ownerColors[p.id] != null
-                      ? hexToColor(ownerColors[p.id]!)
-                      : accent,
-                  surface: surface,
-                  border: border,
-                  muted: muted,
-                  onTap: () => onToggleUser(p.id),
-                ),
-            ],
-          ),
+        child,
       ],
     );
   }
 }
 
-class _FilterChip extends StatelessWidget {
+class _ToggleChip extends StatelessWidget {
   final String label;
-  final Widget icon;
+  final Widget? icon;
   final bool active;
-  final Color accent;
-  final Color surface;
-  final Color border;
-  final Color fg;
-  final Color muted;
+  final Color accent, surface, border, muted;
   final VoidCallback onTap;
 
-  const _FilterChip({
+  const _ToggleChip({
     required this.label,
-    required this.icon,
     required this.active,
     required this.accent,
     required this.surface,
     required this.border,
-    required this.fg,
     required this.muted,
     required this.onTap,
+    this.icon,
   });
 
   @override
@@ -752,32 +933,29 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
         decoration: BoxDecoration(
           color: active ? accent.withValues(alpha: 0.14) : surface,
           border: Border.all(
-            color: active ? accent : const Color(0x00000000),
-            width: 1,
+            color: active ? accent : border,
+            width: active ? 1.2 : 0.8,
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadii.md),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 6,
           children: [
-            icon,
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: AppFonts.body(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: active ? accent : muted,
-                ),
+            if (icon != null) icon!,
+            Text(
+              label,
+              style: AppFonts.body(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: active ? accent : muted,
               ),
             ),
           ],

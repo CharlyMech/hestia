@@ -85,9 +85,7 @@ class _DayViewState extends State<DayView> {
     final accent = hexToColor(theme.primaryColor);
     final border = hexToColor(theme.borderColor);
     final surface = hexToColor(theme.surfaceColor);
-    final tints = theme.categoryTints
-        .map((h) => hexToColor(h))
-        .toList();
+    final tints = theme.categoryTints.map((h) => hexToColor(h)).toList();
 
     final visibleAppts = widget.showAppointments
         ? widget.appointments.map((i) => i.appointment).toList()
@@ -429,9 +427,10 @@ class _AllDayOverlay extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints(minHeight: 44),
       decoration: BoxDecoration(
-        color: surface.withValues(alpha: 0.30),
+        color: CupertinoColors.transparent,
         border: Border(
           bottom: BorderSide(color: accent.withValues(alpha: 0.8), width: 1),
+          top: BorderSide(color: surface.withValues(alpha: 0.9), width: 0.7),
         ),
       ),
       child: Padding(
@@ -456,8 +455,7 @@ class _AllDayOverlay extends StatelessWidget {
                     final t = item.transaction;
                     final sign = t.isExpense ? '-' : '+';
                     final txColor = t.categoryColor != null
-                        ? hexToColor(
-                            t.categoryColor!)
+                        ? hexToColor(t.categoryColor!)
                         : accent;
                     return _AllDayChip(
                       label:

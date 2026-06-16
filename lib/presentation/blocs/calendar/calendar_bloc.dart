@@ -2,10 +2,14 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/domain/entities/appointment.dart';
+import 'package:hestia/domain/entities/car.dart';
+import 'package:hestia/domain/entities/pet.dart';
 import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/domain/entities/transaction.dart';
 import 'package:hestia/domain/repositories/appointment_repository.dart';
+import 'package:hestia/domain/repositories/car_repository.dart';
 import 'package:hestia/domain/repositories/household_repository.dart';
+import 'package:hestia/domain/repositories/pet_repository.dart';
 import 'package:hestia/domain/repositories/transaction_repository.dart';
 
 /// Unified item shown in the calendar agenda — either an appointment
@@ -128,6 +132,24 @@ class CalendarToggleUser extends CalendarEvent {
   List<Object?> get props => [userId];
 }
 
+class CalendarTogglePet extends CalendarEvent {
+  final String petId;
+  const CalendarTogglePet(this.petId);
+  @override
+  List<Object?> get props => [petId];
+}
+
+class CalendarToggleCar extends CalendarEvent {
+  final String carId;
+  const CalendarToggleCar(this.carId);
+  @override
+  List<Object?> get props => [carId];
+}
+
+class CalendarClearFilters extends CalendarEvent {
+  const CalendarClearFilters();
+}
+
 class CalendarState extends Equatable {
   final DateTime selectedDate;
   final DateTime visibleMonth;
@@ -146,6 +168,18 @@ class CalendarState extends Equatable {
   /// After load this is always initialized to {currentUserId}.
   final Set<String>? visibleUserIds;
 
+  /// Pet IDs to filter by. Empty = no pet filter (show all).
+  final Set<String> filterPetIds;
+
+  /// Car IDs to filter by. Empty = no car filter (show all).
+  final Set<String> filterCarIds;
+
+  /// All pets in the household — used to populate filter chips.
+  final List<Pet> availablePets;
+
+  /// All cars in the household — used to populate filter chips.
+  final List<Car> availableCars;
+
   const CalendarState({
     required this.selectedDate,
     required this.visibleMonth,
@@ -159,7 +193,28 @@ class CalendarState extends Equatable {
     this.ownerColors = const {},
     this.memberProfiles = const [],
     this.visibleUserIds,
+    this.filterPetIds = const {},
+    this.filterCarIds = const {},
+    this.availablePets = const [],
+    this.availableCars = const [],
   });
+
+  bool get hasActiveFilters =>
+      !showAppointments ||
+      !showTransactions ||
+      (visibleUserIds != null && visibleUserIds!.length < memberProfiles.length) ||
+      filterPetIds.isNotEmpty ||
+      filterCarIds.isNotEmpty;
+
+  int get activeFilterCount {
+    var count = 0;
+    if (!showAppointments) count++;
+    if (!showTransactions) count++;
+    if (visibleUserIds != null && visibleUserIds!.length < memberProfiles.length) count++;
+    count += filterPetIds.length;
+    count += filterCarIds.length;
+    return count;
+  }
 
   /// All items in the visible month, post-filter.
   List<CalendarItem> visibleItemsFor(String? userId) {
@@ -168,11 +223,23 @@ class CalendarState extends Equatable {
     if (showAppointments) {
       var appts = appointments;
       if (ids != null) appts = appts.where((a) => ids.contains(a.userId)).toList();
+      if (filterPetIds.isNotEmpty) {
+        appts = appts.where((a) => a.petIds.any(filterPetIds.contains)).toList();
+      }
+      if (filterCarIds.isNotEmpty) {
+        appts = appts.where((a) => a.carId != null && filterCarIds.contains(a.carId)).toList();
+      }
       items.addAll(appts.map(AppointmentItem.new));
     }
     if (showTransactions) {
       var txs = recurringTx;
       if (ids != null) txs = txs.where((t) => ids.contains(t.userId)).toList();
+      if (filterPetIds.isNotEmpty) {
+        txs = txs.where((t) => t.petId != null && filterPetIds.contains(t.petId)).toList();
+      }
+      if (filterCarIds.isNotEmpty) {
+        txs = txs.where((t) => t.carId != null && filterCarIds.contains(t.carId)).toList();
+      }
       items.addAll(txs.map(TransactionItem.new));
     }
     items.sort((a, b) => a.when.compareTo(b.when));
@@ -216,6 +283,10 @@ class CalendarState extends Equatable {
     List<Profile>? memberProfiles,
     Set<String>? visibleUserIds,
     bool clearVisibleUserIds = false,
+    Set<String>? filterPetIds,
+    Set<String>? filterCarIds,
+    List<Pet>? availablePets,
+    List<Car>? availableCars,
   }) =>
       CalendarState(
         selectedDate: selectedDate ?? this.selectedDate,
@@ -231,6 +302,10 @@ class CalendarState extends Equatable {
         memberProfiles: memberProfiles ?? this.memberProfiles,
         visibleUserIds:
             clearVisibleUserIds ? null : (visibleUserIds ?? this.visibleUserIds),
+        filterPetIds: filterPetIds ?? this.filterPetIds,
+        filterCarIds: filterCarIds ?? this.filterCarIds,
+        availablePets: availablePets ?? this.availablePets,
+        availableCars: availableCars ?? this.availableCars,
       );
 
   @override
@@ -247,6 +322,10 @@ class CalendarState extends Equatable {
         ownerColors,
         memberProfiles,
         visibleUserIds,
+        filterPetIds,
+        filterCarIds,
+        availablePets,
+        availableCars,
       ];
 
   /// Filter helper for callers that already know the active user id.
@@ -264,6 +343,8 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
   final AppointmentRepository _appointmentRepo;
   final TransactionRepository _transactionRepo;
   final HouseholdRepository _householdRepo;
+  final PetRepository _petRepo;
+  final CarRepository _carRepo;
   String? _userId;
   String? _householdId;
 
@@ -271,10 +352,14 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     required AppointmentRepository appointmentRepository,
     required TransactionRepository transactionRepository,
     required HouseholdRepository householdRepository,
+    required PetRepository petRepository,
+    required CarRepository carRepository,
     DateTime? initialDate,
   })  : _appointmentRepo = appointmentRepository,
         _transactionRepo = transactionRepository,
         _householdRepo = householdRepository,
+        _petRepo = petRepository,
+        _carRepo = carRepository,
         super(CalendarState(
           selectedDate: _stripTime(initialDate ?? DateTime.now()),
           visibleMonth: DateTime(initialDate?.year ?? DateTime.now().year,
@@ -294,10 +379,34 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       final next = current.contains(e.userId)
           ? current.difference({e.userId})
           : {...current, e.userId};
-      // Always keep at least one user visible.
       if (next.isEmpty) return;
       emit(state.copyWith(visibleUserIds: next));
     });
+    on<CalendarTogglePet>((e, emit) {
+      final next = Set<String>.from(state.filterPetIds);
+      if (next.contains(e.petId)) {
+        next.remove(e.petId);
+      } else {
+        next.add(e.petId);
+      }
+      emit(state.copyWith(filterPetIds: next));
+    });
+    on<CalendarToggleCar>((e, emit) {
+      final next = Set<String>.from(state.filterCarIds);
+      if (next.contains(e.carId)) {
+        next.remove(e.carId);
+      } else {
+        next.add(e.carId);
+      }
+      emit(state.copyWith(filterCarIds: next));
+    });
+    on<CalendarClearFilters>((_, emit) => emit(state.copyWith(
+          showAppointments: true,
+          showTransactions: true,
+          filterPetIds: const {},
+          filterCarIds: const {},
+          clearVisibleUserIds: true,
+        )));
     on<CalendarRefresh>(_onRefresh);
     on<CalendarGoogleSyncRequested>(_onGoogleSyncRequested);
   }
@@ -319,17 +428,28 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     if (userId == null) return;
     final (household, _) = await _householdRepo.getCurrentHousehold(userId);
     if (household == null) return;
-    final (profiles, _) = await _householdRepo.getMemberProfiles(household.id);
+
+    final results = await Future.wait([
+      _householdRepo.getMemberProfiles(household.id),
+      _petRepo.getPets(householdId: household.id),
+      _carRepo.getCars(householdId: household.id),
+    ]);
+
+    final (profiles, _) = results[0] as (List<Profile>, Object?);
+    final (pets, _) = results[1] as (List<Pet>, Object?);
+    final (cars, _) = results[2] as (List<Car>, Object?);
+
     final colors = <String, String>{
       for (final p in profiles)
         if (p.calendarColor != null) p.id: p.calendarColor!,
     };
-    // Default: show only the current user's items.
     final visible = state.visibleUserIds ?? {userId};
     emit(state.copyWith(
       ownerColors: colors,
       memberProfiles: profiles,
       visibleUserIds: visible,
+      availablePets: pets,
+      availableCars: cars,
     ));
   }
 
