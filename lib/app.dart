@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show InputDecorationTheme, Theme, ThemeData;
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forui/forui.dart';
@@ -150,11 +151,20 @@ class _HestiaAppState extends State<HestiaApp> {
                     ? Brightness.light
                     : Brightness.dark);
             final surfaceColor = hexToColor(myTheme.surfaceColor);
+            final shimmerBase = hexToColor(myTheme.borderColor);
+            final shimmerHighlight = hexToColor(myTheme.surfaceColor);
             return InheritedMyTheme(
               theme: myTheme,
               child: FTheme(
                 data: buildForuiTheme(myTheme, brightness: brightness),
-                child: Theme(
+                child: SkeletonizerConfig(
+                  data: SkeletonizerConfigData(
+                    effect: ShimmerEffect(
+                      baseColor: shimmerBase,
+                      highlightColor: shimmerHighlight,
+                    ),
+                  ),
+                  child: Theme(
                   data: ThemeData(
                     inputDecorationTheme: InputDecorationTheme(
                       filled: true,
@@ -187,6 +197,7 @@ class _HestiaAppState extends State<HestiaApp> {
                     return const Locale('en');
                   },
                   debugShowCheckedModeBanner: false,
+                ),
                 ),
                 ),
               ),
