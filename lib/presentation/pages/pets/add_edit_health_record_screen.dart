@@ -24,8 +24,6 @@ Future<void> showHealthRecordSheet(
   return showAppBottomSheet<void>(
     context: context,
     title: existing == null ? l10n.healthRecord_addRecord : l10n.healthRecord_editRecord,
-    heightFactor: 0.92,
-    expand: true,
     child: _AddEditHealthRecordView(
       petId: petId,
       existing: existing,
