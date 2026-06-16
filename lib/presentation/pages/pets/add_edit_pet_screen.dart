@@ -5,15 +5,19 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/date_utils.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/pet.dart';
+import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
+import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/common/animated_button.dart';
 import 'package:hestia/presentation/widgets/common/animated_pill_tabs.dart';
 import 'package:hestia/presentation/widgets/common/app_toast.dart';
 import 'package:hestia/presentation/widgets/common/bottom_sheet.dart';
+import 'package:hestia/presentation/widgets/common/date_only_picker.dart';
 import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
 import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
 import 'package:hestia/presentation/widgets/common/primary_button.dart';
@@ -311,8 +315,12 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
             Expanded(
               child: Text(
                 _birthDate != null
-                    ? '${_birthDate!.year}-${_birthDate!.month.toString().padLeft(2, '0')}-${_birthDate!.day.toString().padLeft(2, '0')}'
-                    : 'Not set',
+                    ? formatDateOnly(
+                        _birthDate!,
+                        dateFormat:
+                            context.watch<UserPrefsBloc>().state.dateFormat,
+                      )
+                    : AppLocalizations.of(context).common_notSet,
                 style: AppFonts.body(
                     fontSize: 14,
                     color:
@@ -331,7 +339,6 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
     showAppBottomSheet<void>(
       context: context,
       title: 'Species',
-      heightFactor: 0.5,
       child: SizedBox(
         height: 240,
         child: CupertinoPicker(
@@ -351,56 +358,15 @@ class _AddEditPetViewState extends State<_AddEditPetView> {
     );
   }
 
-  void _pickDate(Color fg, Color surface, Color accent) {
-    DateTime temp = _birthDate ?? DateTime(2020, 1, 1);
-    showAppBottomSheet<void>(
+  Future<void> _pickDate(Color fg, Color surface, Color accent) async {
+    final res = await pickDateOnly(
       context: context,
-      title: 'Birth date',
-      heightFactor: 0.55,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AnimatedButton(
-                  padding: EdgeInsets.zero,
-                  onTap: () {
-                    setState(() => _birthDate = null);
-                    Navigator.pop(context);
-                  },
-                  child: Text('Clear',
-                      style: AppFonts.body(fontSize: 15, color: fg)),
-                ),
-                AnimatedButton(
-                  padding: EdgeInsets.zero,
-                  onTap: () {
-                    setState(() => _birthDate = temp);
-                    Navigator.pop(context);
-                  },
-                  child: Text('Done',
-                      style: AppFonts.body(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: accent)),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 240,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.date,
-              initialDateTime: temp,
-              maximumDate: DateTime.now(),
-              onDateTimeChanged: (d) => temp = d,
-            ),
-          ),
-        ],
-      ),
+      title: AppLocalizations.of(context).profile_birthDate,
+      initial: _birthDate ?? DateTime(2020, 1, 1),
+      maximumDate: DateTime.now(),
     );
+    if (res == null) return;
+    setState(() => _birthDate = res.cleared ? null : res.date);
   }
 
   String _speciesLabel(PetSpecies s) => switch (s) {

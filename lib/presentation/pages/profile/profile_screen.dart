@@ -6,10 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/currencies.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/date_utils.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/profile.dart';
 import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_events.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/core/config/dependencies.dart';
@@ -72,7 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showAppBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).profile_editProfile,
-      heightFactor: 0.92,
       child: ProfileSheetForm(profile: profile, tints: tints),
     );
   }
@@ -88,6 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final tints = theme.categoryTints.map(hexToColor).toList();
     final logoutBg = hexToColor(theme.colorRed);
     final logoutFg = hexToColor(theme.onRedColor);
+    final prefs = context.watch<UserPrefsBloc>().state;
 
     final state = context.watch<AuthBloc>().state;
     final isLoading = state is AuthLoading;
@@ -170,10 +172,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               (
                                 l10n.profile_birthDate,
                                 profile.birthDate != null
-                                    ? _fmtDate(
+                                    ? formatDateOnly(
                                         profile.birthDate!,
-                                        Localizations.localeOf(context)
-                                            .toString(),
+                                        dateFormat: prefs.dateFormat,
                                       )
                                     : '—'
                               ),
@@ -196,9 +197,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               (
                                 l10n.profile_lastUpdate,
-                                _fmtDate(
+                                formatDateTime(
                                   profile.lastUpdate,
-                                  Localizations.localeOf(context).toString(),
+                                  dateFormat: prefs.dateFormat,
+                                  use24h: prefs.use24h,
                                 ),
                               ),
                             ],
@@ -232,9 +234,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
     );
   }
-
-  String _fmtDate(DateTime d, String locale) =>
-      DateFormat.yMMMd(locale).format(d);
 
   String _fmtMonthYear(DateTime d, String locale) =>
       DateFormat.yMMMM(locale).format(d);

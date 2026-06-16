@@ -15,11 +15,60 @@ extension DateTimeExt on DateTime {
 
   /// End of month
   DateTime get endOfMonth => DateTime(year, month + 1, 0, 23, 59, 59);
+
+  /// ISO `YYYY-MM-DD` — the storage form for date-only (string) columns
+  /// (birth dates, car acquisition). Storage is always ISO regardless of the
+  /// user's display preference.
+  String get toDateOnlyIso =>
+      '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+
+  /// Collapse a date-only pick to noon (12:00:00) local time before storing as
+  /// unix. Noon avoids midnight/DST day-shift bugs when only the date matters
+  /// (backdated transactions, fuel fills, vet visits, …).
+  DateTime get atNoon => DateTime(year, month, day, 12);
 }
 
 extension UnixExt on int {
   /// From UNIX seconds to DateTime
   DateTime get fromUnix => DateTime.fromMillisecondsSinceEpoch(this * 1000);
+}
+
+// ── Preference-driven formatting ────────────────────────────────────────────
+// `dateFormat` is the user pref string: 'mdy' | 'dmy' | 'ymd' (see
+// UserPreferencesService). `use24h` toggles 24-hour vs AM/PM. Times always
+// include seconds (HH:mm:ss).
+
+/// intl pattern for the numeric date-only display preference.
+String dateOnlyPattern(String dateFormat) => switch (dateFormat) {
+      'dmy' => 'dd/MM/yyyy',
+      'ymd' => 'yyyy-MM-dd',
+      _ => 'MM/dd/yyyy', // 'mdy' default
+    };
+
+/// intl time pattern; always seconds, AM/PM vs 24-hour per [use24h].
+String timePattern(bool use24h) => use24h ? 'HH:mm:ss' : 'hh:mm:ss a';
+
+/// Formats a date-only value (birth date, acquisition) per the user's
+/// [dateFormat] preference.
+String formatDateOnly(DateTime date, {required String dateFormat}) =>
+    DateFormat(dateOnlyPattern(dateFormat)).format(date);
+
+/// Formats a full timestamp as `<date> <time>` honoring both prefs.
+String formatDateTime(
+  DateTime date, {
+  required String dateFormat,
+  required bool use24h,
+}) =>
+    DateFormat('${dateOnlyPattern(dateFormat)} ${timePattern(use24h)}')
+        .format(date);
+
+/// Parses an ISO `YYYY-MM-DD` (or full ISO) date-only string column to a
+/// [DateTime], or null when empty/invalid.
+DateTime? parseDateOnly(String? value) {
+  if (value == null) return null;
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return null;
+  return DateTime.tryParse(trimmed);
 }
 
 /// Parses Supabase timestamp columns (unix int, ISO string, or numeric).

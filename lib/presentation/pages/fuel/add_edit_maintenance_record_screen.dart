@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/constants/enums.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/date_utils.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/bank_account.dart';
 import 'package:hestia/domain/entities/car_maintenance_record.dart';
@@ -286,7 +287,8 @@ class _AddEditMaintenanceRecordViewState
         _label(l10n.maintenance_date, fg),
         _datePicker(
           value: _recordedAt,
-          onChanged: (d) => setState(() => _recordedAt = d),
+          // Date-only pick → store at noon (avoids midnight/DST day-shift).
+          onChanged: (d) => setState(() => _recordedAt = d.atNoon),
           surface: surface,
           border: border,
           fg: fg,

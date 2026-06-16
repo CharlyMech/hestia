@@ -7,6 +7,8 @@ import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/config/router.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/date_utils.dart';
+import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/domain/entities/car.dart';
 import 'package:hestia/domain/entities/fuel_entry.dart';
@@ -670,11 +672,9 @@ class _EntryRow extends StatelessWidget {
     required this.onTap,
   });
 
-  String _fmtDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-
   @override
   Widget build(BuildContext context) {
+    final dateFmt = context.watch<UserPrefsBloc>().state.dateFormat;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -703,7 +703,7 @@ class _EntryRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     l10n.cars_fillUpMeta(
-                      _fmtDate(entry.filledAt),
+                      formatDateOnly(entry.filledAt, dateFormat: dateFmt),
                       entry.odometerKm.toStringAsFixed(0),
                     ),
                     style: AppFonts.body(fontSize: 11, color: muted),
@@ -740,9 +740,6 @@ class _MaintenanceRow extends StatelessWidget {
     required this.onTap,
   });
 
-  String _fmtDate(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-
   String _typeLabel(AppLocalizations l10n) => switch (record.type) {
         MaintenanceType.mechanic => l10n.maintenance_mechanic,
         MaintenanceType.itv => l10n.maintenance_itv,
@@ -754,6 +751,7 @@ class _MaintenanceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dateFmt = context.watch<UserPrefsBloc>().state.dateFormat;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -779,7 +777,7 @@ class _MaintenanceRow extends StatelessWidget {
                         color: fg),
                   ),
                   Text(
-                    '${_typeLabel(l10n)} · ${_fmtDate(record.recordedAt)}',
+                    '${_typeLabel(l10n)} · ${formatDateOnly(record.recordedAt, dateFormat: dateFmt)}',
                     style: AppFonts.body(fontSize: 11, color: muted),
                   ),
                 ],
