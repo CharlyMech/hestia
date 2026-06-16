@@ -179,6 +179,7 @@ class _BodyState extends State<_Body> {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
 
     final topInset = MediaQuery.viewPaddingOf(context).top;
     return ColoredBox(
@@ -222,6 +223,7 @@ class _BodyState extends State<_Body> {
                           ),
                         ),
                         AnimatedButton(
+                          backgroundColor: primary,
                           size: 32,
                           padding: const EdgeInsets.all(4),
                           onTap: () => _openStartSession(context),

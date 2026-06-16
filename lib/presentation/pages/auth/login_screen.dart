@@ -175,6 +175,7 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
       builder: (context, state) {
         final isLoading = state is AuthLoading;
         return Column(
+          spacing: 8,
           children: [
             CupertinoTextField(
               controller: widget.emailCtrl,
@@ -191,7 +192,6 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
                 borderRadius: BorderRadius.circular(AppRadii.lg),
               ),
             ),
-            const SizedBox(height: 10),
             CupertinoTextField(
               controller: widget.passwordCtrl,
               placeholder: l10n.auth_password,
@@ -207,7 +207,6 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
                 borderRadius: BorderRadius.circular(AppRadii.lg),
               ),
             ),
-            const SizedBox(height: 8),
             Row(
               children: [
                 FCheckbox(
@@ -226,10 +225,12 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
               ],
             ),
             const SizedBox(height: 14),
-            SizedBox(
+            Container(
+              padding: const EdgeInsets.only(top: 8),
               width: double.infinity,
               height: 52,
               child: AnimatedButton(
+                backgroundColor: widget.primary,
                 onTap: isLoading
                     ? null
                     : () => context.read<AuthBloc>().add(
@@ -238,60 +239,67 @@ class _SupabaseAuthState extends State<_SupabaseAuth> {
                             widget.passwordCtrl.text,
                           ),
                         ),
-                child: isLoading
-                    ? const CupertinoActivityIndicator()
-                    : Text(
-                        l10n.auth_signIn,
+                child: Center(
+                  child: isLoading
+                      ? const CupertinoActivityIndicator()
+                      : Text(
+                          l10n.auth_signIn,
+                          style: AppFonts.body(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: widget.onPrimary,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                children: [
+                  Expanded(child: Container(height: 1, color: widget.border)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      l10n.auth_or,
+                      style: AppFonts.body(fontSize: 12, color: widget.muted),
+                    ),
+                  ),
+                  Expanded(child: Container(height: 1, color: widget.border)),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: AnimatedButton(
+                  backgroundColor: hexToColor('#2c2c2e'),
+                  onTap: isLoading
+                      ? null
+                      : () => context
+                          .read<AuthBloc>()
+                          .add(const AuthSignInWithApple()),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 8,
+                    children: [
+                      const Apple(
+                        width: 20,
+                        height: 20,
+                        color: CupertinoColors.white,
+                      ),
+                      Text(
+                        l10n.auth_signInWithApple,
                         style: AppFonts.body(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: widget.onPrimary,
+                          color: CupertinoColors.white,
                         ),
                       ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: Container(height: 1, color: widget.border)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    l10n.auth_or,
-                    style: AppFonts.body(fontSize: 12, color: widget.muted),
+                    ],
                   ),
-                ),
-                Expanded(child: Container(height: 1, color: widget.border)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: AnimatedButton(
-                onTap: isLoading
-                    ? null
-                    : () => context
-                        .read<AuthBloc>()
-                        .add(const AuthSignInWithApple()),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [
-                    const Apple(
-                      width: 20,
-                      height: 20,
-                      color: CupertinoColors.white,
-                    ),
-                    Text(
-                      l10n.auth_signInWithApple,
-                      style: AppFonts.body(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: CupertinoColors.white,
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),

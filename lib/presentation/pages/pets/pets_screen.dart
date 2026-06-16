@@ -58,6 +58,7 @@ class _PetsViewState extends State<_PetsView> {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final accent = hexToColor(theme.primaryColor);
+    final primary = hexToColor(theme.primaryColor);
     final tints = theme.categoryTints.map(hexToColor).toList();
 
     final l10n = AppLocalizations.of(context);
@@ -94,6 +95,7 @@ class _PetsViewState extends State<_PetsView> {
                           ),
                         ),
                         AnimatedButton(
+                          backgroundColor: primary,
                           size: 32,
                           padding: const EdgeInsets.all(4),
                           onTap: () async {
@@ -347,8 +349,9 @@ class _GenderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     if (gender == PetGender.unknown) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
-    final label =
-        gender == PetGender.male ? l10n.pets_genderMale : l10n.pets_genderFemale;
+    final label = gender == PetGender.male
+        ? l10n.pets_genderMale
+        : l10n.pets_genderFemale;
     final mutedHex = context.myTheme.onInactiveColor;
     final muted = hexToColor(mutedHex);
     return Container(
