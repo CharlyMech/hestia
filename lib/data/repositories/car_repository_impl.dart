@@ -28,6 +28,7 @@ class CarRepositoryImpl implements CarRepository {
         ),
         tankCapacityLiters: (j['tank_capacity_liters'] as num?)?.toDouble(),
         currentOdometerKm: (j['current_odometer_km'] as num?)?.toDouble(),
+        acquisitionDate: parseDateOnly(j['acquisition_date'] as String?),
         isActive: (j['is_active'] as bool?) ?? true,
         createdBy: j['created_by'] as String? ?? '',
         createdAt:
@@ -47,6 +48,7 @@ class CarRepositoryImpl implements CarRepository {
         'fuel_type': c.fuelType.name,
         'tank_capacity_liters': c.tankCapacityLiters,
         'current_odometer_km': c.currentOdometerKm,
+        'acquisition_date': c.acquisitionDate?.toDateOnlyIso,
         'is_active': c.isActive,
         'created_by': c.createdBy,
       };

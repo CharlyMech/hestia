@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hestia/core/config/dependencies.dart';
 import 'package:hestia/core/constants/app_constants.dart';
 import 'package:hestia/core/utils/app_fonts.dart';
+import 'package:hestia/core/utils/date_utils.dart';
 import 'package:hestia/core/utils/theme_utils.dart';
 import 'package:hestia/data/services/image_upload_service.dart';
 import 'package:hestia/domain/entities/car.dart';
@@ -13,7 +14,9 @@ import 'package:hestia/l10n/generated/app_localizations.dart';
 import 'package:hestia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:hestia/presentation/blocs/auth/auth_state.dart';
 import 'package:hestia/presentation/blocs/cars/cars_bloc.dart';
+import 'package:hestia/presentation/blocs/user_prefs/user_prefs_bloc.dart';
 import 'package:hestia/presentation/widgets/layout/cupertino_pushed_route_shell.dart';
+import 'package:hestia/presentation/widgets/common/date_only_picker.dart';
 import 'package:hestia/presentation/widgets/common/image_picker_field.dart';
 import 'package:hestia/presentation/widgets/common/member_avatar.dart';
 
@@ -48,6 +51,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
 
   String? _imageUrl;
   FuelType _fuelType = FuelType.gasoline;
+  DateTime? _acquisitionDate;
   bool _isActive = true;
   Car? _existing;
   List<Profile> _household = [];
@@ -87,6 +91,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
         _odo.text = car.currentOdometerKm?.toString() ?? '';
         _imageUrl = car.imageUrl;
         _fuelType = car.fuelType;
+        _acquisitionDate = car.acquisitionDate;
         _isActive = car.isActive;
         final (members, _) =
             await AppDependencies.instance.carRepository.getMembers(car.id);
@@ -133,6 +138,7 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
       fuelType: _fuelType,
       tankCapacityLiters: double.tryParse(_tank.text.replaceAll(',', '.')),
       currentOdometerKm: double.tryParse(_odo.text.replaceAll(',', '.')),
+      acquisitionDate: _acquisitionDate,
       isActive: _isActive,
       createdBy: _existing?.createdBy ?? auth.profile.id,
       createdAt: _existing?.createdAt ?? now,
@@ -278,6 +284,27 @@ class _AddEditCarViewState extends State<_AddEditCarView> {
                     fg: fg,
                     muted: muted),
                 const SizedBox(height: 12),
+                _DateField(
+                  label: l10n.car_acquisitionDate,
+                  value: _acquisitionDate,
+                  dateFormat: context.watch<UserPrefsBloc>().state.dateFormat,
+                  surface: surface,
+                  border: border,
+                  fg: fg,
+                  muted: muted,
+                  accent: accent,
+                  onTap: () async {
+                    final res = await pickDateOnly(
+                      context: context,
+                      title: l10n.car_acquisitionDate,
+                      initial: _acquisitionDate,
+                      maximumDate: DateTime.now(),
+                    );
+                    if (res == null) return;
+                    setState(() => _acquisitionDate = res.cleared ? null : res.date);
+                  },
+                ),
+                const SizedBox(height: 12),
                 _Segmented<bool>(
                   label: l10n.car_status,
                   options: [
@@ -387,6 +414,69 @@ class _Field extends StatelessWidget {
               (keyboard == null || keyboard == TextInputType.text)
                   ? TextCapitalization.sentences
                   : TextCapitalization.none,
+        ),
+      ],
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  final String label;
+  final DateTime? value;
+  final String dateFormat;
+  final Color surface;
+  final Color border;
+  final Color fg;
+  final Color muted;
+  final Color accent;
+  final VoidCallback onTap;
+  const _DateField({
+    required this.label,
+    required this.value,
+    required this.dateFormat,
+    required this.surface,
+    required this.border,
+    required this.fg,
+    required this.muted,
+    required this.accent,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: AppFonts.sectionLabel(color: muted)),
+        const SizedBox(height: 6),
+        GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(color: border),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value != null
+                        ? formatDateOnly(value!, dateFormat: dateFormat)
+                        : l10n.common_notSet,
+                    style: AppFonts.body(
+                      fontSize: 14,
+                      color: value != null ? fg : fg.withValues(alpha: 0.35),
+                    ),
+                  ),
+                ),
+                Icon(CupertinoIcons.calendar, size: 16, color: muted),
+              ],
+            ),
+          ),
         ),
       ],
     );

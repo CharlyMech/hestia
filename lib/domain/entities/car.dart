@@ -14,6 +14,9 @@ class Car extends Equatable {
   final FuelType fuelType;
   final double? tankCapacityLiters;
   final double? currentOdometerKm;
+
+  /// Date the car was acquired. Stored as an ISO date-only string (no time).
+  final DateTime? acquisitionDate;
   final bool isActive;
   final String createdBy;
   final DateTime createdAt;
@@ -31,6 +34,7 @@ class Car extends Equatable {
     this.fuelType = FuelType.gasoline,
     this.tankCapacityLiters,
     this.currentOdometerKm,
+    this.acquisitionDate,
     this.isActive = true,
     required this.createdBy,
     required this.createdAt,
@@ -51,6 +55,8 @@ class Car extends Equatable {
     double? tankCapacityLiters,
     double? currentOdometerKm,
     bool clearOdometer = false,
+    DateTime? acquisitionDate,
+    bool clearAcquisitionDate = false,
     bool? isActive,
     String? createdBy,
     DateTime? createdAt,
@@ -69,6 +75,9 @@ class Car extends Equatable {
       tankCapacityLiters: tankCapacityLiters ?? this.tankCapacityLiters,
       currentOdometerKm:
           clearOdometer ? null : (currentOdometerKm ?? this.currentOdometerKm),
+      acquisitionDate: clearAcquisitionDate
+          ? null
+          : (acquisitionDate ?? this.acquisitionDate),
       isActive: isActive ?? this.isActive,
       createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
