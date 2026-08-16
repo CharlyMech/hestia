@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -201,9 +200,8 @@ class _DayViewState extends State<DayView> {
                                             onTap: () =>
                                                 widget.onTapAppointment(
                                                     e.appointment),
-                                            onLongPress: () =>
-                                                _confirmDelete(
-                                                    context, e.appointment),
+                                            onLongPress: () => _confirmDelete(
+                                                context, e.appointment),
                                             use24h: widget.use24h,
                                           ),
                                         ),
@@ -450,8 +448,7 @@ class _AllDayOverlay extends StatelessWidget {
                       label: appt.title,
                       color: chipColor,
                       onTap: () => onTapAppointment(appt),
-                      onLongPress: () =>
-                          onLongPressAppointment(context, appt),
+                      onLongPress: () => onLongPressAppointment(context, appt),
                     );
                   }),
                   ...transactions.map((item) {

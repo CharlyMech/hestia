@@ -9,8 +9,9 @@ import 'package:hestia/domain/entities/payment_card.dart';
 ///
 /// Layout:
 ///   Top-left  — institution logo (Image.asset from [card.institutionLogoAsset])
-///   Top-right — network logo (assets/networks/<network>.svg — placeholder text until SVGs added)
-///   Center    — masked card number  **** **** **** <last4>
+///   Top-right — network logo (`assets/networks/<network>.svg`; placeholder
+///   text until SVGs are added)
+///   Center    — masked card number `**** **** **** <last4>`
 ///   Bottom-left  — cardholder name
 ///   Bottom-right — MM/YY expiry
 ///   Badge     — "VIRTUAL" if [card.isVirtual]
@@ -36,8 +37,7 @@ class PaymentCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = _baseColor;
-    final dark =
-        ui.Color.lerp(base, const Color(0xFF000000), 0.28) ?? base;
+    final dark = ui.Color.lerp(base, const Color(0xFF000000), 0.28) ?? base;
 
     return GestureDetector(
       onTap: onTap,
@@ -116,8 +116,8 @@ class PaymentCardWidget extends StatelessWidget {
                             style: AppFonts.body(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: CupertinoColors.white
-                                  .withValues(alpha: 0.85),
+                              color:
+                                  CupertinoColors.white.withValues(alpha: 0.85),
                               letterSpacing: 1,
                             ),
                           ),

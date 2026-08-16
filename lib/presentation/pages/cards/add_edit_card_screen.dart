@@ -166,8 +166,7 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
                       decoration: BoxDecoration(
                         color: selected ? primary : surface,
                         borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                            color: selected ? primary : border),
+                        border: Border.all(color: selected ? primary : border),
                       ),
                       child: Text(
                         n.value.toUpperCase(),
@@ -298,11 +297,10 @@ class _AddEditCardScreenState extends State<AddEditCardScreen> {
         height: 220,
         color: CupertinoColors.systemBackground.resolveFrom(context),
         child: CupertinoPicker(
-          scrollController: FixedExtentScrollController(
-              initialItem: _expiryYear - now),
+          scrollController:
+              FixedExtentScrollController(initialItem: _expiryYear - now),
           itemExtent: 36,
-          onSelectedItemChanged: (i) =>
-              setState(() => _expiryYear = now + i),
+          onSelectedItemChanged: (i) => setState(() => _expiryYear = now + i),
           children: List.generate(
             12,
             (i) => Center(
@@ -343,14 +341,12 @@ class _ExpiryPicker extends StatelessWidget {
           onTap: onTap,
           child: Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
               color: surface,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(value,
-                style: AppFonts.numeric(color: fg)),
+            child: Text(value, style: AppFonts.numeric(color: fg)),
           ),
         ),
       ],

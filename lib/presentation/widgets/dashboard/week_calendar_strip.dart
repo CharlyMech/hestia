@@ -97,7 +97,8 @@ class _WeekCalendarStripState extends State<WeekCalendarStrip> {
   Widget build(BuildContext context) {
     final today = _dateOnly(DateTime.now());
     final l10n = AppLocalizations.of(context);
-    final categoryTints = context.myTheme.categoryTints.map(hexToColor).toList();
+    final categoryTints =
+        context.myTheme.categoryTints.map(hexToColor).toList();
     final onPrimary = hexToColor(context.myTheme.onPrimaryColor);
 
     return Column(

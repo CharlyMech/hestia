@@ -130,10 +130,13 @@ class CalendarState extends Equatable {
   final bool loading;
   final String? error;
   final Set<String> allDayAppointmentIds;
+
   /// userId → hex color string (e.g. '#42A5F5'). Loaded from household profiles.
   final Map<String, String> ownerColors;
+
   /// All household member profiles — used to render per-member filter chips.
   final List<Profile> memberProfiles;
+
   /// Which user IDs are currently visible. Null means "show all" (legacy path).
   /// After load this is always initialized to {currentUserId}.
   final Set<String>? visibleUserIds;
@@ -159,7 +162,9 @@ class CalendarState extends Equatable {
     final items = <CalendarItem>[];
     if (showAppointments) {
       var appts = appointments;
-      if (ids != null) appts = appts.where((a) => ids.contains(a.userId)).toList();
+      if (ids != null) {
+        appts = appts.where((a) => ids.contains(a.userId)).toList();
+      }
       items.addAll(appts.map(AppointmentItem.new));
     }
     if (showTransactions) {
@@ -221,8 +226,9 @@ class CalendarState extends Equatable {
         allDayAppointmentIds: allDayAppointmentIds ?? this.allDayAppointmentIds,
         ownerColors: ownerColors ?? this.ownerColors,
         memberProfiles: memberProfiles ?? this.memberProfiles,
-        visibleUserIds:
-            clearVisibleUserIds ? null : (visibleUserIds ?? this.visibleUserIds),
+        visibleUserIds: clearVisibleUserIds
+            ? null
+            : (visibleUserIds ?? this.visibleUserIds),
       );
 
   @override

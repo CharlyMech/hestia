@@ -29,8 +29,7 @@ class AccountMemberService extends SupabaseService {
   Future<void> updateRole(String memberId, String role) async {
     try {
       await from(SupabaseTables.accountMembers)
-          .update({'role': role})
-          .eq('id', memberId);
+          .update({'role': role}).eq('id', memberId);
     } catch (e) {
       throw ServerException('Failed to update member role: $e');
     }

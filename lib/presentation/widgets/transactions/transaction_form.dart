@@ -852,8 +852,7 @@ class _BankLogo extends StatelessWidget {
     final brand = known != null
         ? Color(int.parse(known.brandColor.replaceFirst('#', '0xff')))
         : fallbackColor;
-    final letter =
-        institution.isNotEmpty ? institution[0].toUpperCase() : '?';
+    final letter = institution.isNotEmpty ? institution[0].toUpperCase() : '?';
 
     return SizedBox(
       width: 18,

@@ -143,7 +143,8 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
     );
   }
 
-  Widget _divider(theme) => Container(height: 1, color: hexToColor(theme.borderColor));
+  Widget _divider(theme) =>
+      Container(height: 1, color: hexToColor(theme.borderColor));
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;

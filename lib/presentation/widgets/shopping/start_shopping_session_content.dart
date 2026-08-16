@@ -92,6 +92,7 @@ class _StartShoppingSessionContentState
       templateListId: widget.template?.id,
     );
   }
+
   Future<void> _pickSource() async {
     final theme = context.myTheme;
     final surface = hexToColor(theme.surfaceColor);

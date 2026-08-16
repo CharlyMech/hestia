@@ -183,8 +183,8 @@ class _BodyState extends State<_Body> {
                   slivers: [
                     if (widget.embeddedInTabShell)
                       SliverToBoxAdapter(
-                        child: _LargeTitle(
-                            label: l10n.bankAccounts_title, fg: fg),
+                        child:
+                            _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
                       ),
                     const SliverToBoxAdapter(child: SizedBox(height: 20)),
                     SliverPadding(
@@ -240,16 +240,14 @@ class _BodyState extends State<_Body> {
               slivers: [
                 if (widget.embeddedInTabShell)
                   SliverToBoxAdapter(
-                    child:
-                        _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
+                    child: _LargeTitle(label: l10n.bankAccounts_title, fg: fg),
                   ),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
                 // ── Shared accounts ───────────────────────────────────────
                 if (loaded.shared.isNotEmpty) ...[
                   SliverToBoxAdapter(
-                    child: SectionLabel(l10n.bankAccounts_shared,
-                        color: muted),
+                    child: SectionLabel(l10n.bankAccounts_shared, color: muted),
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 10)),
                   _CardList(sources: loaded.shared, indexOffset: 0),
@@ -295,8 +293,7 @@ class _BodyState extends State<_Body> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: GestureDetector(
-                        onTap: () =>
-                            setState(() => _showOthers = !_showOthers),
+                        onTap: () => setState(() => _showOthers = !_showOthers),
                         behavior: HitTestBehavior.opaque,
                         child: Row(
                           spacing: 6,
@@ -328,8 +325,8 @@ class _BodyState extends State<_Body> {
                   if (_showOthers) ...[
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
                     SliverToBoxAdapter(
-                      child: SectionLabel(l10n.bankAccounts_others,
-                          color: muted),
+                      child:
+                          SectionLabel(l10n.bankAccounts_others, color: muted),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
                     _CardList(

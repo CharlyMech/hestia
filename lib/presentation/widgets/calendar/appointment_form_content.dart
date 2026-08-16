@@ -783,8 +783,8 @@ class _Reminders extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: noneOn ? accent.withValues(alpha: 0.14) : surface,
-              border: Border.all(
-                  color: noneOn ? accent : const Color(0x00000000)),
+              border:
+                  Border.all(color: noneOn ? accent : const Color(0x00000000)),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
@@ -861,9 +861,8 @@ class _ColorPicker extends StatelessWidget {
                 color: _parse(hex),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected == hex
-                      ? _parse(hex)
-                      : const Color(0x00000000),
+                  color:
+                      selected == hex ? _parse(hex) : const Color(0x00000000),
                   width: 3,
                 ),
                 boxShadow: selected == hex

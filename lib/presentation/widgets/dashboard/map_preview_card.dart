@@ -32,8 +32,7 @@ class MapPreviewCard extends StatelessWidget {
         final center = LatLng(state.cameraLat, state.cameraLng);
 
         final homes = state is MapLoaded ? state.homes : const [];
-        final transactions =
-            state is MapLoaded ? state.transactions : const [];
+        final transactions = state is MapLoaded ? state.transactions : const [];
         final vendors = state is MapLoaded ? state.nearbyVendors : const [];
 
         final markers = <Marker>[

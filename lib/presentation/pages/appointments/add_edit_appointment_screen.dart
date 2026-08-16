@@ -113,9 +113,8 @@ class _Form extends StatelessWidget {
                         context
                             .read<AppointmentFormBloc>()
                             .add(FormStartChanged(midnight));
-                        context
-                            .read<AppointmentFormBloc>()
-                            .add(const FormDurationChanged(Duration(hours: 24)));
+                        context.read<AppointmentFormBloc>().add(
+                            const FormDurationChanged(Duration(hours: 24)));
                       }
                     },
                   ),
@@ -204,8 +203,8 @@ class _Form extends StatelessWidget {
                   fg: fg,
                   muted: muted,
                   onPick: () async {
-                    final picked =
-                        await _pickDateTime(context, state.startsAt, state.isAllDay);
+                    final picked = await _pickDateTime(
+                        context, state.startsAt, state.isAllDay);
                     if (picked != null && context.mounted) {
                       context
                           .read<AppointmentFormBloc>()
@@ -471,8 +470,18 @@ class _DateRow extends StatelessWidget {
 
   String _fmt(DateTime d, bool withTime) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final base = '${months[d.month - 1]} ${d.day}, ${d.year}';
     if (!withTime) return base;
@@ -637,9 +646,8 @@ class _ColorPicker extends StatelessWidget {
                 color: _parse(hex),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected == hex
-                      ? _parse(hex)
-                      : const Color(0x00000000),
+                  color:
+                      selected == hex ? _parse(hex) : const Color(0x00000000),
                   width: 3,
                 ),
                 boxShadow: selected == hex

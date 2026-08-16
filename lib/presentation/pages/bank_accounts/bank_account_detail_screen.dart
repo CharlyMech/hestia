@@ -300,8 +300,8 @@ class _BankAccountDetailScreenState extends State<BankAccountDetailScreen> {
               const SizedBox(height: 8),
               if (_cards.isEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                   decoration: BoxDecoration(
                     color: surface,
                     borderRadius: BorderRadius.circular(AppRadii.xl),
@@ -659,9 +659,7 @@ class _CardRow extends StatelessWidget {
                     Text(
                       card.network.value.toUpperCase(),
                       style: AppFonts.label(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: fg),
+                          fontSize: 11, fontWeight: FontWeight.w700, color: fg),
                     ),
                     if (card.isVirtual)
                       Text('VIRTUAL',
@@ -721,6 +719,7 @@ class _CardFormState extends State<_CardForm> {
     _expiry.dispose();
     super.dispose();
   }
+
   Future<void> _save() async {
     final last4 = _last4.text.trim();
     final exp = _expiry.text.trim();
@@ -729,8 +728,7 @@ class _CardFormState extends State<_CardForm> {
     var yy = parts.length > 1 ? int.tryParse(parts[1]) : null;
     if (last4.length != 4 || mm == null || yy == null) {
       context.showToast(const AppToastConfig(
-          type: ToastType.error,
-          title: 'Enter last 4 digits and MM/YY'));
+          type: ToastType.error, title: 'Enter last 4 digits and MM/YY'));
       return;
     }
     if (yy < 100) yy += 2000;
@@ -798,16 +796,15 @@ class _CardFormState extends State<_CardForm> {
                 GestureDetector(
                   onTap: () => setState(() => _network = n),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: _network == n
                           ? accent.withValues(alpha: 0.14)
                           : surface,
                       border: Border.all(
-                          color: _network == n
-                              ? accent
-                              : const Color(0x00000000)),
+                          color:
+                              _network == n ? accent : const Color(0x00000000)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -821,8 +818,7 @@ class _CardFormState extends State<_CardForm> {
                 ),
             ],
           ),
-          field(_holder, 'Cardholder name',
-              cap: TextCapitalization.words),
+          field(_holder, 'Cardholder name', cap: TextCapitalization.words),
           Row(
             spacing: 12,
             children: [
@@ -835,12 +831,11 @@ class _CardFormState extends State<_CardForm> {
                     ]),
               ),
               Expanded(
-                child: field(_expiry, 'MM/YY',
-                    kb: TextInputType.datetime,
-                    fmt: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[\d/]')),
-                      LengthLimitingTextInputFormatter(5),
-                    ]),
+                child:
+                    field(_expiry, 'MM/YY', kb: TextInputType.datetime, fmt: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d/]')),
+                  LengthLimitingTextInputFormatter(5),
+                ]),
               ),
             ],
           ),

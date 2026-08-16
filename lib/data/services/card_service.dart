@@ -11,16 +11,14 @@ class CardService extends SupabaseService {
     bool activeOnly = true,
   }) async {
     try {
-      var query = from(SupabaseTables.paymentCards)
-          .select('''
+      var query = from(SupabaseTables.paymentCards).select('''
             *,
             bank_accounts:account_id(
               name,
               institution_id,
               financial_institutions:institution_id(name, logo_asset, brand_color)
             )
-          ''')
-          .eq('account_id', accountId);
+          ''').eq('account_id', accountId);
 
       if (activeOnly) query = query.eq('is_active', true);
 

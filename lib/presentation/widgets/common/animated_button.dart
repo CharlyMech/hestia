@@ -75,8 +75,8 @@ class _AnimatedButtonState extends State<AnimatedButton>
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(widget.borderRadius);
-    final backgroundColor = widget.backgroundColor ??
-        hexToColor(context.myTheme.primaryColor);
+    final backgroundColor =
+        widget.backgroundColor ?? hexToColor(context.myTheme.primaryColor);
     final Widget content = widget.size != null
         ? SizedBox(
             width: widget.size,

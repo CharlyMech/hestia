@@ -53,14 +53,12 @@ class BankAccountsLoaded extends BankAccountsState {
 
   /// Personal accounts belonging to [userId].
   List<BankAccount> get personal => sources
-      .where((s) =>
-          s.ownerType == OwnerType.personal && s.ownerId == userId)
+      .where((s) => s.ownerType == OwnerType.personal && s.ownerId == userId)
       .toList();
 
   /// Personal accounts belonging to other household members.
   List<BankAccount> get others => sources
-      .where((s) =>
-          s.ownerType == OwnerType.personal && s.ownerId != userId)
+      .where((s) => s.ownerType == OwnerType.personal && s.ownerId != userId)
       .toList();
 }
 

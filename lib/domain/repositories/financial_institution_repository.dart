@@ -6,7 +6,8 @@ abstract class FinancialInstitutionRepository {
 
   Future<(FinancialInstitution?, Failure?)> getById(String id);
 
-  Future<(FinancialInstitution?, Failure?)> create(FinancialInstitution institution);
+  Future<(FinancialInstitution?, Failure?)> create(
+      FinancialInstitution institution);
 
   Future<Failure?> update(FinancialInstitution institution);
 

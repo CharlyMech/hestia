@@ -11,9 +11,8 @@ class HomeService extends SupabaseService {
     bool activeOnly = true,
   }) async {
     try {
-      var query = from(SupabaseTables.homes)
-          .select()
-          .eq('household_id', householdId);
+      var query =
+          from(SupabaseTables.homes).select().eq('household_id', householdId);
       if (activeOnly) query = query.eq('is_active', true);
       final res = await query.order('name');
       return List<Map<String, dynamic>>.from(res);

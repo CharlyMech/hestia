@@ -6,7 +6,8 @@ import 'package:hestia/domain/entities/payment_card.dart';
 abstract final class CardMapper {
   static PaymentCard toDomain(CardDto dto) {
     final account = dto.bankAccounts;
-    final institution = account?['financial_institutions'] as Map<String, dynamic>?;
+    final institution =
+        account?['financial_institutions'] as Map<String, dynamic>?;
 
     return PaymentCard(
       id: dto.id,

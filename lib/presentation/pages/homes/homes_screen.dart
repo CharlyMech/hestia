@@ -161,55 +161,56 @@ class _HomesScreenState extends State<HomesScreen> {
                         // Open the full map to inspect / re-pick the location.
                         onTap: () => context.push(AppRoutes.globalMap),
                         child: Container(
-                        decoration: BoxDecoration(
-                          color: surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: border, width: 0.8),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Row(
-                          children: [
-                            // Mini-map
-                            SizedBox(
-                              width: 90,
-                              height: 90,
-                              child: _MiniMap(
-                                latitude: home.latitude,
-                                longitude: home.longitude,
-                                accent: accent,
-                              ),
-                            ),
-                            // Info
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 4,
-                                  children: [
-                                    Text(
-                                      home.name,
-                                      style: AppFonts.body(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: fg),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      home.address,
-                                      style: AppFonts.body(
-                                          fontSize: 12, color: muted),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                          decoration: BoxDecoration(
+                            color: surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: border, width: 0.8),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Row(
+                            children: [
+                              // Mini-map
+                              SizedBox(
+                                width: 90,
+                                height: 90,
+                                child: _MiniMap(
+                                  latitude: home.latitude,
+                                  longitude: home.longitude,
+                                  accent: accent,
                                 ),
                               ),
-                            ),
-                          ],
+                              // Info
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        home.name,
+                                        style: AppFonts.body(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: fg),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        home.address,
+                                        style: AppFonts.body(
+                                            fontSize: 12, color: muted),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       ),
                     );
                   },

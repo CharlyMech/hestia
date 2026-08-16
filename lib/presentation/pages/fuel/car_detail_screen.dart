@@ -31,8 +31,7 @@ class CarDetailScreen extends StatelessWidget {
             ..add(CarDetailLoad(carId)),
         ),
         BlocProvider(
-          create: (_) => FuelBloc(
-              AppDependencies.instance.fuelEntryRepository,
+          create: (_) => FuelBloc(AppDependencies.instance.fuelEntryRepository,
               AppDependencies.instance.carRepository)
             ..add(FuelLoad(carId)),
         ),
@@ -105,8 +104,7 @@ class _CarDetailBody extends StatelessWidget {
       },
       builder: (context, state) {
         final bloc = context.read<CarDetailBloc>();
-        final loading =
-            state is CarDetailInitial || state is CarDetailLoading;
+        final loading = state is CarDetailInitial || state is CarDetailLoading;
 
         if (state is CarDetailNotFound) {
           return SliverPushedRouteShell(
@@ -345,8 +343,7 @@ class _CarBody extends StatelessWidget {
                     style: AppFonts.body(fontSize: 13, color: muted)),
               );
             }
-            final entries =
-                (state as FuelLoaded).entries.take(10).toList();
+            final entries = (state as FuelLoaded).entries.take(10).toList();
             if (entries.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.all(24),
@@ -444,9 +441,7 @@ class _Header extends StatelessWidget {
               children: [
                 Text(car.name,
                     style: AppFonts.body(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: fg)),
+                        fontSize: 17, fontWeight: FontWeight.w700, color: fg)),
                 if (car.licensePlate != null) ...[
                   const SizedBox(height: 4),
                   Text(car.licensePlate!,
@@ -474,8 +469,7 @@ class _Header extends StatelessWidget {
                           l10n.cars_odometerKm(
                             car.currentOdometerKm!.toStringAsFixed(0),
                           ),
-                          style:
-                              AppFonts.numeric(fontSize: 12, color: muted)),
+                          style: AppFonts.numeric(fontSize: 12, color: muted)),
                     ],
                   ],
                 ),

@@ -176,6 +176,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
     context.read<AuthBloc>().add(AuthUpdateProfile(updated));
     Navigator.of(context).maybePop();
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;

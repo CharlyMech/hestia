@@ -41,7 +41,8 @@ class TxRow extends StatelessWidget {
     final fg = hexToColor(theme.onBackgroundColor);
     final muted = hexToColor(theme.onInactiveColor);
     final isIncome = tx.amount >= 0;
-    final amountColor = isIncome ? hexToColor(theme.colorGreen) : hexToColor(theme.colorRed);
+    final amountColor =
+        isIncome ? hexToColor(theme.colorGreen) : hexToColor(theme.colorRed);
     final prefix = isIncome ? '+' : '−';
     final abs = tx.amount.abs().toStringAsFixed(2);
 

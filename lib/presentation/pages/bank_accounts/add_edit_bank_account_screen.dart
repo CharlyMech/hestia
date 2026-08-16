@@ -230,132 +230,134 @@ class _AddEditBankAccountScreenState extends State<AddEditBankAccountScreen> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
         child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics()),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-            20, 16, 20, 40 + MediaQuery.viewInsetsOf(context).bottom),
-        children: [
-          // Live WalletCard preview
-          ListenableBuilder(
-            listenable: Listenable.merge([_name, _balance]),
-            builder: (_, __) => WalletCard(source: _previewAccount),
-          ),
-          const SizedBox(height: 28),
-
-          _sectionLabel('BANK', muted),
-          const SizedBox(height: 8),
-          _PickerTile(
-            label: _selectedBank?.displayName ?? 'Select bank',
-            isPlaceholder: _selectedBank == null,
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            onTap: _openBankPicker,
-          ),
-          const SizedBox(height: 20),
-
-          _sectionLabel('ACCOUNT NAME', muted),
-          const SizedBox(height: 8),
-          CupertinoTextField(
-            controller: _name,
-            placeholder: 'e.g. Main Checking',
-            textCapitalization: TextCapitalization.words,
-            textInputAction: TextInputAction.next,
-            style: AppFonts.body(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: border, width: 0.8),
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, 40 + MediaQuery.viewInsetsOf(context).bottom),
+          children: [
+            // Live WalletCard preview
+            ListenableBuilder(
+              listenable: Listenable.merge([_name, _balance]),
+              builder: (_, __) => WalletCard(source: _previewAccount),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 28),
 
-          _sectionLabel('IBAN (OPTIONAL)', muted),
-          const SizedBox(height: 8),
-          CupertinoTextField(
-            controller: _iban,
-            placeholder: 'ES00 0000 0000 0000 0000 0000',
-            textCapitalization: TextCapitalization.characters,
-            autocorrect: false,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
-            ],
-            style: AppFonts.numeric(fontSize: 14, color: fg),
-            placeholderStyle: AppFonts.numeric(fontSize: 14, color: muted),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: border, width: 0.8),
+            _sectionLabel('BANK', muted),
+            const SizedBox(height: 8),
+            _PickerTile(
+              label: _selectedBank?.displayName ?? 'Select bank',
+              isPlaceholder: _selectedBank == null,
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              onTap: _openBankPicker,
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          _sectionLabel('TYPE', muted),
-          const SizedBox(height: 8),
-          _SegmentedRow(
-            labels: _typeLabels,
-            selected: _typeIdx,
-            onChanged: (i) => setState(() => _typeIdx = i),
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            accent: accent,
-          ),
-          const SizedBox(height: 20),
-
-          _sectionLabel('OWNERSHIP', muted),
-          const SizedBox(height: 8),
-          _SegmentedRow(
-            labels: const ['Personal', 'Shared'],
-            selected: _ownerIdx,
-            onChanged: (i) => setState(() => _ownerIdx = i),
-            surface: surface,
-            border: border,
-            fg: fg,
-            muted: muted,
-            accent: accent,
-          ),
-          const SizedBox(height: 20),
-
-          _sectionLabel('INITIAL BALANCE', muted),
-          const SizedBox(height: 8),
-          CupertinoTextField(
-            controller: _balance,
-            placeholder: '0.00',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
-            ],
-            suffix: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Text(
-                _currency ?? preferredCurrency,
-                style: AppFonts.body(fontSize: 13, color: muted),
+            _sectionLabel('ACCOUNT NAME', muted),
+            const SizedBox(height: 8),
+            CupertinoTextField(
+              controller: _name,
+              placeholder: 'e.g. Main Checking',
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              style: AppFonts.body(fontSize: 15, color: fg),
+              placeholderStyle: AppFonts.body(fontSize: 15, color: muted),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: border, width: 0.8),
               ),
             ),
-            style: AppFonts.numeric(fontSize: 15, color: fg),
-            placeholderStyle: AppFonts.numeric(fontSize: 15, color: muted),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: border, width: 0.8),
-            ),
-          ),
-          const SizedBox(height: 32),
+            const SizedBox(height: 20),
 
-          PrimaryButton(
-            label: widget.existing == null ? 'Create account' : 'Save changes',
-            onPressed: _saving ? null : _save,
-            loading: _saving,
-          ),
-        ],
+            _sectionLabel('IBAN (OPTIONAL)', muted),
+            const SizedBox(height: 8),
+            CupertinoTextField(
+              controller: _iban,
+              placeholder: 'ES00 0000 0000 0000 0000 0000',
+              textCapitalization: TextCapitalization.characters,
+              autocorrect: false,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
+              ],
+              style: AppFonts.numeric(fontSize: 14, color: fg),
+              placeholderStyle: AppFonts.numeric(fontSize: 14, color: muted),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: border, width: 0.8),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            _sectionLabel('TYPE', muted),
+            const SizedBox(height: 8),
+            _SegmentedRow(
+              labels: _typeLabels,
+              selected: _typeIdx,
+              onChanged: (i) => setState(() => _typeIdx = i),
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              accent: accent,
+            ),
+            const SizedBox(height: 20),
+
+            _sectionLabel('OWNERSHIP', muted),
+            const SizedBox(height: 8),
+            _SegmentedRow(
+              labels: const ['Personal', 'Shared'],
+              selected: _ownerIdx,
+              onChanged: (i) => setState(() => _ownerIdx = i),
+              surface: surface,
+              border: border,
+              fg: fg,
+              muted: muted,
+              accent: accent,
+            ),
+            const SizedBox(height: 20),
+
+            _sectionLabel('INITIAL BALANCE', muted),
+            const SizedBox(height: 8),
+            CupertinoTextField(
+              controller: _balance,
+              placeholder: '0.00',
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+              ],
+              suffix: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Text(
+                  _currency ?? preferredCurrency,
+                  style: AppFonts.body(fontSize: 13, color: muted),
+                ),
+              ),
+              style: AppFonts.numeric(fontSize: 15, color: fg),
+              placeholderStyle: AppFonts.numeric(fontSize: 15, color: muted),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: border, width: 0.8),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            PrimaryButton(
+              label:
+                  widget.existing == null ? 'Create account' : 'Save changes',
+              onPressed: _saving ? null : _save,
+              loading: _saving,
+            ),
+          ],
         ),
       ),
     );
@@ -422,121 +424,120 @@ class _BankPickerSheetState extends State<_BankPickerSheet> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-          // Search
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: CupertinoSearchTextField(
-              controller: _search,
-              placeholder: 'Search bank…',
-              style: AppFonts.body(fontSize: 15, color: fg),
-              onChanged: (v) => setState(() => _query = v),
-            ),
+        // Search
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: CupertinoSearchTextField(
+            controller: _search,
+            placeholder: 'Search bank…',
+            style: AppFonts.body(fontSize: 15, color: fg),
+            onChanged: (v) => setState(() => _query = v),
           ),
-          // List
-          ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxListHeight),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const BouncingScrollPhysics(),
-              itemCount: filtered.length,
-              separatorBuilder: (_, __) => Container(
-                height: 0.5,
-                color: border,
-                margin: const EdgeInsets.only(left: 58),
-              ),
-              itemBuilder: (_, i) {
-                final bank = filtered[i];
-                final isSelected = widget.selected?.slug == bank.slug;
-                final brandColor =
-                    Color(int.parse(bank.brandColor.replaceFirst('#', '0xff')));
+        ),
+        // List
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxListHeight),
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            itemCount: filtered.length,
+            separatorBuilder: (_, __) => Container(
+              height: 0.5,
+              color: border,
+              margin: const EdgeInsets.only(left: 58),
+            ),
+            itemBuilder: (_, i) {
+              final bank = filtered[i];
+              final isSelected = widget.selected?.slug == bank.slug;
+              final brandColor =
+                  Color(int.parse(bank.brandColor.replaceFirst('#', '0xff')));
 
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onPicked(bank);
-                    Navigator.of(context).pop();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    child: Row(
-                      spacing: 12,
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: brandColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            bank.displayName.substring(0, 1).toUpperCase(),
-                            style: AppFonts.heading(
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onPicked(bank);
+                  Navigator.of(context).pop();
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: brandColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          bank.displayName.substring(0, 1).toUpperCase(),
+                          style: AppFonts.heading(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: brandColor),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 1,
+                          children: [
+                            Text(
+                              bank.displayName,
+                              style: AppFonts.body(
                                 fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: brandColor),
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 1,
-                            children: [
-                              Text(
-                                bank.displayName,
-                                style: AppFonts.body(
-                                  fontSize: 15,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  color: fg,
-                                ),
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: fg,
                               ),
-                              if (bank.country.isNotEmpty)
-                                Text(
-                                  bank.country,
-                                  style:
-                                      AppFonts.body(fontSize: 11, color: muted),
-                                ),
-                            ],
-                          ),
+                            ),
+                            if (bank.country.isNotEmpty)
+                              Text(
+                                bank.country,
+                                style:
+                                    AppFonts.body(fontSize: 11, color: muted),
+                              ),
+                          ],
                         ),
-                        if (isSelected)
-                          Icon(CupertinoIcons.checkmark,
-                              size: 16, color: accent),
-                      ],
-                    ),
+                      ),
+                      if (isSelected)
+                        Icon(CupertinoIcons.checkmark, size: 16, color: accent),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-          // None / other option
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                widget.onPicked(null);
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: border, width: 0.8),
-                ),
-                child: Text(
-                  'None / enter manually',
-                  style: AppFonts.body(fontSize: 14, color: muted),
-                ),
+        ),
+        // None / other option
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              widget.onPicked(null);
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: border, width: 0.8),
+              ),
+              child: Text(
+                'None / enter manually',
+                style: AppFonts.body(fontSize: 14, color: muted),
               ),
             ),
           ),
-        ],
+        ),
+      ],
     );
   }
 }

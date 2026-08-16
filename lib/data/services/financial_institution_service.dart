@@ -43,7 +43,9 @@ class FinancialInstitutionService extends SupabaseService {
 
   Future<void> update(String id, Map<String, dynamic> data) async {
     try {
-      await from(SupabaseTables.financialInstitutions).update(data).eq('id', id);
+      await from(SupabaseTables.financialInstitutions)
+          .update(data)
+          .eq('id', id);
     } catch (e) {
       throw ServerException('Failed to update financial institution: $e');
     }

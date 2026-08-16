@@ -3,8 +3,7 @@ import 'package:forui/forui.dart';
 import 'package:hestia/core/constants/themes.dart';
 
 /// Shared hex parser for app theme colors (e.g. '#0077B6').
-Color hexToColor(String hex) =>
-    Color(int.parse(hex.replaceFirst('#', '0xff')));
+Color hexToColor(String hex) => Color(int.parse(hex.replaceFirst('#', '0xff')));
 
 /// Convert MyTheme → Forui FThemeData
 extension MyThemeToForui on MyTheme {

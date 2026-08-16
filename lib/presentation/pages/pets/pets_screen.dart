@@ -347,8 +347,9 @@ class _GenderBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     if (gender == PetGender.unknown) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
-    final label =
-        gender == PetGender.male ? l10n.pets_genderMale : l10n.pets_genderFemale;
+    final label = gender == PetGender.male
+        ? l10n.pets_genderMale
+        : l10n.pets_genderFemale;
     final mutedHex = context.myTheme.onInactiveColor;
     final muted = Color(int.parse(mutedHex.replaceFirst('#', '0xff')));
     return Container(

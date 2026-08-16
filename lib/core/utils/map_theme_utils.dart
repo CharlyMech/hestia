@@ -13,8 +13,7 @@ String mapTileUrl(BuildContext context) =>
     context.myTheme.isDark ? _kCartoDark : _kCartoLight;
 
 /// Same without a [BuildContext], for cases where [isDark] is already known.
-String mapTileUrlForDark(bool isDark) =>
-    isDark ? _kCartoDark : _kCartoLight;
+String mapTileUrlForDark(bool isDark) => isDark ? _kCartoDark : _kCartoLight;
 
 /// Subdomains for CARTO tile load-balancing.
 List<String> get mapTileSubdomains => _kCartoSubdomains;

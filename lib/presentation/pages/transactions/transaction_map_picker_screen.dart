@@ -20,8 +20,7 @@ class TransactionMapPickerScreen extends StatefulWidget {
       _TransactionMapPickerScreenState();
 }
 
-class _TransactionMapPickerScreenState
-    extends State<TransactionMapPickerScreen>
+class _TransactionMapPickerScreenState extends State<TransactionMapPickerScreen>
     with TickerProviderStateMixin {
   late AnimatedMapController _mapCtrl;
   late double _lat;
@@ -57,12 +56,13 @@ class _TransactionMapPickerScreenState
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;
-    final bg = Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
-    final fg = Color(int.parse(theme.foregroundColor.replaceFirst('#', '0xff')));
+    final bg =
+        Color(int.parse(theme.backgroundColor.replaceFirst('#', '0xff')));
+    final fg =
+        Color(int.parse(theme.foregroundColor.replaceFirst('#', '0xff')));
     final accent =
         Color(int.parse(theme.primaryColor.replaceFirst('#', '0xff')));
-    final muted =
-        Color(int.parse(theme.mutedColor.replaceFirst('#', '0xff')));
+    final muted = Color(int.parse(theme.mutedColor.replaceFirst('#', '0xff')));
     final pinCoord = LatLng(_lat, _lng);
 
     return CupertinoPageScaffold(
@@ -91,8 +91,7 @@ class _TransactionMapPickerScreenState
             ),
             children: [
               TileLayer(
-                urlTemplate:
-                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.charlymech.hestia',
                 retinaMode: MediaQuery.devicePixelRatioOf(context) > 1,
               ),

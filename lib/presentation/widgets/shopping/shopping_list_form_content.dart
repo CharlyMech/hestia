@@ -221,6 +221,7 @@ class ShoppingListFormContentState extends State<ShoppingListFormContent> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.myTheme;

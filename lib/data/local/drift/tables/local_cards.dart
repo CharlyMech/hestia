@@ -4,8 +4,7 @@ import 'local_bank_accounts.dart';
 
 class LocalCards extends Table {
   TextColumn get id => text()();
-  TextColumn get accountId =>
-      text().references(LocalBankAccounts, #id)();
+  TextColumn get accountId => text().references(LocalBankAccounts, #id)();
   TextColumn get network => text()();
   TextColumn get last4 => text()();
   IntColumn get expiryMonth => integer()();

@@ -491,7 +491,8 @@ class _ActiveSessionBanner extends StatelessWidget {
                 spacing: 2,
                 children: [
                   Text(
-                    AppLocalizations.of(context).dashboard_activeShoppingSession,
+                    AppLocalizations.of(context)
+                        .dashboard_activeShoppingSession,
                     style: AppFonts.body(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
