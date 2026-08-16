@@ -3,14 +3,15 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:hestia/core/config/env.dart';
 
-/// Builds [FirebaseOptions] from `.env` (see [Env.isFirebaseConfigured]).
+/// Builds [FirebaseOptions] from the Dart configuration in `env.dart`.
 ///
-/// Run `flutterfire configure` for native files, then copy values into `.env`.
+/// Run `flutterfire configure` for native files, then copy the public client
+/// values into `env.dart`.
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (!Env.isFirebaseConfigured) {
       throw StateError(
-        'Firebase is not configured. Add FIREBASE_* keys to your .env file.',
+        'Firebase is not configured. Add its public client values to env.dart.',
       );
     }
     if (kIsWeb) {

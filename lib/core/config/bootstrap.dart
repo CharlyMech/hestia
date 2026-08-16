@@ -24,7 +24,6 @@ Future<void> bootstrap() async {
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-    await Env.load();
     await AppInfo.load();
 
     if (Env.isFirebaseConfigured) {
@@ -35,7 +34,7 @@ Future<void> bootstrap() async {
     } else {
       logger.w(
         'Firebase not configured — Crashlytics and native Firebase features disabled. '
-        'Add FIREBASE_* keys to .env (see .env.example).',
+        'Configure the FIREBASE_* values in env.dart.',
       );
     }
 
@@ -53,7 +52,7 @@ Future<void> _startApp() async {
       runApp(const GlobalErrorApp(
         title: 'Configuration missing',
         message:
-            'Supabase env not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY to your .env file and relaunch.',
+            'Supabase is not configured. Add its URL and publishable key to env.dart and relaunch.',
       ));
       return;
     }

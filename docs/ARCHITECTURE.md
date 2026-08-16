@@ -26,8 +26,8 @@ mappers under `lib/data`.
 ## Boot Flow
 
 1. `lib/main.dart` calls `bootstrap()`.
-2. `bootstrap()` loads `.env`, app version info, Firebase, Crashlytics, and
-   Supabase.
+2. `bootstrap()` reads the Dart client configuration, loads app version info,
+   and initializes Firebase, Crashlytics, and Supabase.
 3. Drift opens `hestia.db`.
 4. `AppDependencies.initialize()` constructs services and repositories.
 5. `HestiaApp` installs top-level BLoCs and starts `CupertinoApp.router`.
@@ -70,7 +70,9 @@ Routes are centralized in `lib/core/config/router.dart`.
 - Drift tables live in `lib/data/local/drift/tables`.
 - `AppDatabase.schemaVersion` owns local database migrations.
 - Firebase handles Crashlytics, Analytics, and push messaging.
-- MagicLane powers maps and location-aware transaction/home screens.
+- `flutter_map` with CARTO raster tiles powers the current map and
+  location-aware screens. The MagicLane client setting is reserved for a
+  provider integration and is not consumed by the current map widgets.
 
 ## UI
 

@@ -22,7 +22,7 @@
 - [ ] `dart format lib test` clean
 - [ ] `flutter analyze` clean
 - [ ] `flutter test` passing
-- [ ] No secrets / `.env` / certs committed
+- [ ] No secrets / local `env.dart` / certs committed
 
 ## Screenshots
 

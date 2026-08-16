@@ -42,12 +42,10 @@ app.*.map.json
 # Android Studio will place build artifacts here
 /android/app/debug
 
-# Environment and secret files
+# Legacy/server-only environment files and local Dart app configuration
 .env
-.env.dart
 .env.*
 .env.*.local
-!.env.example
 lib/core/config/env.dart
 /android/app/profile
 /android/app/release

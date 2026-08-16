@@ -7,30 +7,26 @@
 - CocoaPods for iOS dependencies.
 - Supabase project.
 - Firebase project for Crashlytics, Analytics, and FCM.
-- MagicLane API key for maps.
+- MagicLane API key reserved for the planned provider integration; current map
+  widgets use CARTO raster tiles.
 - Apple Developer Program membership for TestFlight distribution.
 
 ## Local Setup
 
 ```bash
 flutter pub get
-cp .env.example .env
+cp lib/core/config/env.example.dart lib/core/config/env.dart
 ```
 
-Fill `.env` with non-placeholder values:
+Fill `lib/core/config/env.dart` with the public client configuration. The file
+is ignored by Git and is the app's only runtime configuration source:
 
-```text
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-APPLE_CLIENT_ID=
-APPLE_REDIRECT_URI=
-MAGICLANE_API_KEY=
-FIREBASE_API_KEY=
-FIREBASE_APP_ID=
-FIREBASE_MESSAGING_SENDER_ID=
-FIREBASE_PROJECT_ID=
-FIREBASE_STORAGE_BUCKET=
-FIREBASE_IOS_BUNDLE_ID=
+```dart
+abstract final class Env {
+  static const supabaseUrl = '...';
+  static const supabaseAnonKey = '...';
+  // Apple, MagicLane, and Firebase public client values follow.
+}
 ```
 
 Run:
@@ -71,7 +67,10 @@ Release signing and backend secrets are used only by GitHub Actions:
 
 ## Secret Handling
 
-- Never commit `.env`.
+- Never commit `lib/core/config/env.dart`.
+- Dart constants are bundled with the app and are not secret storage. Never add
+  database passwords, Supabase service-role keys, private signing keys, or
+  other server credentials to `Env`.
 - Never commit `.p8`, `.p12`, `.mobileprovision`, or Firebase private keys.
 - Rotate App Store Connect and signing credentials after suspected exposure.
 - Use GitHub repository or environment secrets, not workflow literals.

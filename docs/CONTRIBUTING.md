@@ -76,6 +76,6 @@ flow, update the matching file in `docs/` in the same PR.
 
 ## Secrets
 
-Never commit `.env`, signing certificates, provisioning profiles, private API
+Never commit local `env.dart`, signing certificates, provisioning profiles, private API
 keys, or App Store Connect keys. CI secrets are documented in
 [ENVIRONMENT.md](ENVIRONMENT.md) and [CI_CD.md](CI_CD.md).

@@ -133,7 +133,7 @@ Confirm:
 
 - PR CI is green.
 - Version bump implied by commits is intentional.
-- `.env` secrets exist in GitHub.
+- Release configuration and signing secrets exist in GitHub.
 - Signing certificate and provisioning profile are not expired.
 - App Store Connect API key is active.
 - TestFlight tester groups exist if external distribution is enabled.

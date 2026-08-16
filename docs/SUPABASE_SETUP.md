@@ -15,7 +15,8 @@ Functions.
 https://YOUR_PROJECT.supabase.co/auth/v1/callback
 ```
 
-5. Add the same values to `.env` and GitHub Actions secrets.
+5. Add the public client values to `lib/core/config/env.dart` locally and to
+   GitHub Actions secrets for release builds.
 
 ## App-Owned Tables
 

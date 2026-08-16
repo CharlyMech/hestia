@@ -25,7 +25,7 @@ The test step skips only when no `test/` directory exists.
 - Backend contract changes include docs and migration notes.
 - Release, signing, and CI changes update `docs/CI_CD.md` or
   `docs/RELEASES.md`.
-- No secrets, certificates, `.env` files, or private Apple keys are committed.
+- No secrets, local `env.dart`, certificates, or private Apple keys are committed.
 
 ## Merge Expectations
 

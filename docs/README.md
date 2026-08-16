@@ -15,7 +15,7 @@ convention and release automation.
 | [PULL_REQUESTS.md](PULL_REQUESTS.md) | Pull request checklist and merge expectations. |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Code structure, layers, dependencies, and runtime boot flow. |
 | [DATA_FLOW.md](DATA_FLOW.md) | How auth, reads, writes, cache, notifications, and integrations move through the app. |
-| [ENVIRONMENT.md](ENVIRONMENT.md) | Local setup, `.env`, platform prerequisites, and CI secrets. |
+| [ENVIRONMENT.md](ENVIRONMENT.md) | Local Dart configuration, platform prerequisites, and CI secrets. |
 | [SUPABASE_SETUP.md](SUPABASE_SETUP.md) | Supabase project setup notes and backend ownership. |
 | [CI_CD.md](CI_CD.md) | Pull request CI and automated TestFlight release workflow. |
 | [RELEASES.md](RELEASES.md) | Versioning, changelog, tags, and release rules. |

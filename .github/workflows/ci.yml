@@ -18,9 +18,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # .env is required by Env.load(); the analyzer/tests don't need real keys.
-      - name: Stub .env
-        run: cp .env.example .env || touch .env
+      - name: Prepare Dart configuration
+        run: cp lib/core/config/env.example.dart lib/core/config/env.dart
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib

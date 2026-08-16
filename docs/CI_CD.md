@@ -14,7 +14,7 @@ Checks:
 
 ```bash
 flutter pub get
-cp .env.example .env
+cp lib/core/config/env.example.dart lib/core/config/env.dart
 dart format --output=none --set-exit-if-changed lib
 flutter analyze
 flutter test
@@ -38,7 +38,7 @@ The workflow:
 2. Installs Flutter.
 3. Runs `scripts/prepare_release.py`.
 4. Updates `pubspec.yaml`, `CHANGELOG.md`, and `build/release-notes.md`.
-5. Writes `.env` from GitHub Secrets.
+5. Generates the ignored Dart client configuration from GitHub Secrets.
 6. Imports the iOS distribution certificate and provisioning profile into a
    temporary macOS keychain.
 7. Builds a signed IPA with `flutter build ipa`.

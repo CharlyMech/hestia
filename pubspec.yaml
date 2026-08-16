@@ -68,7 +68,6 @@ dependencies:
   connectivity_plus: ^6.1.1
   logger: ^2.5.0
   package_info_plus: ^8.1.2
-  flutter_dotenv: ^5.2.1
   url_launcher: ^6.3.1
   rxdart: ^0.28.0
 
@@ -111,7 +110,6 @@ flutter:
   generate: true
 
   assets:
-    - .env
     - assets/images/
     - assets/banks/
     - assets/icons/
